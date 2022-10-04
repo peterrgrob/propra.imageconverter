@@ -5,7 +5,6 @@ package propra.imageconverter.image;
  * @author pg
  */
 public class ImageInfo {
-    
     /**
      * 
      */
@@ -17,6 +16,7 @@ public class ImageInfo {
     private int height;
     private int elementSize;    
     private Encoding encoding;
+    private int checksum;
 
     /**
      * 
@@ -96,6 +96,24 @@ public class ImageInfo {
         this.elementSize = elementSize;
     }
 
+    /**
+     * Get the value of checksum
+     *
+     * @return the value of checksum
+     */
+    public int getChecksum() {
+        return checksum;
+    }
+
+    /**
+     * Set the value of checksum
+     *
+     * @param checksum new value of checksum
+     */
+    public void setChecksum(int checksum) {
+        this.checksum = checksum;
+    }
+    
     /**
      * Get the value of height
      *

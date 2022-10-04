@@ -30,6 +30,8 @@ public class Converter {
         switch(cmd.getOption(CmdLine.Options.INPUT_EXT)) {
             case "tga":
                 return new ImageReaderTGA(fInput);
+            case "propra":
+                return new ImageReaderPropra(fInput);
         }
         throw new IOException();
     }
@@ -67,14 +69,14 @@ public class Converter {
             ImageWriter writer = createWriter(cmdLine);
             
             ImageInfo inputInfo = reader.readInfo();
-            writer.writeInfo(inputInfo);
+            //writer.writeInfo(inputInfo);
             
             System.out.print(reader.getInfo().getWidth());
             System.out.print(reader.getInfo().getHeight());
             System.out.print(reader.getInfo().getElementSize());
             
-            ImageBuffer iBuffer = reader.readBlock(reader.getInfo().getTotalSize());
-            writer.writeBlock(iBuffer);
+            //ImageBuffer iBuffer = reader.readBlock(reader.getInfo().getTotalSize());
+            //writer.writeBlock(iBuffer);
             
         } catch (IOException ex) {
             Logger.getLogger(Converter.class.getName()).log(Level.SEVERE, null, ex);

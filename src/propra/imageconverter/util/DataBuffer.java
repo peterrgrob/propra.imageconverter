@@ -1,5 +1,6 @@
 package propra.imageconverter.util;
 
+import java.io.UnsupportedEncodingException;
 import propra.imageconverter.image.Color;
 
 /**
@@ -29,6 +30,10 @@ public class DataBuffer extends Object {
         data = new byte[size];
     }
     
+    /**
+     *
+     * @param d
+     */
     public void put(byte d) {
         data[position] = d;
         movePosition(1);  
@@ -74,20 +79,49 @@ public class DataBuffer extends Object {
         return data[offset];
     }
     
+    public String getString(int len) throws UnsupportedEncodingException {
+        byte[] str = copy(len);
+        return new String(str,"utf-8");
+    }
+    
     public short getShort(int offset) {
-        return bytesToShort(data[offset],data[offset + 1]);
+        return 0;/*return bytesToShort(data[offset],
+                            data[offset + 1]);*/
     }
     
     public short getShortLittle(int offset) {
-        return bytesToShort(data[offset + 1],data[offset]);
+        return bytesToShortLittle(data[offset + 1],
+                            data[offset]);
     }
     
+    /**
+     *
+     * @param offset
+     * @return
+     */
+    public int getIntLittle(int offset) {
+        return bytesToIntLittle(data, offset);
+    }
+    
+    /**
+     *
+     * @param offset
+     * @return
+     */
+    public long getLongLittle(int offset) {
+        return bytesToLongLittle(data, offset);
+    }
+        
     public Color getColorRGB() {
-        return new Color(data[position++], data[position++], data[position++]);  
+        return new Color(data[position++], 
+                        data[position++], 
+                        data[position++]);  
     }
     
     public Color getColorBGR() {
-        Color c = new Color(data[position+2], data[position+1], data[position]);  
+        Color c = new Color(data[position+2], 
+                            data[position+1], 
+                            data[position]);  
         position += 3;
         return c;
     }
@@ -105,14 +139,61 @@ public class DataBuffer extends Object {
     }
     
     public boolean isValid() {
-        return (data != null && position >= 0);
+        return (data != null && 
+                position >= 0);
     }
     
     public byte[] getBuffer() {
         return data;
     }
     
-    public static short bytesToShort(byte b1, byte b2) {
-        return (short)((b1 << 8) | (b2 & 0x00FF));
+    /**
+     *
+     * @param len
+     * @return
+     */
+    public byte[] copy(int len) {
+        byte[] cp = new byte[len];
+        System.arraycopy(data,
+                        position,
+                        cp,
+                        0,
+                        len);
+        return cp;
+    }
+    
+    public static short bytesToShortLittle(byte b1, byte b2) {
+        return (short)( (b1 << 8) | 
+                        (b2 & 0x00FF));
+    }
+    
+    public static int bytesToInt(byte[] buffer, int offset) {
+        return (((buffer[offset]     & 0xFF) << 24)  | 
+                ((buffer[offset + 1] & 0xFF) << 16)  |
+                ((buffer[offset + 2] & 0xFF) << 8)   |
+                  buffer[offset + 3] & 0xFF);
+    }
+    
+    public static int bytesToIntLittle(byte[] buffer, int offset) {
+        return (((buffer[offset + 3] & 0xFF) << 24)  | 
+                ((buffer[offset + 2] & 0xFF) << 16)  |
+                ((buffer[offset + 1] & 0xFF) << 8)   |
+                  buffer[offset]     & 0xFF);
+    }
+    
+    public static long bytesToLong(byte[] buffer, int offset) {
+        return  (((long)(bytesToInt(buffer, offset) & 0xFFFFFFFF)) << 4) |
+                 (long)bytesToInt(buffer, offset + 4) & 0xFFFFFFFF;
+    }
+    
+    public static long bytesToLongLittle(byte[] buffer, int offset) {
+        return (((long)(buffer[offset + 7] & 0xFF) << 56)  | 
+                ((long)(buffer[offset + 6] & 0xFF) << 48)  |
+                ((long)(buffer[offset + 5] & 0xFF) << 40)  |
+                ((long)(buffer[offset + 4] & 0xFF) << 32   |
+                ((long)(buffer[offset + 3] & 0xFF) << 24)  | 
+                ((long)(buffer[offset + 2] & 0xFF) << 16)  |
+                ((long)(buffer[offset + 1] & 0xFF) << 8)   |
+                 (long)buffer[offset]      & 0xFF));
     }
 }
