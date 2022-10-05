@@ -8,6 +8,15 @@ public class Color {
     public byte r;
     public byte g;
     public byte b;
+    
+    /**
+     * 
+     */
+    public static class ColorOrder {
+        public int redShift = 2;
+        public int greenShift = 1;
+        public int blueShift = 0;
+    }
 
     /**
      * 

@@ -3,6 +3,7 @@ package propra.imageconverter.image;
 import java.io.IOException;
 import java.io.InputStream;
 import propra.imageconverter.util.DataBuffer;
+import propra.imageconverter.util.DataBufferLittle;
 
 /**
  *
@@ -10,29 +11,22 @@ import propra.imageconverter.util.DataBuffer;
  */
 public class ImageReaderPropra extends ImageReader {
     static final String PROPRA_VERSION = "ProPraWiSe22";
-    
     static final int PROPRA_HEADER_SIZE = 30;
-    static final byte PROPRA_HEADER_OFFSET_ENCODING = 12;
-    static final short PROPRA_HEADER_OFFSET_WIDTH = 13;
-    static final short PROPRA_HEADER_OFFSET_HEIGHT = 15;
-    static final byte PROPRA_HEADER_OFFSET_BPP = 17;
+    static final int PROPRA_HEADER_OFFSET_ENCODING = 12;
+    static final int PROPRA_HEADER_OFFSET_WIDTH = 13;
+    static final int PROPRA_HEADER_OFFSET_HEIGHT = 15;
+    static final int PROPRA_HEADER_OFFSET_BPP = 17;
     static final int PROPRA_HEADER_OFFSET_DATALEN = 18;
     static final int PROPRA_HEADER_OFFSET_CHECKSUM = 26;
-        
+    
+    
+    
     public ImageReaderPropra(InputStream in) throws IOException {
         super(in);
-    }
-
-    /**
-     *
-     * @param len
-     * @param buff
-     * @return
-     * @throws IOException
-     */
-    @Override
-    protected ImageBuffer readBlock(int len, ImageBuffer buff) throws IOException {
-        return super.readBlock(len, buff); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
+        this.byteOrder = DataBuffer.Order.LITTLE_ENDIAN;
+        this.colorOrder.blueShift = 1;
+        this.colorOrder.greenShift = 0;
+        this.colorOrder.redShift = 2;
     }
 
     /**
@@ -41,9 +35,15 @@ public class ImageReaderPropra extends ImageReader {
      * @throws IOException
      */
     @Override
-    protected ImageInfo readInfo() throws IOException {
+    public ImageInfo readInfo() throws IOException {
         ImageInfo tInfo = new ImageInfo();
-        DataBuffer data = new DataBuffer(readBytes(PROPRA_HEADER_SIZE));
+        
+        byte[] buffer = new byte[PROPRA_HEADER_SIZE];
+        if(readBytes(PROPRA_HEADER_SIZE, buffer) != PROPRA_HEADER_SIZE) {
+            throw new java.io.IOException("Ungültiger ProPra Header.");
+        }
+                
+        DataBufferLittle data = new DataBufferLittle(buffer);
         if(!data.isValid()){
             return null;
         }
@@ -53,13 +53,14 @@ public class ImageReaderPropra extends ImageReader {
            throw new java.io.IOException("Ungültige ProPra Formatkennung.");
         }
         
-        tInfo.setWidth(data.getShortLittle(PROPRA_HEADER_OFFSET_WIDTH));
-        tInfo.setHeight(data.getShortLittle(PROPRA_HEADER_OFFSET_HEIGHT));
+        tInfo.setWidth(data.getShort(PROPRA_HEADER_OFFSET_WIDTH));
+        tInfo.setHeight(data.getShort(PROPRA_HEADER_OFFSET_HEIGHT));
         tInfo.setElementSize(data.get(PROPRA_HEADER_OFFSET_BPP) >> 3); 
-        tInfo.setChecksum(data.getIntLittle(PROPRA_HEADER_OFFSET_CHECKSUM)); 
-        long dataLen = data.getLongLittle(PROPRA_HEADER_OFFSET_DATALEN);    
+        tInfo.setChecksum(data.getInt(PROPRA_HEADER_OFFSET_CHECKSUM)); 
+        long dataLen = data.getLong(PROPRA_HEADER_OFFSET_DATALEN);    
         
-        if(tInfo.isValid() == false) {
+        if( tInfo.isValid() == false || 
+            tInfo.getTotalSize() != dataLen) {
             throw new java.io.IOException("Ungültiges Bildformat.");
         }
         

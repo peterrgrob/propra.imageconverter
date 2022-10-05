@@ -3,6 +3,7 @@ package propra.imageconverter.image;
 import java.io.IOException;
 import java.io.InputStream;
 import propra.imageconverter.util.DataBuffer;
+import propra.imageconverter.util.DataBufferLittle;
 
 import propra.imageconverter.util.Utility;
 
@@ -21,6 +22,7 @@ public class ImageReaderTGA extends ImageReader {
     
     public ImageReaderTGA(InputStream in) throws IOException {
         super(in);
+        this.byteOrder = DataBuffer.Order.LITTLE_ENDIAN;
     }
 
     /**
@@ -29,9 +31,15 @@ public class ImageReaderTGA extends ImageReader {
      * @throws java.io.IOException 
      */
     @Override
-    protected ImageInfo readInfo() throws IOException {
+    public ImageInfo readInfo() throws IOException {
         ImageInfo tInfo = new ImageInfo();
-        DataBuffer data = new DataBuffer(readBytes(TGA_HEADER_SIZE));
+        
+        byte[] buffer = new byte[TGA_HEADER_SIZE];
+        if(readBytes(TGA_HEADER_SIZE, buffer) != TGA_HEADER_SIZE) {
+            throw new java.io.IOException("Ungültiger TGA Header.");
+        }
+        
+        DataBufferLittle data = new DataBufferLittle(buffer);
         if(!data.isValid()){
             return null;
         }
@@ -44,8 +52,8 @@ public class ImageReaderTGA extends ImageReader {
                 throw new java.lang.UnsupportedOperationException("Nicht unterstütztes Bildformat.");
         }
         
-        tInfo.setWidth(data.getShortLittle(TGA_HEADER_OFFSET_WIDTH));
-        tInfo.setHeight(data.getShortLittle(TGA_HEADER_OFFSET_HEIGHT));
+        tInfo.setWidth(data.getShort(TGA_HEADER_OFFSET_WIDTH));
+        tInfo.setHeight(data.getShort(TGA_HEADER_OFFSET_HEIGHT));
         tInfo.setElementSize(data.get(TGA_HEADER_OFFSET_BPP) >> 3); 
         
         if(tInfo.isValid() == false) {
@@ -53,23 +61,5 @@ public class ImageReaderTGA extends ImageReader {
         }
         
         return (info = tInfo);
-    }
-
-    /**
-     * 
-     * @param len
-     * @param buff
-     * @return
-     * @throws IOException 
-     */
-    @Override
-    protected ImageBuffer readBlock(int len, ImageBuffer buff) throws IOException {
-        DataBuffer data = new DataBuffer(readBytes(len));
-
-        for(int i=0; i<info.getElementCount(); i++) {
-            buff.set(i, data.getColorBGR());
-        }
-        
-        return buff;
     }
 }

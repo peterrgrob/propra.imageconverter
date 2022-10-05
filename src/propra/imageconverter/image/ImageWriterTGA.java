@@ -31,11 +31,11 @@ public class ImageWriterTGA extends ImageWriter {
             throw new IllegalArgumentException();
         }
 
-        DataBuffer data = new DataBuffer();
+        DataBuffer data = new DataBufferLittle();
         data.create(info.getTotalSize());
 
         for(int i=0; i<info.getElementCount(); i++) {
-            data.putLittle(buffer.get(i));
+            data.put(buffer.get(i));
         }
         
         data.setPosition(0);
@@ -56,11 +56,11 @@ public class ImageWriterTGA extends ImageWriter {
             throw new IllegalArgumentException();
         }
         
-        DataBuffer data = new DataBuffer();
+        DataBuffer data = new DataBufferLittle();
         data.create(TGA_HEADER_SIZE);
         data.put((byte)2,ImageReaderTGA.TGA_HEADER_OFFSET_ENCODING);
-        data.putLittle((short)info.getWidth(),ImageReaderTGA.TGA_HEADER_OFFSET_WIDTH);
-        data.putLittle((short)info.getHeight(),ImageReaderTGA.TGA_HEADER_OFFSET_HEIGHT);
+        data.put((short)info.getWidth(),ImageReaderTGA.TGA_HEADER_OFFSET_WIDTH);
+        data.put((short)info.getHeight(),ImageReaderTGA.TGA_HEADER_OFFSET_HEIGHT);
         data.put((byte)(info.getElementSize() << 3),ImageReaderTGA.TGA_HEADER_OFFSET_BPP);        
         data.put((byte)(1 << 5),ImageReaderTGA.TGA_HEADER_OFFSET_ORIGIN);    
         
