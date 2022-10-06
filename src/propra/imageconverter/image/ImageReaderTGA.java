@@ -2,10 +2,10 @@ package propra.imageconverter.image;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import propra.imageconverter.util.DataBuffer;
-import propra.imageconverter.util.DataBufferLittle;
 
-import propra.imageconverter.util.Utility;
 
 /**
  *
@@ -22,7 +22,6 @@ public class ImageReaderTGA extends ImageReader {
     
     public ImageReaderTGA(InputStream in) throws IOException {
         super(in);
-        this.byteOrder = DataBuffer.Order.LITTLE_ENDIAN;
     }
 
     /**
@@ -34,17 +33,16 @@ public class ImageReaderTGA extends ImageReader {
     public ImageInfo readInfo() throws IOException {
         ImageInfo tInfo = new ImageInfo();
         
-        byte[] buffer = new byte[TGA_HEADER_SIZE];
-        if(readBytes(TGA_HEADER_SIZE, buffer) != TGA_HEADER_SIZE) {
+        byte[] rawBytes = new byte[TGA_HEADER_SIZE];
+        if(readBytes(TGA_HEADER_SIZE, rawBytes) != TGA_HEADER_SIZE) {
             throw new java.io.IOException("Ungültiger TGA Header.");
         }
         
-        DataBufferLittle data = new DataBufferLittle(buffer);
-        if(!data.isValid()){
-            return null;
-        }
+        DataBuffer dataBuffer = new DataBuffer(rawBytes);
+        ByteBuffer byteBuffer = dataBuffer.getBuffer();
+        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         
-        switch(data.get(TGA_HEADER_OFFSET_ENCODING)) {
+        switch(byteBuffer.get(TGA_HEADER_OFFSET_ENCODING)) {
             case 2:
                 tInfo.setEncoding(ImageInfo.Encoding.UNCOMPRESSED);
                 break;
@@ -52,9 +50,9 @@ public class ImageReaderTGA extends ImageReader {
                 throw new java.lang.UnsupportedOperationException("Nicht unterstütztes Bildformat.");
         }
         
-        tInfo.setWidth(data.getShort(TGA_HEADER_OFFSET_WIDTH));
-        tInfo.setHeight(data.getShort(TGA_HEADER_OFFSET_HEIGHT));
-        tInfo.setElementSize(data.get(TGA_HEADER_OFFSET_BPP) >> 3); 
+        tInfo.setWidth(byteBuffer.getShort(TGA_HEADER_OFFSET_WIDTH));
+        tInfo.setHeight(byteBuffer.getShort(TGA_HEADER_OFFSET_HEIGHT));
+        tInfo.setElementSize(byteBuffer.get(TGA_HEADER_OFFSET_BPP) >> 3); 
         
         if(tInfo.isValid() == false) {
             throw new java.io.IOException("Ungültiges Bildformat.");

@@ -2,6 +2,8 @@ package propra.imageconverter.image;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import propra.imageconverter.util.*;
 
 /**
@@ -31,15 +33,9 @@ public class ImageWriterTGA extends ImageWriter {
             throw new IllegalArgumentException();
         }
 
-        DataBuffer data = new DataBufferLittle();
-        data.create(info.getTotalSize());
-
-        for(int i=0; i<info.getElementCount(); i++) {
-            data.put(buffer.get(i));
-        }
-        
-        data.setPosition(0);
-        write(data.getBuffer(),0,info.getTotalSize());
+        ByteBuffer byteBuffer = buffer.getBuffer();
+        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+        write(byteBuffer.array(),0,info.getTotalSize());
         
         return buffer;
     }
@@ -56,15 +52,18 @@ public class ImageWriterTGA extends ImageWriter {
             throw new IllegalArgumentException();
         }
         
-        DataBuffer data = new DataBufferLittle();
-        data.create(TGA_HEADER_SIZE);
-        data.put((byte)2,ImageReaderTGA.TGA_HEADER_OFFSET_ENCODING);
-        data.put((short)info.getWidth(),ImageReaderTGA.TGA_HEADER_OFFSET_WIDTH);
-        data.put((short)info.getHeight(),ImageReaderTGA.TGA_HEADER_OFFSET_HEIGHT);
-        data.put((byte)(info.getElementSize() << 3),ImageReaderTGA.TGA_HEADER_OFFSET_BPP);        
-        data.put((byte)(1 << 5),ImageReaderTGA.TGA_HEADER_OFFSET_ORIGIN);    
+        DataBuffer dataBuffer = new DataBuffer();
+        dataBuffer.create(ImageReaderTGA.TGA_HEADER_SIZE);
+        ByteBuffer byteBuffer = dataBuffer.getBuffer();
+        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+ 
+        byteBuffer.put(ImageReaderTGA.TGA_HEADER_OFFSET_ENCODING, (byte)2);
+        byteBuffer.putShort(ImageReaderTGA.TGA_HEADER_OFFSET_WIDTH, (short)info.getWidth());
+        byteBuffer.putShort(ImageReaderTGA.TGA_HEADER_OFFSET_HEIGHT, (short)info.getHeight());
+        byteBuffer.put(ImageReaderTGA.TGA_HEADER_OFFSET_BPP, (byte)(info.getElementSize() << 3));        
+        byteBuffer.put(ImageReaderTGA.TGA_HEADER_OFFSET_ORIGIN, (byte)(1 << 5));    
         
-        write(data.getBuffer(), 0, TGA_HEADER_SIZE);
+        write(byteBuffer.array(), 0, TGA_HEADER_SIZE);
         
         return (this.info = info);
     }

@@ -17,23 +17,25 @@ public class ImageInfo {
     private int elementSize;    
     private Encoding encoding;
     private int checksum;
+    private Color colorType = new Color();
 
     /**
      * 
      */
     public ImageInfo() {
     }
-    
+
     /**
-     * 
-     * @param width
-     * @param height
-     * @param elementSize 
+     *
+     * @param src
      */
-    public ImageInfo(int width, int height, int elementSize) {
-        this.width = width;
-        this.height = height;
-        this.elementSize = elementSize;
+    public ImageInfo(ImageInfo src) {
+        this.width = src.width;
+        this.height = src.height;
+        this.elementSize = src.elementSize;
+        this.encoding = src.encoding;
+        this.checksum = src.checksum;
+        this.colorType = new Color(src.getColorType());
     }
     
     /**
@@ -41,7 +43,9 @@ public class ImageInfo {
      * @return 
      */
     public boolean isValid() {
-        return (width > 0 && height > 0 && elementSize > 0);
+        return (    width > 0 
+                &&  height > 0 
+                &&  elementSize > 0);
     }
     
     /**
@@ -68,6 +72,24 @@ public class ImageInfo {
      */
     public int getTotalSize() {
         return width * height * elementSize;
+    }
+    
+        /**
+     * Get the value of colorType
+     *
+     * @return the value of colorType
+     */
+    public Color getColorType() {
+        return colorType;
+    }
+
+    /**
+     * Set the value of colorType
+     *
+     * @param colorType new value of colorType
+     */
+    public void setColorType(Color colorType) {
+        this.colorType = colorType;
     }
     
     /**

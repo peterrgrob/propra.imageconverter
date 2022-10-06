@@ -3,8 +3,7 @@ package propra.imageconverter.image;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import propra.imageconverter.util.DataBuffer;
-import propra.imageconverter.util.DataBufferLittle;
+import java.nio.ByteOrder;
 
 /**
  *
@@ -13,8 +12,7 @@ import propra.imageconverter.util.DataBufferLittle;
 public class ImageReader extends BufferedInputStream {
     
     protected ImageInfo info;
-    protected DataBuffer.Order byteOrder = DataBuffer.Order.BIG_ENDIAN;
-    protected Color.ColorOrder colorOrder = new Color.ColorOrder();
+    ByteOrder byteOrder = ByteOrder.BIG_ENDIAN;
     
     /**
      * 
@@ -30,22 +28,6 @@ public class ImageReader extends BufferedInputStream {
     */
     public ImageInfo readInfo() throws IOException {       
         throw new UnsupportedOperationException("Not supported yet.");
-    }
-    
-    /**
-     * 
-     * @param byteOrder 
-     */
-    public void setOrder(DataBuffer.Order byteOrder) {
-        this.byteOrder = byteOrder;
-    }
-    
-    /**
-     * 
-     * @param colorOrder
-     */
-    public void setColorOrder(Color.ColorOrder colorOrder) {
-        this.colorOrder = colorOrder;
     }
     
     /**
@@ -74,12 +56,8 @@ public class ImageReader extends BufferedInputStream {
         if(readBytes(len, buffer) != len) {
             throw new java.io.IOException("Nicht genug Bilddaten lesbar.");
         }
-        DataBuffer data = wrapDataBuffer(buffer);
-
-        for(int i=0; i<info.getElementCount(); i++) {
-            image.set(i, data.getColor(colorOrder));
-        }
-        
+        image = wrapDataBuffer(buffer);
+        image.getBuffer().order(byteOrder);
         return image;
     }
     
@@ -94,26 +72,28 @@ public class ImageReader extends BufferedInputStream {
     /**
      * 
      * @param len
-     * @param buffer
+     * @param data
      * @return
      * @throws IOException 
      */
-    protected int readBytes(int len, byte[] buffer) throws IOException {
-        if (len == 0 || buffer == null ) {
+    protected int readBytes(int len, byte[] data) throws IOException {
+        if (len == 0 || data == null ) {
             throw new IllegalArgumentException();
         }
-        return read(buffer, 0, len);
+        return read(data, 0, len);
     }
     
     /**
      * 
-     * @param buffer
+     * @param data
      * @return 
      */
-    protected DataBuffer wrapDataBuffer(byte[] buffer) {
-        if(byteOrder == DataBuffer.Order.LITTLE_ENDIAN) {
-            return new DataBufferLittle(buffer);
+    protected ImageBuffer wrapDataBuffer(byte[] data) {
+        if (data == null ) {
+            throw new IllegalArgumentException();
         }
-        return new DataBuffer(buffer);
+        ImageBuffer buffer = new ImageBuffer();
+        buffer.wrap(data, info);
+        return buffer;
     }
 }

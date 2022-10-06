@@ -1,15 +1,17 @@
 package propra.imageconverter.image;
 
+import propra.imageconverter.util.DataBuffer;
+import java.nio.ByteBuffer;
+
 /**
  *
  * @author pg
  */
-public class ImageBuffer {
+public class ImageBuffer extends DataBuffer {
     /**
      * 
      */
-    private ImageInfo info; 
-    private Color[] buffer;    
+    protected ImageInfo info;  
   
     /**
      * 
@@ -23,16 +25,37 @@ public class ImageBuffer {
      * @param info 
      */
     ImageBuffer(ImageInfo info) {
-        createBuffer(info);
+        create(info);
+    }
+    
+    /**
+     * 
+     * @param info 
+     */
+    ImageBuffer(byte[] data, ImageInfo info) {
+        wrap(data, info);
     }
     
     /**
      * 
      * @param info
      */
-    public void createBuffer(ImageInfo info) {
-        this.info = info;
-        buffer = new Color[info.getElementCount()];
+    public void create(ImageInfo info) {
+        if (!info.isValid()) {
+            throw new IllegalArgumentException();
+        }        
+        this.info = new ImageInfo(info);
+        create(info.getTotalSize());
+    }
+    
+    /**
+     * 
+     * @param data
+     * @param info 
+     */
+    public void wrap(byte[] data, ImageInfo info) {
+        buffer = ByteBuffer.wrap(data);
+        this.info = new ImageInfo(info);
     }
     
     /**
@@ -42,27 +65,15 @@ public class ImageBuffer {
     public ImageInfo getInfo() {
         return info;
     }
-    
-    /**
-     * 
-     * @param x
-     * @param y
-     * @param color 
-     */
-    public void set(int x, int y, Color color) {
-        
-    }
+   
     
     /**
      * 
      * @param offset
      * @param color 
      */
-    public void set(int offset, Color color) {
-        if(offset > info.getTotalSize()) {
-            throw new ArrayIndexOutOfBoundsException();
-        }
-        buffer[offset] = color;
+    public void put(byte[] color) {
+        buffer.put(color);
     }
     
     /**
@@ -70,10 +81,11 @@ public class ImageBuffer {
      * @param offset
      * @return 
      */
-    public Color get(int offset) {
+    public byte[] getColor(int offset) {
         if(offset < 0) {
             throw new ArrayIndexOutOfBoundsException();
         }
-        return buffer[offset];
+        
+        return new byte[3];
     }
 }

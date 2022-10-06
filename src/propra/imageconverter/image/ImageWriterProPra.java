@@ -2,8 +2,9 @@ package propra.imageconverter.image;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import propra.imageconverter.util.DataBuffer;
-import propra.imageconverter.util.DataBufferLittle;
 
 /**
  *
@@ -13,6 +14,10 @@ public class ImageWriterProPra extends ImageWriter {
 
     public ImageWriterProPra(OutputStream out) {
         super(out);
+        info.getColorType().setChannel(Color.RED,new Color.ChannelInfo(2));
+        info.getColorType().setChannel(Color.GREEN,new Color.ChannelInfo(0));
+        info.getColorType().setChannel(Color.BLUE,new Color.ChannelInfo(1));
+
     }
 
     @Override
@@ -26,17 +31,20 @@ public class ImageWriterProPra extends ImageWriter {
             throw new IllegalArgumentException();
         }
         
-        DataBufferLittle data = new DataBufferLittle();
-        data.create(ImageReaderPropra.PROPRA_HEADER_SIZE);
-        data.put(ImageReaderPropra.PROPRA_VERSION,0);
-        data.put((byte)0,ImageReaderPropra.PROPRA_HEADER_OFFSET_ENCODING);
-        data.put((short)info.getWidth(),ImageReaderPropra.PROPRA_HEADER_OFFSET_WIDTH);
-        data.put((short)info.getHeight(),ImageReaderPropra.PROPRA_HEADER_OFFSET_HEIGHT);
-        data.put((byte)(info.getElementSize() >> 3),ImageReaderPropra.PROPRA_HEADER_OFFSET_BPP);
-        data.put((long)info.getTotalSize(),ImageReaderPropra.PROPRA_HEADER_OFFSET_DATALEN);
-        data.put(info.getChecksum(),ImageReaderPropra.PROPRA_HEADER_OFFSET_CHECKSUM);
+        DataBuffer dataBuffer = new DataBuffer();
+        dataBuffer.create(ImageReaderPropra.PROPRA_HEADER_SIZE);
+        ByteBuffer byteBuffer = dataBuffer.getBuffer();
+        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+        
+        dataBuffer.put(ImageReaderPropra.PROPRA_VERSION,0);
+        byteBuffer.put(ImageReaderPropra.PROPRA_HEADER_OFFSET_ENCODING, (byte)0);
+        byteBuffer.putShort(ImageReaderPropra.PROPRA_HEADER_OFFSET_WIDTH,(short)info.getWidth());
+        byteBuffer.putShort(ImageReaderPropra.PROPRA_HEADER_OFFSET_HEIGHT,(short)info.getHeight());
+        byteBuffer.put(ImageReaderPropra.PROPRA_HEADER_OFFSET_BPP,(byte)(info.getElementSize() >> 3));
+        byteBuffer.putLong(ImageReaderPropra.PROPRA_HEADER_OFFSET_DATALEN,(long)info.getTotalSize());
+        byteBuffer.putInt(ImageReaderPropra.PROPRA_HEADER_OFFSET_CHECKSUM,info.getChecksum());
     
-        write(data.getBuffer(), 0, ImageReaderPropra.PROPRA_HEADER_SIZE);
+        write(byteBuffer.array(), 0, ImageReaderPropra.PROPRA_HEADER_SIZE);
         
         return (this.info = info);
     }

@@ -2,8 +2,10 @@ package propra.imageconverter.image;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import propra.imageconverter.util.DataBuffer;
-import propra.imageconverter.util.DataBufferLittle;
+
 
 /**
  *
@@ -19,14 +21,17 @@ public class ImageReaderPropra extends ImageReader {
     static final int PROPRA_HEADER_OFFSET_DATALEN = 18;
     static final int PROPRA_HEADER_OFFSET_CHECKSUM = 26;
     
-    
-    
+    /**
+     *
+     * @param in
+     * @throws IOException
+     */
     public ImageReaderPropra(InputStream in) throws IOException {
         super(in);
-        this.byteOrder = DataBuffer.Order.LITTLE_ENDIAN;
-        this.colorOrder.blueShift = 1;
-        this.colorOrder.greenShift = 0;
-        this.colorOrder.redShift = 2;
+        info = new ImageInfo();
+        info.getColorType().setChannel(Color.RED,new Color.ChannelInfo(2));
+        info.getColorType().setChannel(Color.GREEN,new Color.ChannelInfo(0));
+        info.getColorType().setChannel(Color.BLUE,new Color.ChannelInfo(1));
     }
 
     /**
@@ -43,21 +48,20 @@ public class ImageReaderPropra extends ImageReader {
             throw new java.io.IOException("Ungültiger ProPra Header.");
         }
                 
-        DataBufferLittle data = new DataBufferLittle(buffer);
-        if(!data.isValid()){
-            return null;
-        }
+        DataBuffer dataBuffer = new DataBuffer(buffer);
+        ByteBuffer bytes = dataBuffer.getBuffer();
+        bytes.order(ByteOrder.LITTLE_ENDIAN);
         
-        String version = data.getString(PROPRA_VERSION.length());
+        String version = dataBuffer.getString(PROPRA_VERSION.length());
         if(version.compareTo(PROPRA_VERSION) != 0) {
            throw new java.io.IOException("Ungültige ProPra Formatkennung.");
         }
         
-        tInfo.setWidth(data.getShort(PROPRA_HEADER_OFFSET_WIDTH));
-        tInfo.setHeight(data.getShort(PROPRA_HEADER_OFFSET_HEIGHT));
-        tInfo.setElementSize(data.get(PROPRA_HEADER_OFFSET_BPP) >> 3); 
-        tInfo.setChecksum(data.getInt(PROPRA_HEADER_OFFSET_CHECKSUM)); 
-        long dataLen = data.getLong(PROPRA_HEADER_OFFSET_DATALEN);    
+        tInfo.setWidth(bytes.getShort(PROPRA_HEADER_OFFSET_WIDTH));
+        tInfo.setHeight(bytes.getShort(PROPRA_HEADER_OFFSET_HEIGHT));
+        tInfo.setElementSize(bytes.get(PROPRA_HEADER_OFFSET_BPP) >> 3); 
+        tInfo.setChecksum(bytes.getInt(PROPRA_HEADER_OFFSET_CHECKSUM)); 
+        long dataLen = bytes.getLong(PROPRA_HEADER_OFFSET_DATALEN);    
         
         if( tInfo.isValid() == false || 
             tInfo.getTotalSize() != dataLen) {

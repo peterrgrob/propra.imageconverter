@@ -5,98 +5,109 @@ package propra.imageconverter.image;
  * @author pg
  */
 public class Color {
-    public byte r;
-    public byte g;
-    public byte b;
+    /**
+     * 
+     */
+    public static final int BLUE = 0;
+    public static final int GREEN = 1;
+    public static final int RED = 2;
+    
+    protected ChannelInfo[] channel = new ChannelInfo[3];
     
     /**
      * 
      */
-    public static class ColorOrder {
-        public int redShift = 2;
-        public int greenShift = 1;
-        public int blueShift = 0;
+    public static class ChannelInfo {
+        protected int index;
+        protected int mask;
+        
+        /**
+         * 
+         * @param shift
+         * @param mask 
+         */
+        ChannelInfo(int index) {
+            this.index = index;
+        }
+        
+        /**
+         * 
+         * @param shift
+         * @param mask 
+         */
+        ChannelInfo(int shift, int mask) {
+            this.index = index;
+            this.mask = mask;
+        }
+        
+        /**
+         *
+         * @return
+         */
+        public int getIndex() {
+            return index;
+        }
     }
 
     /**
      * 
      */
     public Color() {
+        /**
+         * Standard RGB Farben
+         */
+        setChannel(RED,new ChannelInfo(2));
+        setChannel(GREEN,new ChannelInfo(1));
+        setChannel(BLUE,new ChannelInfo(0));
     }
-
+    
+    
     /**
      * 
-     * @param r
-     * @param g
-     * @param b 
+     * @param src
      */
-    public Color(byte r, byte g, byte b) {
-        set(r,g,b);
+    public Color(Color src) {
+        /**
+         * Standard RGB Farben
+         */
+        setChannel(RED,src.getChannelInfo(RED));
+        setChannel(GREEN,src.getChannelInfo(GREEN));
+        setChannel(BLUE,src.getChannelInfo(BLUE));
     }
     
     /**
      * 
-     * @param r
-     * @param g
-     * @param b 
+     * @param id
+     * @param channelInfo
      */
-    public void set(byte r, byte g, byte b) {
-        this.r = r;
-        this.g = g;
-        this.b = b;
-    }
-    
-    /**
-     * 
-     * @return 
-     */
-    protected int getRaw() {
-        return buildRGB(this);
-    }
-    
-    /**
-     * 
-     * @param c
-     * @return 
-     */
-    public static int buildRGB(Color c) {
-        return ((c.r << 16) | (c.g << 8) | c.b);
-    }
-    
-    /**
-     * 
-     * @param c
-     * @return 
-     */
-    public static int buildBGR(Color c) {
-        return ((c.b << 16) | (c.g << 8) | c.r);
+    public void setChannel(int id, ChannelInfo channelInfo) {
+        channel[id] = new ChannelInfo(channelInfo.getIndex());
     }
     
     /**
      *
-     * @param buff
-     * @param offset
-     * @param c
+     * @param id
      * @return
      */
-    public static byte[] buildBGR(byte[] buff, int offset, Color c) {
-        buff[offset+0] = c.b;
-        buff[offset+1] = c.g;
-        buff[offset+2] = c.r;
-        return buff;
+    public ChannelInfo getChannelInfo(int id) {
+        return channel[id];
     }
     
     /**
-     *
-     * @param buff
-     * @param offset
-     * @param c
-     * @return
+     * 
+     * @param data
+     * @param colorInfo
+     * @return 
      */
-    public static byte[] buildRGB(byte[] buff, int offset, Color c) {
-        buff[offset+2] = c.b;
-        buff[offset+1] = c.g;
-        buff[offset+0] = c.r;
-        return buff;
+    public byte[] convertColor(byte[] input, Color colorInfo) {
+        if (input == null) {
+            throw new IllegalArgumentException();
+        }   
+        
+        byte[] v = new byte[3];
+        v[RED] = input[colorInfo.getChannelInfo(RED).getIndex()];
+        v[GREEN] = input[colorInfo.getChannelInfo(GREEN).getIndex()];
+        v[BLUE] = input[colorInfo.getChannelInfo(BLUE).getIndex()];
+        return v;
     }
 }
