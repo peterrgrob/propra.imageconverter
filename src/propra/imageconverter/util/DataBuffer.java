@@ -2,6 +2,8 @@ package propra.imageconverter.util;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import propra.imageconverter.image.ColorType;
 
 /**
  *
@@ -25,7 +27,7 @@ public class DataBuffer {
      */
     public DataBuffer(byte[] data) {
         super();
-        buffer = ByteBuffer.wrap(data);
+        wrap(data);
     }
     
     /**
@@ -57,6 +59,34 @@ public class DataBuffer {
     
     /**
      *
+     * @param data
+     * @return 
+     */
+    public ByteBuffer wrap(byte[] data) {
+        if (data == null) {
+            throw new IllegalArgumentException();
+        }
+        buffer = ByteBuffer.wrap(data);
+        return buffer;
+    }
+    
+    /**
+     *
+     * @param data
+     * @param byteOrder
+     * @return 
+     */
+    public ByteBuffer wrap(byte[] data, ByteOrder byteOrder) {
+        if (data == null) {
+            throw new IllegalArgumentException();
+        }
+        buffer = ByteBuffer.wrap(data);
+        buffer.order(byteOrder);
+        return buffer;
+    }
+    
+    /**
+     *
      * @param string
      * @param offset
      * @throws UnsupportedEncodingException
@@ -71,6 +101,51 @@ public class DataBuffer {
                     ,string.length());
     }
    
+    /**
+     *
+     * @param index
+     * @param color
+     * @return
+     */
+    public byte[] getColor(int index, byte[] color) {
+        if (!isValid()) {
+            throw new IllegalStateException();
+        }
+        buffer.get(index, color);
+        return color;
+    }
+    
+    /**
+     * Gibt 3 Byte Farbwert an aktueller Position als BIG_ENDIAN zurück
+     * @param color
+     * @return
+     */
+    public byte[] getColor(byte[] color) {
+        if (!isValid()) {
+            throw new IllegalStateException();
+        }
+        buffer.get(color);
+        if(buffer.order() == ByteOrder.LITTLE_ENDIAN) {
+            ColorType.switchColorEndian(color);
+        }
+        return color;
+    }
+    
+    /**
+     * Schreibt 3 Byte Farbwert an aktuelle Position
+     * @param color
+     * @return
+     */
+    public byte[] putColor(byte[] color) {
+        if (!isValid()) {
+            throw new IllegalStateException();
+        }
+        if(buffer.order() == ByteOrder.LITTLE_ENDIAN) {
+            ColorType.switchColorEndian(color);
+        }
+        buffer.put(color);
+        return color;
+    }
     
     /**
      *
@@ -82,104 +157,5 @@ public class DataBuffer {
         byte[] str = new byte[len]; 
         buffer.get(str);
         return new String(str,"utf-8");
-    }
-    
-    /**
-     *
-     * @param src
-     * @param dst
-     * @return
-     */
-    public static byte[] copyColor(byte[] src, byte[] dst) {
-        if (src == null || dst == null) {
-            throw new IllegalStateException();
-        }
-        
-        dst[0] = src[0];
-        dst[1] = src[1];
-        dst[2] = src[2];
-        return dst;
-    }
-    
-    /**
-     *
-     * @param src
-     * @param dst
-     * @return
-     */
-    public static byte[] colorToLittleEndian(byte[] src, byte[] dst) {
-        if (src == null || dst == null) {
-            throw new IllegalStateException();
-        }
-        
-        dst[0] = src[2];
-        dst[1] = src[1];
-        dst[2] = src[0];
-        return dst;
-    }
-    
-    /**
-     *
-     * @param b1
-     * @param b2
-     * @return
-     */
-    public static short bytesToShortLittle(byte b1, byte b2) {
-        return (short)( (b1 << 8) | 
-                        (b2 & 0x00FF));
-    }
-    
-    /**
-     *
-     * @param buffer
-     * @param offset
-     * @return
-     */
-    public static int bytesToInt(byte[] buffer, int offset) {
-        return (((buffer[offset]     & 0xFF) << 24)  | 
-                ((buffer[offset + 1] & 0xFF) << 16)  |
-                ((buffer[offset + 2] & 0xFF) << 8)   |
-                  buffer[offset + 3] & 0xFF);
-    }
-    
-    /**
-     *
-     * @param buffer
-     * @param offset
-     * @return
-     */
-    public static int bytesToIntLittle(byte[] buffer, int offset) {
-        return (((buffer[offset + 3] & 0xFF) << 24)  | 
-                ((buffer[offset + 2] & 0xFF) << 16)  |
-                ((buffer[offset + 1] & 0xFF) << 8)   |
-                  buffer[offset]     & 0xFF);
-    }
-    
-    /**
-     *
-     * @param buffer
-     * @param offset
-     * @return
-     */
-    public static long bytesToLong(byte[] buffer, int offset) {
-        return  (((long)(bytesToInt(buffer, offset) & 0xFFFFFFFF)) << 4) |
-                 (long)bytesToInt(buffer, offset + 4) & 0xFFFFFFFF;
-    }
-    
-    /**
-     *
-     * @param buffer
-     * @param offset
-     * @return
-     */
-    public static long bytesToLongLittle(byte[] buffer, int offset) {
-        return (((long)(buffer[offset + 7] & 0xFF) << 56)  | 
-                ((long)(buffer[offset + 6] & 0xFF) << 48)  |
-                ((long)(buffer[offset + 5] & 0xFF) << 40)  |
-                ((long)(buffer[offset + 4] & 0xFF) << 32   |
-                ((long)(buffer[offset + 3] & 0xFF) << 24)  | 
-                ((long)(buffer[offset + 2] & 0xFF) << 16)  |
-                ((long)(buffer[offset + 1] & 0xFF) << 8)   |
-                 (long)buffer[offset]      & 0xFF));
     }
 }

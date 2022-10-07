@@ -22,6 +22,7 @@ public class ImageReaderTGA extends ImageReader {
     
     public ImageReaderTGA(InputStream in) throws IOException {
         super(in);
+        byteOrder = ByteOrder.LITTLE_ENDIAN;
     }
 
     /**
@@ -30,11 +31,11 @@ public class ImageReaderTGA extends ImageReader {
      * @throws java.io.IOException 
      */
     @Override
-    public ImageInfo readInfo() throws IOException {
-        ImageInfo tInfo = new ImageInfo();
+    public ImageHeader readHeader() throws IOException {
+        ImageHeader tInfo = new ImageHeader();
         
         byte[] rawBytes = new byte[TGA_HEADER_SIZE];
-        if(readBytes(TGA_HEADER_SIZE, rawBytes) != TGA_HEADER_SIZE) {
+        if(readBytes( rawBytes,TGA_HEADER_SIZE) != TGA_HEADER_SIZE) {
             throw new java.io.IOException("Ungültiger TGA Header.");
         }
         
@@ -44,7 +45,7 @@ public class ImageReaderTGA extends ImageReader {
         
         switch(byteBuffer.get(TGA_HEADER_OFFSET_ENCODING)) {
             case 2:
-                tInfo.setEncoding(ImageInfo.Encoding.UNCOMPRESSED);
+                tInfo.setEncoding(ImageHeader.Encoding.UNCOMPRESSED);
                 break;
             default:
                 throw new java.lang.UnsupportedOperationException("Nicht unterstütztes Bildformat.");

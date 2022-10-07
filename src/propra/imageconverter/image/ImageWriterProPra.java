@@ -19,9 +19,9 @@ public class ImageWriterProPra extends ImageWriter {
     public ImageWriterProPra(OutputStream out) {
         super(out);
         this.byteOrder = ByteOrder.LITTLE_ENDIAN;
-        info.getColorType().setChannel(Color.RED,2);
-        info.getColorType().setChannel(Color.GREEN,0);
-        info.getColorType().setChannel(Color.BLUE,1);
+        header.getColorType().setChannel(ColorType.RED,2);
+        header.getColorType().setChannel(ColorType.GREEN,0);
+        header.getColorType().setChannel(ColorType.BLUE,1);
 
     }
 
@@ -32,7 +32,7 @@ public class ImageWriterProPra extends ImageWriter {
      * @throws IOException
      */
     @Override
-    public ImageBuffer writeBlock(ImageBuffer buffer) throws IOException {
+    public ImageBuffer writeContent(ImageBuffer buffer) throws IOException {
         return buffer;
     }
 
@@ -43,7 +43,7 @@ public class ImageWriterProPra extends ImageWriter {
      * @throws IOException
      */
     @Override
-    public ImageInfo writeInfo(ImageInfo info) throws IOException {
+    public ImageHeader writeHeader(ImageHeader info) throws IOException {
         if(info.isValid() == false) {
             throw new IllegalArgumentException();
         }
@@ -63,7 +63,7 @@ public class ImageWriterProPra extends ImageWriter {
     
         write(byteBuffer.array(), 0, ImageReaderPropra.PROPRA_HEADER_SIZE);
         
-        return (this.info = info);
+        return (this.header = info);
     }
     
 }

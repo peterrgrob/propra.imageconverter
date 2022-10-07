@@ -29,7 +29,7 @@ public class ImageWriterTGA extends ImageWriter {
      * @throws IOException 
      */
     @Override
-    public ImageInfo writeInfo(ImageInfo info) throws IOException {
+    public ImageHeader writeHeader(ImageHeader info) throws IOException {
         if(info.isValid() == false) {
             throw new IllegalArgumentException();
         }
@@ -39,10 +39,10 @@ public class ImageWriterTGA extends ImageWriter {
         ByteBuffer byteBuffer = dataBuffer.getBuffer();
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         
-        this.info = new ImageInfo(info);
-        this.info.getColorType().setChannel(Color.RED,new Color.ChannelInfo(2));
-        this.info.getColorType().setChannel(Color.GREEN,new Color.ChannelInfo(1));
-        this.info.getColorType().setChannel(Color.BLUE,new Color.ChannelInfo(0));
+        this.header = new ImageHeader(info);
+        this.header.getColorType().setChannel(ColorType.RED,new ColorChannel(0));
+        this.header.getColorType().setChannel(ColorType.GREEN,new ColorChannel(1));
+        this.header.getColorType().setChannel(ColorType.BLUE,new ColorChannel(2));
  
         byteBuffer.put(ImageReaderTGA.TGA_HEADER_OFFSET_ENCODING, (byte)2);
         byteBuffer.putShort(ImageReaderTGA.TGA_HEADER_OFFSET_WIDTH, (short)info.getWidth());

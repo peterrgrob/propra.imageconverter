@@ -4,7 +4,7 @@ package propra.imageconverter.image;
  *
  * @author pg
  */
-public class ImageInfo {
+public class ImageHeader {
     /**
      * 
      */
@@ -17,25 +17,25 @@ public class ImageInfo {
     private int elementSize;    
     private Encoding encoding;
     private int checksum;
-    private Color colorType = new Color();
+    private ColorType colorType = new ColorType();
 
     /**
      * 
      */
-    public ImageInfo() {
+    public ImageHeader() {
     }
 
     /**
      *
      * @param src
      */
-    public ImageInfo(ImageInfo src) {
+    public ImageHeader(ImageHeader src) {
         this.width = src.width;
         this.height = src.height;
         this.elementSize = src.elementSize;
         this.encoding = src.encoding;
         this.checksum = src.checksum;
-        this.colorType = new Color(src.getColorType());
+        this.colorType = new ColorType(src.getColorType());
     }
     
     /**
@@ -79,7 +79,7 @@ public class ImageInfo {
      *
      * @return the value of colorType
      */
-    public Color getColorType() {
+    public ColorType getColorType() {
         return colorType;
     }
 
@@ -88,7 +88,7 @@ public class ImageInfo {
      *
      * @param colorType new value of colorType
      */
-    public void setColorType(Color colorType) {
+    public void setColorType(ColorType colorType) {
         this.colorType = colorType;
     }
     

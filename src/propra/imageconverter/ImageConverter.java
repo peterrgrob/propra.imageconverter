@@ -52,15 +52,15 @@ public class ImageConverter {
             ImageReader reader = createReader(cmdLine);
             ImageWriter writer = createWriter(cmdLine);
             
-            ImageInfo inputInfo = reader.readInfo();
-            writer.writeInfo(inputInfo);
+            ImageHeader inputInfo = reader.readHeader();
+            writer.writeHeader(inputInfo);
             
-            System.out.print("Eingabe: "+reader.getInfo().getWidth());
-            System.out.print("x" + reader.getInfo().getHeight());
-            System.out.print("x" + reader.getInfo().getElementSize());
+            System.out.print("Eingabe: "+reader.getHeader().getWidth());
+            System.out.print("x" + reader.getHeader().getHeight());
+            System.out.print("x" + reader.getHeader().getElementSize());
             
-            ImageBuffer iBuffer = reader.readBlock(reader.getInfo().getTotalSize());
-            writer.writeBlock(iBuffer);
+            ImageBuffer iBuffer = reader.readContent(reader.getHeader().getTotalSize());
+            writer.writeContent(iBuffer);
             
             long finish = System.currentTimeMillis();
             long timeElapsed = finish - start;

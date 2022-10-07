@@ -11,7 +11,7 @@ public class ImageBuffer extends DataBuffer {
     /**
      * 
      */
-    protected ImageInfo info;  
+    protected ImageHeader info;  
   
     /**
      * 
@@ -24,7 +24,7 @@ public class ImageBuffer extends DataBuffer {
      * 
      * @param info 
      */
-    ImageBuffer(ImageInfo info) {
+    ImageBuffer(ImageHeader info) {
         create(info);
     }
     
@@ -32,7 +32,7 @@ public class ImageBuffer extends DataBuffer {
      * 
      * @param info 
      */
-    ImageBuffer(byte[] data, ImageInfo info) {
+    ImageBuffer(byte[] data, ImageHeader info) {
         wrap(data, info);
     }
     
@@ -40,11 +40,11 @@ public class ImageBuffer extends DataBuffer {
      * 
      * @param info
      */
-    public void create(ImageInfo info) {
+    public void create(ImageHeader info) {
         if (!info.isValid()) {
             throw new IllegalArgumentException();
         }        
-        this.info = new ImageInfo(info);
+        this.info = new ImageHeader(info);
         create(info.getTotalSize());
     }
     
@@ -53,16 +53,16 @@ public class ImageBuffer extends DataBuffer {
      * @param data
      * @param info 
      */
-    public void wrap(byte[] data, ImageInfo info) {
+    public void wrap(byte[] data, ImageHeader info) {
         buffer = ByteBuffer.wrap(data);
-        this.info = new ImageInfo(info);
+        this.info = new ImageHeader(info);
     }
     
     /**
      * 
      * @return 
      */
-    public ImageInfo getInfo() {
+    public ImageHeader getInfo() {
         return info;
     }
 }

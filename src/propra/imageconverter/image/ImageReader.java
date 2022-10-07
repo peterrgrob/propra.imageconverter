@@ -13,7 +13,7 @@ import propra.imageconverter.util.DataBuffer;
  */
 public class ImageReader extends BufferedInputStream {
     
-    protected ImageInfo info;
+    protected ImageHeader info;
     ByteOrder byteOrder = ByteOrder.BIG_ENDIAN;
     
     /**
@@ -30,7 +30,7 @@ public class ImageReader extends BufferedInputStream {
      * @return 
      * @throws java.io.IOException
     */
-    public ImageInfo readInfo() throws IOException {       
+    public ImageHeader readHeader() throws IOException {       
         throw new UnsupportedOperationException("Not supported yet.");
     }
     
@@ -40,8 +40,8 @@ public class ImageReader extends BufferedInputStream {
      * @return
      * @throws IOException 
      */
-    public ImageBuffer readBlock(int len) throws IOException {
-        return readBlock(len, new ImageBuffer(info));
+    public ImageBuffer readContent(int len) throws IOException {
+        return readContent(len, new ImageBuffer(info));
     }
     
     /**
@@ -51,38 +51,36 @@ public class ImageReader extends BufferedInputStream {
     * @return
     * @throws IOException 
     */
-    public ImageBuffer readBlock(int len, ImageBuffer image) throws IOException {
+    public ImageBuffer readContent(int len, ImageBuffer image) throws IOException {
         if(len <= 0 || image == null) {
             throw new IllegalArgumentException();
         }
         
         byte[] bytes = new byte[len];
-        if(readBytes(len, bytes) != len) {
+        if(readBytes(bytes, len) != len) {
             throw new java.io.IOException("Nicht genug Bilddaten lesbar.");
         }
-        
-        ByteBuffer dstBuffer = image.getBuffer();
-        ByteBuffer srcBuffer = ByteBuffer.wrap(bytes);
-        
-        Color dstColorType = image.getInfo().getColorType();
+         
+        ColorType srcColorType = info.getColorType();
+        ColorType dstColorType = image.getInfo().getColorType();
         
         if(dstColorType.compareTo(info.getColorType()) != 0 
                                 || byteOrder == ByteOrder.LITTLE_ENDIAN) {
             byte[] color = new byte[3];
-            byte[] convColor = new byte[3];
+            
+            DataBuffer srcBuffer = new DataBuffer();
+            srcBuffer.wrap(bytes, byteOrder);
+            ByteBuffer dstBuffer = image.getBuffer();
             
             for(int i=0; i<info.getElementCount();i++) {
-                srcBuffer.get(i*getInfo().getElementSize(), color);
-                info.getColorType().convertColor(color, dstColorType,convColor);
-                if(byteOrder == ByteOrder.LITTLE_ENDIAN) {
-                    DataBuffer.colorToLittleEndian(convColor, color);
-                    DataBuffer.copyColor(color, convColor);
-                }
-                dstBuffer.put(i*image.getInfo().getElementSize(), color);
+                srcBuffer.getColor(color);
+                srcColorType.convertColor(color, dstColorType);
+                dstBuffer.put( color);
             }
+            dstBuffer.rewind();
         }
         else {        
-            image = wrapDataBuffer(bytes);
+            image.wrap(bytes, info);
         }
         
         return image;
@@ -92,7 +90,7 @@ public class ImageReader extends BufferedInputStream {
      * 
      * @return 
      */
-    public ImageInfo getInfo() {
+    public ImageHeader getHeader() {
         return info;
     }
     
@@ -103,24 +101,10 @@ public class ImageReader extends BufferedInputStream {
      * @return
      * @throws IOException 
      */
-    protected int readBytes(int len, byte[] data) throws IOException {
+    protected int readBytes(byte[] data, int len) throws IOException {
         if (len == 0 || data == null ) {
             throw new IllegalArgumentException();
         }
         return read(data, 0, len);
-    }
-    
-    /**
-     * 
-     * @param data
-     * @return 
-     */
-    protected ImageBuffer wrapDataBuffer(byte[] data) {
-        if (data == null ) {
-            throw new IllegalArgumentException();
-        }
-        ImageBuffer buffer = new ImageBuffer();
-        buffer.wrap(data, info);
-        return buffer;
     }
 }

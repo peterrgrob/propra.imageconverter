@@ -7,9 +7,8 @@ import java.util.HashMap;
  * @author pg
  */
  public class CmdLine {
-    public static final String INPUT_KEY = "--input";
-    public static final String OUTPUT_KEY = "--output";
-    
+    private static final String INPUT_KEY = "--input";
+    private static final String OUTPUT_KEY = "--output";
     private HashMap<Options,String> options = new HashMap();
     
     /**
