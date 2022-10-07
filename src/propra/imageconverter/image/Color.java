@@ -4,7 +4,7 @@ package propra.imageconverter.image;
  *
  * @author pg
  */
-public class Color {
+public class Color implements Comparable<Color> {
     /**
      * 
      */
@@ -17,7 +17,7 @@ public class Color {
     /**
      * 
      */
-    public static class ChannelInfo {
+    public static class ChannelInfo implements Comparable<ChannelInfo>{
         protected int index;
         protected int mask;
         
@@ -35,7 +35,7 @@ public class Color {
          * @param shift
          * @param mask 
          */
-        ChannelInfo(int shift, int mask) {
+        ChannelInfo(int index, int mask) {
             this.index = index;
             this.mask = mask;
         }
@@ -46,6 +46,20 @@ public class Color {
          */
         public int getIndex() {
             return index;
+        }
+
+        /**
+         *
+         * @param o
+         * @return
+         */
+        @Override
+        public int compareTo(ChannelInfo o) {
+            if (index == o.index &&
+                mask == o.mask) {
+                return 0;
+            }
+            return -1;
         }
     }
 
@@ -76,12 +90,36 @@ public class Color {
     }
     
     /**
+     *
+     * @param o
+     * @return
+     */
+    @Override
+    public int compareTo(Color o) {
+        if( channel[0] == o.getChannelInfo(0) &&
+            channel[1] == o.getChannelInfo(1) &&
+            channel[2] == o.getChannelInfo(2)) {
+            return 0;
+        }
+        return -1;
+    }
+    
+    /**
      * 
      * @param id
      * @param channelInfo
      */
     public void setChannel(int id, ChannelInfo channelInfo) {
         channel[id] = new ChannelInfo(channelInfo.getIndex());
+    }
+    
+    /**
+     * 
+     * @param id
+     * @param index
+     */
+    public void setChannel(int id, int index) {
+        channel[id] = new ChannelInfo(index);
     }
     
     /**
@@ -95,19 +133,19 @@ public class Color {
     
     /**
      * 
-     * @param data
+     * @param input
      * @param colorInfo
+     * @param output
      * @return 
      */
-    public byte[] convertColor(byte[] input, Color colorInfo) {
-        if (input == null) {
+    public byte[] convertColor(byte[] input, Color colorInfo, byte[] output) {
+        if ( input == null
+          || output == null ) {
             throw new IllegalArgumentException();
         }   
-        
-        byte[] v = new byte[3];
-        v[RED] = input[colorInfo.getChannelInfo(RED).getIndex()];
-        v[GREEN] = input[colorInfo.getChannelInfo(GREEN).getIndex()];
-        v[BLUE] = input[colorInfo.getChannelInfo(BLUE).getIndex()];
-        return v;
+        output[RED] = input[colorInfo.getChannelInfo(RED).getIndex()];
+        output[GREEN] = input[colorInfo.getChannelInfo(GREEN).getIndex()];
+        output[BLUE] = input[colorInfo.getChannelInfo(BLUE).getIndex()];
+        return output;
     }
 }

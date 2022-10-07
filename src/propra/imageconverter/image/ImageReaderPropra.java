@@ -28,10 +28,7 @@ public class ImageReaderPropra extends ImageReader {
      */
     public ImageReaderPropra(InputStream in) throws IOException {
         super(in);
-        info = new ImageInfo();
-        info.getColorType().setChannel(Color.RED,new Color.ChannelInfo(2));
-        info.getColorType().setChannel(Color.GREEN,new Color.ChannelInfo(0));
-        info.getColorType().setChannel(Color.BLUE,new Color.ChannelInfo(1));
+        this.byteOrder = ByteOrder.LITTLE_ENDIAN;
     }
 
     /**
@@ -42,6 +39,9 @@ public class ImageReaderPropra extends ImageReader {
     @Override
     public ImageInfo readInfo() throws IOException {
         ImageInfo tInfo = new ImageInfo();
+        tInfo.getColorType().setChannel(Color.RED,2);
+        tInfo.getColorType().setChannel(Color.GREEN,0);
+        tInfo.getColorType().setChannel(Color.BLUE,1);
         
         byte[] buffer = new byte[PROPRA_HEADER_SIZE];
         if(readBytes(PROPRA_HEADER_SIZE, buffer) != PROPRA_HEADER_SIZE) {
@@ -50,7 +50,7 @@ public class ImageReaderPropra extends ImageReader {
                 
         DataBuffer dataBuffer = new DataBuffer(buffer);
         ByteBuffer bytes = dataBuffer.getBuffer();
-        bytes.order(ByteOrder.LITTLE_ENDIAN);
+        bytes.order(this.byteOrder);
         
         String version = dataBuffer.getString(PROPRA_VERSION.length());
         if(version.compareTo(PROPRA_VERSION) != 0) {

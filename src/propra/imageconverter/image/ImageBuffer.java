@@ -65,27 +65,4 @@ public class ImageBuffer extends DataBuffer {
     public ImageInfo getInfo() {
         return info;
     }
-   
-    
-    /**
-     * 
-     * @param offset
-     * @param color 
-     */
-    public void put(byte[] color) {
-        buffer.put(color);
-    }
-    
-    /**
-     * 
-     * @param offset
-     * @return 
-     */
-    public byte[] getColor(int offset) {
-        if(offset < 0) {
-            throw new ArrayIndexOutOfBoundsException();
-        }
-        
-        return new byte[3];
-    }
 }

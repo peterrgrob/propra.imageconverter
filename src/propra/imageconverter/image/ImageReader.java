@@ -3,7 +3,9 @@ package propra.imageconverter.image;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import propra.imageconverter.util.DataBuffer;
 
 /**
  *
@@ -25,6 +27,8 @@ public class ImageReader extends BufferedInputStream {
     
     /**
     * 
+     * @return 
+     * @throws java.io.IOException
     */
     public ImageInfo readInfo() throws IOException {       
         throw new UnsupportedOperationException("Not supported yet.");
@@ -52,12 +56,35 @@ public class ImageReader extends BufferedInputStream {
             throw new IllegalArgumentException();
         }
         
-        byte[] buffer = new byte[len];
-        if(readBytes(len, buffer) != len) {
+        byte[] bytes = new byte[len];
+        if(readBytes(len, bytes) != len) {
             throw new java.io.IOException("Nicht genug Bilddaten lesbar.");
         }
-        image = wrapDataBuffer(buffer);
-        image.getBuffer().order(byteOrder);
+        
+        ByteBuffer dstBuffer = image.getBuffer();
+        ByteBuffer srcBuffer = ByteBuffer.wrap(bytes);
+        
+        Color dstColorType = image.getInfo().getColorType();
+        
+        if(dstColorType.compareTo(info.getColorType()) != 0 
+                                || byteOrder == ByteOrder.LITTLE_ENDIAN) {
+            byte[] color = new byte[3];
+            byte[] convColor = new byte[3];
+            
+            for(int i=0; i<info.getElementCount();i++) {
+                srcBuffer.get(i*getInfo().getElementSize(), color);
+                info.getColorType().convertColor(color, dstColorType,convColor);
+                if(byteOrder == ByteOrder.LITTLE_ENDIAN) {
+                    DataBuffer.colorToLittleEndian(convColor, color);
+                    DataBuffer.copyColor(color, convColor);
+                }
+                dstBuffer.put(i*image.getInfo().getElementSize(), color);
+            }
+        }
+        else {        
+            image = wrapDataBuffer(bytes);
+        }
+        
         return image;
     }
     

@@ -63,7 +63,7 @@ public class DataBuffer {
      */
     public void put(String string, int offset) throws UnsupportedEncodingException {
         if (!isValid()) {
-            throw new IllegalStateException("arg");
+            throw new IllegalStateException();
         }
         
         buffer.put(string.getBytes("UTF-8"),
@@ -82,6 +82,40 @@ public class DataBuffer {
         byte[] str = new byte[len]; 
         buffer.get(str);
         return new String(str,"utf-8");
+    }
+    
+    /**
+     *
+     * @param src
+     * @param dst
+     * @return
+     */
+    public static byte[] copyColor(byte[] src, byte[] dst) {
+        if (src == null || dst == null) {
+            throw new IllegalStateException();
+        }
+        
+        dst[0] = src[0];
+        dst[1] = src[1];
+        dst[2] = src[2];
+        return dst;
+    }
+    
+    /**
+     *
+     * @param src
+     * @param dst
+     * @return
+     */
+    public static byte[] colorToLittleEndian(byte[] src, byte[] dst) {
+        if (src == null || dst == null) {
+            throw new IllegalStateException();
+        }
+        
+        dst[0] = src[2];
+        dst[1] = src[1];
+        dst[2] = src[0];
+        return dst;
     }
     
     /**

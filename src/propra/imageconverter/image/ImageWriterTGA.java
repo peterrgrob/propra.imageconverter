@@ -19,25 +19,7 @@ public class ImageWriterTGA extends ImageWriter {
      */
     public ImageWriterTGA(OutputStream out) {
         super(out);
-    }
-
-    /**
-     * 
-     * @param buffer
-     * @return
-     * @throws IOException 
-     */
-    @Override
-    protected ImageBuffer writeBlock(ImageBuffer buffer) throws IOException {
-        if(!info.isValid()) {
-            throw new IllegalArgumentException();
-        }
-
-        ByteBuffer byteBuffer = buffer.getBuffer();
-        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-        write(byteBuffer.array(),0,info.getTotalSize());
-        
-        return buffer;
+        this.byteOrder = ByteOrder.LITTLE_ENDIAN;
     }
     
     /**
@@ -47,7 +29,7 @@ public class ImageWriterTGA extends ImageWriter {
      * @throws IOException 
      */
     @Override
-    protected ImageInfo writeInfo(ImageInfo info) throws IOException {
+    public ImageInfo writeInfo(ImageInfo info) throws IOException {
         if(info.isValid() == false) {
             throw new IllegalArgumentException();
         }
@@ -56,6 +38,11 @@ public class ImageWriterTGA extends ImageWriter {
         dataBuffer.create(ImageReaderTGA.TGA_HEADER_SIZE);
         ByteBuffer byteBuffer = dataBuffer.getBuffer();
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+        
+        this.info = new ImageInfo(info);
+        this.info.getColorType().setChannel(Color.RED,new Color.ChannelInfo(2));
+        this.info.getColorType().setChannel(Color.GREEN,new Color.ChannelInfo(1));
+        this.info.getColorType().setChannel(Color.BLUE,new Color.ChannelInfo(0));
  
         byteBuffer.put(ImageReaderTGA.TGA_HEADER_OFFSET_ENCODING, (byte)2);
         byteBuffer.putShort(ImageReaderTGA.TGA_HEADER_OFFSET_WIDTH, (short)info.getWidth());
@@ -65,7 +52,7 @@ public class ImageWriterTGA extends ImageWriter {
         
         write(byteBuffer.array(), 0, TGA_HEADER_SIZE);
         
-        return (this.info = info);
+        return info;
     }
     
 }

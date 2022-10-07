@@ -12,21 +12,38 @@ import propra.imageconverter.util.DataBuffer;
  */
 public class ImageWriterProPra extends ImageWriter {
 
+    /**
+     *
+     * @param out
+     */
     public ImageWriterProPra(OutputStream out) {
         super(out);
-        info.getColorType().setChannel(Color.RED,new Color.ChannelInfo(2));
-        info.getColorType().setChannel(Color.GREEN,new Color.ChannelInfo(0));
-        info.getColorType().setChannel(Color.BLUE,new Color.ChannelInfo(1));
+        this.byteOrder = ByteOrder.LITTLE_ENDIAN;
+        info.getColorType().setChannel(Color.RED,2);
+        info.getColorType().setChannel(Color.GREEN,0);
+        info.getColorType().setChannel(Color.BLUE,1);
 
     }
 
+    /**
+     *
+     * @param buffer
+     * @return
+     * @throws IOException
+     */
     @Override
-    protected ImageBuffer writeBlock(ImageBuffer buffer) throws IOException {
+    public ImageBuffer writeBlock(ImageBuffer buffer) throws IOException {
         return buffer;
     }
 
+    /**
+     *
+     * @param info
+     * @return
+     * @throws IOException
+     */
     @Override
-    protected ImageInfo writeInfo(ImageInfo info) throws IOException {
+    public ImageInfo writeInfo(ImageInfo info) throws IOException {
         if(info.isValid() == false) {
             throw new IllegalArgumentException();
         }
@@ -34,7 +51,7 @@ public class ImageWriterProPra extends ImageWriter {
         DataBuffer dataBuffer = new DataBuffer();
         dataBuffer.create(ImageReaderPropra.PROPRA_HEADER_SIZE);
         ByteBuffer byteBuffer = dataBuffer.getBuffer();
-        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+        byteBuffer.order(byteOrder);
         
         dataBuffer.put(ImageReaderPropra.PROPRA_VERSION,0);
         byteBuffer.put(ImageReaderPropra.PROPRA_HEADER_OFFSET_ENCODING, (byte)0);
