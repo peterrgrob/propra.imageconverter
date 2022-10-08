@@ -126,7 +126,7 @@ public class DataBuffer {
         }
         buffer.get(color);
         if(buffer.order() == ByteOrder.LITTLE_ENDIAN) {
-            ColorType.switchColorEndian(color);
+            ColorType.switchEndian(color);
         }
         return color;
     }
@@ -141,7 +141,7 @@ public class DataBuffer {
             throw new IllegalStateException();
         }
         if(buffer.order() == ByteOrder.LITTLE_ENDIAN) {
-            ColorType.switchColorEndian(color);
+            ColorType.switchEndian(color);
         }
         buffer.put(color);
         return color;

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import propra.imageconverter.util.ChecksumPropra;
 import propra.imageconverter.util.DataBuffer;
 
 /**
@@ -15,6 +16,7 @@ public class ImageReader extends BufferedInputStream {
     
     protected ImageHeader info;
     ByteOrder byteOrder = ByteOrder.BIG_ENDIAN;
+    ChecksumPropra checksum = new ChecksumPropra();
     
     /**
      * 
@@ -23,14 +25,25 @@ public class ImageReader extends BufferedInputStream {
      */
     public ImageReader(InputStream in) throws IOException {
         super(in);
+        checksum.test();
     } 
+    
+    /**
+     *
+     * @return
+     * @throws java.io.IOException
+     */
+    public ImageBuffer readImage() throws IOException {
+        readHeader();
+        return readContent(info.getTotalSize());
+    }
     
     /**
     * 
      * @return 
      * @throws java.io.IOException
     */
-    public ImageHeader readHeader() throws IOException {       
+    protected ImageHeader readHeader() throws IOException {       
         throw new UnsupportedOperationException("Not supported yet.");
     }
     
@@ -40,7 +53,7 @@ public class ImageReader extends BufferedInputStream {
      * @return
      * @throws IOException 
      */
-    public ImageBuffer readContent(int len) throws IOException {
+    protected ImageBuffer readContent(int len) throws IOException {
         return readContent(len, new ImageBuffer(info));
     }
     
@@ -51,37 +64,38 @@ public class ImageReader extends BufferedInputStream {
     * @return
     * @throws IOException 
     */
-    public ImageBuffer readContent(int len, ImageBuffer image) throws IOException {
+    protected ImageBuffer readContent(int len, ImageBuffer image) throws IOException {
         if(len <= 0 || image == null) {
             throw new IllegalArgumentException();
         }
-        
+ 
         byte[] bytes = new byte[len];
         if(readBytes(bytes, len) != len) {
             throw new java.io.IOException("Nicht genug Bilddaten lesbar.");
         }
-         
-        ColorType srcColorType = info.getColorType();
-        ColorType dstColorType = image.getInfo().getColorType();
         
-        if(dstColorType.compareTo(info.getColorType()) != 0 
-                                || byteOrder == ByteOrder.LITTLE_ENDIAN) {
-            byte[] color = new byte[3];
-            
-            DataBuffer srcBuffer = new DataBuffer();
-            srcBuffer.wrap(bytes, byteOrder);
-            ByteBuffer dstBuffer = image.getBuffer();
-            
-            for(int i=0; i<info.getElementCount();i++) {
-                srcBuffer.getColor(color);
-                srcColorType.convertColor(color, dstColorType);
-                dstBuffer.put( color);
+        if(info.getChecksum() == 0) {
+            info.setChecksum(checkBytes(bytes));
+        }
+        else {
+            if(checkBytes(bytes) != info.getChecksum()) {
+                throw new java.io.IOException("Prüfsummenfehler.");
             }
-            dstBuffer.rewind();
         }
-        else {        
-            image.wrap(bytes, info);
+           
+        ColorType srcColorType = info.getColorType();
+        ColorType dstColorType = image.getHeader().getColorType();
+        byte[] color = new byte[3];
+
+        DataBuffer srcBuffer = new DataBuffer();
+        srcBuffer.wrap(bytes, byteOrder);
+        ImageBuffer dstBuffer = image;
+
+        for(int i=0; i<info.getElementCount();i++) {
+            srcBuffer.getColor(color);
+            dstBuffer.putColor(color, dstColorType);
         }
+        dstBuffer.getBuffer().rewind();
         
         return image;
     }
@@ -106,5 +120,16 @@ public class ImageReader extends BufferedInputStream {
             throw new IllegalArgumentException();
         }
         return read(data, 0, len);
+    }
+    
+    /**
+     *
+     * @param data
+     * @param checkSum
+     * @return
+     * @throws java.io.IOException
+     */
+    protected long checkBytes(byte[] data) {
+        return checksum.update(data);
     }
 }

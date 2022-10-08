@@ -109,7 +109,7 @@ public class ColorType implements Comparable<ColorType> {
      * @param color
      * @return
      */
-    public static byte[] switchColorEndian(byte[] color) {
+    public static byte[] switchEndian(byte[] color) {
         if (color == null) {
             throw new IllegalArgumentException();
         }
@@ -125,7 +125,7 @@ public class ColorType implements Comparable<ColorType> {
      * @param dst
      * @return
      */
-    public static byte[] colorToLittleEndian(byte[] src, byte[] dst) {
+    public static byte[] toLittleEndian(byte[] src, byte[] dst) {
         if (src == null || dst == null) {
             throw new IllegalStateException();
         }

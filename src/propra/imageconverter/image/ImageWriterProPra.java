@@ -27,17 +27,6 @@ public class ImageWriterProPra extends ImageWriter {
 
     /**
      *
-     * @param buffer
-     * @return
-     * @throws IOException
-     */
-    @Override
-    public ImageBuffer writeContent(ImageBuffer buffer) throws IOException {
-        return buffer;
-    }
-
-    /**
-     *
      * @param info
      * @return
      * @throws IOException
@@ -59,7 +48,7 @@ public class ImageWriterProPra extends ImageWriter {
         byteBuffer.putShort(ImageReaderPropra.PROPRA_HEADER_OFFSET_HEIGHT,(short)info.getHeight());
         byteBuffer.put(ImageReaderPropra.PROPRA_HEADER_OFFSET_BPP,(byte)(info.getElementSize() >> 3));
         byteBuffer.putLong(ImageReaderPropra.PROPRA_HEADER_OFFSET_DATALEN,(long)info.getTotalSize());
-        byteBuffer.putInt(ImageReaderPropra.PROPRA_HEADER_OFFSET_CHECKSUM,info.getChecksum());
+        byteBuffer.putInt(ImageReaderPropra.PROPRA_HEADER_OFFSET_CHECKSUM,(int)info.getChecksum());
     
         write(byteBuffer.array(), 0, ImageReaderPropra.PROPRA_HEADER_SIZE);
         

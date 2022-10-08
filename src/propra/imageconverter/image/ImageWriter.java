@@ -21,6 +21,16 @@ public class ImageWriter extends BufferedOutputStream {
     public ImageWriter(OutputStream out) {
         super(out);
     }
+    
+    /**
+     *
+     * @param image
+     * @throws IOException
+     */
+    public void writeImage(ImageBuffer image) throws IOException {
+        writeHeader(image.getHeader());
+        writeContent(image);
+    }
    
     /**
      * 
@@ -28,7 +38,7 @@ public class ImageWriter extends BufferedOutputStream {
      * @return
      * @throws IOException 
      */
-    public ImageHeader writeHeader(ImageHeader info) throws IOException {       
+    protected ImageHeader writeHeader(ImageHeader info) throws IOException {       
         throw new UnsupportedOperationException("Not supported yet.");
     }
       
@@ -38,13 +48,13 @@ public class ImageWriter extends BufferedOutputStream {
     * @return
     * @throws IOException 
     */
-    public ImageBuffer writeContent(ImageBuffer image) throws IOException {
+    protected ImageBuffer writeContent(ImageBuffer image) throws IOException {
         if(!header.isValid()) {
             throw new IllegalArgumentException();
         }
             
         ImageBuffer dstBuffer = image;
-        ColorType srcColorType = image.getInfo().getColorType();
+        ColorType srcColorType = image.getHeader().getColorType();
         ColorType dstColorType = header.getColorType();
         
         if(srcColorType.compareTo(header.getColorType()) != 0 
@@ -55,7 +65,7 @@ public class ImageWriter extends BufferedOutputStream {
                     
             byte[] color = new byte[3];
             
-            for(int i=0; i<image.getInfo().getElementCount();i++) {
+            for(int i=0;i<image.getHeader().getElementCount();i++) {
                 image.getColor(color);
                 header.getColorType().convertColor(color, srcColorType);
                 dstBuffer.putColor(color);

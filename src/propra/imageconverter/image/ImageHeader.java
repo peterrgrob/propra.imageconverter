@@ -16,7 +16,7 @@ public class ImageHeader {
     private int height;
     private int elementSize;    
     private Encoding encoding;
-    private int checksum;
+    private long checksum;
     private ColorType colorType = new ColorType();
 
     /**
@@ -123,7 +123,7 @@ public class ImageHeader {
      *
      * @return the value of checksum
      */
-    public int getChecksum() {
+    public long getChecksum() {
         return checksum;
     }
 
@@ -132,7 +132,7 @@ public class ImageHeader {
      *
      * @param checksum new value of checksum
      */
-    public void setChecksum(int checksum) {
+    public void setChecksum(long checksum) {
         this.checksum = checksum;
     }
     

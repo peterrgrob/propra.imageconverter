@@ -26,11 +26,10 @@ public class ImageConverter {
     public static void main(String[] args) {
         try {
             CmdLine cmdLine = new CmdLine(args);
+            
+            System.out.println("Dateien:");
             System.out.println(cmdLine.getOption(CmdLine.Options.INPUT_FILE));
             System.out.println(cmdLine.getOption(CmdLine.Options.OUTPUT_FILE));
-             
-            System.out.println(cmdLine.getOption(CmdLine.Options.INPUT_EXT));
-            System.out.println(cmdLine.getOption(CmdLine.Options.OUTPUT_EXT));
             
             ImageConverter converter = new ImageConverter(); 
             converter.Convert(cmdLine);
@@ -52,19 +51,17 @@ public class ImageConverter {
             ImageReader reader = createReader(cmdLine);
             ImageWriter writer = createWriter(cmdLine);
             
-            ImageHeader inputInfo = reader.readHeader();
-            writer.writeHeader(inputInfo);
-            
-            System.out.print("Eingabe: "+reader.getHeader().getWidth());
-            System.out.print("x" + reader.getHeader().getHeight());
-            System.out.print("x" + reader.getHeader().getElementSize());
-            
-            ImageBuffer iBuffer = reader.readContent(reader.getHeader().getTotalSize());
-            writer.writeContent(iBuffer);
+            ImageBuffer src = reader.readImage();
+            System.out.print("Bildinfo: "+src.getHeader().getWidth());
+            System.out.print("x" + src.getHeader().getHeight());
+            System.out.print("x" + src.getHeader().getElementSize());
+            System.out.print("\nPrüfsumme: "+String.format("0x%08X", (int)src.getHeader().getChecksum()));
+                 
+            writer.writeImage(src);
             
             long finish = System.currentTimeMillis();
             long timeElapsed = finish - start;
-            System.out.println("\nAbgeschlossen in (ms):" + String.valueOf(timeElapsed));
+            System.out.println("\nKonvertierung abgeschlossen in (ms): " + String.valueOf(timeElapsed));
             
         } catch (IOException ex) {
             Logger.getLogger(ImageConverter.class.getName()).log(Level.SEVERE, null, ex);
