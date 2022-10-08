@@ -34,7 +34,7 @@ public class ImageBuffer extends DataBuffer {
      * @param info 
      */
     ImageBuffer(byte[] data, ImageHeader info) {
-        wrap(data, info);
+        wrap(data, info, ByteOrder.BIG_ENDIAN);
     }
     
     /**
@@ -54,9 +54,38 @@ public class ImageBuffer extends DataBuffer {
      * @param data
      * @param info 
      */
-    public void wrap(byte[] data, ImageHeader info) {
+    public void wrap(byte[] data, ImageHeader info, ByteOrder byteOrder) {
         buffer = ByteBuffer.wrap(data);
+        buffer.order(byteOrder);
         this.info = new ImageHeader(info);
+    }
+    
+    /**
+     *
+     * @param header
+     * @param byteOrder
+     * @return
+     */
+    public ImageBuffer convertTo(ImageHeader header, ByteOrder byteOrder) {
+        ImageBuffer image = new ImageBuffer(header);
+        ColorType colorType = header.getColorType();
+        
+        if(info.getColorType().compareTo(colorType) != 0 
+                        || byteOrder != buffer.order()) {
+            byte[] color = new byte[3];
+            
+            for(int i=0;i<info.getElementCount();i++) {
+                getColor(color);
+                colorType.convertColor(color, info.getColorType());
+                image.putColor(color);
+            }
+            
+            image.getBuffer().rewind();
+        }
+        else {
+            image.wrap(buffer.array());
+        }
+        return image;
     }
     
     /**

@@ -3,16 +3,14 @@ package propra.imageconverter.image;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import propra.imageconverter.util.ChecksumPropra;
-import propra.imageconverter.util.DataBuffer;
 
 /**
  *
  * @author pg
  */
-public class ImageReader extends BufferedInputStream {
+public abstract class ImageReader extends BufferedInputStream {
     
     protected ImageHeader info;
     ByteOrder byteOrder = ByteOrder.BIG_ENDIAN;
@@ -43,9 +41,7 @@ public class ImageReader extends BufferedInputStream {
      * @return 
      * @throws java.io.IOException
     */
-    protected ImageHeader readHeader() throws IOException {       
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+    protected abstract ImageHeader readHeader() throws IOException;
     
     /**
      * 
@@ -82,21 +78,8 @@ public class ImageReader extends BufferedInputStream {
                 throw new java.io.IOException("Prüfsummenfehler.");
             }
         }
-           
-        ColorType srcColorType = info.getColorType();
-        ColorType dstColorType = image.getHeader().getColorType();
-        byte[] color = new byte[3];
 
-        DataBuffer srcBuffer = new DataBuffer();
-        srcBuffer.wrap(bytes, byteOrder);
-        ImageBuffer dstBuffer = image;
-
-        for(int i=0; i<info.getElementCount();i++) {
-            srcBuffer.getColor(color);
-            dstBuffer.putColor(color, dstColorType);
-        }
-        dstBuffer.getBuffer().rewind();
-        
+        image.wrap(bytes, info, byteOrder);
         return image;
     }
     
@@ -125,9 +108,7 @@ public class ImageReader extends BufferedInputStream {
     /**
      *
      * @param data
-     * @param checkSum
      * @return
-     * @throws java.io.IOException
      */
     protected long checkBytes(byte[] data) {
         return checksum.update(data);
