@@ -30,6 +30,10 @@ public class ImageHeader {
      * @param src
      */
     public ImageHeader(ImageHeader src) {
+        if (src == null) {
+            throw new IllegalArgumentException();
+        }
+        
         this.width = src.width;
         this.height = src.height;
         this.elementSize = src.elementSize;
@@ -45,7 +49,7 @@ public class ImageHeader {
     public boolean isValid() {
         return (    width > 0 
                 &&  height > 0 
-                &&  elementSize > 0);
+                &&  elementSize == 3);
     }
     
     /**

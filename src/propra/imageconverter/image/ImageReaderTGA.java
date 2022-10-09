@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import propra.imageconverter.util.DataBuffer;
+import propra.imageconverter.util.Utility;
 
 
 /**
@@ -15,6 +16,8 @@ public class ImageReaderTGA extends ImageReader {
     
     static final int TGA_HEADER_SIZE = 18;
     static final int TGA_HEADER_OFFSET_ENCODING = 2;
+    static final int TGA_HEADER_OFFSET_X0 = 8;
+    static final int TGA_HEADER_OFFSET_Y0 = 10;
     static final int TGA_HEADER_OFFSET_WIDTH = 12;
     static final int TGA_HEADER_OFFSET_HEIGHT = 14;
     static final int TGA_HEADER_OFFSET_BPP = 16;
@@ -43,22 +46,33 @@ public class ImageReaderTGA extends ImageReader {
         ByteBuffer byteBuffer = dataBuffer.getBuffer();
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         
+        /**
+         * Anforderungen prüfen
+         */
+        if(byteBuffer.getShort(TGA_HEADER_OFFSET_X0) != 0
+        || byteBuffer.getShort(TGA_HEADER_OFFSET_Y0) != 0
+        || !Utility.checkBit(byteBuffer.get(TGA_HEADER_OFFSET_ORIGIN), (byte)5)
+        || byteBuffer.get(0) != 0) {
+            throw new java.lang.UnsupportedOperationException("Nicht unterstütztes TGA Bildformat.");
+        }
         switch(byteBuffer.get(TGA_HEADER_OFFSET_ENCODING)) {
             case 2:
                 tInfo.setEncoding(ImageHeader.Encoding.UNCOMPRESSED);
                 break;
             default:
-                throw new java.lang.UnsupportedOperationException("Nicht unterstütztes Bildformat.");
+                throw new java.lang.UnsupportedOperationException("Nicht unterstütztes TGA Bildformat.");
         }
         
+        /**
+         * Bildinfo einlesen und prüfen
+         */
         tInfo.setWidth(byteBuffer.getShort(TGA_HEADER_OFFSET_WIDTH));
         tInfo.setHeight(byteBuffer.getShort(TGA_HEADER_OFFSET_HEIGHT));
         tInfo.setElementSize(byteBuffer.get(TGA_HEADER_OFFSET_BPP) >> 3); 
-        
         if(tInfo.isValid() == false) {
             throw new java.io.IOException("Ungültiges Bildformat.");
         }
         
-        return (info = tInfo);
+        return (header = tInfo);
     }
 }

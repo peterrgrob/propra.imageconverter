@@ -57,18 +57,26 @@ public class ImageReaderPropra extends ImageReader {
            throw new java.io.IOException("Ungültige ProPra Formatkennung.");
         }
         
+        switch(bytes.get(PROPRA_HEADER_OFFSET_ENCODING)) {
+            case 0:
+                tInfo.setEncoding(ImageHeader.Encoding.UNCOMPRESSED);
+                break;
+            default:
+                throw new java.lang.UnsupportedOperationException("Nicht unterstütze ProPra Kompression.");
+        }
+        
         tInfo.setWidth(bytes.getShort(PROPRA_HEADER_OFFSET_WIDTH));
         tInfo.setHeight(bytes.getShort(PROPRA_HEADER_OFFSET_HEIGHT));
         tInfo.setElementSize(bytes.get(PROPRA_HEADER_OFFSET_BPP) >> 3); 
         tInfo.setChecksum(bytes.getInt(PROPRA_HEADER_OFFSET_CHECKSUM)); 
         long dataLen = bytes.getLong(PROPRA_HEADER_OFFSET_DATALEN);    
         
-        if( tInfo.isValid() == false || 
-            tInfo.getTotalSize() != dataLen) {
+        if( tInfo.isValid() == false 
+        ||  tInfo.getTotalSize() != dataLen) {
             throw new java.io.IOException("Ungültiges Bildformat.");
         }
         
-        return (info = tInfo);
+        return (header = tInfo);
     }
     
 }

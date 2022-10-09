@@ -55,10 +55,10 @@ public class ImageBuffer extends DataBuffer {
      * @param info 
      * @param byteOrder 
      */
-    public void wrap(byte[] data, ImageHeader info, ByteOrder byteOrder) {
+    public void wrap(byte[] data, ImageHeader header, ByteOrder byteOrder) {
         buffer = ByteBuffer.wrap(data);
         buffer.order(byteOrder);
-        this.header = new ImageHeader(info);
+        this.header = new ImageHeader(header);
     }
     
     /**
@@ -67,6 +67,11 @@ public class ImageBuffer extends DataBuffer {
      * @return
      */
     public ImageBuffer convertTo(ImageHeader format) {
+        if (!format.isValid()
+            || !isValid()) {
+            throw new IllegalArgumentException();
+        }
+        
         ImageBuffer image = new ImageBuffer(format);
         ColorType newColorType = format.getColorType();
         ColorType oldColorType = header.getColorType();

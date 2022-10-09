@@ -3,7 +3,6 @@ package propra.imageconverter.image;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /**
@@ -28,6 +27,9 @@ public abstract class ImageWriter extends BufferedOutputStream {
      * @throws IOException
      */
     public void writeImage(ImageBuffer image) throws IOException {
+        if(image == null) {
+            throw new IllegalArgumentException();
+        }
         writeHeader(image.getHeader());
         writeContent(image);
     }
@@ -47,7 +49,7 @@ public abstract class ImageWriter extends BufferedOutputStream {
     * @throws IOException 
     */
     protected ImageBuffer writeContent(ImageBuffer image) throws IOException {
-        if(!header.isValid()) {
+        if(!header.isValid() || image == null) {
             throw new IllegalArgumentException();
         }
         

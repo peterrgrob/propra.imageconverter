@@ -12,7 +12,7 @@ import propra.imageconverter.util.ChecksumPropra;
  */
 public abstract class ImageReader extends BufferedInputStream {
     
-    protected ImageHeader info;
+    protected ImageHeader header;
     ByteOrder byteOrder = ByteOrder.BIG_ENDIAN;
     ChecksumPropra checksum = new ChecksumPropra();
     
@@ -33,7 +33,7 @@ public abstract class ImageReader extends BufferedInputStream {
      */
     public ImageBuffer readImage() throws IOException {
         readHeader();
-        return readContent(info.getTotalSize());
+        return readContent(header.getTotalSize());
     }
     
     /**
@@ -50,7 +50,7 @@ public abstract class ImageReader extends BufferedInputStream {
      * @throws IOException 
      */
     protected ImageBuffer readContent(int len) throws IOException {
-        return readContent(len, new ImageBuffer(info));
+        return readContent(len, new ImageBuffer(header));
     }
     
     /**
@@ -70,16 +70,16 @@ public abstract class ImageReader extends BufferedInputStream {
             throw new java.io.IOException("Nicht genug Bilddaten lesbar.");
         }
         
-        if(info.getChecksum() == 0) {
-            info.setChecksum(checkBytes(bytes));
+        if(header.getChecksum() == 0) {
+            header.setChecksum(checkBytes(bytes));
         }
         else {
-            if(checkBytes(bytes) != info.getChecksum()) {
+            if(checkBytes(bytes) != header.getChecksum()) {
                 throw new java.io.IOException("Prüfsummenfehler.");
             }
         }
 
-        image.wrap(bytes, info, byteOrder);
+        image.wrap(bytes, header, byteOrder);
         return image;
     }
     
@@ -88,7 +88,7 @@ public abstract class ImageReader extends BufferedInputStream {
      * @return 
      */
     public ImageHeader getHeader() {
-        return info;
+        return header;
     }
     
     /**
@@ -111,6 +111,9 @@ public abstract class ImageReader extends BufferedInputStream {
      * @return
      */
     protected long checkBytes(byte[] data) {
+        if (data == null ) {
+            throw new IllegalArgumentException();
+        }
         return checksum.update(data);
     }
 }

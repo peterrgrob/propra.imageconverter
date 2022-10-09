@@ -3,7 +3,6 @@ package propra.imageconverter.util;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import propra.imageconverter.image.ColorType;
 
 /**
  *
@@ -96,8 +95,8 @@ public class DataBuffer {
             throw new IllegalStateException();
         }
         
-        buffer.put(string.getBytes("UTF-8"),
-                    offset
+        buffer.put(string.getBytes("UTF-8")
+                    , offset
                     ,string.length());
     }
     
@@ -108,6 +107,9 @@ public class DataBuffer {
      * @throws UnsupportedEncodingException
      */
     public String getString(int len) throws UnsupportedEncodingException {
+        if (len <= 0) {
+            throw new IllegalArgumentException();
+        }
         byte[] str = new byte[len]; 
         buffer.get(str);
         return new String(str,"utf-8");
