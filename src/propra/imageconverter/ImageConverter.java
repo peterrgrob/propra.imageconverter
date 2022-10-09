@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 import propra.imageconverter.image.*;
 import propra.imageconverter.util.*;
 
-
 /**
  *
  * @author pg

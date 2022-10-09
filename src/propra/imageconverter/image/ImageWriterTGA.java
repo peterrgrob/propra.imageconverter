@@ -11,10 +11,7 @@ import propra.imageconverter.util.*;
  * @author pg
  */
 public class ImageWriterTGA extends ImageWriter {
-    /**
-     * Größe des TGA Header in Bytes
-     */
-    static final int TGA_HEADER_SIZE = 18;
+    static final int TGA_HEADER_SIZE = 18;  
         
     /**
      * 
@@ -37,9 +34,7 @@ public class ImageWriterTGA extends ImageWriter {
             throw new IllegalArgumentException();
         }
         
-        /**
-         * DataBuffer für Header erstellen
-         */
+        // DataBuffer für Header erstellen
         DataBuffer dataBuffer = new DataBuffer();
         dataBuffer.create(ImageReaderTGA.TGA_HEADER_SIZE);
         ByteBuffer byteBuffer = dataBuffer.getBuffer();
@@ -50,20 +45,16 @@ public class ImageWriterTGA extends ImageWriter {
         this.header.getColorType().setMapping(ColorType.GREEN,1);
         this.header.getColorType().setMapping(ColorType.BLUE,0);
         
-        /**
-         * Headerfelder in Buffer schreiben
-         */
+        // Headerfelder in Buffer schreiben
         byteBuffer.put(ImageReaderTGA.TGA_HEADER_OFFSET_ENCODING, (byte)2);
         byteBuffer.putShort(ImageReaderTGA.TGA_HEADER_OFFSET_WIDTH, (short)info.getWidth());
         byteBuffer.putShort(ImageReaderTGA.TGA_HEADER_OFFSET_HEIGHT, (short)info.getHeight());
         byteBuffer.put(ImageReaderTGA.TGA_HEADER_OFFSET_BPP, (byte)(info.getElementSize() << 3));        
         byteBuffer.put(ImageReaderTGA.TGA_HEADER_OFFSET_ORIGIN, (byte)(1 << 5));    
         
-        /**
-         * Buffer in Stream ausgeben
-         */
+        // ByteBuffer in Stream ausgeben
         write(byteBuffer.array(), 0, TGA_HEADER_SIZE);
-        return info;
+        return header;
     }
     
 }

@@ -5,23 +5,20 @@ package propra.imageconverter.image;
  * @author pg
  */
 public class ColorType implements Comparable<ColorType> {
-    /**
-     * Konstanten zur Indizierung von Farbkomponenten (Little Endian)
-     */
+
+    // Konstanten zur Indizierung von Farbkomponenten (Little Endian)
     public static final int BLUE = 0;
     public static final int GREEN = 1;
     public static final int RED = 2;
-    
-    /**
-     * Bildet Indizes der Farkomponenten ab
-     */
+
+    // Bildet Indizes der Farkomponenten ab
     protected int[] mapping = new int[3];
 
     /**
      * 
      */
     public ColorType() {
-        /**
+        /*
          * Standard RGB Farben (Little Endian)
          */
         setMapping(RED, 2);
@@ -35,9 +32,6 @@ public class ColorType implements Comparable<ColorType> {
      * @param src
      */
     public ColorType(ColorType src) {
-        /**
-         * Standard RGB Farben
-         */
         setMapping(RED,src.getMapping(RED));
         setMapping(GREEN,src.getMapping(GREEN));
         setMapping(BLUE,src.getMapping(BLUE));

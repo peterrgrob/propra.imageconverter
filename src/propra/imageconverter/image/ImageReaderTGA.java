@@ -16,8 +16,8 @@ public class ImageReaderTGA extends ImageReader {
     
     static final int TGA_HEADER_SIZE = 18;
     static final int TGA_HEADER_OFFSET_ENCODING = 2;
-    static final int TGA_HEADER_OFFSET_X0 = 8;
-    static final int TGA_HEADER_OFFSET_Y0 = 10;
+    static final int TGA_HEADER_OFFSET_X0 = 7;
+    static final int TGA_HEADER_OFFSET_Y0 = 9;
     static final int TGA_HEADER_OFFSET_WIDTH = 12;
     static final int TGA_HEADER_OFFSET_HEIGHT = 14;
     static final int TGA_HEADER_OFFSET_BPP = 16;
@@ -59,9 +59,7 @@ public class ImageReaderTGA extends ImageReader {
          * Prüfe tga Spezifikationen
          */
         if(tInfo.isValid() == false
-        || byteBuffer.getShort(TGA_HEADER_OFFSET_X0) != 0
-        || byteBuffer.getShort(TGA_HEADER_OFFSET_Y0) != 0
-        || !Utility.checkBit(byteBuffer.get(TGA_HEADER_OFFSET_ORIGIN), (byte)5)
+        || !Utility.checkBit(byteBuffer.get(TGA_HEADER_OFFSET_ORIGIN), (byte)6)
         || byteBuffer.get(0) != 0
         || byteBuffer.get(TGA_HEADER_OFFSET_ENCODING) != 2) {
             throw new java.io.IOException("Ungültiges TGA Bildformat.");
