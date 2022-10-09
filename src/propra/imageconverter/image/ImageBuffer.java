@@ -12,7 +12,7 @@ public class ImageBuffer extends DataBuffer {
     /**
      * 
      */
-    protected ImageHeader info;  
+    protected ImageHeader header;  
   
     /**
      * 
@@ -45,7 +45,7 @@ public class ImageBuffer extends DataBuffer {
         if (!info.isValid()) {
             throw new IllegalArgumentException();
         }        
-        this.info = new ImageHeader(info);
+        this.header = new ImageHeader(info);
         create(info.getTotalSize());
     }
     
@@ -53,30 +53,30 @@ public class ImageBuffer extends DataBuffer {
      * 
      * @param data
      * @param info 
+     * @param byteOrder 
      */
     public void wrap(byte[] data, ImageHeader info, ByteOrder byteOrder) {
         buffer = ByteBuffer.wrap(data);
         buffer.order(byteOrder);
-        this.info = new ImageHeader(info);
+        this.header = new ImageHeader(info);
     }
     
     /**
      *
-     * @param header
-     * @param byteOrder
+     * @param format
      * @return
      */
-    public ImageBuffer convertTo(ImageHeader header, ByteOrder byteOrder) {
-        ImageBuffer image = new ImageBuffer(header);
-        ColorType colorType = header.getColorType();
+    public ImageBuffer convertTo(ImageHeader format) {
+        ImageBuffer image = new ImageBuffer(format);
+        ColorType newColorType = format.getColorType();
+        ColorType oldColorType = header.getColorType();
         
-        if(info.getColorType().compareTo(colorType) != 0 
-                        || byteOrder != buffer.order()) {
+        if(oldColorType.compareTo(newColorType) != 0) {
             byte[] color = new byte[3];
             
-            for(int i=0;i<info.getElementCount();i++) {
+            for(int i=0;i<header.getElementCount();i++) {
                 getColor(color);
-                colorType.convertColor(color, info.getColorType());
+                newColorType.convertColor(color, oldColorType);
                 image.putColor(color);
             }
             
@@ -93,11 +93,37 @@ public class ImageBuffer extends DataBuffer {
      * @return 
      */
     public ImageHeader getHeader() {
-        return info;
+        return header;
+    }
+    
+    /**
+     * Gibt 3 Byte Farbwert an aktueller Position zurück
+     * @param color
+     * @return
+     */
+    public byte[] getColor(byte[] color) {
+        if (!isValid()) {
+            throw new IllegalStateException();
+        }
+        buffer.get(color);
+        return color;
     }
     
     /**
      * Schreibt 3 Byte Farbwert an aktuelle Position
+     * @param color
+     * @return
+     */
+    public byte[] putColor(byte[] color) {
+        if (!isValid()) {
+            throw new IllegalStateException();
+        }
+        buffer.put(color);
+        return color;
+    }
+    
+    /**
+     * Schreibt 3 Byte Farbwert an aktuelle Position und konvertiert zum Zielformat
      * @param color
      * @param type
      * @return
@@ -106,10 +132,7 @@ public class ImageBuffer extends DataBuffer {
         if (!isValid()) {
             throw new IllegalStateException();
         }
-        if(buffer.order() == ByteOrder.LITTLE_ENDIAN) {
-            ColorType.switchEndian(color);
-        }
-        info.getColorType().convertColor(color, type);
+        header.getColorType().convertColor(color, type);
         buffer.put(color);
         return color;
     }

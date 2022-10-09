@@ -51,7 +51,7 @@ public abstract class ImageWriter extends BufferedOutputStream {
             throw new IllegalArgumentException();
         }
         
-        ImageBuffer output = image.convertTo(header, byteOrder);
+        ImageBuffer output = image.convertTo(header);
         write(output.getBuffer().array(),0,header.getTotalSize());
         
         return image;

@@ -6,23 +6,27 @@ package propra.imageconverter.image;
  */
 public class ColorType implements Comparable<ColorType> {
     /**
-     * 
+     * Konstanten zur Indizierung von Farbkomponenten (Little Endian)
      */
     public static final int BLUE = 0;
     public static final int GREEN = 1;
     public static final int RED = 2;
-    protected ColorChannel[] channel = new ColorChannel[3];
+    
+    /**
+     * Bildet Indizes der Farkomponenten ab
+     */
+    protected int[] mapping = new int[3];
 
     /**
      * 
      */
     public ColorType() {
         /**
-         * Standard RGB Farben
+         * Standard RGB Farben (Little Endian)
          */
-        setChannel(RED,new ColorChannel(2));
-        setChannel(GREEN,new ColorChannel(1));
-        setChannel(BLUE,new ColorChannel(0));
+        setMapping(RED, 2);
+        setMapping(GREEN,1);
+        setMapping(BLUE, 0);
     }
     
     
@@ -34,9 +38,9 @@ public class ColorType implements Comparable<ColorType> {
         /**
          * Standard RGB Farben
          */
-        setChannel(RED,src.getChannelInfo(RED));
-        setChannel(GREEN,src.getChannelInfo(GREEN));
-        setChannel(BLUE,src.getChannelInfo(BLUE));
+        setMapping(RED,src.getMapping(RED));
+        setMapping(GREEN,src.getMapping(GREEN));
+        setMapping(BLUE,src.getMapping(BLUE));
     }
     
     /**
@@ -46,9 +50,9 @@ public class ColorType implements Comparable<ColorType> {
      */
     @Override
     public int compareTo(ColorType o) {
-        if( channel[0] == o.getChannelInfo(0) &&
-            channel[1] == o.getChannelInfo(1) &&
-            channel[2] == o.getChannelInfo(2)) {
+        if( mapping[0] == o.getMapping(0) &&
+            mapping[1] == o.getMapping(1) &&
+            mapping[2] == o.getMapping(2)) {
             return 0;
         }
         return -1;
@@ -59,17 +63,8 @@ public class ColorType implements Comparable<ColorType> {
      * @param id
      * @param channelInfo
      */
-    public void setChannel(int id, ColorChannel channelInfo) {
-        channel[id] = new ColorChannel(channelInfo.getIndex());
-    }
-    
-    /**
-     * 
-     * @param id
-     * @param index
-     */
-    public void setChannel(int id, int index) {
-        channel[id] = new ColorChannel(index);
+    public void setMapping(int id, int newId) {
+        mapping[id] = newId;
     }
     
     /**
@@ -77,8 +72,16 @@ public class ColorType implements Comparable<ColorType> {
      * @param id
      * @return
      */
-    public ColorChannel getChannelInfo(int id) {
-        return channel[id];
+    public int getMapping(int id) {
+        return mapping[id];
+    }
+    
+    /**
+     *
+     * @return
+     */
+    public int[] getMapping() {
+        return mapping;
     }
     
     /**
@@ -92,47 +95,16 @@ public class ColorType implements Comparable<ColorType> {
             throw new IllegalArgumentException();
         }  
         byte t0,t1,t2;
+        int[] map = colorInfo.getMapping();
         
-        t2 = input[colorInfo.getChannelInfo(RED).getIndex()];
-        t1 = input[colorInfo.getChannelInfo(GREEN).getIndex()];
-        t0 = input[colorInfo.getChannelInfo(BLUE).getIndex()];
+        t2 = input[map[RED]];
+        t1 = input[map[GREEN]];
+        t0 = input[map[BLUE]];
         
         input[RED] = t2;
         input[GREEN] = t1;
         input[BLUE] = t0;
                 
         return input;
-    }
-    
-    /**
-     *
-     * @param color
-     * @return
-     */
-    public static byte[] switchEndian(byte[] color) {
-        if (color == null) {
-            throw new IllegalArgumentException();
-        }
-        byte tmp = color[0];
-        color[0] = color[2];
-        color[2] = tmp;
-        return color;
-    }
-    
-    /**
-     *
-     * @param src
-     * @param dst
-     * @return
-     */
-    public static byte[] toLittleEndian(byte[] src, byte[] dst) {
-        if (src == null || dst == null) {
-            throw new IllegalStateException();
-        }
-        
-        dst[0] = src[2];
-        dst[1] = src[1];
-        dst[2] = src[0];
-        return dst;
     }
 }

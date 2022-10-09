@@ -40,9 +40,9 @@ public class ImageWriterTGA extends ImageWriter {
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         
         this.header = new ImageHeader(info);
-        this.header.getColorType().setChannel(ColorType.RED,new ColorChannel(0));
-        this.header.getColorType().setChannel(ColorType.GREEN,new ColorChannel(1));
-        this.header.getColorType().setChannel(ColorType.BLUE,new ColorChannel(2));
+        this.header.getColorType().setMapping(ColorType.RED,2);
+        this.header.getColorType().setMapping(ColorType.GREEN,1);
+        this.header.getColorType().setMapping(ColorType.BLUE,0);
  
         byteBuffer.put(ImageReaderTGA.TGA_HEADER_OFFSET_ENCODING, (byte)2);
         byteBuffer.putShort(ImageReaderTGA.TGA_HEADER_OFFSET_WIDTH, (short)info.getWidth());

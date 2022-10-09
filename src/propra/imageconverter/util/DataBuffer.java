@@ -100,52 +100,6 @@ public class DataBuffer {
                     offset
                     ,string.length());
     }
-   
-    /**
-     *
-     * @param index
-     * @param color
-     * @return
-     */
-    public byte[] getColor(int index, byte[] color) {
-        if (!isValid()) {
-            throw new IllegalStateException();
-        }
-        buffer.get(index, color);
-        return color;
-    }
-    
-    /**
-     * Gibt 3 Byte Farbwert an aktueller Position als BIG_ENDIAN zurück
-     * @param color
-     * @return
-     */
-    public byte[] getColor(byte[] color) {
-        if (!isValid()) {
-            throw new IllegalStateException();
-        }
-        buffer.get(color);
-        if(buffer.order() == ByteOrder.LITTLE_ENDIAN) {
-            ColorType.switchEndian(color);
-        }
-        return color;
-    }
-    
-    /**
-     * Schreibt 3 Byte Farbwert an aktuelle Position
-     * @param color
-     * @return
-     */
-    public byte[] putColor(byte[] color) {
-        if (!isValid()) {
-            throw new IllegalStateException();
-        }
-        if(buffer.order() == ByteOrder.LITTLE_ENDIAN) {
-            ColorType.switchEndian(color);
-        }
-        buffer.put(color);
-        return color;
-    }
     
     /**
      *

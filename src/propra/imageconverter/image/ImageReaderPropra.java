@@ -39,9 +39,9 @@ public class ImageReaderPropra extends ImageReader {
     @Override
     public ImageHeader readHeader() throws IOException {
         ImageHeader tInfo = new ImageHeader();
-        tInfo.getColorType().setChannel(ColorType.RED,0);
-        tInfo.getColorType().setChannel(ColorType.GREEN,2);
-        tInfo.getColorType().setChannel(ColorType.BLUE,1);
+        tInfo.getColorType().setMapping(ColorType.RED,0);
+        tInfo.getColorType().setMapping(ColorType.GREEN,2);
+        tInfo.getColorType().setMapping(ColorType.BLUE,1);
         
         byte[] buffer = new byte[PROPRA_HEADER_SIZE];
         if(readBytes(buffer,PROPRA_HEADER_SIZE) != PROPRA_HEADER_SIZE) {

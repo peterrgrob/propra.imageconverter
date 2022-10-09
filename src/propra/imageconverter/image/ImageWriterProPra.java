@@ -19,10 +19,9 @@ public class ImageWriterProPra extends ImageWriter {
     public ImageWriterProPra(OutputStream out) {
         super(out);
         this.byteOrder = ByteOrder.LITTLE_ENDIAN;
-        header.getColorType().setChannel(ColorType.RED,2);
-        header.getColorType().setChannel(ColorType.GREEN,0);
-        header.getColorType().setChannel(ColorType.BLUE,1);
-
+        header.getColorType().setMapping(ColorType.RED,0);
+        header.getColorType().setMapping(ColorType.GREEN,2);
+        header.getColorType().setMapping(ColorType.BLUE,1);
     }
 
     /**
