@@ -67,8 +67,8 @@ public class ImageBuffer extends DataBuffer {
      * @return
      */
     public ImageBuffer convertTo(ImageHeader format) {
-        if (!format.isValid()
-            || !isValid()) {
+        if(!format.isValid()
+        || !isValid()) {
             throw new IllegalArgumentException();
         }
         

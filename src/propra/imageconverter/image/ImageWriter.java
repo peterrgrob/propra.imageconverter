@@ -49,13 +49,12 @@ public abstract class ImageWriter extends BufferedOutputStream {
     * @throws IOException 
     */
     protected ImageBuffer writeContent(ImageBuffer image) throws IOException {
-        if(!header.isValid() || image == null) {
+        if(!header.isValid() 
+        || image == null) {
             throw new IllegalArgumentException();
         }
-        
         ImageBuffer output = image.convertTo(header);
         write(output.getBuffer().array(),0,header.getTotalSize());
-        
         return image;
     }
 }

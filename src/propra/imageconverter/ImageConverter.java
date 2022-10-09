@@ -16,7 +16,9 @@ import propra.imageconverter.util.*;
  * @author pg
  */
 public class ImageConverter {
-
+    /**
+     * 
+     */
     protected static final int ERROR_EXIT_CODE = 123;
     public static final Messages MSG = new MessagesSimple();
             
@@ -25,12 +27,15 @@ public class ImageConverter {
      */
     public static void main(String[] args) {
         try {
+            // Komandozeilenparamter parsen.
             CmdLine cmdLine = new CmdLine(args);
             
+            // Ein- und Ausgabedateipfad ausgeben
             System.out.println("Dateien:");
             System.out.println(cmdLine.getOption(CmdLine.Options.INPUT_FILE));
             System.out.println(cmdLine.getOption(CmdLine.Options.OUTPUT_FILE));
             
+            // Klasseninstanz erstellen und Dateien konvertieren
             ImageConverter converter = new ImageConverter(); 
             converter.Convert(cmdLine);
         }
@@ -47,18 +52,24 @@ public class ImageConverter {
     public void Convert(CmdLine cmdLine) throws FileNotFoundException {    
         try {
             long start = System.currentTimeMillis();
-
+            
+            // Reader und Writer erstellen basierend auf Dateierweiterungen.
             ImageReader reader = createReader(cmdLine);
             ImageWriter writer = createWriter(cmdLine);
             
+            // Eingabebild laden.
             ImageBuffer src = reader.readImage();
+            
+            // Infos zum Eingabebild ausgeben.
             System.out.print("Bildinfo: "+src.getHeader().getWidth());
             System.out.print("x" + src.getHeader().getHeight());
             System.out.print("x" + src.getHeader().getElementSize());
             System.out.print("\nPrüfsumme: "+String.format("0x%08X", (int)src.getHeader().getChecksum()));
-                 
+            
+            // Bild konvertieren und speichern.
             writer.writeImage(src);
             
+            // Infos ausgeben.
             long finish = System.currentTimeMillis();
             long timeElapsed = finish - start;
             System.out.println("\nKonvertierung abgeschlossen in (ms): " + String.valueOf(timeElapsed));
@@ -75,6 +86,7 @@ public class ImageConverter {
      * @throws java.io.FileNotFoundException 
      */
     public ImageReader createReader(CmdLine cmd) throws FileNotFoundException, IOException {
+        // FileStream öffnen und ImageReader Objekt erstellen.
         FileInputStream fInput = new FileInputStream(cmd.getOption(CmdLine.Options.INPUT_FILE));
         switch(cmd.getOption(CmdLine.Options.INPUT_EXT)) {
             case "tga":
@@ -82,7 +94,7 @@ public class ImageConverter {
             case "propra":
                 return new ImageReaderPropra(fInput);
         }
-        throw new IOException();
+        throw new IOException("Nicht unterstütztes Bildformat.");
     }
     
     /**
@@ -94,11 +106,13 @@ public class ImageConverter {
     public ImageWriter createWriter(CmdLine cmd) throws IOException {
         String path = cmd.getOption(CmdLine.Options.OUTPUT_FILE);  
         
+        // Wenn Datei nicht vorhanden, neue Datei erstellen.
         File file = new File(path);
         if(!file.exists()) {
             file.createNewFile();
         }
         
+        // FileStream öffnen und ImageWriter Objekt erstellen.
         FileOutputStream fOutput = new FileOutputStream(file);
         switch(cmd.getOption(CmdLine.Options.OUTPUT_EXT)) {
             case "tga":
@@ -106,6 +120,6 @@ public class ImageConverter {
             case "propra":
                 return new ImageWriterProPra(fOutput);
         }
-        throw new IOException();
+        throw new IOException("Nicht unterstütztes Bildformat.");
     }
 }

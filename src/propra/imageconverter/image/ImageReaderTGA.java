@@ -35,42 +35,36 @@ public class ImageReaderTGA extends ImageReader {
      */
     @Override
     public ImageHeader readHeader() throws IOException {
-        ImageHeader tInfo = new ImageHeader();
-        
+        /**
+         * Header-Bytes von Stream lesen
+         */
         byte[] rawBytes = new byte[TGA_HEADER_SIZE];
         if(readBytes( rawBytes,TGA_HEADER_SIZE) != TGA_HEADER_SIZE) {
             throw new java.io.IOException("Ungültiger TGA Header.");
         }
-        
         DataBuffer dataBuffer = new DataBuffer(rawBytes);
         ByteBuffer byteBuffer = dataBuffer.getBuffer();
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         
         /**
-         * Anforderungen prüfen
+         * Headerfelder einlesen
          */
-        if(byteBuffer.getShort(TGA_HEADER_OFFSET_X0) != 0
-        || byteBuffer.getShort(TGA_HEADER_OFFSET_Y0) != 0
-        || !Utility.checkBit(byteBuffer.get(TGA_HEADER_OFFSET_ORIGIN), (byte)5)
-        || byteBuffer.get(0) != 0) {
-            throw new java.lang.UnsupportedOperationException("Nicht unterstütztes TGA Bildformat.");
-        }
-        switch(byteBuffer.get(TGA_HEADER_OFFSET_ENCODING)) {
-            case 2:
-                tInfo.setEncoding(ImageHeader.Encoding.UNCOMPRESSED);
-                break;
-            default:
-                throw new java.lang.UnsupportedOperationException("Nicht unterstütztes TGA Bildformat.");
-        }
-        
-        /**
-         * Bildinfo einlesen und prüfen
-         */
+        ImageHeader tInfo = new ImageHeader();
         tInfo.setWidth(byteBuffer.getShort(TGA_HEADER_OFFSET_WIDTH));
         tInfo.setHeight(byteBuffer.getShort(TGA_HEADER_OFFSET_HEIGHT));
         tInfo.setElementSize(byteBuffer.get(TGA_HEADER_OFFSET_BPP) >> 3); 
-        if(tInfo.isValid() == false) {
-            throw new java.io.IOException("Ungültiges Bildformat.");
+        tInfo.setEncoding(ImageHeader.Encoding.UNCOMPRESSED);
+        
+        /**
+         * Prüfe tga Spezifikationen
+         */
+        if(tInfo.isValid() == false
+        || byteBuffer.getShort(TGA_HEADER_OFFSET_X0) != 0
+        || byteBuffer.getShort(TGA_HEADER_OFFSET_Y0) != 0
+        || !Utility.checkBit(byteBuffer.get(TGA_HEADER_OFFSET_ORIGIN), (byte)5)
+        || byteBuffer.get(0) != 0
+        || byteBuffer.get(TGA_HEADER_OFFSET_ENCODING) != 2) {
+            throw new java.io.IOException("Ungültiges TGA Bildformat.");
         }
         
         return (header = tInfo);

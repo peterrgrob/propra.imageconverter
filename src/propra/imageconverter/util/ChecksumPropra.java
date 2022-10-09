@@ -5,6 +5,9 @@ package propra.imageconverter.util;
  * @author pg
  */
 public class ChecksumPropra extends Checksum {
+    /**
+     * 
+     */
     private static final int X = 65521;
     
     /**
@@ -27,7 +30,7 @@ public class ChecksumPropra extends Checksum {
         for(int i=1;i<=len;i++) {
             a_i = (i + a_i + Byte.toUnsignedInt(data[index++])) % X;
             b_i = (b_i + a_i) % X; 
-        }      
+        }   
         return (value = (a_i << 16) + b_i);
     }
  

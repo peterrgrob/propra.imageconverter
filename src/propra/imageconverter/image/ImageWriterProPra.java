@@ -19,6 +19,10 @@ public class ImageWriterProPra extends ImageWriter {
     public ImageWriterProPra(OutputStream out) {
         super(out);
         this.byteOrder = ByteOrder.LITTLE_ENDIAN;
+        
+        /**
+         * RBG Farbmapping für ProPra
+         */
         header.getColorType().setMapping(ColorType.RED,0);
         header.getColorType().setMapping(ColorType.GREEN,2);
         header.getColorType().setMapping(ColorType.BLUE,1);
@@ -36,11 +40,17 @@ public class ImageWriterProPra extends ImageWriter {
             throw new IllegalArgumentException();
         }
         
+        /**
+         * DataBuffer für Header erstellen
+         */
         DataBuffer dataBuffer = new DataBuffer();
         dataBuffer.create(ImageReaderPropra.PROPRA_HEADER_SIZE);
         ByteBuffer byteBuffer = dataBuffer.getBuffer();
         byteBuffer.order(byteOrder);
         
+        /**
+         * Headerfelder in Buffer schreiben
+         */
         dataBuffer.put(ImageReaderPropra.PROPRA_VERSION,0);
         byteBuffer.put(ImageReaderPropra.PROPRA_HEADER_OFFSET_ENCODING, (byte)0);
         byteBuffer.putShort(ImageReaderPropra.PROPRA_HEADER_OFFSET_WIDTH,(short)info.getWidth());
@@ -48,9 +58,11 @@ public class ImageWriterProPra extends ImageWriter {
         byteBuffer.put(ImageReaderPropra.PROPRA_HEADER_OFFSET_BPP,(byte)(info.getElementSize() >> 3));
         byteBuffer.putLong(ImageReaderPropra.PROPRA_HEADER_OFFSET_DATALEN,(long)info.getTotalSize());
         byteBuffer.putInt(ImageReaderPropra.PROPRA_HEADER_OFFSET_CHECKSUM,(int)info.getChecksum());
-    
-        write(byteBuffer.array(), 0, ImageReaderPropra.PROPRA_HEADER_SIZE);
         
+        /**
+         * Buffer in Stream ausgeben
+         */
+        write(byteBuffer.array(), 0, ImageReaderPropra.PROPRA_HEADER_SIZE);
         return (this.header = info);
     }
     

@@ -11,8 +11,11 @@ import propra.imageconverter.util.ChecksumPropra;
  * @author pg
  */
 public abstract class ImageReader extends BufferedInputStream {
-    
+    /**
+     * 
+     */
     protected ImageHeader header;
+    int intialAvailableBytes;
     ByteOrder byteOrder = ByteOrder.BIG_ENDIAN;
     ChecksumPropra checksum = new ChecksumPropra();
     
@@ -23,6 +26,7 @@ public abstract class ImageReader extends BufferedInputStream {
      */
     public ImageReader(InputStream in) throws IOException {
         super(in);
+        intialAvailableBytes = available();
         checksum.test();
     } 
     
@@ -61,15 +65,22 @@ public abstract class ImageReader extends BufferedInputStream {
     * @throws IOException 
     */
     protected ImageBuffer readContent(int len, ImageBuffer image) throws IOException {
-        if(len <= 0 || image == null) {
+        if(len <= 0 
+        || image == null) {
             throw new IllegalArgumentException();
         }
  
+        /**
+         * Farbbytes einlesen.
+         */
         byte[] bytes = new byte[len];
         if(readBytes(bytes, len) != len) {
             throw new java.io.IOException("Nicht genug Bilddaten lesbar.");
         }
         
+        /**
+         * Checksum über Bytes berechnen und prüfen, falls Prüfsumme vorhanden.
+         */
         if(header.getChecksum() == 0) {
             header.setChecksum(checkBytes(bytes));
         }
@@ -78,7 +89,7 @@ public abstract class ImageReader extends BufferedInputStream {
                 throw new java.io.IOException("Prüfsummenfehler.");
             }
         }
-
+        // Bytes an ImageBuffer übergeben.
         image.wrap(bytes, header, byteOrder);
         return image;
     }
@@ -99,7 +110,8 @@ public abstract class ImageReader extends BufferedInputStream {
      * @throws IOException 
      */
     protected int readBytes(byte[] data, int len) throws IOException {
-        if (len == 0 || data == null ) {
+        if(len == 0 
+        || data == null ) {
             throw new IllegalArgumentException();
         }
         return read(data, 0, len);
