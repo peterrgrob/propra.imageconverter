@@ -29,7 +29,7 @@ public class ImageWriterTGA extends ImageWriter {
      * @throws IOException 
      */
     @Override
-    public ImageHeader writeHeader(ImageHeader info) throws IOException {
+    public DataBuffer buildHeader(ImageHeader info) {
         if(info.isValid() == false) {
             throw new IllegalArgumentException();
         }
@@ -52,9 +52,6 @@ public class ImageWriterTGA extends ImageWriter {
         byteBuffer.put(ImageReaderTGA.TGA_HEADER_OFFSET_BPP, (byte)(info.getElementSize() << 3));        
         byteBuffer.put(ImageReaderTGA.TGA_HEADER_OFFSET_ORIGIN, (byte)(1 << 5));    
         
-        // ByteBuffer in Stream ausgeben
-        write(byteBuffer.array(), 0, TGA_HEADER_SIZE);
-        return header;
+        return dataBuffer;
     }
-    
 }

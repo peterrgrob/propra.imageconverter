@@ -4,20 +4,21 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteOrder;
-import propra.imageconverter.util.ChecksumPropra;
+import propra.imageconverter.util.Checkable;
+import propra.imageconverter.util.Checksum;
 
 /**
  *
  * @author pg
  */
-public abstract class ImageReader extends BufferedInputStream {
+public abstract class ImageReader extends BufferedInputStream implements Checkable {
     /**
      * 
      */
     protected ImageHeader header;
     int intialAvailableBytes;
     ByteOrder byteOrder = ByteOrder.BIG_ENDIAN;
-    ChecksumPropra checksum = new ChecksumPropra();
+    Checksum checksumObj;
     
     /**
      * 
@@ -27,7 +28,6 @@ public abstract class ImageReader extends BufferedInputStream {
     public ImageReader(InputStream in) throws IOException {
         super(in);
         intialAvailableBytes = available();
-        checksum.test();
     } 
     
     /**
@@ -70,7 +70,7 @@ public abstract class ImageReader extends BufferedInputStream {
             throw new IllegalArgumentException();
         }
  
-        /**
+        /*
          * Farbbytes einlesen.
          */
         byte[] bytes = new byte[len];
@@ -78,17 +78,15 @@ public abstract class ImageReader extends BufferedInputStream {
             throw new java.io.IOException("Nicht genug Bilddaten lesbar.");
         }
         
-        /**
+        /*
          * Checksum über Bytes berechnen und prüfen, falls Prüfsumme vorhanden.
          */
-        if(header.getChecksum() == 0) {
-            header.setChecksum(checkBytes(bytes));
-        }
-        else {
-            if(checkBytes(bytes) != header.getChecksum()) {
+        if(isCheckable()) {
+            if(check(bytes) != header.getChecksum()) {
                 throw new java.io.IOException("Prüfsummenfehler.");
             }
         }
+        
         // Bytes an ImageBuffer übergeben.
         image.wrap(bytes, header, byteOrder);
         return image;
@@ -116,16 +114,22 @@ public abstract class ImageReader extends BufferedInputStream {
         }
         return read(data, 0, len);
     }
-    
-    /**
-     *
-     * @param data
-     * @return
-     */
-    protected long checkBytes(byte[] data) {
-        if (data == null ) {
+  
+    @Override
+    public boolean isCheckable() {
+        return (checksumObj != null);
+    }
+
+    @Override
+    public Checksum getChecksumObj() {
+        return checksumObj;
+    }
+
+    @Override
+    public long check(byte[] bytes) {
+        if (bytes == null ) {
             throw new IllegalArgumentException();
         }
-        return checksum.update(data);
-    }
+        return checksumObj.update(bytes);
+    }    
 }

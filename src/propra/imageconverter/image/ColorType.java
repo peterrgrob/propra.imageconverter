@@ -95,9 +95,9 @@ public class ColorType implements Comparable<ColorType> {
         t1 = input[map[GREEN]];
         t0 = input[map[BLUE]];
         
-        input[RED] = t2;
-        input[GREEN] = t1;
-        input[BLUE] = t0;
+        input[mapping[RED]] = t2;
+        input[mapping[GREEN]] = t1;
+        input[mapping[BLUE]] = t0;
                 
         return input;
     }

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import propra.imageconverter.util.ChecksumPropra;
 import propra.imageconverter.util.DataBuffer;
 
 /**
@@ -19,6 +20,7 @@ public class ImageWriterProPra extends ImageWriter {
     public ImageWriterProPra(OutputStream out) {
         super(out);
         this.byteOrder = ByteOrder.LITTLE_ENDIAN;
+        checksumObj = new ChecksumPropra();
     }
 
     /**
@@ -28,7 +30,7 @@ public class ImageWriterProPra extends ImageWriter {
      * @throws IOException
      */
     @Override
-    public ImageHeader writeHeader(ImageHeader info) throws IOException {
+    protected DataBuffer buildHeader(ImageHeader info) {
         if(info.isValid() == false) {
             throw new IllegalArgumentException();
         }
@@ -55,13 +57,33 @@ public class ImageWriterProPra extends ImageWriter {
         byteBuffer.putShort(ImageReaderPropra.PROPRA_HEADER_OFFSET_HEIGHT,(short)info.getHeight());
         byteBuffer.put(ImageReaderPropra.PROPRA_HEADER_OFFSET_BPP,(byte)(info.getElementSize() << 3));
         byteBuffer.putLong(ImageReaderPropra.PROPRA_HEADER_OFFSET_DATALEN,(long)info.getTotalSize());
-        byteBuffer.putInt(ImageReaderPropra.PROPRA_HEADER_OFFSET_CHECKSUM,(int)info.getChecksum());
-        
-        /*
-         * Buffer in Stream ausgeben
-         */
-        write(byteBuffer.array(), 0, ImageReaderPropra.PROPRA_HEADER_SIZE);
-        return header;
+       
+        return dataBuffer;
     }
     
+        
+    /**
+     *
+     * @param image
+     * @throws IOException
+     */
+    public ImageBuffer writeImage(ImageBuffer image) throws IOException {
+        if(image == null) {
+            throw new IllegalArgumentException();
+        }
+
+        DataBuffer buffer = buildHeader(image.getHeader());
+        ImageBuffer output = buildContent(image);
+        
+        if(isCheckable()) {
+            output.getHeader().setChecksum(check(output.getBuffer().array()));
+            buffer.getBuffer().putInt(ImageReaderPropra.PROPRA_HEADER_OFFSET_CHECKSUM, 
+                                    (int)header.getChecksum());
+        }
+        
+        writeHeader(buffer);
+        writeContent(output);
+        flush();
+        return output;
+    }
 }

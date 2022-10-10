@@ -63,10 +63,11 @@ public class ImageConverter {
             System.out.print("Bildinfo: "+src.getHeader().getWidth());
             System.out.print("x" + src.getHeader().getHeight());
             System.out.print("x" + src.getHeader().getElementSize());
-            System.out.print("\nPrüfsumme: "+String.format("0x%08X", (int)src.getHeader().getChecksum()));
-            
+           
             // Bild konvertieren und speichern.
-            writer.writeImage(src);
+            ImageBuffer dst = writer.writeImage(src);
+            
+            System.out.print("\nPrüfsumme: "+String.format("0x%08X", (int)dst.getHeader().getChecksum()));
             
             // Infos ausgeben.
             long finish = System.currentTimeMillis();

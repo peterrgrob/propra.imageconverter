@@ -3,6 +3,8 @@ package propra.imageconverter.util;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -88,16 +90,19 @@ public class DataBuffer {
      *
      * @param string
      * @param offset
-     * @throws UnsupportedEncodingException
      */
-    public void put(String string, int offset) throws UnsupportedEncodingException {
+    public void put(String string, int offset) {
         if (!isValid()) {
             throw new IllegalStateException();
         }
         
-        buffer.put(string.getBytes("UTF-8")
+        try {
+            buffer.put(string.getBytes("UTF-8")
                     , offset
                     ,string.length());
+        } catch (UnsupportedEncodingException ex) {
+            
+        }
     }
     
     /**

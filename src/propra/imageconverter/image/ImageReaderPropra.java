@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import propra.imageconverter.util.ChecksumPropra;
 import propra.imageconverter.util.DataBuffer;
 
 
@@ -32,6 +33,7 @@ public class ImageReaderPropra extends ImageReader {
     public ImageReaderPropra(InputStream in) throws IOException {
         super(in);
         this.byteOrder = ByteOrder.LITTLE_ENDIAN;
+        checksumObj = new ChecksumPropra();
     }
 
     /**
