@@ -3,31 +3,28 @@ package propra.imageconverter.image;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteOrder;
-import propra.imageconverter.util.Checkable;
-import propra.imageconverter.util.Checksum;
+import propra.imageconverter.util.DataBuffer;
 
 /**
  *
  * @author pg
  */
-public abstract class ImageReader extends BufferedInputStream implements Checkable {
+public class ImageReader extends BufferedInputStream {
     /**
      * 
      */
-    protected ImageHeader header;
-    int intialAvailableBytes;
-    ByteOrder byteOrder = ByteOrder.BIG_ENDIAN;
-    Checksum checksumObj;
+    ImagePlugin plugin;
     
     /**
      * 
      * @param in 
+     * @param plugin 
      * @throws java.io.IOException 
      */
-    public ImageReader(InputStream in) throws IOException {
+    public ImageReader(InputStream in, ImagePlugin plugin) throws IOException {
         super(in);
-        intialAvailableBytes = available();
+        this.plugin = plugin;
+        this.plugin.setInitialAvailableBytes(available());
     } 
     
     /**
@@ -36,8 +33,11 @@ public abstract class ImageReader extends BufferedInputStream implements Checkab
      * @throws java.io.IOException
      */
     public ImageBuffer readImage() throws IOException {
+        if(plugin == null) {
+            throw new IllegalArgumentException("Kein Plugin gesetzt.");
+        }
         readHeader();
-        return readContent(header.getTotalSize());
+        return readContent(plugin.getHeader().getTotalSize());
     }
     
     /**
@@ -45,7 +45,18 @@ public abstract class ImageReader extends BufferedInputStream implements Checkab
      * @return 
      * @throws java.io.IOException
     */
-    protected abstract ImageHeader readHeader() throws IOException;
+    protected ImageHeader readHeader() throws IOException {
+        /**
+         * Header-Bytes von Stream lesen
+         */
+        byte[] rawBytes = new byte[plugin.getHeaderSize()];
+        if(readBytes( rawBytes,plugin.getHeaderSize()) != plugin.getHeaderSize()) {
+            throw new java.io.IOException("Ungültiger Dateikopf.");
+        }
+        
+        DataBuffer dataBuffer = new DataBuffer(rawBytes);
+        return plugin.bytesToHeader(dataBuffer);
+    }
     
     /**
      * 
@@ -54,7 +65,7 @@ public abstract class ImageReader extends BufferedInputStream implements Checkab
      * @throws IOException 
      */
     protected ImageBuffer readContent(int len) throws IOException {
-        return readContent(len, new ImageBuffer(header));
+        return readContent(len, new ImageBuffer(plugin.getHeader()));
     }
     
     /**
@@ -81,14 +92,13 @@ public abstract class ImageReader extends BufferedInputStream implements Checkab
         /*
          * Checksum über Bytes berechnen und prüfen, falls Prüfsumme vorhanden.
          */
-        if(isCheckable()) {
-            if(check(bytes) != header.getChecksum()) {
+        if(plugin.isCheckable()) {
+            if(plugin.check(bytes) != plugin.getHeader().getChecksum()) {
                 throw new java.io.IOException("Prüfsummenfehler.");
             }
         }
         
-        // Bytes an ImageBuffer übergeben.
-        image.wrap(bytes, header, byteOrder);
+        image = plugin.bytesToContent(new DataBuffer(bytes));
         return image;
     }
     
@@ -97,7 +107,10 @@ public abstract class ImageReader extends BufferedInputStream implements Checkab
      * @return 
      */
     public ImageHeader getHeader() {
-        return header;
+        if(plugin == null) {
+            throw new IllegalArgumentException("Kein Plugin gesetzt.");
+        }
+        return plugin.getHeader();
     }
     
     /**
@@ -113,23 +126,5 @@ public abstract class ImageReader extends BufferedInputStream implements Checkab
             throw new IllegalArgumentException();
         }
         return read(data, 0, len);
-    }
-  
-    @Override
-    public boolean isCheckable() {
-        return (checksumObj != null);
-    }
-
-    @Override
-    public Checksum getChecksumObj() {
-        return checksumObj;
-    }
-
-    @Override
-    public long check(byte[] bytes) {
-        if (bytes == null ) {
-            throw new IllegalArgumentException();
-        }
-        return checksumObj.update(bytes);
     }    
 }
