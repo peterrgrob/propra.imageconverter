@@ -67,11 +67,10 @@ public class ImageConverter {
             // Bild konvertieren und speichern.
             ImageBuffer dst = writer.writeImage(src);
             
-            System.out.print("\nPrüfsumme: "+String.format("0x%08X", (int)dst.getHeader().getChecksum()));
-            
             // Infos ausgeben.
             long finish = System.currentTimeMillis();
             long timeElapsed = finish - start;
+            System.out.print("\nPrüfsumme: "+String.format("0x%08X", (int)dst.getHeader().getChecksum()));
             System.out.println("\nKonvertierung abgeschlossen in (ms): " + String.valueOf(timeElapsed));
             
         } catch (IOException ex) {
