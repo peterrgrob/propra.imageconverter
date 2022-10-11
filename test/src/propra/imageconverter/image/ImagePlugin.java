@@ -10,17 +10,13 @@ import propra.imageconverter.util.DataBuffer;
  * @author pg
  */
 public abstract class ImagePlugin implements Checkable {
-    
     int headerSize;
     int headerPosition;
-    protected ImageHeader header;
-    
-    Checksum checksumObj; 
-    int initialAvailableBytes;
     int contentPosition;
-
+    protected ImageHeader header;
+    Checksum checksumObj;
     ByteOrder byteOrder = ByteOrder.LITTLE_ENDIAN;
-
+    int initialAvailableBytes;
     
     /**
      *
@@ -104,98 +100,50 @@ public abstract class ImagePlugin implements Checkable {
         return checksumObj.update(bytes);
     }  
 
-    /**
-     *
-     * @return
-     */
     public int getHeaderSize() {
         return headerSize;
     }
 
-    /**
-     *
-     * @param headerSize
-     */
     public void setHeaderSize(int headerSize) {
         this.headerSize = headerSize;
     }
 
-    /**
-     *
-     * @return
-     */
     public int getHeaderPosition() {
         return headerPosition;
     }
 
-    /**
-     *
-     * @param headerPosition
-     */
     public void setHeaderPosition(int headerPosition) {
         this.headerPosition = headerPosition;
     }
 
-    /**
-     *
-     * @return
-     */
     public int getContentPosition() {
         return contentPosition;
     }
 
-    /**
-     *
-     * @param contentPosition
-     */
     public void setContentPosition(int contentPosition) {
         this.contentPosition = contentPosition;
     }
 
-    /**
-     *
-     * @return
-     */
     public ImageHeader getHeader() {
         return header;
     }
 
-    /**
-     *
-     * @param header
-     */
     public void setHeader(ImageHeader header) {
         this.header = header;
     }
 
-    /**
-     *
-     * @return
-     */
     public ByteOrder getByteOrder() {
         return byteOrder;
     }
 
-    /**
-     *
-     * @param byteOrder
-     */
     public void setByteOrder(ByteOrder byteOrder) {
         this.byteOrder = byteOrder;
     }
 
-    /**
-     *
-     * @return
-     */
     public int getInitialAvailableBytes() {
         return initialAvailableBytes;
     }
 
-    /**
-     *
-     * @param initialAvailableBytes
-     */
     public void setInitialAvailableBytes(int initialAvailableBytes) {
         this.initialAvailableBytes = initialAvailableBytes;
     }

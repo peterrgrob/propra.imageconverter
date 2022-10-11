@@ -10,9 +10,6 @@ import propra.imageconverter.util.DataBuffer;
  * @author pg
  */
 public class ImageWriter extends BufferedOutputStream {
-    /**
-     * 
-     */
     ImagePlugin plugin;
     
     /**
@@ -37,11 +34,10 @@ public class ImageWriter extends BufferedOutputStream {
             throw new IllegalArgumentException();
         }
 
-        // Finale Daten zur Ausgabe erstellen durch Plugin
         DataBuffer buffer = plugin.headerToBytes(image.getHeader());
         ImageBuffer output = plugin.contentToBytes(image, buffer);
         
-        // Erstellte Daten in den Stream schreiben
+        // Daten in den Stream schreiben
         writeHeader(buffer);
         writeContent(output);
         flush();

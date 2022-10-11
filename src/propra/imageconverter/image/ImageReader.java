@@ -10,9 +10,7 @@ import propra.imageconverter.util.DataBuffer;
  * @author pg
  */
 public class ImageReader extends BufferedInputStream {
-    /**
-     * 
-     */
+
     ImagePlugin plugin;
     
     /**
@@ -36,6 +34,7 @@ public class ImageReader extends BufferedInputStream {
         if(plugin == null) {
             throw new IllegalArgumentException("Kein Plugin gesetzt.");
         }
+        
         readHeader();
         return readContent(plugin.getHeader().getTotalSize());
     }
@@ -46,14 +45,12 @@ public class ImageReader extends BufferedInputStream {
      * @throws java.io.IOException
     */
     protected ImageHeader readHeader() throws IOException {
-        /**
-         * Header-Bytes von Stream lesen
-         */
+        // Header-Bytes von Stream lesen
         byte[] rawBytes = new byte[plugin.getHeaderSize()];
         if(readBytes( rawBytes,plugin.getHeaderSize()) != plugin.getHeaderSize()) {
             throw new java.io.IOException("Ungültiger Dateikopf.");
         }
-        
+        // In Header umwandeln
         DataBuffer dataBuffer = new DataBuffer(rawBytes);
         return plugin.bytesToHeader(dataBuffer);
     }
@@ -81,23 +78,20 @@ public class ImageReader extends BufferedInputStream {
             throw new IllegalArgumentException();
         }
  
-        /*
-         * Farbbytes einlesen.
-         */
+        // Farbwerte einlesen
         byte[] bytes = new byte[len];
         if(readBytes(bytes, len) != len) {
             throw new java.io.IOException("Nicht genug Bilddaten lesbar.");
         }
         
-        /*
-         * Checksum über Bytes berechnen und prüfen, falls Prüfsumme vorhanden.
-         */
+        // Checksum über Bytes berechnen und prüfen, falls Prüfsumme vorhanden
         if(plugin.isCheckable()) {
             if(plugin.check(bytes) != plugin.getHeader().getChecksum()) {
                 throw new java.io.IOException("Prüfsummenfehler.");
             }
         }
         
+        // Farbbytes ggfs. umwandeln, je nach Plugin Objekt
         image = plugin.bytesToContent(new DataBuffer(bytes));
         return image;
     }

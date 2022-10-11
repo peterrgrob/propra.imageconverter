@@ -3,8 +3,6 @@ package propra.imageconverter.util;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *

@@ -19,7 +19,6 @@ public class ImageConverter {
      * 
      */
     protected static final int ERROR_EXIT_CODE = 123;
-    public static final Messages MSG = new MessagesSimple();
             
     /** 
      * @param args the command line arguments
@@ -29,7 +28,7 @@ public class ImageConverter {
             // Komandozeilenparamter parsen.
             CmdLine cmdLine = new CmdLine(args);
             
-            // Ein- und Ausgabedateipfad ausgeben
+            // Ein- und Ausgabedateipfad auf der Konsole ausgeben
             System.out.println("Dateien:");
             System.out.println(cmdLine.getOption(CmdLine.Options.INPUT_FILE));
             System.out.println(cmdLine.getOption(CmdLine.Options.OUTPUT_FILE));
@@ -52,22 +51,23 @@ public class ImageConverter {
         try {
             long start = System.currentTimeMillis();
             
-            // Reader und Writer erstellen basierend auf Dateierweiterungen.
-            ImageReader reader = createPReader(cmdLine);
-            ImageWriter writer = createPWriter(cmdLine);
+            // Reader und Writer erstellen basierend auf den Dateierweiterungen
+            ImageReader reader = createReader(cmdLine);
+            ImageWriter writer = createWriter(cmdLine);
             
-            // Eingabebild laden.
+            // Eingabebild laden
             ImageBuffer src = reader.readImage();
             
-            // Infos zum Eingabebild ausgeben.
+            // Infos zum Eingabebild ausgeben
             System.out.print("Bildinfo: "+src.getHeader().getWidth());
             System.out.print("x" + src.getHeader().getHeight());
             System.out.print("x" + src.getHeader().getElementSize());
            
-            // Bild konvertieren und speichern.
+            /* Bild konvertieren und speichern, die ggfs. nötige Konvertierung 
+               erfolgt durch formatspezifisches Plugin */
             ImageBuffer dst = writer.writeImage(src);
             
-            // Infos ausgeben.
+            // Infos auf der Konsole ausgeben
             long finish = System.currentTimeMillis();
             long timeElapsed = finish - start;
             System.out.print("\nPrüfsumme: "+String.format("0x%08X", (int)dst.getHeader().getChecksum()));
@@ -84,7 +84,7 @@ public class ImageConverter {
      * @return 
      * @throws java.io.FileNotFoundException 
      */
-    public ImageReader createPReader(CmdLine cmd) throws FileNotFoundException, IOException {
+    public ImageReader createReader(CmdLine cmd) throws FileNotFoundException, IOException {
         // FileStream öffnen und ImageReader Objekt erstellen.
         FileInputStream fInput = new FileInputStream(cmd.getOption(CmdLine.Options.INPUT_FILE));
         switch(cmd.getOption(CmdLine.Options.INPUT_EXT)) {
@@ -102,7 +102,7 @@ public class ImageConverter {
      * @return 
      * @throws java.io.FileNotFoundException 
      */
-    public ImageWriter createPWriter(CmdLine cmd) throws FileNotFoundException, IOException {
+    public ImageWriter createWriter(CmdLine cmd) throws FileNotFoundException, IOException {
         String path = cmd.getOption(CmdLine.Options.OUTPUT_FILE);  
         
         // Wenn Datei nicht vorhanden, neue Datei erstellen.

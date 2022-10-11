@@ -10,7 +10,6 @@ import propra.imageconverter.util.DataBuffer;
  * @author pg
  */
 public class ImagePluginProPra extends ImagePlugin {
-    
     static final String PROPRA_VERSION = "ProPraWiSe22";
     static final int PROPRA_HEADER_SIZE = 30;
     static final int PROPRA_HEADER_OFFSET_ENCODING = 12;
@@ -39,19 +38,22 @@ public class ImagePluginProPra extends ImagePlugin {
             throw new IllegalArgumentException();
         }
         
-        // DataBuffer für Header erstellen
+        /*
+         * DataBuffer für Header erstellen
+         */
         DataBuffer dataBuffer = new DataBuffer();
         dataBuffer.create(PROPRA_HEADER_SIZE);
         ByteBuffer byteBuffer = dataBuffer.getBuffer();
         byteBuffer.order(byteOrder);
         
-        // ProPra spezifisches RBG Farbmapping setzen
         header = new ImageHeader(info);
         header.getColorType().setMapping(ColorType.RED,0);
         header.getColorType().setMapping(ColorType.GREEN,2);
         header.getColorType().setMapping(ColorType.BLUE,1);
         
-        // Headerfelder in ByteBuffer schreiben
+        /*
+         * Headerfelder in Buffer schreiben
+         */
         dataBuffer.put(PROPRA_VERSION,0);
         byteBuffer.put(PROPRA_HEADER_OFFSET_ENCODING, (byte)0);
         byteBuffer.putShort(PROPRA_HEADER_OFFSET_WIDTH,(short)info.getWidth());

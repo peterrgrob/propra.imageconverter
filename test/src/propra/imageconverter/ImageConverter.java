@@ -19,7 +19,6 @@ public class ImageConverter {
      * 
      */
     protected static final int ERROR_EXIT_CODE = 123;
-    public static final Messages MSG = new MessagesSimple();
             
     /** 
      * @param args the command line arguments
@@ -53,8 +52,8 @@ public class ImageConverter {
             long start = System.currentTimeMillis();
             
             // Reader und Writer erstellen basierend auf Dateierweiterungen.
-            ImageReader reader = createReader(cmdLine);
-            ImageWriter writer = createWriter(cmdLine);
+            ImageReader reader = createPReader(cmdLine);
+            ImageWriter writer = createPWriter(cmdLine);
             
             // Eingabebild laden.
             ImageBuffer src = reader.readImage();
@@ -67,11 +66,10 @@ public class ImageConverter {
             // Bild konvertieren und speichern.
             ImageBuffer dst = writer.writeImage(src);
             
-            System.out.print("\nPrüfsumme: "+String.format("0x%08X", (int)dst.getHeader().getChecksum()));
-            
             // Infos ausgeben.
             long finish = System.currentTimeMillis();
             long timeElapsed = finish - start;
+            System.out.print("\nPrüfsumme: "+String.format("0x%08X", (int)dst.getHeader().getChecksum()));
             System.out.println("\nKonvertierung abgeschlossen in (ms): " + String.valueOf(timeElapsed));
             
         } catch (IOException ex) {
@@ -85,25 +83,25 @@ public class ImageConverter {
      * @return 
      * @throws java.io.FileNotFoundException 
      */
-    public ImageReader createReader(CmdLine cmd) throws FileNotFoundException, IOException {
+    public ImageReader createPReader(CmdLine cmd) throws FileNotFoundException, IOException {
         // FileStream öffnen und ImageReader Objekt erstellen.
         FileInputStream fInput = new FileInputStream(cmd.getOption(CmdLine.Options.INPUT_FILE));
         switch(cmd.getOption(CmdLine.Options.INPUT_EXT)) {
             case "tga":
-                return new ImageReaderTGA(fInput);
+                return new ImageReader(fInput, new ImagePluginTGA());
             case "propra":
-                return new ImageReaderPropra(fInput);
+                return new ImageReader(fInput, new ImagePluginProPra());
         }
         throw new IOException("Nicht unterstütztes Bildformat.");
     }
     
-    /**
+            /**
      * 
      * @param cmd
      * @return 
-     * @throws java.io.IOException 
+     * @throws java.io.FileNotFoundException 
      */
-    public ImageWriter createWriter(CmdLine cmd) throws IOException {
+    public ImageWriter createPWriter(CmdLine cmd) throws FileNotFoundException, IOException {
         String path = cmd.getOption(CmdLine.Options.OUTPUT_FILE);  
         
         // Wenn Datei nicht vorhanden, neue Datei erstellen.
@@ -116,9 +114,9 @@ public class ImageConverter {
         FileOutputStream fOutput = new FileOutputStream(file);
         switch(cmd.getOption(CmdLine.Options.OUTPUT_EXT)) {
             case "tga":
-                return new ImageWriterTGA(fOutput);
+                return new ImageWriter(fOutput, new ImagePluginTGA());
             case "propra":
-                return new ImageWriterProPra(fOutput);
+                return new ImageWriter(fOutput, new ImagePluginProPra());
         }
         throw new IOException("Nicht unterstütztes Bildformat.");
     }

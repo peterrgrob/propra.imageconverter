@@ -9,9 +9,6 @@ import java.nio.ByteOrder;
  * @author pg
  */
 public class ImageBuffer extends DataBuffer {
-    /**
-     * 
-     */
     protected ImageHeader header;  
   
     /**
@@ -76,10 +73,12 @@ public class ImageBuffer extends DataBuffer {
         ColorType newColorType = format.getColorType();
         ColorType oldColorType = header.getColorType();
         
+        // Konvertierung der Farben nötig?
         if(oldColorType.compareTo(newColorType) != 0) {
             byte[] color = new byte[3];
             
             for(int i=0;i<header.getElementCount();i++) {
+                // Farbtripel von Quell- zu Zielformat konvertieren
                 getColor(color);
                 newColorType.convertColor(color, oldColorType);
                 image.putColor(color);

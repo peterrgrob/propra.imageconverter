@@ -10,7 +10,6 @@ import propra.imageconverter.util.Utility;
  * @author pg
  */
 public class ImagePluginTGA extends ImagePlugin {
-
     static final int TGA_HEADER_SIZE = 18;
     static final int TGA_HEADER_OFFSET_ENCODING = 2;
     static final int TGA_HEADER_OFFSET_X0 = 7;
