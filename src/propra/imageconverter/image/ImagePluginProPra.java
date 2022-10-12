@@ -87,7 +87,7 @@ public class ImagePluginProPra extends ImagePlugin {
         ImageHeader tInfo = new ImageHeader();
         tInfo.setWidth(bytes.getShort(PROPRA_HEADER_OFFSET_WIDTH));
         tInfo.setHeight(bytes.getShort(PROPRA_HEADER_OFFSET_HEIGHT));
-        tInfo.setElementSize(bytes.get(PROPRA_HEADER_OFFSET_BPP) >> 3); 
+        tInfo.setElementSize((int)bytes.get(PROPRA_HEADER_OFFSET_BPP) >> 3); 
         tInfo.setChecksum(bytes.getInt(PROPRA_HEADER_OFFSET_CHECKSUM)); 
         tInfo.setEncoding(ImageHeader.Encoding.UNCOMPRESSED);
         long dataLen = bytes.getLong(PROPRA_HEADER_OFFSET_DATALEN);   

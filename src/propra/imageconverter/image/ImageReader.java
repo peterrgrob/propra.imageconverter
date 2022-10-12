@@ -35,7 +35,15 @@ public class ImageReader extends BufferedInputStream {
             throw new IllegalArgumentException("Kein Plugin gesetzt.");
         }
         
+        // Header einlesen
         readHeader();
+        
+        // Genügend Daten vorhanden?
+        if(available()< plugin.getHeader().getTotalSize()) {
+            throw new java.io.IOException("Fehlerhafte Datenmenge!");
+        }
+        
+        // Farben einlesen
         return readContent(plugin.getHeader().getTotalSize());
     }
     

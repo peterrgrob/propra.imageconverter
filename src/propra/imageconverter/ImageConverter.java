@@ -94,7 +94,7 @@ public class ImageConverter {
         throw new IOException("Nicht unterstütztes Bildformat.");
     }
     
-            /**
+    /**
      * 
      * @param cmd
      * @return 

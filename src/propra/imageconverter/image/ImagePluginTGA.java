@@ -81,6 +81,7 @@ public class ImagePluginTGA extends ImagePlugin {
         // Prüfe tga Spezifikationen
         if(tInfo.isValid() == false
         || !Utility.checkBit(byteBuffer.get(TGA_HEADER_OFFSET_ORIGIN), (byte)6)
+        || Utility.checkBit(byteBuffer.get(TGA_HEADER_OFFSET_ORIGIN), (byte)5)
         || byteBuffer.get(0) != 0
         || byteBuffer.get(TGA_HEADER_OFFSET_ENCODING) != 2) {
             throw new UnsupportedOperationException("Ungültiges TGA Dateiformat!");
