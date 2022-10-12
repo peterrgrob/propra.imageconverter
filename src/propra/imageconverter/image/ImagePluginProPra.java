@@ -80,7 +80,7 @@ public class ImagePluginProPra extends ImagePlugin {
             return null;
         }
         if(version.compareTo(PROPRA_VERSION) != 0) {
-           return null;
+           throw new UnsupportedOperationException("Ungültige ProPra-Kennung!");
         }
         
         // Headerfelder einlesen
@@ -103,7 +103,7 @@ public class ImagePluginProPra extends ImagePlugin {
         ||  (dataLen != (initialAvailableBytes - PROPRA_HEADER_SIZE))
         ||  (tInfo.getTotalSize() != (initialAvailableBytes - PROPRA_HEADER_SIZE))
         ||  (bytes.get(PROPRA_HEADER_OFFSET_ENCODING) != 0)) {
-            return null;
+            throw new UnsupportedOperationException("Ungültiges ProPra Dateiformat!");
         }
         
         return (header = tInfo);

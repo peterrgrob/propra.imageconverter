@@ -37,7 +37,9 @@ public class ImageConverter {
             ImageConverter converter = new ImageConverter(); 
             converter.Convert(cmdLine);
         }
-        catch(FileNotFoundException e) {
+        catch(Exception e) {
+            //Logger.getLogger(ImageConverter.class.getName()).log(Level.SEVERE, null, e);
+            System.err.println(e.toString());
             System.exit(ERROR_EXIT_CODE);
         }
     }
@@ -47,35 +49,30 @@ public class ImageConverter {
      * @param cmdLine 
      * @throws java.io.FileNotFoundException 
      */
-    public void Convert(CmdLine cmdLine) throws FileNotFoundException {    
-        try {
-            long start = System.currentTimeMillis();
-            
-            // Reader und Writer erstellen basierend auf den Dateierweiterungen
-            ImageReader reader = createReader(cmdLine);
-            ImageWriter writer = createWriter(cmdLine);
-            
-            // Eingabebild laden
-            ImageBuffer src = reader.readImage();
-            
-            // Infos zum Eingabebild ausgeben
-            System.out.print("Bildinfo: "+src.getHeader().getWidth());
-            System.out.print("x" + src.getHeader().getHeight());
-            System.out.print("x" + src.getHeader().getElementSize());
-           
-            /* Bild konvertieren und speichern, die ggfs. nötige Konvertierung 
-               erfolgt durch formatspezifisches Plugin */
-            ImageBuffer dst = writer.writeImage(src);
-            
-            // Infos auf der Konsole ausgeben
-            long finish = System.currentTimeMillis();
-            long timeElapsed = finish - start;
-            System.out.print("\nPrüfsumme: "+String.format("0x%08X", (int)dst.getHeader().getChecksum()));
-            System.out.println("\nKonvertierung abgeschlossen in (ms): " + String.valueOf(timeElapsed));
-            
-        } catch (IOException ex) {
-            Logger.getLogger(ImageConverter.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    public void Convert(CmdLine cmdLine) throws FileNotFoundException, IOException {    
+        long start = System.currentTimeMillis();
+
+        // Reader und Writer erstellen basierend auf den Dateierweiterungen
+        ImageReader reader = createReader(cmdLine);
+        ImageWriter writer = createWriter(cmdLine);
+
+        // Eingabebild laden
+        ImageBuffer src = reader.readImage();
+
+        // Infos zum Eingabebild ausgeben
+        System.out.print("Bildinfo: "+src.getHeader().getWidth());
+        System.out.print("x" + src.getHeader().getHeight());
+        System.out.print("x" + src.getHeader().getElementSize());
+
+        /* Bild konvertieren und speichern, die ggfs. nötige Konvertierung 
+           erfolgt durch formatspezifisches Plugin */
+        ImageBuffer dst = writer.writeImage(src);
+
+        // Infos auf der Konsole ausgeben
+        long finish = System.currentTimeMillis();
+        long timeElapsed = finish - start;
+        System.out.print("\nPrüfsumme: "+String.format("0x%08X", (int)dst.getHeader().getChecksum()));
+        System.out.println("\nKonvertierung abgeschlossen in (ms): " + String.valueOf(timeElapsed));
     }
     
     /**
@@ -87,6 +84,7 @@ public class ImageConverter {
     public ImageReader createReader(CmdLine cmd) throws FileNotFoundException, IOException {
         // FileStream öffnen und ImageReader Objekt erstellen.
         FileInputStream fInput = new FileInputStream(cmd.getOption(CmdLine.Options.INPUT_FILE));
+        
         switch(cmd.getOption(CmdLine.Options.INPUT_EXT)) {
             case "tga":
                 return new ImageReader(fInput, new ImagePluginTGA());
@@ -113,6 +111,7 @@ public class ImageConverter {
         
         // FileStream öffnen und ImageWriter Objekt erstellen.
         FileOutputStream fOutput = new FileOutputStream(file);
+        
         switch(cmd.getOption(CmdLine.Options.OUTPUT_EXT)) {
             case "tga":
                 return new ImageWriter(fOutput, new ImagePluginTGA());

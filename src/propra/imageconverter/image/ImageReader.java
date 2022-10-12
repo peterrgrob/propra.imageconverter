@@ -48,7 +48,7 @@ public class ImageReader extends BufferedInputStream {
         // Header-Bytes von Stream lesen
         byte[] rawBytes = new byte[plugin.getHeaderSize()];
         if(readBytes( rawBytes,plugin.getHeaderSize()) != plugin.getHeaderSize()) {
-            throw new java.io.IOException("Ungültiger Dateikopf.");
+            throw new java.io.IOException("Ungültiger Dateikopf!");
         }
         // In Header umwandeln
         DataBuffer dataBuffer = new DataBuffer(rawBytes);
