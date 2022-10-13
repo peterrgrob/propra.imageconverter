@@ -1,8 +1,8 @@
 #! /bin/bash
-mkdir KE1_Peter_Gröber
-cd KE1_Peter_Gröber
+mkdir KE1_Peter_Groeber
+cd KE1_Peter_Groeber
 mkdir KE1_Konvertiert
-unzip ../KE1_Peter_Gröber.zip
+unzip ../KE1_Peter_Groeber.zip
 unzip ../KE1_TestBilder.zip
 javac --source-path src src/propra/imageconverter/ImageConverter.java -d bin
 cd bin
