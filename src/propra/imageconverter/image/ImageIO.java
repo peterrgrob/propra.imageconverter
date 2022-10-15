@@ -58,7 +58,7 @@ public class ImageIO {
     public void Convert(ImageReader reader, ImageWriter writer) throws IOException {
         
         reader.readHeader();
-        writer.writeHeader(writer.plugin.headerToBytes(reader.getHeader()));
+        writer.writeData(writer.plugin.headerToBytes(reader.getHeader()));
         
         // Farben in Blöcken einlesen
         int blockSize = reader.available();

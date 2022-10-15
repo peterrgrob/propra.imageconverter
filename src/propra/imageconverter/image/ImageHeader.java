@@ -1,13 +1,12 @@
 package propra.imageconverter.image;
 
 /**
- *
+ * Klasse für einen allgemeinen Bildkopf
+ * 
  * @author pg
  */
 public class ImageHeader {
-    /**
-     * 
-     */
+
     public enum Encoding {
         UNCOMPRESSED,
     }
@@ -44,7 +43,7 @@ public class ImageHeader {
     
     /**
      * 
-     * @return 
+     * @return true, wenn zulässiger Bildkopf vorliegt.
      */
     public boolean isValid() {
         return (    width > 0 
@@ -53,8 +52,6 @@ public class ImageHeader {
     }
     
     /**
-     * Get the value of encoding
-     *
      * @return the value of encoding
      */
     public Encoding getEncoding() {
@@ -62,8 +59,6 @@ public class ImageHeader {
     }
 
     /**
-     * Set the value of encoding
-     *
      * @param encoding new value of encoding
      */
     public void setEncoding(Encoding encoding) {
@@ -78,9 +73,7 @@ public class ImageHeader {
         return width * height * elementSize;
     }
     
-        /**
-     * Get the value of colorType
-     *
+    /**
      * @return the value of colorType
      */
     public ColorType getColorType() {
@@ -88,8 +81,6 @@ public class ImageHeader {
     }
 
     /**
-     * Set the value of colorType
-     *
      * @param colorType new value of colorType
      */
     public void setColorType(ColorType colorType) {
@@ -105,8 +96,6 @@ public class ImageHeader {
     }
     
     /**
-     * Get the value of elementSize
-     *
      * @return the value of elementSize
      */
     public int getElementSize() {
@@ -114,8 +103,6 @@ public class ImageHeader {
     }
 
     /**
-     * Set the value of elementSize
-     *
      * @param elementSize new value of elementSize
      */
     public void setElementSize(int elementSize) {
@@ -123,8 +110,6 @@ public class ImageHeader {
     }
 
     /**
-     * Get the value of checksum
-     *
      * @return the value of checksum
      */
     public long getChecksum() {
@@ -132,8 +117,6 @@ public class ImageHeader {
     }
 
     /**
-     * Set the value of checksum
-     *
      * @param checksum new value of checksum
      */
     public void setChecksum(long checksum) {
@@ -141,8 +124,6 @@ public class ImageHeader {
     }
     
     /**
-     * Get the value of height
-     *
      * @return the value of height
      */
     public int getHeight() {
@@ -150,8 +131,6 @@ public class ImageHeader {
     }
 
     /**
-     * Set the value of height
-     *
      * @param height new value of height
      */
     public void setHeight(int height) {
@@ -159,8 +138,6 @@ public class ImageHeader {
     }
 
     /**
-     * Get the value of width
-     *
      * @return the value of width
      */
     public int getWidth() {
@@ -168,8 +145,6 @@ public class ImageHeader {
     }
 
     /**
-     * Set the value of width
-     *
      * @param width new value of width
      */
     public void setWidth(int width) {

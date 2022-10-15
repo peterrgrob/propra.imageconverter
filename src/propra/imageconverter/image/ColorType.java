@@ -1,7 +1,11 @@
 package propra.imageconverter.image;
 
 /**
- *
+ * 
+ *  Repräsentiert ein Farbformat mit 3 Bytes. 
+ *  Die Reihenfolge der Komponenten ist durch ein Mapping 
+ *  konfigurierbar, die Standardreihenfolge ist Little-Endian.
+ * 
  * @author pg
  */
 public class ColorType implements Comparable<ColorType> {
@@ -53,32 +57,7 @@ public class ColorType implements Comparable<ColorType> {
     }
     
     /**
-     * 
-     * @param id
-     * @param channelInfo
-     */
-    public void setMapping(int id, int newId) {
-        mapping[id] = newId;
-    }
-    
-    /**
-     *
-     * @param id
-     * @return
-     */
-    public int getMapping(int id) {
-        return mapping[id];
-    }
-    
-    /**
-     *
-     * @return
-     */
-    public int[] getMapping() {
-        return mapping;
-    }
-    
-    /**
+     * Allgemeine Methode zum Konvertieren einer Farbe in ein Zielfarbformat.
      * 
      * @param input
      * @param colorInfo
@@ -100,5 +79,31 @@ public class ColorType implements Comparable<ColorType> {
         input[mapping[BLUE]] = t0;
                 
         return input;
+    }
+    
+    /**
+     * 
+     * @param id
+     * @param newId
+     */
+    public void setMapping(int id, int newId) {
+        mapping[id] = newId;
+    }
+    
+    /**
+     *
+     * @param id
+     * @return
+     */
+    public int getMapping(int id) {
+        return mapping[id];
+    }
+    
+    /**
+     *
+     * @return
+     */
+    public int[] getMapping() {
+        return mapping;
     }
 }

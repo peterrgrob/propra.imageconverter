@@ -6,7 +6,8 @@ import propra.imageconverter.util.Checksum;
 import propra.imageconverter.util.DataBuffer;
 
 /**
- *
+ * Basisklasse für Bildformatspezifische Reader/Writer Operationen. 
+ * 
  * @author pg
  */
 public abstract class ImagePlugin implements Checkable {
@@ -14,30 +15,31 @@ public abstract class ImagePlugin implements Checkable {
     int headerSize;
     int headerPosition;
     protected ImageHeader header;
-    
     Checksum checksumObj; 
     int initialAvailableBytes;
     int contentPosition;
-
     ByteOrder byteOrder = ByteOrder.LITTLE_ENDIAN;
 
     
     /**
-     *
+     * Wandelt einen allgemeinen ImageHeader in Bytes um.
+     * 
      * @param info
      * @return
      */
     public abstract DataBuffer headerToBytes(ImageHeader info);
 
     /**
-     *
+     * Wandelt Bytes in einen allgmeinen ImageHeader um. 
+     * 
      * @param data
      * @return
      */
     public abstract ImageHeader bytesToHeader(DataBuffer data);
     
     /**
-     *
+     * Wandelt Bilddaten in bytes um. 
+     * 
      * @param image
      * @param headerData
      * @return
@@ -54,10 +56,9 @@ public abstract class ImagePlugin implements Checkable {
         return output; 
     }
 
-        /**
+    /**
      *
      * @param image
-     * @param headerData
      * @return
      */
     public ImageBuffer contentToBytes_(ImageBuffer image) {
@@ -72,7 +73,8 @@ public abstract class ImagePlugin implements Checkable {
     
     
     /**
-     *
+     * Erstellt ImageBuffer aus Byte Daten 
+     * 
      * @param data
      * @return
      */
@@ -81,7 +83,8 @@ public abstract class ImagePlugin implements Checkable {
     }
     
     /**
-     *
+     * Berechnet aktuelle Prüfsumme für Byte Daten und speichert im Header 
+     * 
      * @param data
      * @param headerData
      * @return
@@ -90,8 +93,8 @@ public abstract class ImagePlugin implements Checkable {
         return header.getChecksum();
     }
     
-    /**
-     *
+    /** 
+     * 
      * @return
      */
     @Override

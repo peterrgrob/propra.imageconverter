@@ -6,7 +6,8 @@ import propra.imageconverter.util.ChecksumPropra;
 import propra.imageconverter.util.DataBuffer;
 
 /**
- *
+ *  ProPra spezifische Implementierung
+ * 
  * @author pg
  */
 public class ImagePluginProPra extends ImagePlugin {
@@ -29,9 +30,10 @@ public class ImagePluginProPra extends ImagePlugin {
     }
 
     /**
-     *
+     *  Wandelt einen allgemeinen Header in einen ProPra Header um
+     * 
      * @param info
-     * @return
+     * @return Header als DataBuffer
      */
     @Override
     public DataBuffer headerToBytes(ImageHeader info) {
@@ -40,8 +42,7 @@ public class ImagePluginProPra extends ImagePlugin {
         }
         
         // DataBuffer für Header erstellen
-        DataBuffer dataBuffer = new DataBuffer();
-        dataBuffer.create(PROPRA_HEADER_SIZE);
+        DataBuffer dataBuffer = new DataBuffer(PROPRA_HEADER_SIZE);
         ByteBuffer byteBuffer = dataBuffer.getBuffer();
         byteBuffer.order(byteOrder);
         
@@ -63,9 +64,10 @@ public class ImagePluginProPra extends ImagePlugin {
     }
 
     /**
-     *
+     * Wandelt einen ProPra Header in allgemeinen Header um 
+     * 
      * @param data
-     * @return
+     * @return Allgemeiner Header
      */
     @Override
     public ImageHeader bytesToHeader(DataBuffer data) {
@@ -110,10 +112,12 @@ public class ImagePluginProPra extends ImagePlugin {
     }  
 
     /**
-     *
+     * Führt Prüsummenberechnung für einen DataBuffer durch und speichert
+     * diese im Header-Block
+     * 
      * @param data
      * @param headerData
-     * @return
+     * @return Prüfsumme
      */
     @Override
     public long checkContent(DataBuffer data, DataBuffer headerData) {

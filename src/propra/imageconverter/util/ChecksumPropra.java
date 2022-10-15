@@ -1,17 +1,17 @@
 package propra.imageconverter.util;
 
 /**
- *
+ *  ProPra Implementierung einer Prüfsumme
+ * 
  * @author pg
  */
 public class ChecksumPropra extends Checksum {
-    /**
-     * 
-     */
+
     private static final int X = 65521;
     
     /**
-     *
+     *  Aktualisiert Prüfsumme mit ProPra-Prüfsummen Verfahren, wie vorgegeben
+     * 
      * @param data
      * @param offset
      * @param len

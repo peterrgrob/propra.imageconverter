@@ -5,19 +5,28 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /**
- *
+ *  Hilfsklasse zur Datenverwaltung, kapselt intern einen ByteBuffer und
+ *  erweitert diesen mit zusätzlichen Methoden.
+ * 
  * @author pg
  */
 public class DataBuffer {
-    /**
-     * 
-     */
+
     protected ByteBuffer buffer;
 
     /**
      *
      */
     public DataBuffer() {
+    }
+    
+    /**
+     *
+     * @param len
+     */
+    public DataBuffer(int len) {
+        super();
+        create(len);
     }
 
     /**
@@ -54,6 +63,17 @@ public class DataBuffer {
      */
     public ByteBuffer getBuffer() {
         return buffer;
+    }
+    
+    /**
+     *
+     * @return
+     */
+    public byte[] getBytes() {
+        if (buffer == null) {
+            throw new IllegalArgumentException(); 
+        }
+        return buffer.array();
     }
     
     /**

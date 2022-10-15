@@ -1,7 +1,8 @@
 package propra.imageconverter.util;
 
 /**
- *
+ * Basisklasse für Prüfsummen-Algorithmen
+ * 
  * @author pg
  */
 public abstract class Checksum {
@@ -49,7 +50,8 @@ public abstract class Checksum {
     }
     
     /**
-     *
+     * Berechnet die Prüfsumme über Bytes
+     * 
      * @param data
      * @return
      */
@@ -59,7 +61,8 @@ public abstract class Checksum {
     }
     
     /**
-     *
+     * Aktualisiert die aktuelle Prüfsumme mit Bytes 
+     * 
      * @param data
      * @return 
      */
@@ -71,7 +74,8 @@ public abstract class Checksum {
     }
 
     /**
-     *
+     * Aktualisiert die aktuelle Prüfsumme mit Bytes 
+     * 
      * @param data
      * @param offset
      * @param len

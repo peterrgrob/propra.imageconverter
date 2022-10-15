@@ -5,22 +5,22 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import propra.imageconverter.image.*;
 import propra.imageconverter.util.*;
 
 /**
- *
+ * Einstiegsklasse für ImageConverter 
+ * 
  * @author pg
  */
 public class ImageConverter {
-    /**
-     * 
-     */
+    
+    // Fehlercode
     protected static final int ERROR_EXIT_CODE = 123;
             
     /** 
+     * Programmeinstieg
+     * 
      * @param args the command line arguments
      */
     public static void main(String[] args) {
@@ -33,7 +33,7 @@ public class ImageConverter {
             System.out.println(cmdLine.getOption(CmdLine.Options.INPUT_FILE));
             System.out.println(cmdLine.getOption(CmdLine.Options.OUTPUT_FILE));
             
-            // Klasseninstanz erstellen und Dateien konvertieren
+            // Klasseninstanz erstellen und konvertierung starten
             ImageConverter converter = new ImageConverter(); 
             converter.Convert(cmdLine);
         }
@@ -46,7 +46,9 @@ public class ImageConverter {
     
     /**
      * 
-     * @param cmdLine 
+     * Konvertiert Ein- in Ausgabebild entsprechend der Kommandozeilenparameter
+     * 
+     * @param cmdLine Kommandozeilenparamater 
      * @throws java.io.FileNotFoundException 
      */
     public void Convert(CmdLine cmdLine) throws FileNotFoundException, IOException {    
@@ -64,8 +66,10 @@ public class ImageConverter {
         System.out.print("x" + src.getHeader().getHeight());
         System.out.print("x" + src.getHeader().getElementSize());
 
-        /* Bild konvertieren und speichern, die ggfs. nötige Konvertierung 
-           erfolgt durch formatspezifisches Plugin */
+        /* 
+         *  Bild konvertieren und speichern, die ggfs. nötige Konvertierung 
+         *  erfolgt durch formatspezifisches Ausgabe-Plugin 
+         */
         ImageBuffer dst = writer.writeImage(src);
 
         // Infos auf der Konsole ausgeben
@@ -76,15 +80,15 @@ public class ImageConverter {
     }
     
     /**
+     * Erstellt einen passenden Reader
      * 
      * @param cmd
-     * @return 
+     * @return ImageReader
      * @throws java.io.FileNotFoundException 
      */
     public ImageReader createReader(CmdLine cmd) throws FileNotFoundException, IOException {
         // FileStream öffnen und ImageReader Objekt erstellen.
         FileInputStream fInput = new FileInputStream(cmd.getOption(CmdLine.Options.INPUT_FILE));
-        
         switch(cmd.getOption(CmdLine.Options.INPUT_EXT)) {
             case "tga":
                 return new ImageReader(fInput, new ImagePluginTGA());
@@ -95,9 +99,10 @@ public class ImageConverter {
     }
     
     /**
+     * Erstellt einen passenden Writer
      * 
      * @param cmd
-     * @return 
+     * @return ImageWriter
      * @throws java.io.FileNotFoundException 
      */
     public ImageWriter createWriter(CmdLine cmd) throws FileNotFoundException, IOException {
@@ -109,9 +114,8 @@ public class ImageConverter {
             file.createNewFile();
         }
         
-        // FileStream öffnen und ImageWriter Objekt erstellen.
+        // FileStream öffnen und passendes ImageWriter Objekt erstellen.
         FileOutputStream fOutput = new FileOutputStream(file);
-        
         switch(cmd.getOption(CmdLine.Options.OUTPUT_EXT)) {
             case "tga":
                 return new ImageWriter(fOutput, new ImagePluginTGA());

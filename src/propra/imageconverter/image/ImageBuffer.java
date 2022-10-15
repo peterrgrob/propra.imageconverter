@@ -5,10 +5,12 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /**
- *
+ * DataBuffer Implementierung mit bildspezifischen Zusatzmethoden.
+ * 
  * @author pg
  */
 public class ImageBuffer extends DataBuffer {
+    
     protected ImageHeader header;  
   
     /**
@@ -35,6 +37,7 @@ public class ImageBuffer extends DataBuffer {
     }
     
     /**
+     * Initialisiert den Buffer anhand eines Headers. 
      * 
      * @param info
      */
@@ -47,8 +50,11 @@ public class ImageBuffer extends DataBuffer {
     }
     
     /**
+     * Initialisiert den Buffer anhand eines byte Arrays, Headers und 
+     * ByteOrder.
      * 
      * @param data
+     * @param header
      * @param info 
      * @param byteOrder 
      */
@@ -59,7 +65,9 @@ public class ImageBuffer extends DataBuffer {
     }
     
     /**
-     *
+     * Konvertiert den ImageBuffer in einen neuen ImageBuffer mit gegebenen
+     * Format.
+     *  
      * @param format
      * @return
      */
@@ -87,6 +95,7 @@ public class ImageBuffer extends DataBuffer {
             image.getBuffer().rewind();
         }
         else {
+            // Keine Konvertierung nötig, daher Buffer direkt übernehmen
             image.wrap(buffer.array());
         }
         return image;
@@ -101,7 +110,8 @@ public class ImageBuffer extends DataBuffer {
     }
     
     /**
-     * Gibt 3 Byte Farbwert an aktueller Position zurück
+     * Gibt 3 Byte Farbwert an aktueller Position zurück.
+     * 
      * @param color
      * @return
      */
@@ -114,7 +124,8 @@ public class ImageBuffer extends DataBuffer {
     }
     
     /**
-     * Schreibt 3 Byte Farbwert an aktuelle Position
+     * Schreibt 3 Byte Farbwert an aktuelle Position.
+     * 
      * @param color
      * @return
      */
@@ -127,7 +138,8 @@ public class ImageBuffer extends DataBuffer {
     }
     
     /**
-     * Schreibt 3 Byte Farbwert an aktuelle Position und konvertiert zum Zielformat
+     * Schreibt 3 Byte Farbwert an aktuelle Position und konvertiert zum Zielformat.
+     * 
      * @param color
      * @param type
      * @return

@@ -3,15 +3,18 @@ package propra.imageconverter.util;
 import java.util.HashMap;
 
 /**
- *
+ * Hilfsklasse die Kommandozeilenparameter parsed und speichert, diese
+ * können über Options abgefragt werden.
+ * 
  * @author pg
  */
  public class CmdLine {
+     
     private static final String INPUT_KEY = "--input";
     private static final String OUTPUT_KEY = "--output";
     private HashMap<Options,String> options = new HashMap();
     
-    /**
+    /*
      * 
      */
     public enum Options {
@@ -26,6 +29,7 @@ import java.util.HashMap;
      * @param args 
      */
     public CmdLine(String[] args) {
+        // Iteriere und parse alle Argumente
         for(var a: args) {
             String[] tupel = a.split("=");
             if(tupel.length == 2) {

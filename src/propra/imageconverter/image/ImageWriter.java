@@ -6,13 +6,13 @@ import java.io.OutputStream;
 import propra.imageconverter.util.DataBuffer;
 
 /**
- *
+ * Implementierung eines BufferedOutputStream zum Schreiben der unterstützten
+ * Bildformate, formatspezifische Umwandlungen erfolgen durch ein Plugin.
+ * 
  * @author pg
  */
 public class ImageWriter extends BufferedOutputStream {
-    /**
-     * 
-     */
+    // Bildformat
     ImagePlugin plugin;
     
     /**
@@ -26,7 +26,8 @@ public class ImageWriter extends BufferedOutputStream {
     }
     
     /**
-     *
+     * Schreibt ImageBuffer in den Stream 
+     * 
      * @param image
      * @return 
      * @throws IOException
@@ -42,41 +43,29 @@ public class ImageWriter extends BufferedOutputStream {
         ImageBuffer output = plugin.contentToBytes(image, buffer);
         
         // Erstellte Daten in den Stream schreiben
-        writeHeader(buffer);
-        writeContent(output);
+        writeData(buffer);
+        writeData(output);
         flush();
         
         return output;
     }
-     
+
     /**
-     * 
-     * @param bytes
-     * @throws IOException 
-     */
-    protected void writeHeader(DataBuffer bytes) throws IOException {
-        if(bytes == null) {
-            throw new IllegalArgumentException();
-        }
-        
-        write(bytes.getBuffer().array());
-    }
-    
-    /**
+    * Schreibt Daten in den Stream
     * 
     * @param data
     * @return
     * @throws IOException 
     */
-    protected DataBuffer writeContent(DataBuffer data) throws IOException {
+    protected DataBuffer writeData(DataBuffer data) throws IOException {
         if(data == null) {
             throw new IllegalArgumentException();
         }
         
-        write(data.getBuffer().array());
+        write(data.getBytes());
         return data;
     }
-
+    
     /**
      *
      * @return

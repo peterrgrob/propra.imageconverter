@@ -6,11 +6,13 @@ import propra.imageconverter.util.DataBuffer;
 import propra.imageconverter.util.Utility;
 
 /**
- *
+ * TGA spezifische Implementierung
+ * 
  * @author pg
  */
 public class ImagePluginTGA extends ImagePlugin {
 
+    // Datei-Offsets der einzelnen Header-Felder
     static final int TGA_HEADER_SIZE = 18;
     static final int TGA_HEADER_OFFSET_ENCODING = 2;
     static final int TGA_HEADER_OFFSET_X0 = 7;
@@ -30,7 +32,8 @@ public class ImagePluginTGA extends ImagePlugin {
 
     
     /**
-     *
+     * Wandelt einen allgemeinen Header in einen TGA Header um
+     * 
      * @param info
      * @return
      */
@@ -41,8 +44,7 @@ public class ImagePluginTGA extends ImagePlugin {
         }
         
         // DataBuffer für Header erstellen
-        DataBuffer dataBuffer = new DataBuffer();
-        dataBuffer.create(ImagePluginTGA.TGA_HEADER_SIZE);
+        DataBuffer dataBuffer = new DataBuffer(ImagePluginTGA.TGA_HEADER_SIZE);
         ByteBuffer byteBuffer = dataBuffer.getBuffer();
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         
@@ -62,7 +64,8 @@ public class ImagePluginTGA extends ImagePlugin {
     }
 
     /**
-     *
+     * Wandelt einen TGA Header in einen allgemeinen Header um 
+     * 
      * @param data
      * @return
      */
