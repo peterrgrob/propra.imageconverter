@@ -4,30 +4,40 @@ import java.nio.ByteOrder;
 import propra.imageconverter.util.Checkable;
 import propra.imageconverter.util.Checksum;
 import propra.imageconverter.util.DataBuffer;
+import propra.imageconverter.util.Validatable;
 
 /**
  * Basisklasse für Bildformatspezifische Reader/Writer Operationen. 
  * 
  * @author pg
  */
-public abstract class ImagePlugin implements Checkable {
+public abstract class ImageModule implements Checkable, Validatable {
+    
+    ByteOrder byteOrder = ByteOrder.LITTLE_ENDIAN;
     
     int headerSize;
     int headerPosition;
+    int contentPosition;
+    long streamLen;
+        
     protected ImageHeader header;
     Checksum checksumObj; 
-    int initialAvailableBytes;
-    int contentPosition;
-    ByteOrder byteOrder = ByteOrder.LITTLE_ENDIAN;
 
-    
+    /**
+     *
+     * @param streamLen
+     */
+    public ImageModule(long streamLen) {
+        this.streamLen = streamLen;
+    }
+            
     /**
      * Wandelt einen allgemeinen ImageHeader in Bytes um.
      * 
      * @param info
      * @return
      */
-    public abstract DataBuffer headerToBytes(ImageHeader info);
+    public abstract DataBuffer headerOut(ImageHeader info);
 
     /**
      * Wandelt Bytes in einen allgmeinen ImageHeader um. 
@@ -35,62 +45,46 @@ public abstract class ImagePlugin implements Checkable {
      * @param data
      * @return
      */
-    public abstract ImageHeader bytesToHeader(DataBuffer data);
+    public abstract ImageHeader headerIn(DataBuffer data);
     
     /**
      * Wandelt Bilddaten in bytes um. 
      * 
-     * @param image
-     * @param headerData
+     * @param data
+     * @param colorFormat
      * @return
      */
-    public ImageBuffer contentToBytes(ImageBuffer image, DataBuffer headerData) {
-        if(!header.isValid() 
-        || image == null
-        || headerData == null) {
+    public DataBuffer dataOut(DataBuffer data, ColorFormat colorFormat) {
+        if(!isValid() 
+        || data == null) {
             throw new IllegalArgumentException();
         }
         
-        ImageBuffer output = image.convertTo(header);
-        output.getHeader().setChecksum(checkContent(output, headerData));
-        return output; 
-    }
-
-    /**
-     *
-     * @param image
-     * @return
-     */
-    public ImageBuffer contentToBytes_(ImageBuffer image) {
-        if(!header.isValid() 
-        || image == null) {
-            throw new IllegalArgumentException();
+        // Generische Farbkonvertierung
+        if(header.getColorType().compareTo(colorFormat) != 0) {
+            byte[] color = data.getBytes();
+            
+            for(int i=0; i<data.getSize(); i+=3) {
+                header.getColorType().convertColor(color, 
+                                        i,
+                                        colorFormat);
+            }
         }
-        
-        ImageBuffer output = image.convertTo(header);
-        return output; 
+        return data;
     }
     
-    
     /**
-     * Erstellt ImageBuffer aus Byte Daten 
+     * Erstellt Image aus Byte Daten 
      * 
      * @param data
      * @return
      */
-    public ImageBuffer bytesToContent(DataBuffer data) {
-        return new ImageBuffer(data.getBuffer().array(), header);
-    }
-    
-    /**
-     * Berechnet aktuelle Prüfsumme für Byte Daten und speichert im Header 
-     * 
-     * @param data
-     * @param headerData
-     * @return
-     */
-    public long checkContent(DataBuffer data, DataBuffer headerData) {
-        return header.getChecksum();
+    public DataBuffer dataIn(DataBuffer data) {
+        if(!isValid() 
+        || data == null) {
+            throw new IllegalArgumentException();
+        }
+        return data;
     }
     
     /** 
@@ -123,6 +117,16 @@ public abstract class ImagePlugin implements Checkable {
         }
         return checksumObj.update(bytes);
     }  
+    
+    /**
+     *
+     * @return
+     */
+    @Override
+    public boolean isValid() {
+        return (    header != null 
+                &&  streamLen > 0);
+    }
 
     /**
      *
@@ -202,21 +206,5 @@ public abstract class ImagePlugin implements Checkable {
      */
     public void setByteOrder(ByteOrder byteOrder) {
         this.byteOrder = byteOrder;
-    }
-
-    /**
-     *
-     * @return
-     */
-    public int getInitialAvailableBytes() {
-        return initialAvailableBytes;
-    }
-
-    /**
-     *
-     * @param initialAvailableBytes
-     */
-    public void setInitialAvailableBytes(int initialAvailableBytes) {
-        this.initialAvailableBytes = initialAvailableBytes;
     }
 }

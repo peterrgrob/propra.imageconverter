@@ -1,5 +1,7 @@
 package propra.imageconverter;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -17,6 +19,10 @@ public class ImageConverter {
     
     // Fehlercode
     protected static final int ERROR_EXIT_CODE = 123;
+    
+    // Filestreams
+    FileInputStream fileInput;
+    FileOutputStream fileOutput;
             
     /** 
      * Programmeinstieg
@@ -25,7 +31,7 @@ public class ImageConverter {
      */
     public static void main(String[] args) {
         try {
-            // Komandozeilenparamter parsen.
+            // Komandozeilenparameter parsen.
             CmdLine cmdLine = new CmdLine(args);
             
             // Ein- und Ausgabedateipfad auf der Konsole ausgeben
@@ -54,28 +60,24 @@ public class ImageConverter {
     public void Convert(CmdLine cmdLine) throws FileNotFoundException, IOException {    
         long start = System.currentTimeMillis();
 
-        // Reader und Writer erstellen basierend auf den Dateierweiterungen
-        ImageReader reader = createReader(cmdLine);
-        ImageWriter writer = createWriter(cmdLine);
+        ImageIO io = createIO(cmdLine);
 
-        // Eingabebild laden
-        ImageBuffer src = reader.readImage();
-
+        // Header IO
+        ImageHeader inHeader = io.loadHeader();
+        io.writeHeader(inHeader);
+                
         // Infos zum Eingabebild ausgeben
-        System.out.print("Bildinfo: "+src.getHeader().getWidth());
-        System.out.print("x" + src.getHeader().getHeight());
-        System.out.print("x" + src.getHeader().getElementSize());
+        System.out.print("Bildinfo: " + inHeader.getWidth());
+        System.out.print("x" + inHeader.getHeight());
+        System.out.print("x" + inHeader.getElementSize());
 
-        /* 
-         *  Bild konvertieren und speichern, die ggfs. nötige Konvertierung 
-         *  erfolgt durch formatspezifisches Ausgabe-Plugin 
-         */
-        ImageBuffer dst = writer.writeImage(src);
-
+        // Bilddaten konvertieren
+        io.transferData();
+        
         // Infos auf der Konsole ausgeben
         long finish = System.currentTimeMillis();
         long timeElapsed = finish - start;
-        System.out.print("\nPrüfsumme: "+String.format("0x%08X", (int)dst.getHeader().getChecksum()));
+        System.out.print("\nPrüfsumme: "+String.format("0x%08X", (int)io.getInChecksum()));
         System.out.println("\nKonvertierung abgeschlossen in (ms): " + String.valueOf(timeElapsed));
     }
     
@@ -86,42 +88,47 @@ public class ImageConverter {
      * @return ImageReader
      * @throws java.io.FileNotFoundException 
      */
-    public ImageReader createReader(CmdLine cmd) throws FileNotFoundException, IOException {
-        // FileStream öffnen und ImageReader Objekt erstellen.
-        FileInputStream fInput = new FileInputStream(cmd.getOption(CmdLine.Options.INPUT_FILE));
+    public ImageIO createIO(CmdLine cmd) throws FileNotFoundException, IOException {
+        ImageModule inPlugin;
+        ImageModule outPlugin;
+        BufferedInputStream inStream;
+        BufferedOutputStream outStream;
+    
+        // FileStream öffnen
+        fileInput = new FileInputStream(cmd.getOption(CmdLine.Options.INPUT_FILE));
+        inStream = new BufferedInputStream(fileInput);
         switch(cmd.getOption(CmdLine.Options.INPUT_EXT)) {
             case "tga":
-                return new ImageReader(fInput, new ImagePluginTGA());
+                inPlugin = new ImageModuleTGA(fileInput.available());
+                break;
             case "propra":
-                return new ImageReader(fInput, new ImagePluginProPra());
+                inPlugin = new ImageModuleProPra(fileInput.available());
+                break;
+            default:
+                throw new IOException("Nicht unterstütztes Bildformat.");
         }
-        throw new IOException("Nicht unterstütztes Bildformat.");
-    }
-    
-    /**
-     * Erstellt einen passenden Writer
-     * 
-     * @param cmd
-     * @return ImageWriter
-     * @throws java.io.FileNotFoundException 
-     */
-    public ImageWriter createWriter(CmdLine cmd) throws FileNotFoundException, IOException {
-        String path = cmd.getOption(CmdLine.Options.OUTPUT_FILE);  
-        
+
+        String outPath = cmd.getOption(CmdLine.Options.OUTPUT_FILE);  
         // Wenn Datei nicht vorhanden, neue Datei erstellen.
-        File file = new File(path);
+        File file = new File(outPath);
         if(!file.exists()) {
             file.createNewFile();
         }
         
-        // FileStream öffnen und passendes ImageWriter Objekt erstellen.
-        FileOutputStream fOutput = new FileOutputStream(file);
+        // FileStream öffnen
+        fileOutput = new FileOutputStream(file);
+        outStream = new BufferedOutputStream(fileOutput);
         switch(cmd.getOption(CmdLine.Options.OUTPUT_EXT)) {
             case "tga":
-                return new ImageWriter(fOutput, new ImagePluginTGA());
+                outPlugin = new ImageModuleTGA(fileInput.available());
+                break;
             case "propra":
-                return new ImageWriter(fOutput, new ImagePluginProPra());
+                outPlugin = new ImageModuleProPra(fileInput.available());
+                break;
+            default:
+                throw new IOException("Nicht unterstütztes Bildformat.");
         }
-        throw new IOException("Nicht unterstütztes Bildformat.");
+        
+        return new ImageIO(inStream, outStream, inPlugin, outPlugin);
     }
 }

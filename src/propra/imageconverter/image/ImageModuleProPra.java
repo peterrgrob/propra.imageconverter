@@ -10,7 +10,7 @@ import propra.imageconverter.util.DataBuffer;
  * 
  * @author pg
  */
-public class ImagePluginProPra extends ImagePlugin {
+public class ImageModuleProPra extends ImageModule {
     
     static final String PROPRA_VERSION = "ProPraWiSe22";
     static final int PROPRA_HEADER_SIZE = 30;
@@ -23,8 +23,10 @@ public class ImagePluginProPra extends ImagePlugin {
     
     /**
      *
+     * @param streamLen
      */
-    public ImagePluginProPra() {
+    public ImageModuleProPra(long streamLen) {
+        super(streamLen);
         headerSize = PROPRA_HEADER_SIZE;  
         checksumObj = new ChecksumPropra();
     }
@@ -36,7 +38,7 @@ public class ImagePluginProPra extends ImagePlugin {
      * @return Header als DataBuffer
      */
     @Override
-    public DataBuffer headerToBytes(ImageHeader info) {
+    public DataBuffer headerOut(ImageHeader info) {
         if(info.isValid() == false) {
             throw new IllegalArgumentException();
         }
@@ -48,9 +50,9 @@ public class ImagePluginProPra extends ImagePlugin {
         
         // ProPra spezifisches RBG Farbmapping setzen
         header = new ImageHeader(info);
-        header.getColorType().setMapping(ColorType.RED,0);
-        header.getColorType().setMapping(ColorType.GREEN,2);
-        header.getColorType().setMapping(ColorType.BLUE,1);
+        header.getColorType().setMapping(ColorFormat.RED,0);
+        header.getColorType().setMapping(ColorFormat.GREEN,2);
+        header.getColorType().setMapping(ColorFormat.BLUE,1);
         
         // Headerfelder in ByteBuffer schreiben
         dataBuffer.put(PROPRA_VERSION,0);
@@ -70,7 +72,7 @@ public class ImagePluginProPra extends ImagePlugin {
      * @return Allgemeiner Header
      */
     @Override
-    public ImageHeader bytesToHeader(DataBuffer data) {
+    public ImageHeader headerIn(DataBuffer data) {
         ByteBuffer bytes = data.getBuffer();
         bytes.order(this.byteOrder);
         
@@ -95,43 +97,19 @@ public class ImagePluginProPra extends ImagePlugin {
         long dataLen = bytes.getLong(PROPRA_HEADER_OFFSET_DATALEN);   
         
         // RBG Farbmapping setzen
-        tInfo.getColorType().setMapping(ColorType.RED,0);
-        tInfo.getColorType().setMapping(ColorType.GREEN,2);
-        tInfo.getColorType().setMapping(ColorType.BLUE,1);
+        tInfo.getColorType().setMapping(ColorFormat.RED,0);
+        tInfo.getColorType().setMapping(ColorFormat.GREEN,2);
+        tInfo.getColorType().setMapping(ColorFormat.BLUE,1);
         
         // Prüfe ProPra Spezifikationen
         if( tInfo.isValid() == false 
         ||  (tInfo.getTotalSize() != dataLen)
-        ||  (dataLen != (initialAvailableBytes - PROPRA_HEADER_SIZE))
-        ||  (tInfo.getTotalSize() != (initialAvailableBytes - PROPRA_HEADER_SIZE))
+        ||  (dataLen != (streamLen - PROPRA_HEADER_SIZE))
+        ||  (tInfo.getTotalSize() != (streamLen - PROPRA_HEADER_SIZE))
         ||  (bytes.get(PROPRA_HEADER_OFFSET_ENCODING) != 0)) {
             throw new UnsupportedOperationException("Ungültiges ProPra Dateiformat!");
         }
         
         return (header = tInfo);
     }  
-
-    /**
-     * Führt Prüsummenberechnung für einen DataBuffer durch und speichert
-     * diese im Header-Block
-     * 
-     * @param data
-     * @param headerData
-     * @return Prüfsumme
-     */
-    @Override
-    public long checkContent(DataBuffer data, DataBuffer headerData) {
-        if (data == null
-        ||  headerData == null) {
-            throw new IllegalArgumentException();
-        }
-        // Prüfsumme berechnen und in den Header schreiben
-        if(isCheckable()) {
-            long chkSum = check(data.getBuffer().array());
-            headerData.getBuffer().putInt(PROPRA_HEADER_OFFSET_CHECKSUM, (int)chkSum);
-            header.setChecksum(chkSum);
-        }
-        
-        return header.getChecksum();
-    }
 }

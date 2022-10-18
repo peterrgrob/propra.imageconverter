@@ -6,18 +6,18 @@ package propra.imageconverter.image;
  * @author pg
  */
 public class ImageHeader {
-
-    public enum Encoding {
-        UNCOMPRESSED,
-    }
     
     private int width;
     private int height;
     private int elementSize;    
     private Encoding encoding;
     private long checksum;
-    private ColorType colorType = new ColorType();
+    private ColorFormat colorType = new ColorFormat();
 
+    public enum Encoding {
+        UNCOMPRESSED,
+    }
+        
     /**
      * 
      */
@@ -38,7 +38,7 @@ public class ImageHeader {
         this.elementSize = src.elementSize;
         this.encoding = src.encoding;
         this.checksum = src.checksum;
-        this.colorType = new ColorType(src.getColorType());
+        this.colorType = new ColorFormat(src.getColorType());
     }
     
     /**
@@ -76,14 +76,14 @@ public class ImageHeader {
     /**
      * @return the value of colorType
      */
-    public ColorType getColorType() {
+    public ColorFormat getColorType() {
         return colorType;
     }
 
     /**
      * @param colorType new value of colorType
      */
-    public void setColorType(ColorType colorType) {
+    public void setColorType(ColorFormat colorType) {
         this.colorType = colorType;
     }
     

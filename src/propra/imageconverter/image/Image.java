@@ -9,14 +9,14 @@ import java.nio.ByteOrder;
  * 
  * @author pg
  */
-public class ImageBuffer extends DataBuffer {
+public class Image extends DataBuffer {
     
     protected ImageHeader header;  
   
     /**
      * 
      */
-    ImageBuffer() {
+    Image() {
         
     }
     
@@ -24,7 +24,7 @@ public class ImageBuffer extends DataBuffer {
      * 
      * @param info 
      */
-    ImageBuffer(ImageHeader info) {
+    Image(ImageHeader info) {
         create(info);
     }
     
@@ -32,7 +32,7 @@ public class ImageBuffer extends DataBuffer {
      * 
      * @param info 
      */
-    ImageBuffer(byte[] data, ImageHeader info) {
+    Image(byte[] data, ImageHeader info) {
         wrap(data, info, ByteOrder.BIG_ENDIAN);
     }
     
@@ -65,40 +65,39 @@ public class ImageBuffer extends DataBuffer {
     }
     
     /**
-     * Konvertiert den ImageBuffer in einen neuen ImageBuffer mit gegebenen
-     * Format.
+     * Konvertiert den Image in einen neuen Image mit gegebenen Format.
      *  
+     * @param target
      * @param format
      * @return
      */
-    public ImageBuffer convertTo(ImageHeader format) {
-        if(!format.isValid()
-        || !isValid()) {
+    public Image convertTo(Image target, ColorFormat format) {
+        if( !target.isValid()
+        ||  !isValid()
+        ||  format == null) {
             throw new IllegalArgumentException();
         }
         
-        ImageBuffer image = new ImageBuffer(format);
-        ColorType newColorType = format.getColorType();
-        ColorType oldColorType = header.getColorType();
-        
+        ColorFormat srcFormat = getHeader().getColorType();
+
         // Konvertierung der Farben nötig?
-        if(oldColorType.compareTo(newColorType) != 0) {
+        if(srcFormat.compareTo(format) != 0) {
             byte[] color = new byte[3];
             
-            for(int i=0;i<header.getElementCount();i++) {
+            for(int i=0; i<getHeader().getElementCount(); i++) {
                 // Farbtripel von Quell- zu Zielformat konvertieren
                 getColor(color);
-                newColorType.convertColor(color, oldColorType);
-                image.putColor(color);
+                format.convertColor(color, srcFormat);
+                target.putColor(color);
             }
             
-            image.getBuffer().rewind();
+            target.getBuffer().rewind();
         }
         else {
             // Keine Konvertierung nötig, daher Buffer direkt übernehmen
-            image.wrap(buffer.array());
+            target.wrap(buffer.array());
         }
-        return image;
+        return target;
     }
     
     /**
@@ -144,7 +143,7 @@ public class ImageBuffer extends DataBuffer {
      * @param type
      * @return
      */
-    public byte[] putColor(byte[] color, ColorType type) {
+    public byte[] putColor(byte[] color, ColorFormat type) {
         if (!isValid()) {
             throw new IllegalStateException();
         }

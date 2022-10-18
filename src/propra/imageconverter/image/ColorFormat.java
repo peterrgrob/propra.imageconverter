@@ -8,7 +8,7 @@ package propra.imageconverter.image;
  * 
  * @author pg
  */
-public class ColorType implements Comparable<ColorType> {
+public class ColorFormat implements Comparable<ColorFormat> {
 
     // Konstanten zur Indizierung von Farbkomponenten (Little Endian)
     public static final int BLUE = 0;
@@ -21,7 +21,7 @@ public class ColorType implements Comparable<ColorType> {
     /**
      * 
      */
-    public ColorType() {
+    public ColorFormat() {
         /*
          * Standard RGB Farben (Little Endian)
          */
@@ -35,7 +35,7 @@ public class ColorType implements Comparable<ColorType> {
      * 
      * @param src
      */
-    public ColorType(ColorType src) {
+    public ColorFormat(ColorFormat src) {
         setMapping(RED,src.getMapping(RED));
         setMapping(GREEN,src.getMapping(GREEN));
         setMapping(BLUE,src.getMapping(BLUE));
@@ -47,7 +47,7 @@ public class ColorType implements Comparable<ColorType> {
      * @return
      */
     @Override
-    public int compareTo(ColorType o) {
+    public int compareTo(ColorFormat o) {
         if( mapping[0] == o.getMapping(0) &&
             mapping[1] == o.getMapping(1) &&
             mapping[2] == o.getMapping(2)) {
@@ -63,20 +63,35 @@ public class ColorType implements Comparable<ColorType> {
      * @param colorInfo
      * @return 
      */
-    public byte[] convertColor(byte[] input, ColorType colorInfo) {
+    public byte[] convertColor(byte[] input, ColorFormat colorInfo) {
+        if ( input == null) {
+            throw new IllegalArgumentException();
+        }  
+        return convertColor(input, 0, colorInfo);
+    }
+    
+    /**
+     * Allgemeine Methode zum Konvertieren einer Farbe in ein Zielfarbformat.
+     * 
+     * @param input
+     * @param offset
+     * @param colorInfo
+     * @return 
+     */
+    public byte[] convertColor(byte[] input, int offset, ColorFormat colorInfo) {
         if ( input == null) {
             throw new IllegalArgumentException();
         }  
         byte t0,t1,t2;
         int[] map = colorInfo.getMapping();
         
-        t2 = input[map[RED]];
-        t1 = input[map[GREEN]];
-        t0 = input[map[BLUE]];
+        t2 = input[offset + map[RED]];
+        t1 = input[offset + map[GREEN]];
+        t0 = input[offset + map[BLUE]];
         
-        input[mapping[RED]] = t2;
-        input[mapping[GREEN]] = t1;
-        input[mapping[BLUE]] = t0;
+        input[offset + mapping[RED]] = t2;
+        input[offset + mapping[GREEN]] = t1;
+        input[offset + mapping[BLUE]] = t0;
                 
         return input;
     }

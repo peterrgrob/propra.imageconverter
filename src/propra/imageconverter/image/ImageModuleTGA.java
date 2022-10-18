@@ -10,7 +10,7 @@ import propra.imageconverter.util.Utility;
  * 
  * @author pg
  */
-public class ImagePluginTGA extends ImagePlugin {
+public class ImageModuleTGA extends ImageModule {
 
     // Datei-Offsets der einzelnen Header-Felder
     static final int TGA_HEADER_SIZE = 18;
@@ -25,7 +25,8 @@ public class ImagePluginTGA extends ImagePlugin {
     /**
      *
      */
-    public ImagePluginTGA() {
+    public ImageModuleTGA(long streamLen) {
+        super(streamLen);
         headerSize = TGA_HEADER_SIZE;
         byteOrder = ByteOrder.LITTLE_ENDIAN;    
     }
@@ -38,20 +39,20 @@ public class ImagePluginTGA extends ImagePlugin {
      * @return
      */
     @Override
-    public DataBuffer headerToBytes(ImageHeader info) {
+    public DataBuffer headerOut(ImageHeader info) {
         if(info.isValid() == false) {
             throw new IllegalArgumentException();
         }
         
         // DataBuffer für Header erstellen
-        DataBuffer dataBuffer = new DataBuffer(ImagePluginTGA.TGA_HEADER_SIZE);
+        DataBuffer dataBuffer = new DataBuffer(ImageModuleTGA.TGA_HEADER_SIZE);
         ByteBuffer byteBuffer = dataBuffer.getBuffer();
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         
         header = new ImageHeader(info);
-        header.getColorType().setMapping(ColorType.RED,2);
-        header.getColorType().setMapping(ColorType.GREEN,1);
-        header.getColorType().setMapping(ColorType.BLUE,0);
+        header.getColorType().setMapping(ColorFormat.RED,2);
+        header.getColorType().setMapping(ColorFormat.GREEN,1);
+        header.getColorType().setMapping(ColorFormat.BLUE,0);
         
         // Headerfelder in Buffer schreiben
         byteBuffer.put(TGA_HEADER_OFFSET_ENCODING, (byte)2);
@@ -70,7 +71,7 @@ public class ImagePluginTGA extends ImagePlugin {
      * @return
      */
     @Override
-    public ImageHeader bytesToHeader(DataBuffer data) {
+    public ImageHeader headerIn(DataBuffer data) {
         ByteBuffer byteBuffer = data.getBuffer();
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         

@@ -69,6 +69,17 @@ public class DataBuffer {
      *
      * @return
      */
+    public int getSize() {
+        if (!isValid()) {
+            throw new IllegalStateException(); 
+        }
+        return buffer.capacity();
+    }
+    
+    /**
+     *
+     * @return
+     */
     public byte[] getBytes() {
         if (buffer == null) {
             throw new IllegalArgumentException(); 
