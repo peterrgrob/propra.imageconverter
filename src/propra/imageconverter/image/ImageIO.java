@@ -3,7 +3,6 @@ package propra.imageconverter.image;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
-import propra.imageconverter.util.CmdLine;
 import propra.imageconverter.util.DataBuffer;
 import propra.imageconverter.util.Validatable;
 

@@ -95,7 +95,6 @@ public class ImageConverter {
         BufferedInputStream inStream;
         BufferedOutputStream outStream;
     
-        // FileStream öffnen
         fileInput = new FileInputStream(cmd.getOption(CmdLine.Options.INPUT_FILE));
         inStream = new BufferedInputStream(fileInput);
         inPlugin = createIoModule(  cmd.getOption(CmdLine.Options.INPUT_EXT), 
@@ -111,7 +110,6 @@ public class ImageConverter {
             file.createNewFile();
         }
         
-        // FileStream öffnen
         fileOutput = new FileOutputStream(file);
         outStream = new BufferedOutputStream(fileOutput);
         outPlugin = createIoModule(  cmd.getOption(CmdLine.Options.OUTPUT_EXT), 
