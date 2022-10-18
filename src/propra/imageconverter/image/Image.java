@@ -65,42 +65,6 @@ public class Image extends DataBuffer {
     }
     
     /**
-     * Konvertiert den Image in einen neuen Image mit gegebenen Format.
-     *  
-     * @param target
-     * @param format
-     * @return
-     */
-    public Image convertTo(Image target, ColorFormat format) {
-        if( !target.isValid()
-        ||  !isValid()
-        ||  format == null) {
-            throw new IllegalArgumentException();
-        }
-        
-        ColorFormat srcFormat = getHeader().getColorType();
-
-        // Konvertierung der Farben nötig?
-        if(srcFormat.compareTo(format) != 0) {
-            byte[] color = new byte[3];
-            
-            for(int i=0; i<getHeader().getElementCount(); i++) {
-                // Farbtripel von Quell- zu Zielformat konvertieren
-                getColor(color);
-                format.convertColor(color, srcFormat);
-                target.putColor(color);
-            }
-            
-            target.getBuffer().rewind();
-        }
-        else {
-            // Keine Konvertierung nötig, daher Buffer direkt übernehmen
-            target.wrap(buffer.array());
-        }
-        return target;
-    }
-    
-    /**
      * 
      * @return 
      */

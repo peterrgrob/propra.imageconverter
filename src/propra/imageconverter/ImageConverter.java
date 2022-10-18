@@ -60,7 +60,7 @@ public class ImageConverter {
     public void Convert(CmdLine cmdLine) throws FileNotFoundException, IOException {    
         long start = System.currentTimeMillis();
 
-        ImageIO io = createIO(cmdLine);
+        ImageIO io = createIo(cmdLine);
 
         // Header IO
         ImageHeader inHeader = io.loadHeader();
@@ -89,7 +89,7 @@ public class ImageConverter {
      * @return ImageReader
      * @throws java.io.FileNotFoundException 
      */
-    public ImageIO createIO(CmdLine cmd) throws FileNotFoundException, IOException {
+    public ImageIO createIo(CmdLine cmd) throws FileNotFoundException, IOException {
         ImageModule inPlugin;
         ImageModule outPlugin;
         BufferedInputStream inStream;
@@ -98,14 +98,9 @@ public class ImageConverter {
         // FileStream öffnen
         fileInput = new FileInputStream(cmd.getOption(CmdLine.Options.INPUT_FILE));
         inStream = new BufferedInputStream(fileInput);
-        switch(cmd.getOption(CmdLine.Options.INPUT_EXT)) {
-            case "tga":
-                inPlugin = new ImageModuleTGA(fileInput.available());
-                break;
-            case "propra":
-                inPlugin = new ImageModuleProPra(fileInput.available());
-                break;
-            default:
+        inPlugin = createIoModule(  cmd.getOption(CmdLine.Options.INPUT_EXT), 
+                                fileInput.available());
+        if(inPlugin == null) {
                 throw new IOException("Nicht unterstütztes Bildformat.");
         }
 
@@ -119,17 +114,28 @@ public class ImageConverter {
         // FileStream öffnen
         fileOutput = new FileOutputStream(file);
         outStream = new BufferedOutputStream(fileOutput);
-        switch(cmd.getOption(CmdLine.Options.OUTPUT_EXT)) {
-            case "tga":
-                outPlugin = new ImageModuleTGA(fileInput.available());
-                break;
-            case "propra":
-                outPlugin = new ImageModuleProPra(fileInput.available());
-                break;
-            default:
+        outPlugin = createIoModule(  cmd.getOption(CmdLine.Options.OUTPUT_EXT), 
+                                fileInput.available());
+        if(outPlugin == null) {
                 throw new IOException("Nicht unterstütztes Bildformat.");
         }
         
         return new ImageIO(inStream, outStream, inPlugin, outPlugin);
+    }
+
+    /**
+     *
+     * @param ext
+     * @param streamLen
+     * @return
+     */
+    public ImageModule createIoModule(String ext, long streamLen) {
+        switch(ext) {
+            case "tga":
+                return new ImageModuleTGA(streamLen);
+            case "propra":
+                return new ImageModuleProPra(streamLen);
+        }
+        return null;
     }
 }

@@ -24,6 +24,7 @@ public class ImageModuleTGA extends ImageModule {
 
     /**
      *
+     * @param streamLen
      */
     public ImageModuleTGA(long streamLen) {
         super(streamLen);
