@@ -129,6 +129,9 @@ public class ImageIO implements Validatable {
         int blockMod = (int)(len % getBlockSize());
         DataBuffer block = new DataBuffer(getBlockSize());
         
+        inPlugin.beginDataTransfer();
+        outPlugin.beginDataTransfer();
+        
         for(int i=0; i<blockCount; i++) {
             processBlock(block, inPlugin, outPlugin);
         }
@@ -136,6 +139,10 @@ public class ImageIO implements Validatable {
         if(blockMod > 0) {
             processBlock(new DataBuffer(blockMod), inPlugin, outPlugin);
         }
+        
+        inPlugin.finishDataTransfer();
+        outPlugin.finishDataTransfer();
+        checkChecksum();
         
         return len;
     }
@@ -161,11 +168,6 @@ public class ImageIO implements Validatable {
             throw new IOException("IO Fehler!");
         }
         
-        // Eingabe Prüfsumme updaten für den aktuellen Block
-        if(inPlugin.isCheckable()) {
-            inPlugin.check(block.getBytes());
-        }
-        
         // Farbdaten umwandeln mit spezifischen Modulen
         block = inPlugin.dataIn(block);
         outPlugin.dataOut(block, inPlugin.getHeader().getColorType());
@@ -173,11 +175,6 @@ public class ImageIO implements Validatable {
         // In Stream schreiben
         write(block);
         outStream.flush();
-        
-        // Ausgabe Prüfsumme updaten für den aktuellen Block
-        if(outPlugin.isCheckable()) {
-            outPlugin.check(block.getBytes());
-        }
         
         return block;
     }
@@ -207,6 +204,29 @@ public class ImageIO implements Validatable {
             throw new IllegalStateException();
         }
         outStream.write(buffer.getBytes());
+    }
+    
+    /**
+     *
+     * @throws java.io.IOException
+     */
+    public void checkChecksum() throws IOException {
+        if(!isValid()) {
+            throw new IllegalStateException();
+        }
+        
+        if(inPlugin.isCheckable()) {
+            if(inPlugin.getChecksumObj().getValue() 
+            != inPlugin.getHeader().getChecksum()) {
+                throw new IOException("Eingabe Prüfsummenfehler!");
+            }
+        }
+        if(outPlugin.isCheckable()) {
+            if(inPlugin.getChecksumObj().getValue() 
+            != inPlugin.getHeader().getChecksum()) {
+                throw new IOException("Ausgabe Prüfsummenfehler!");
+            }
+        }
     }
     
     /**

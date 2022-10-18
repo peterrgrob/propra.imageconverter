@@ -70,6 +70,9 @@ public abstract class ImageModule implements Checkable, Validatable {
                                         colorFormat);
             }
         }
+        
+        updateCheck(data.getBytes());
+        
         return data;
     }
     
@@ -84,7 +87,29 @@ public abstract class ImageModule implements Checkable, Validatable {
         || data == null) {
             throw new IllegalArgumentException();
         }
+               
+        updateCheck(data.getBytes());                
         return data;
+    }
+    
+    /**
+     *
+     */
+    public void beginDataTransfer() {
+        if(isCheckable()) {
+            checksumObj.begin();
+        }
+    }
+
+    /**
+     *
+     * @return
+     */
+    public long finishDataTransfer() {
+        if(isCheckable()) {
+            return checksumObj.finish();
+        }
+        return 0;
     }
     
     /** 
@@ -104,20 +129,17 @@ public abstract class ImageModule implements Checkable, Validatable {
     public Checksum getChecksumObj() {
         return checksumObj;
     }
-
+    
     /**
      *
      * @param bytes
-     * @return
      */
-    @Override
-    public long check(byte[] bytes) {
+    protected void updateCheck(byte[] bytes) {
         if (bytes == null ) {
             throw new IllegalArgumentException();
         }
-        return checksumObj.update(bytes);
-    }  
-    
+        checksumObj.update(bytes,0,bytes.length);
+    } 
     /**
      *
      * @return

@@ -77,7 +77,8 @@ public class ImageConverter {
         // Infos auf der Konsole ausgeben
         long finish = System.currentTimeMillis();
         long timeElapsed = finish - start;
-        System.out.print("\nPrüfsumme: "+String.format("0x%08X", (int)io.getInChecksum()));
+        System.out.print("\nEingabe Prüfsumme: "+String.format("0x%08X", (int)io.getInChecksum()));
+        System.out.print("\nAusgabe Prüfsumme: "+String.format("0x%08X", (int)io.getOutChecksum()));
         System.out.println("\nKonvertierung abgeschlossen in (ms): " + String.valueOf(timeElapsed));
     }
     

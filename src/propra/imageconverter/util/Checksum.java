@@ -57,7 +57,22 @@ public abstract class Checksum {
      */
     public long check(byte[] data) {
         reset();
-        return update(data);
+        return getValue();
+    }
+    
+    /**
+     *
+     */
+    public void begin() {
+        reset();
+    }
+    
+    /**
+     *
+     * @return
+     */
+    public long finish() {
+        return getValue();
     }
     
     /**
@@ -66,11 +81,11 @@ public abstract class Checksum {
      * @param data
      * @return 
      */
-    public long update(byte[] data) {
+    public void update(byte[] data) {
         if (data == null) {
             throw new IllegalArgumentException();
         }
-        return update(data, 0, data.length);
+        update(data, 0, data.length);
     }
 
     /**
@@ -81,5 +96,5 @@ public abstract class Checksum {
      * @param len
      * @return 
      */
-    public abstract long update(byte [] data, int offset, int len);
+    public abstract void update(byte [] data, int offset, int len);
 }

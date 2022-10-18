@@ -18,11 +18,4 @@ public interface Checkable {
      * @return
      */
     public Checksum getChecksumObj();
-    
-    /**
-     *
-     * @param bytes
-     * @return
-     */
-    public long check(byte[] bytes);
 }
