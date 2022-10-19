@@ -1,8 +1,7 @@
 package propra.imageconverter.image;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import propra.imageconverter.util.DataBuffer;
 import propra.imageconverter.util.Validatable;
 
@@ -12,10 +11,10 @@ import propra.imageconverter.util.Validatable;
  */
 public class ImageIO implements Validatable {
     
-    protected ImageModule inPlugin;
-    protected ImageModule outPlugin;
-    BufferedInputStream inStream;
-    BufferedOutputStream outStream;
+    private ImageModule inPlugin;
+    private ImageModule outPlugin;
+    private RandomAccessFile inStream;
+    private RandomAccessFile outStream;
     
     public ImageIO() {
     }
@@ -27,10 +26,10 @@ public class ImageIO implements Validatable {
      * @param inPlugin
      * @param outPlugin
      */
-    public ImageIO(BufferedInputStream inStream,
-                        BufferedOutputStream outStream,
-                        ImageModule inPlugin,
-                        ImageModule outPlugin) {
+    public ImageIO( RandomAccessFile inStream,
+                    RandomAccessFile outStream,
+                    ImageModule inPlugin,
+                    ImageModule outPlugin) {
         wrap(inStream,
              outStream,
              inPlugin,
@@ -56,8 +55,8 @@ public class ImageIO implements Validatable {
      * @param inPlugin
      * @param outPlugin
      */
-    public void wrap(   BufferedInputStream inStream,
-                        BufferedOutputStream outStream,
+    public void wrap(   RandomAccessFile inStream,
+                        RandomAccessFile outStream,
                         ImageModule inPlugin,
                         ImageModule outPlugin) {
         if( inStream == null
@@ -74,52 +73,39 @@ public class ImageIO implements Validatable {
     }
     
     /**
-     *  Liest Header vom Stream und gibt einen allgemeinen Header
-     *  zurück
-     * 
-     * @return 
-     * @throws java.io.IOException
-    */
-    public ImageHeader loadHeader() throws IOException {
+     *
+     * @throws IOException
+     */
+    public void beginTransfer() throws IOException {
         if(!isValid()) {
             throw new IllegalStateException();
         }
         
-        // Header-Bytes von Stream lesen
-        DataBuffer rawBytes = new DataBuffer(inPlugin.getHeaderSize());
-        if(read( rawBytes) != inPlugin.getHeaderSize()) {
-            throw new java.io.IOException("Ungültiger Dateikopf!");
-        }
-        
-        // In logischen Header umwandeln und für Ausgabe merken
-        return inPlugin.headerIn(rawBytes);
+        // Header IO
+        ImageHeader inHeader = loadHeader();
+        writeHeader(inHeader);
     }
-    
     
     /**
-     * @param header
-     * @return 
-     * @throws java.io.IOException
-    */
-    public DataBuffer writeHeader(ImageHeader header) throws IOException {
-        if(!isValid()
-        || header == null) {
+     *
+     * @throws IOException
+     */
+    public void finishTransfer() throws IOException {
+        if(!isValid()) {
             throw new IllegalStateException();
         }
-   
-        // In Formatheader umwandeln und in den Stream schreiben
-        DataBuffer rawBytes = outPlugin.headerOut(header);
-        outStream.write(rawBytes.getBytes());
-        return rawBytes;
+        
+        // Header updaten
+        outStream.seek(0);
+        writeHeader(outPlugin.getHeader());
     }
-    
     
     /**
      *
      * @return 
      * @throws java.io.IOException 
      */
-    public long transferData() throws IOException {
+    public long doTransfer() throws IOException {
         if(!isValid()) {
             throw new IllegalArgumentException();
         }
@@ -148,6 +134,49 @@ public class ImageIO implements Validatable {
     }
     
     /**
+     *  Liest Header vom Stream und gibt einen allgemeinen Header
+     *  zurück
+     * 
+     * @return 
+     * @throws java.io.IOException
+    */
+    protected ImageHeader loadHeader() throws IOException {
+        if(!isValid()) {
+            throw new IllegalStateException();
+        }
+        
+        // Header-Bytes von Stream lesen
+        DataBuffer rawBytes = new DataBuffer(inPlugin.getHeaderSize());
+        if(read( rawBytes) != inPlugin.getHeaderSize()) {
+            throw new java.io.IOException("Ungültiger Dateikopf!");
+        }
+        
+        // In logischen Header umwandeln und für Ausgabe merken
+        return inPlugin.headerIn(rawBytes);
+    }
+    
+    
+    /**
+     * @param header
+     * @return 
+     * @throws java.io.IOException
+    */
+    protected DataBuffer writeHeader(ImageHeader header) throws IOException {
+        if(!isValid()
+        || header == null) {
+            throw new IllegalStateException();
+        }
+   
+        // In Formatheader umwandeln und in den Stream schreiben
+        DataBuffer rawBytes = outPlugin.headerOut(header);
+        outStream.write(rawBytes.getBytes());
+        return rawBytes;
+    }
+    
+    
+    
+    
+    /**
      *
      * @param block
      * @param inPlugin
@@ -174,7 +203,6 @@ public class ImageIO implements Validatable {
         
         // In Stream schreiben
         write(block);
-        outStream.flush();
         
         return block;
     }
@@ -185,7 +213,7 @@ public class ImageIO implements Validatable {
      * @return
      * @throws java.io.IOException
      */
-    public int read(DataBuffer buffer) throws IOException {
+    protected int read(DataBuffer buffer) throws IOException {
         if(!isValid()
         || buffer == null) {
             throw new IllegalStateException();
@@ -198,7 +226,7 @@ public class ImageIO implements Validatable {
      * @param buffer
      * @throws java.io.IOException
      */
-    public void write(DataBuffer buffer) throws IOException {
+    protected void write(DataBuffer buffer) throws IOException {
         if(!isValid()
         || buffer == null) {
             throw new IllegalStateException();
@@ -221,7 +249,8 @@ public class ImageIO implements Validatable {
                 throw new IOException("Eingabe Prüfsummenfehler!");
             }
         }
-        if(outPlugin.isCheckable()) {
+        if(outPlugin.isCheckable()
+        && inPlugin.isCheckable()) {
             if(inPlugin.getChecksumObj().getValue() 
             != inPlugin.getHeader().getChecksum()) {
                 throw new IOException("Ausgabe Prüfsummenfehler!");

@@ -7,21 +7,17 @@ import propra.imageconverter.util.DataBuffer;
 import propra.imageconverter.util.Validatable;
 
 /**
- * Basisklasse für Bildformatspezifische Reader/Writer Operationen. 
+ * Basisklasse für Bildformatspezifische Konvertierungen. 
  * 
  * @author pg
  */
 public abstract class ImageModule implements Checkable, Validatable {
     
     ByteOrder byteOrder = ByteOrder.LITTLE_ENDIAN;
-    
-    int headerSize;
-    int headerPosition;
-    int contentPosition;
-    long streamLen;
-        
     protected ImageHeader header;
-    Checksum checksumObj; 
+    Checksum checksumObj;  
+    int headerSize;
+    long streamLen;
 
     /**
      *
@@ -107,7 +103,8 @@ public abstract class ImageModule implements Checkable, Validatable {
      */
     public long finishDataTransfer() {
         if(isCheckable()) {
-            return checksumObj.finish();
+            header.setChecksum(checksumObj.finish());
+            return header.getChecksum();
         }
         return 0;
     }
@@ -138,7 +135,9 @@ public abstract class ImageModule implements Checkable, Validatable {
         if (bytes == null ) {
             throw new IllegalArgumentException();
         }
-        checksumObj.update(bytes,0,bytes.length);
+        if(isCheckable()) {
+            checksumObj.update(bytes,0,bytes.length);
+        }
     } 
     /**
      *
@@ -164,38 +163,6 @@ public abstract class ImageModule implements Checkable, Validatable {
      */
     public void setHeaderSize(int headerSize) {
         this.headerSize = headerSize;
-    }
-
-    /**
-     *
-     * @return
-     */
-    public int getHeaderPosition() {
-        return headerPosition;
-    }
-
-    /**
-     *
-     * @param headerPosition
-     */
-    public void setHeaderPosition(int headerPosition) {
-        this.headerPosition = headerPosition;
-    }
-
-    /**
-     *
-     * @return
-     */
-    public int getContentPosition() {
-        return contentPosition;
-    }
-
-    /**
-     *
-     * @param contentPosition
-     */
-    public void setContentPosition(int contentPosition) {
-        this.contentPosition = contentPosition;
     }
 
     /**

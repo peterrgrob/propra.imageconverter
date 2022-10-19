@@ -1,12 +1,11 @@
 package propra.imageconverter;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.util.logging.*;
+import java.util.logging.Level;
 import propra.imageconverter.image.*;
 import propra.imageconverter.util.*;
 
@@ -19,10 +18,6 @@ public class ImageConverter {
     
     // Fehlercode
     protected static final int ERROR_EXIT_CODE = 123;
-    
-    // Filestreams
-    FileInputStream fileInput;
-    FileOutputStream fileOutput;
             
     /** 
      * Programmeinstieg
@@ -43,8 +38,8 @@ public class ImageConverter {
             ImageConverter converter = new ImageConverter(); 
             converter.Convert(cmdLine);
         }
-        catch(Exception e) {
-            //Logger.getLogger(ImageConverter.class.getName()).log(Level.SEVERE, null, e);
+        catch(IOException e) {
+            Logger.getLogger(ImageConverter.class.getName()).log(Level.SEVERE, null, e);
             System.err.println(e.toString());
             System.exit(ERROR_EXIT_CODE);
         }
@@ -61,18 +56,16 @@ public class ImageConverter {
         long start = System.currentTimeMillis();
 
         ImageIO io = createIo(cmdLine);
-
-        // Header IO
-        ImageHeader inHeader = io.loadHeader();
-        io.writeHeader(inHeader);
+        io.beginTransfer();
+        ImageHeader inHeader = io.getInPlugin().getHeader();
                 
         // Infos zum Eingabebild ausgeben
         System.out.print("Bildinfo: " + inHeader.getWidth());
         System.out.print("x" + inHeader.getHeight());
         System.out.print("x" + inHeader.getElementSize());
 
-        // Bilddaten konvertieren
-        io.transferData();
+        io.doTransfer();
+        io.finishTransfer();
         
         // Infos auf der Konsole ausgeben
         long finish = System.currentTimeMillis();
@@ -92,13 +85,10 @@ public class ImageConverter {
     public ImageIO createIo(CmdLine cmd) throws FileNotFoundException, IOException {
         ImageModule inPlugin;
         ImageModule outPlugin;
-        BufferedInputStream inStream;
-        BufferedOutputStream outStream;
     
-        fileInput = new FileInputStream(cmd.getOption(CmdLine.Options.INPUT_FILE));
-        inStream = new BufferedInputStream(fileInput);
+        RandomAccessFile fileInput = new RandomAccessFile(cmd.getOption(CmdLine.Options.INPUT_FILE),"r");
         inPlugin = createIoModule(  cmd.getOption(CmdLine.Options.INPUT_EXT), 
-                                fileInput.available());
+                                fileInput.length());
         if(inPlugin == null) {
                 throw new IOException("Nicht unterstütztes Bildformat.");
         }
@@ -110,15 +100,14 @@ public class ImageConverter {
             file.createNewFile();
         }
         
-        fileOutput = new FileOutputStream(file);
-        outStream = new BufferedOutputStream(fileOutput);
+        RandomAccessFile fileOutput = new RandomAccessFile(file,"rw");
         outPlugin = createIoModule(  cmd.getOption(CmdLine.Options.OUTPUT_EXT), 
-                                fileInput.available());
+                                fileInput.length());
         if(outPlugin == null) {
                 throw new IOException("Nicht unterstütztes Bildformat.");
         }
         
-        return new ImageIO(inStream, outStream, inPlugin, outPlugin);
+        return new ImageIO(fileInput, fileOutput, inPlugin, outPlugin);
     }
 
     /**
