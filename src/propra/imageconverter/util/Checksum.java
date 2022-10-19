@@ -79,7 +79,6 @@ public abstract class Checksum {
      * Aktualisiert die aktuelle Prüfsumme mit Bytes 
      * 
      * @param data
-     * @return 
      */
     public void update(byte[] data) {
         if (data == null) {

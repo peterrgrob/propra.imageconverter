@@ -2,6 +2,7 @@ package propra.imageconverter.image;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import propra.imageconverter.util.ChecksumPropra;
 import propra.imageconverter.util.DataBuffer;
 
@@ -46,7 +47,7 @@ public class ImageModuleProPra extends ImageModule {
         // DataBuffer für Header erstellen
         DataBuffer dataBuffer = new DataBuffer(PROPRA_HEADER_SIZE);
         ByteBuffer byteBuffer = dataBuffer.getBuffer();
-        byteBuffer.order(byteOrder);
+        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         
         // ProPra spezifisches RBG Farbmapping setzen
         header = new ImageHeader(info);
@@ -74,7 +75,7 @@ public class ImageModuleProPra extends ImageModule {
     @Override
     public ImageHeader headerIn(DataBuffer data) {
         ByteBuffer bytes = data.getBuffer();
-        bytes.order(this.byteOrder);
+        bytes.order(ByteOrder.LITTLE_ENDIAN);
         
         // Prüfe Formatkennung
         String version;

@@ -70,6 +70,7 @@ public class ColorFormat implements Comparable<ColorFormat> {
         return convertColor(input, 0, colorInfo);
     }
     
+    
     /**
      * Allgemeine Methode zum Konvertieren einer Farbe in ein Zielfarbformat.
      * 
@@ -93,6 +94,34 @@ public class ColorFormat implements Comparable<ColorFormat> {
         input[offset + mapping[GREEN]] = t1;
         input[offset + mapping[BLUE]] = t0;
                 
+        return input;
+    }
+    
+    /*
+     * 
+     */
+    public static byte[] convertColor(  byte[] input, int srcOffset, ColorFormat srcFormat,
+                                        byte[] output, int dstOffset, ColorFormat dstFormat, int len) {
+        if (input == null
+        ||  output == null
+        ||  srcFormat == null
+        ||  dstFormat == null) {
+            throw new IllegalArgumentException();
+        }  
+        byte t0,t1,t2;
+        int[] srcMap = srcFormat.getMapping();
+        int[] dstMap = dstFormat.getMapping();
+        
+        for (int i=0; i<len; i++) {
+            t2 = input[srcOffset + srcMap[RED]];
+            t1 = input[srcOffset + srcMap[GREEN]];
+            t0 = input[srcOffset + srcMap[BLUE]];
+
+            output[dstOffset + dstMap[RED]] = t2;
+            output[dstOffset + dstMap[GREEN]] = t1;
+            output[dstOffset + dstMap[BLUE]] = t0;
+        }
+        
         return input;
     }
     

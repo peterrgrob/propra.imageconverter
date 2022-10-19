@@ -28,8 +28,7 @@ public class ImageModuleTGA extends ImageModule {
      */
     public ImageModuleTGA(long streamLen) {
         super(streamLen);
-        headerSize = TGA_HEADER_SIZE;
-        byteOrder = ByteOrder.LITTLE_ENDIAN;    
+        headerSize = TGA_HEADER_SIZE;   
     }
 
     

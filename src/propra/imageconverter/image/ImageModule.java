@@ -1,6 +1,5 @@
 package propra.imageconverter.image;
 
-import java.nio.ByteOrder;
 import propra.imageconverter.util.Checkable;
 import propra.imageconverter.util.Checksum;
 import propra.imageconverter.util.DataBuffer;
@@ -13,11 +12,12 @@ import propra.imageconverter.util.Validatable;
  */
 public abstract class ImageModule implements Checkable, Validatable {
     
-    ByteOrder byteOrder = ByteOrder.LITTLE_ENDIAN;
     protected ImageHeader header;
     Checksum checksumObj;  
     int headerSize;
     long streamLen;
+    
+    ImageTranscoderColor colorTranscoder = new ImageTranscoderColor();
 
     /**
      *
@@ -56,17 +56,7 @@ public abstract class ImageModule implements Checkable, Validatable {
             throw new IllegalArgumentException();
         }
         
-        // Generische Farbkonvertierung
-        if(header.getColorType().compareTo(colorFormat) != 0) {
-            byte[] color = data.getBytes();
-            
-            for(int i=0; i<data.getSize(); i+=3) {
-                header.getColorType().convertColor(color, 
-                                        i,
-                                        colorFormat);
-            }
-        }
-        
+        colorTranscoder.encode(data, colorFormat, data, header.getColorType());
         updateCheck(data.getBytes());
         
         return data;
@@ -126,6 +116,19 @@ public abstract class ImageModule implements Checkable, Validatable {
     public Checksum getChecksumObj() {
         return checksumObj;
     }
+
+    /**
+     *
+     * @return
+     */
+    @Override
+    public long getChecksum() {
+        if( isCheckable()
+        &&  checksumObj != null) {
+            return checksumObj.getValue();
+        }
+        return 0;
+    }
     
     /**
      *
@@ -171,29 +174,5 @@ public abstract class ImageModule implements Checkable, Validatable {
      */
     public ImageHeader getHeader() {
         return header;
-    }
-
-    /**
-     *
-     * @param header
-     */
-    public void setHeader(ImageHeader header) {
-        this.header = header;
-    }
-
-    /**
-     *
-     * @return
-     */
-    public ByteOrder getByteOrder() {
-        return byteOrder;
-    }
-
-    /**
-     *
-     * @param byteOrder
-     */
-    public void setByteOrder(ByteOrder byteOrder) {
-        this.byteOrder = byteOrder;
     }
 }

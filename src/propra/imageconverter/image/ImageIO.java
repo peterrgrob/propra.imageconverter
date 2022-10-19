@@ -1,7 +1,10 @@
 package propra.imageconverter.image;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import propra.imageconverter.util.CmdLine;
 import propra.imageconverter.util.DataBuffer;
 import propra.imageconverter.util.Validatable;
 
@@ -70,6 +73,37 @@ public class ImageIO implements Validatable {
         this.outStream = outStream;
         this.inPlugin = inPlugin;
         this.outPlugin = outPlugin;
+    }
+    
+    /**
+     *
+     * @param cmd
+     */
+    public void setup(CmdLine cmd) throws FileNotFoundException, IOException {
+        if(cmd == null) {
+            throw new IllegalArgumentException();
+        }
+        
+        inStream = new RandomAccessFile(cmd.getOption(CmdLine.Options.INPUT_FILE),"r");
+        inPlugin = getModule(cmd.getOption(CmdLine.Options.INPUT_EXT), 
+                            inStream.length());
+        if(inPlugin == null) {
+            throw new IOException("Nicht unterstütztes Bildformat.");
+        }
+
+        String outPath = cmd.getOption(CmdLine.Options.OUTPUT_FILE);  
+        // Wenn Datei nicht vorhanden, neue Datei erstellen.
+        File file = new File(outPath);
+        if(!file.exists()) {
+            file.createNewFile();
+        }
+        
+        outStream = new RandomAccessFile(file,"rw");
+        outPlugin = getModule(cmd.getOption(CmdLine.Options.OUTPUT_EXT), 
+                            outStream.length());
+        if(outPlugin == null) {
+            throw new IOException("Nicht unterstütztes Bildformat.");
+        }
     }
     
     /**
@@ -172,9 +206,6 @@ public class ImageIO implements Validatable {
         outStream.write(rawBytes.getBytes());
         return rawBytes;
     }
-    
-    
-    
     
     /**
      *
@@ -302,5 +333,21 @@ public class ImageIO implements Validatable {
 
     public ImageModule getOutPlugin() {
         return outPlugin;
+    }
+    
+    /**
+     *
+     * @param ext
+     * @param streamLen
+     * @return
+     */
+    private static ImageModule getModule(String ext, long streamLen) {
+        switch(ext) {
+            case "tga":
+                return new ImageModuleTGA(streamLen);
+            case "propra":
+                return new ImageModuleProPra(streamLen);
+        }
+        return null;
     }
 }

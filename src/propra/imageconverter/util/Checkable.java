@@ -17,5 +17,11 @@ public interface Checkable {
      *
      * @return
      */
+    public long getChecksum();
+    
+    /**
+     *
+     * @return
+     */
     public Checksum getChecksumObj();
 }

@@ -11,8 +11,7 @@ public class ChecksumPropra extends Checksum {
     int a_i;
     int b_i = 1;
     int index;
-    
-        
+     
     /**
      *
      */
