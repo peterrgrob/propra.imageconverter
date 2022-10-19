@@ -53,24 +53,23 @@ public class ImageConverter {
     public void Convert(CmdLine cmdLine) throws FileNotFoundException, IOException {    
         long start = System.currentTimeMillis();
 
-        ImageIO ioController = new ImageIO();
-        ioController.setup(cmdLine);
-        ioController.beginTransfer();
-        ImageHeader inHeader = ioController.getInPlugin().getHeader();
+        ImageIO io = new ImageIO();
+        io.setup(cmdLine);
+        ImageHeader inHeader = io.beginTransfer();
                 
         // Infos zum Eingabebild ausgeben
         System.out.print("Bildinfo: " + inHeader.getWidth());
         System.out.print("x" + inHeader.getHeight());
         System.out.print("x" + inHeader.getElementSize());
 
-        ioController.doTransfer();
-        ioController.finishTransfer();
+        io.doTransfer();
+        io.finishTransfer();
         
         // Infos auf der Konsole ausgeben
         long finish = System.currentTimeMillis();
         long timeElapsed = finish - start;
-        System.out.print("\nEingabe Prüfsumme: "+String.format("0x%08X", (int)ioController.getInChecksum()));
-        System.out.print("\nAusgabe Prüfsumme: "+String.format("0x%08X", (int)ioController.getOutChecksum()));
+        System.out.print("\nEingabe Prüfsumme: "+String.format("0x%08X", (int)io.getInChecksum()));
+        System.out.print("\nAusgabe Prüfsumme: "+String.format("0x%08X", (int)io.getOutChecksum()));
         System.out.println("\nKonvertierung abgeschlossen in (ms): " + String.valueOf(timeElapsed));
     }
 }

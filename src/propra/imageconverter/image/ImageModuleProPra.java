@@ -39,7 +39,7 @@ public class ImageModuleProPra extends ImageModule {
      * @return Header als DataBuffer
      */
     @Override
-    public DataBuffer headerOut(ImageHeader info) {
+    public DataBuffer writeHeader(ImageHeader info) {
         if(info.isValid() == false) {
             throw new IllegalArgumentException();
         }
@@ -73,7 +73,7 @@ public class ImageModuleProPra extends ImageModule {
      * @return Allgemeiner Header
      */
     @Override
-    public ImageHeader headerIn(DataBuffer data) {
+    public ImageHeader readHeader(DataBuffer data) {
         ByteBuffer bytes = data.getBuffer();
         bytes.order(ByteOrder.LITTLE_ENDIAN);
         

@@ -110,7 +110,7 @@ public class ImageIO implements Validatable {
      *
      * @throws IOException
      */
-    public void beginTransfer() throws IOException {
+    public ImageHeader beginTransfer() throws IOException {
         if(!isValid()) {
             throw new IllegalStateException();
         }
@@ -118,6 +118,7 @@ public class ImageIO implements Validatable {
         // Header IO
         ImageHeader inHeader = loadHeader();
         writeHeader(inHeader);
+        return inHeader;
     }
     
     /**
@@ -149,8 +150,8 @@ public class ImageIO implements Validatable {
         int blockMod = (int)(len % getBlockSize());
         DataBuffer block = new DataBuffer(getBlockSize());
         
-        inPlugin.beginDataTransfer();
-        outPlugin.beginDataTransfer();
+        inPlugin.beginReadWrite();
+        outPlugin.beginReadWrite();
         
         for(int i=0; i<blockCount; i++) {
             processBlock(block, inPlugin, outPlugin);
@@ -160,8 +161,8 @@ public class ImageIO implements Validatable {
             processBlock(new DataBuffer(blockMod), inPlugin, outPlugin);
         }
         
-        inPlugin.finishDataTransfer();
-        outPlugin.finishDataTransfer();
+        inPlugin.finishReadWrite();
+        outPlugin.finishReadWrite();
         checkChecksum();
         
         return len;
@@ -186,7 +187,7 @@ public class ImageIO implements Validatable {
         }
         
         // In logischen Header umwandeln und für Ausgabe merken
-        return inPlugin.headerIn(rawBytes);
+        return inPlugin.readHeader(rawBytes);
     }
     
     
@@ -202,7 +203,7 @@ public class ImageIO implements Validatable {
         }
    
         // In Formatheader umwandeln und in den Stream schreiben
-        DataBuffer rawBytes = outPlugin.headerOut(header);
+        DataBuffer rawBytes = outPlugin.writeHeader(header);
         outStream.write(rawBytes.getBytes());
         return rawBytes;
     }
@@ -229,8 +230,8 @@ public class ImageIO implements Validatable {
         }
         
         // Farbdaten umwandeln mit spezifischen Modulen
-        block = inPlugin.dataIn(block);
-        outPlugin.dataOut(block, inPlugin.getHeader().getColorType());
+        block = inPlugin.read(block);
+        outPlugin.write(block, inPlugin.getHeader().getColorType());
         
         // In Stream schreiben
         write(block);

@@ -39,7 +39,7 @@ public class ImageModuleTGA extends ImageModule {
      * @return
      */
     @Override
-    public DataBuffer headerOut(ImageHeader info) {
+    public DataBuffer writeHeader(ImageHeader info) {
         if(info.isValid() == false) {
             throw new IllegalArgumentException();
         }
@@ -71,7 +71,7 @@ public class ImageModuleTGA extends ImageModule {
      * @return
      */
     @Override
-    public ImageHeader headerIn(DataBuffer data) {
+    public ImageHeader readHeader(DataBuffer data) {
         ByteBuffer byteBuffer = data.getBuffer();
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         

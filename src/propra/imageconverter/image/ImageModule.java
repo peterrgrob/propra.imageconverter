@@ -33,7 +33,7 @@ public abstract class ImageModule implements Checkable, Validatable {
      * @param info
      * @return
      */
-    public abstract DataBuffer headerOut(ImageHeader info);
+    public abstract DataBuffer writeHeader(ImageHeader info);
 
     /**
      * Wandelt Bytes in einen allgmeinen ImageHeader um. 
@@ -41,7 +41,7 @@ public abstract class ImageModule implements Checkable, Validatable {
      * @param data
      * @return
      */
-    public abstract ImageHeader headerIn(DataBuffer data);
+    public abstract ImageHeader readHeader(DataBuffer data);
     
     /**
      * Wandelt Bilddaten in bytes um. 
@@ -50,7 +50,7 @@ public abstract class ImageModule implements Checkable, Validatable {
      * @param colorFormat
      * @return
      */
-    public DataBuffer dataOut(DataBuffer data, ColorFormat colorFormat) {
+    public DataBuffer write(DataBuffer data, ColorFormat colorFormat) {
         if(!isValid() 
         || data == null) {
             throw new IllegalArgumentException();
@@ -68,7 +68,7 @@ public abstract class ImageModule implements Checkable, Validatable {
      * @param data
      * @return
      */
-    public DataBuffer dataIn(DataBuffer data) {
+    public DataBuffer read(DataBuffer data) {
         if(!isValid() 
         || data == null) {
             throw new IllegalArgumentException();
@@ -81,7 +81,7 @@ public abstract class ImageModule implements Checkable, Validatable {
     /**
      *
      */
-    public void beginDataTransfer() {
+    public void beginReadWrite() {
         if(isCheckable()) {
             checksumObj.begin();
         }
@@ -91,7 +91,7 @@ public abstract class ImageModule implements Checkable, Validatable {
      *
      * @return
      */
-    public long finishDataTransfer() {
+    public long finishReadWrite() {
         if(isCheckable()) {
             header.setChecksum(checksumObj.finish());
             return header.getChecksum();
