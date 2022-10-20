@@ -1,5 +1,7 @@
 package propra.imageconverter.image;
 
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import propra.imageconverter.util.Checkable;
 import propra.imageconverter.util.Checksum;
 import propra.imageconverter.util.DataBuffer;
@@ -12,19 +14,19 @@ import propra.imageconverter.util.Validatable;
  */
 public abstract class ImageModule implements Checkable, Validatable {
     
+    protected ImageTranscoderColor colorTranscoder = new ImageTranscoderColor(); 
+    protected int blockSize = 4096 * 3;
+    protected RandomAccessFile stream;
     protected ImageHeader header;
-    Checksum checksumObj;  
-    int headerSize;
-    long streamLen;
-    
-    ImageTranscoderColor colorTranscoder = new ImageTranscoderColor();
+    protected Checksum checksumObj;  
+    protected int headerSize;
+    protected long bytesRead;
 
     /**
      *
-     * @param streamLen
      */
-    public ImageModule(long streamLen) {
-        this.streamLen = streamLen;
+    public ImageModule(RandomAccessFile stream) {
+        this.stream = stream;
     }
             
     /**
@@ -33,7 +35,7 @@ public abstract class ImageModule implements Checkable, Validatable {
      * @param info
      * @return
      */
-    public abstract DataBuffer writeHeader(ImageHeader info);
+    public abstract void writeHeader(ImageHeader info) throws IOException;
 
     /**
      * Wandelt Bytes in einen allgmeinen ImageHeader um. 
@@ -41,7 +43,7 @@ public abstract class ImageModule implements Checkable, Validatable {
      * @param data
      * @return
      */
-    public abstract ImageHeader readHeader(DataBuffer data);
+    public abstract ImageHeader readHeader() throws IOException;
     
     /**
      * Wandelt Bilddaten in bytes um. 
@@ -50,15 +52,21 @@ public abstract class ImageModule implements Checkable, Validatable {
      * @param colorFormat
      * @return
      */
-    public DataBuffer write(DataBuffer data, ColorFormat colorFormat) {
+    public DataBuffer writeImageData(DataBuffer data, int len, ColorFormat colorFormat) throws IOException {
         if(!isValid() 
-        || data == null) {
+        || data == null
+        || len <= 0) {
             throw new IllegalArgumentException();
         }
         
-        colorTranscoder.encode(data, colorFormat, data, header.getColorType());
-        updateCheck(data.getBytes());
-        
+        colorTranscoder.encode( data, 
+                                colorFormat, 
+                                data, 
+                                header.getColorType(), 
+                                len);        
+        updateCheck(data.getBytes(), len);  
+        stream.write(data.getBytes(), 0, len);
+       
         return data;
     }
     
@@ -68,35 +76,51 @@ public abstract class ImageModule implements Checkable, Validatable {
      * @param data
      * @return
      */
-    public DataBuffer read(DataBuffer data) {
+    public int readImageData(DataBuffer buffer) throws IOException {
         if(!isValid() 
-        || data == null) {
+        || buffer == null) {
             throw new IllegalArgumentException();
         }
-               
-        updateCheck(data.getBytes());                
-        return data;
+        
+        int len = buffer.getSize();
+        
+        if(bytesRead + buffer.getSize() > header.getBufferSize()) {
+            len = (int)(header.getBufferSize() - bytesRead);
+        }
+        
+        if(len != stream.read(buffer.getBytes(), 0, len)) {
+            throw new IOException();
+        }
+        
+        updateCheck(buffer.getBytes(), len);   
+        bytesRead += len; 
+        return len;
     }
     
     /**
      *
      */
-    public void beginReadWrite() {
+    public void beginImageData() {
         if(isCheckable()) {
             checksumObj.begin();
         }
+        
+        bytesRead = 0;
     }
-
+    
     /**
      *
      * @return
      */
-    public long finishReadWrite() {
+    public long endImageData() {
         if(isCheckable()) {
-            header.setChecksum(checksumObj.finish());
-            return header.getChecksum();
+            header.setChecksum(checksumObj.end());
         }
-        return 0;
+        return bytesRead;
+    }
+    
+    public boolean hasMoreImageData() throws IOException {
+        return (header.getBufferSize() - bytesRead) != 0;
     }
     
     /** 
@@ -134,12 +158,12 @@ public abstract class ImageModule implements Checkable, Validatable {
      *
      * @param bytes
      */
-    protected void updateCheck(byte[] bytes) {
+    protected void updateCheck(byte[] bytes, int len) {
         if (bytes == null ) {
             throw new IllegalArgumentException();
         }
         if(isCheckable()) {
-            checksumObj.update(bytes,0,bytes.length);
+            checksumObj.update(bytes,0,len);
         }
     } 
     /**
@@ -149,7 +173,7 @@ public abstract class ImageModule implements Checkable, Validatable {
     @Override
     public boolean isValid() {
         return (    header != null 
-                &&  streamLen > 0);
+                &&  stream != null);
     }
 
     /**
@@ -160,12 +184,8 @@ public abstract class ImageModule implements Checkable, Validatable {
         return headerSize;
     }
 
-    /**
-     *
-     * @param headerSize
-     */
-    public void setHeaderSize(int headerSize) {
-        this.headerSize = headerSize;
+    public int getBlockSize() {
+        return blockSize;
     }
 
     /**

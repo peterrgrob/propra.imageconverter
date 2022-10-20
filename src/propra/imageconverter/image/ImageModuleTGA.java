@@ -1,5 +1,7 @@
 package propra.imageconverter.image;
 
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import propra.imageconverter.util.DataBuffer;
@@ -26,8 +28,8 @@ public class ImageModuleTGA extends ImageModule {
      *
      * @param streamLen
      */
-    public ImageModuleTGA(long streamLen) {
-        super(streamLen);
+    public ImageModuleTGA(RandomAccessFile stream) {
+        super(stream);
         headerSize = TGA_HEADER_SIZE;   
     }
 
@@ -39,7 +41,7 @@ public class ImageModuleTGA extends ImageModule {
      * @return
      */
     @Override
-    public DataBuffer writeHeader(ImageHeader info) {
+    public void writeHeader(ImageHeader info) throws IOException {
         if(info.isValid() == false) {
             throw new IllegalArgumentException();
         }
@@ -58,10 +60,11 @@ public class ImageModuleTGA extends ImageModule {
         byteBuffer.put(TGA_HEADER_OFFSET_ENCODING, (byte)2);
         byteBuffer.putShort(TGA_HEADER_OFFSET_WIDTH, (short)info.getWidth());
         byteBuffer.putShort(TGA_HEADER_OFFSET_HEIGHT, (short)info.getHeight());
-        byteBuffer.put(TGA_HEADER_OFFSET_BPP, (byte)(info.getElementSize() << 3));        
+        byteBuffer.put(TGA_HEADER_OFFSET_BPP, (byte)(info.getPixelSize() << 3));        
         byteBuffer.put(TGA_HEADER_OFFSET_ORIGIN, (byte)(1 << 5));    
         
-        return dataBuffer;
+        stream.seek(0);
+        stream.write(byteBuffer.array());
     }
 
     /**
@@ -71,15 +74,17 @@ public class ImageModuleTGA extends ImageModule {
      * @return
      */
     @Override
-    public ImageHeader readHeader(DataBuffer data) {
+    public ImageHeader readHeader() throws IOException{
+        DataBuffer data = new DataBuffer(headerSize);
         ByteBuffer byteBuffer = data.getBuffer();
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+        stream.read(byteBuffer.array());
         
         // Headerfelder einlesen
         ImageHeader tInfo = new ImageHeader();
         tInfo.setWidth(byteBuffer.getShort(TGA_HEADER_OFFSET_WIDTH));
         tInfo.setHeight(byteBuffer.getShort(TGA_HEADER_OFFSET_HEIGHT));
-        tInfo.setElementSize(byteBuffer.get(TGA_HEADER_OFFSET_BPP) >> 3); 
+        tInfo.setPixelSize(byteBuffer.get(TGA_HEADER_OFFSET_BPP) >> 3); 
         tInfo.setEncoding(ImageHeader.Encoding.UNCOMPRESSED);
         
         // Prüfe tga Spezifikationen

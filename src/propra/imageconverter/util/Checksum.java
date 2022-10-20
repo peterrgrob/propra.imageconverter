@@ -16,6 +16,7 @@ public abstract class Checksum {
      *
      */
     public Checksum() {
+        
     }
     
     /**
@@ -71,7 +72,7 @@ public abstract class Checksum {
      *
      * @return
      */
-    public long finish() {
+    public long end() {
         return getValue();
     }
     

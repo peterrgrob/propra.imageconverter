@@ -16,27 +16,19 @@ public class ImageIO implements Validatable {
     
     private ImageModule inPlugin;
     private ImageModule outPlugin;
-    private RandomAccessFile inStream;
-    private RandomAccessFile outStream;
     
     public ImageIO() {
     }
     
     /**
      *
-     * @param inStream
-     * @param outStream
      * @param inPlugin
      * @param outPlugin
      */
-    public ImageIO( RandomAccessFile inStream,
-                    RandomAccessFile outStream,
-                    ImageModule inPlugin,
+    public ImageIO( ImageModule inPlugin,
                     ImageModule outPlugin) {
-        wrap(inStream,
-             outStream,
-             inPlugin,
-             outPlugin);
+        wrapPlugins(inPlugin,
+                    outPlugin);
     }
     
     /**
@@ -45,10 +37,8 @@ public class ImageIO implements Validatable {
      */
     @Override
     public boolean isValid() {
-        return (inStream    != null 
-            &&  outStream   != null
-            &&  inPlugin    != null
-            &&  outPlugin   != null);
+        return (    inPlugin    != null
+                &&  outPlugin   != null);
     }
     
     /**
@@ -58,19 +48,13 @@ public class ImageIO implements Validatable {
      * @param inPlugin
      * @param outPlugin
      */
-    public void wrap(   RandomAccessFile inStream,
-                        RandomAccessFile outStream,
-                        ImageModule inPlugin,
-                        ImageModule outPlugin) {
-        if( inStream == null
-        ||  outStream == null
-        ||  inPlugin == null
+    public void wrapPlugins(ImageModule inPlugin,
+                            ImageModule outPlugin) {
+        if( inPlugin == null
         ||  outPlugin == null) {
             throw new IllegalArgumentException();
         }
         
-        this.inStream = inStream;
-        this.outStream = outStream;
         this.inPlugin = inPlugin;
         this.outPlugin = outPlugin;
     }
@@ -79,28 +63,27 @@ public class ImageIO implements Validatable {
      *
      * @param cmd
      */
-    public void setup(CmdLine cmd) throws FileNotFoundException, IOException {
+    public void setupPlugins(CmdLine cmd) throws FileNotFoundException, IOException {
         if(cmd == null) {
             throw new IllegalArgumentException();
         }
         
-        inStream = new RandomAccessFile(cmd.getOption(CmdLine.Options.INPUT_FILE),"r");
-        inPlugin = getModule(cmd.getOption(CmdLine.Options.INPUT_EXT), 
-                            inStream.length());
+        RandomAccessFile inStream = new RandomAccessFile(cmd.getOption(CmdLine.Options.INPUT_FILE),"r");
+        inPlugin = createModule(cmd.getOption(CmdLine.Options.INPUT_EXT), 
+                            inStream);
         if(inPlugin == null) {
             throw new IOException("Nicht unterstütztes Bildformat.");
         }
 
         String outPath = cmd.getOption(CmdLine.Options.OUTPUT_FILE);  
-        // Wenn Datei nicht vorhanden, neue Datei erstellen.
         File file = new File(outPath);
         if(!file.exists()) {
             file.createNewFile();
         }
         
-        outStream = new RandomAccessFile(file,"rw");
-        outPlugin = getModule(cmd.getOption(CmdLine.Options.OUTPUT_EXT), 
-                            outStream.length());
+        RandomAccessFile outStream = new RandomAccessFile(file,"rw");
+        outPlugin = createModule(cmd.getOption(CmdLine.Options.OUTPUT_EXT), 
+                            outStream);
         if(outPlugin == null) {
             throw new IOException("Nicht unterstütztes Bildformat.");
         }
@@ -108,6 +91,7 @@ public class ImageIO implements Validatable {
     
     /**
      *
+     * @return 
      * @throws IOException
      */
     public ImageHeader beginTransfer() throws IOException {
@@ -115,9 +99,8 @@ public class ImageIO implements Validatable {
             throw new IllegalStateException();
         }
         
-        // Header IO
-        ImageHeader inHeader = loadHeader();
-        writeHeader(inHeader);
+        ImageHeader inHeader = inPlugin.readHeader();
+        outPlugin.writeHeader(inHeader);
         return inHeader;
     }
     
@@ -125,14 +108,12 @@ public class ImageIO implements Validatable {
      *
      * @throws IOException
      */
-    public void finishTransfer() throws IOException {
+    public void endTransfer() throws IOException {
         if(!isValid()) {
             throw new IllegalStateException();
         }
-        
-        // Header updaten
-        outStream.seek(0);
-        writeHeader(outPlugin.getHeader());
+
+        outPlugin.writeHeader(outPlugin.getHeader());
     }
     
     /**
@@ -140,137 +121,33 @@ public class ImageIO implements Validatable {
      * @return 
      * @throws java.io.IOException 
      */
-    public long doTransfer() throws IOException {
+    public void transfer() throws IOException {
         if(!isValid()) {
             throw new IllegalArgumentException();
         }
+
+        DataBuffer block = new DataBuffer(inPlugin.getBlockSize());
+        ColorFormat cFormat = inPlugin.getHeader().getColorType();
+        int len;
         
-        long len = inPlugin.getHeader().getTotalSize();
-        int blockCount = (int)(len / getBlockSize());
-        int blockMod = (int)(len % getBlockSize());
-        DataBuffer block = new DataBuffer(getBlockSize());
+        inPlugin.beginImageData();
+        outPlugin.beginImageData();
         
-        inPlugin.beginReadWrite();
-        outPlugin.beginReadWrite();
-        
-        for(int i=0; i<blockCount; i++) {
-            processBlock(block, inPlugin, outPlugin);
+        while(inPlugin.hasMoreImageData()) {
+            len = inPlugin.readImageData(block);
+            outPlugin.writeImageData(block, len, cFormat);
         }
         
-        if(blockMod > 0) {
-            processBlock(new DataBuffer(blockMod), inPlugin, outPlugin);
-        }
-        
-        inPlugin.finishReadWrite();
-        outPlugin.finishReadWrite();
-        checkChecksum();
-        
-        return len;
-    }
-    
-    /**
-     *  Liest Header vom Stream und gibt einen allgemeinen Header
-     *  zurück
-     * 
-     * @return 
-     * @throws java.io.IOException
-    */
-    protected ImageHeader loadHeader() throws IOException {
-        if(!isValid()) {
-            throw new IllegalStateException();
-        }
-        
-        // Header-Bytes von Stream lesen
-        DataBuffer rawBytes = new DataBuffer(inPlugin.getHeaderSize());
-        if(read( rawBytes) != inPlugin.getHeaderSize()) {
-            throw new java.io.IOException("Ungültiger Dateikopf!");
-        }
-        
-        // In logischen Header umwandeln und für Ausgabe merken
-        return inPlugin.readHeader(rawBytes);
-    }
-    
-    
-    /**
-     * @param header
-     * @return 
-     * @throws java.io.IOException
-    */
-    protected DataBuffer writeHeader(ImageHeader header) throws IOException {
-        if(!isValid()
-        || header == null) {
-            throw new IllegalStateException();
-        }
-   
-        // In Formatheader umwandeln und in den Stream schreiben
-        DataBuffer rawBytes = outPlugin.writeHeader(header);
-        outStream.write(rawBytes.getBytes());
-        return rawBytes;
-    }
-    
-    /**
-     *
-     * @param block
-     * @param inPlugin
-     * @param outPlugin
-     * @return
-     * @throws IOException
-     */
-    protected DataBuffer processBlock(DataBuffer block, ImageModule inPlugin, ImageModule outPlugin) throws IOException {
-        if(!isValid()
-        || inPlugin == null
-        || outPlugin == null
-        || block == null) {
-            throw new IllegalArgumentException();
-        }    
-        
-        // Farbdaten lesen
-        if(read(block) != block.getSize()) {
-            throw new IOException("IO Fehler!");
-        }
-        
-        // Farbdaten umwandeln mit spezifischen Modulen
-        block = inPlugin.read(block);
-        outPlugin.write(block, inPlugin.getHeader().getColorType());
-        
-        // In Stream schreiben
-        write(block);
-        
-        return block;
-    }
-    
-    /**
-     *
-     * @param buffer
-     * @return
-     * @throws java.io.IOException
-     */
-    protected int read(DataBuffer buffer) throws IOException {
-        if(!isValid()
-        || buffer == null) {
-            throw new IllegalStateException();
-        }
-        return inStream.read(buffer.getBytes());
-    }
-    
-    /**
-     *
-     * @param buffer
-     * @throws java.io.IOException
-     */
-    protected void write(DataBuffer buffer) throws IOException {
-        if(!isValid()
-        || buffer == null) {
-            throw new IllegalStateException();
-        }
-        outStream.write(buffer.getBytes());
+        inPlugin.endImageData();
+        outPlugin.endImageData();
+        isChecksumValid();
     }
     
     /**
      *
      * @throws java.io.IOException
      */
-    public void checkChecksum() throws IOException {
+    public void isChecksumValid() throws IOException {
         if(!isValid()) {
             throw new IllegalStateException();
         }
@@ -294,7 +171,7 @@ public class ImageIO implements Validatable {
      *
      * @return
      */
-    public long getInChecksum() {
+    public long getInputChecksum() {
         if(!isValid()) {
             throw new IllegalStateException();
         }
@@ -309,7 +186,7 @@ public class ImageIO implements Validatable {
      *
      * @return
      */
-    public long getOutChecksum() {
+    public long getOutputChecksum() {
         if(!isValid()) {
             throw new IllegalStateException();
         }
@@ -319,20 +196,20 @@ public class ImageIO implements Validatable {
         }
         return 0;
     }
-    
+
     /**
      *
      * @return
      */
-    public int getBlockSize() {
-        return 4096 * 3;
-    }
-
-    public ImageModule getInPlugin() {
+    public ImageModule getInputPlugin() {
         return inPlugin;
     }
 
-    public ImageModule getOutPlugin() {
+    /**
+     *
+     * @return
+     */
+    public ImageModule getOutputPlugin() {
         return outPlugin;
     }
     
@@ -342,12 +219,12 @@ public class ImageIO implements Validatable {
      * @param streamLen
      * @return
      */
-    private static ImageModule getModule(String ext, long streamLen) {
+    private static ImageModule createModule(String ext, RandomAccessFile stream) {
         switch(ext) {
             case "tga":
-                return new ImageModuleTGA(streamLen);
+                return new ImageModuleTGA(stream);
             case "propra":
-                return new ImageModuleProPra(streamLen);
+                return new ImageModuleProPra(stream);
         }
         return null;
     }

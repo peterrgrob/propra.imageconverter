@@ -1,5 +1,7 @@
 package propra.imageconverter.image;
 
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -26,8 +28,8 @@ public class ImageModuleProPra extends ImageModule {
      *
      * @param streamLen
      */
-    public ImageModuleProPra(long streamLen) {
-        super(streamLen);
+    public ImageModuleProPra(RandomAccessFile stream) {
+        super(stream);
         headerSize = PROPRA_HEADER_SIZE;  
         checksumObj = new ChecksumPropra();
     }
@@ -39,7 +41,7 @@ public class ImageModuleProPra extends ImageModule {
      * @return Header als DataBuffer
      */
     @Override
-    public DataBuffer writeHeader(ImageHeader info) {
+    public void writeHeader(ImageHeader info) throws IOException {
         if(info.isValid() == false) {
             throw new IllegalArgumentException();
         }
@@ -60,10 +62,11 @@ public class ImageModuleProPra extends ImageModule {
         byteBuffer.put(PROPRA_HEADER_OFFSET_ENCODING, (byte)0);
         byteBuffer.putShort(PROPRA_HEADER_OFFSET_WIDTH,(short)info.getWidth());
         byteBuffer.putShort(PROPRA_HEADER_OFFSET_HEIGHT,(short)info.getHeight());
-        byteBuffer.put(PROPRA_HEADER_OFFSET_BPP,(byte)(info.getElementSize() << 3));
-        byteBuffer.putLong(PROPRA_HEADER_OFFSET_DATALEN,(long)info.getTotalSize());
-       
-        return dataBuffer;
+        byteBuffer.put(PROPRA_HEADER_OFFSET_BPP,(byte)(info.getPixelSize() << 3));
+        byteBuffer.putLong(PROPRA_HEADER_OFFSET_DATALEN,(long)info.getBufferSize());
+        
+        stream.seek(0);
+        stream.write(byteBuffer.array());
     }
 
     /**
@@ -71,11 +74,17 @@ public class ImageModuleProPra extends ImageModule {
      * 
      * @param data
      * @return Allgemeiner Header
+     * @throws java.io.IOException
      */
     @Override
-    public ImageHeader readHeader(DataBuffer data) {
+    public ImageHeader readHeader() throws IOException {
+        if(stream == null) {
+            throw new IllegalArgumentException();
+        }
+        DataBuffer data = new DataBuffer(headerSize);
         ByteBuffer bytes = data.getBuffer();
         bytes.order(ByteOrder.LITTLE_ENDIAN);
+        stream.read(bytes.array());
         
         // Prüfe Formatkennung
         String version;
@@ -92,7 +101,7 @@ public class ImageModuleProPra extends ImageModule {
         ImageHeader tInfo = new ImageHeader();
         tInfo.setWidth(bytes.getShort(PROPRA_HEADER_OFFSET_WIDTH));
         tInfo.setHeight(bytes.getShort(PROPRA_HEADER_OFFSET_HEIGHT));
-        tInfo.setElementSize((int)bytes.get(PROPRA_HEADER_OFFSET_BPP) >> 3); 
+        tInfo.setPixelSize((int)bytes.get(PROPRA_HEADER_OFFSET_BPP) >> 3); 
         tInfo.setChecksum(bytes.getInt(PROPRA_HEADER_OFFSET_CHECKSUM)); 
         tInfo.setEncoding(ImageHeader.Encoding.UNCOMPRESSED);
         long dataLen = bytes.getLong(PROPRA_HEADER_OFFSET_DATALEN);   
@@ -104,9 +113,9 @@ public class ImageModuleProPra extends ImageModule {
         
         // Prüfe ProPra Spezifikationen
         if( tInfo.isValid() == false 
-        ||  (tInfo.getTotalSize() != dataLen)
-        ||  (dataLen != (streamLen - PROPRA_HEADER_SIZE))
-        ||  (tInfo.getTotalSize() != (streamLen - PROPRA_HEADER_SIZE))
+        ||  (tInfo.getBufferSize() != dataLen)
+        ||  (dataLen != (stream.length() - PROPRA_HEADER_SIZE))
+        ||  (tInfo.getBufferSize() != (stream.length() - PROPRA_HEADER_SIZE))
         ||  (bytes.get(PROPRA_HEADER_OFFSET_ENCODING) != 0)) {
             throw new UnsupportedOperationException("Ungültiges ProPra Dateiformat!");
         }

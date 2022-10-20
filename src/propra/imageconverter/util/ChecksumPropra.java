@@ -10,7 +10,7 @@ public class ChecksumPropra extends Checksum {
     private static final int X = 65521;
     int a_i;
     int b_i = 1;
-    int index;
+    int runningIndex;
      
     /**
      *
@@ -20,7 +20,7 @@ public class ChecksumPropra extends Checksum {
         super.reset();
         a_i = 0;
         b_i = 1;
-        index = 0;
+        runningIndex = 0;
     }
     
     /**
@@ -42,15 +42,6 @@ public class ChecksumPropra extends Checksum {
         }   
         return (value = (a_i << 16) + b_i);
     }
-
-    /**
-     *
-     * @return
-     */
-    @Override
-    public long finish() {
-        return (value = (a_i << 16) + b_i);
-    }
     
     /**
      *  Aktualisiert Prüfsumme mit ProPra-Prüfsummen Verfahren, wie vorgegeben
@@ -68,10 +59,19 @@ public class ChecksumPropra extends Checksum {
         int dindex = offset;
         
         for(int i=1; i<=len; i++) {
-            a_i = (i + index + a_i + Byte.toUnsignedInt(data[dindex++])) % X;
+            a_i = (i + runningIndex + a_i + Byte.toUnsignedInt(data[dindex++])) % X;
             b_i = (b_i + a_i) % X; 
         }  
         
-        index += len;
+        runningIndex += len;
+    }
+    
+    /**
+     *
+     * @return
+     */
+    @Override
+    public long end() {
+        return (value = (a_i << 16) + b_i);
     }
 }

@@ -17,7 +17,7 @@ public interface ImageTranscoder {
      * @return
      */
     public DataBuffer encode(   DataBuffer src, ColorFormat srcFormat, 
-                                DataBuffer target, ColorFormat targetFormat);
+                                DataBuffer target, ColorFormat targetFormat, int len);
     
     /**
      *
@@ -28,5 +28,5 @@ public interface ImageTranscoder {
      * @return
      */
     public DataBuffer decode(   DataBuffer src, ColorFormat srcFormat, 
-                                DataBuffer target, ColorFormat targetFormat);
+                                DataBuffer target, ColorFormat targetFormat, int len);
 }

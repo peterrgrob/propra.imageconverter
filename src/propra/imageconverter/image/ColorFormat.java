@@ -100,8 +100,8 @@ public class ColorFormat implements Comparable<ColorFormat> {
     /*
      * 
      */
-    public static byte[] convertColor(  byte[] input, int srcOffset, ColorFormat srcFormat,
-                                        byte[] output, int dstOffset, ColorFormat dstFormat, int len) {
+    public static byte[] convertColorArray(  byte[] input, int srcOffset, ColorFormat srcFormat,
+                                            byte[] output, int dstOffset, ColorFormat dstFormat, int len) {
         if (input == null
         ||  output == null
         ||  srcFormat == null
@@ -109,17 +109,22 @@ public class ColorFormat implements Comparable<ColorFormat> {
             throw new IllegalArgumentException();
         }  
         byte t0,t1,t2;
+        int sIndex;
+        int dIndex;
         int[] srcMap = srcFormat.getMapping();
         int[] dstMap = dstFormat.getMapping();
         
-        for (int i=0; i<len; i++) {
-            t2 = input[srcOffset + srcMap[RED]];
-            t1 = input[srcOffset + srcMap[GREEN]];
-            t0 = input[srcOffset + srcMap[BLUE]];
+        for (int i=0; i<len; i+=3) {
+            sIndex = srcOffset + i;
+            dIndex = dstOffset + i;
+            
+            t2 = input[sIndex + srcMap[RED]];
+            t1 = input[sIndex + srcMap[GREEN]];
+            t0 = input[sIndex + srcMap[BLUE]];
 
-            output[dstOffset + dstMap[RED]] = t2;
-            output[dstOffset + dstMap[GREEN]] = t1;
-            output[dstOffset + dstMap[BLUE]] = t0;
+            output[dIndex + dstMap[RED]] = t2;
+            output[dIndex + dstMap[GREEN]] = t1;
+            output[dIndex + dstMap[BLUE]] = t0;
         }
         
         return input;

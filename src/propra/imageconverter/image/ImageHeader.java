@@ -1,11 +1,13 @@
 package propra.imageconverter.image;
 
+import propra.imageconverter.util.Validatable;
+
 /**
  * Klasse für einen allgemeinen Bildkopf
  * 
  * @author pg
  */
-public class ImageHeader {
+public class ImageHeader implements Validatable {
     
     private int width;
     private int height;
@@ -69,7 +71,7 @@ public class ImageHeader {
      * 
      * @return 
      */
-    public int getTotalSize() {
+    public int getBufferSize() {
         return width * height * elementSize;
     }
     
@@ -91,21 +93,21 @@ public class ImageHeader {
      * 
      * @return 
      */
-    public int getElementCount() {
+    public int getPixelCount() {
         return width * height;
     }
     
     /**
      * @return the value of elementSize
      */
-    public int getElementSize() {
+    public int getPixelSize() {
         return elementSize;
     }
 
     /**
      * @param elementSize new value of elementSize
      */
-    public void setElementSize(int elementSize) {
+    public void setPixelSize(int elementSize) {
         this.elementSize = elementSize;
     }
 
