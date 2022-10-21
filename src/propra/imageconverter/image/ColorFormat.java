@@ -75,33 +75,32 @@ public class ColorFormat implements Comparable<ColorFormat> {
      * Allgemeine Methode zum Konvertieren einer Farbe in ein Zielfarbformat.
      * 
      * @param input
-     * @param offset
-     * @param colorInfo
      * @return 
      */
-    public byte[] convertColor(byte[] input, int offset, ColorFormat colorInfo) {
+    public byte[] convertColor(byte[] input, int inputOffset, ColorFormat inputFormat) {
         if ( input == null) {
             throw new IllegalArgumentException();
         }  
         byte t0,t1,t2;
-        int[] map = colorInfo.getMapping();
+        int[] map = inputFormat.getMapping();
         
-        t2 = input[offset + map[RED]];
-        t1 = input[offset + map[GREEN]];
-        t0 = input[offset + map[BLUE]];
+        t2 = input[inputOffset + map[RED]];
+        t1 = input[inputOffset + map[GREEN]];
+        t0 = input[inputOffset + map[BLUE]];
         
-        input[offset + mapping[RED]] = t2;
-        input[offset + mapping[GREEN]] = t1;
-        input[offset + mapping[BLUE]] = t0;
+        input[inputOffset + mapping[RED]] = t2;
+        input[inputOffset + mapping[GREEN]] = t1;
+        input[inputOffset + mapping[BLUE]] = t0;
                 
         return input;
     }
-    
+      
     /*
      * 
      */
-    public static byte[] convertColorArray(  byte[] input, int srcOffset, ColorFormat srcFormat,
-                                            byte[] output, int dstOffset, ColorFormat dstFormat, int len) {
+    public static byte[] convertColorArray( byte[] input, int srcOffset, ColorFormat srcFormat,
+                                            byte[] output, int dstOffset, ColorFormat dstFormat, 
+                                            int len) {
         if (input == null
         ||  output == null
         ||  srcFormat == null
