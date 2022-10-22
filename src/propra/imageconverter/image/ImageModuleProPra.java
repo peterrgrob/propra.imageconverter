@@ -15,18 +15,18 @@ import propra.imageconverter.util.DataBuffer;
  */
 public class ImageModuleProPra extends ImageModule {
     
-    static final String PROPRA_VERSION = "ProPraWiSe22";
-    static final int PROPRA_HEADER_SIZE = 30;
-    static final int PROPRA_HEADER_OFFSET_ENCODING = 12;
-    static final int PROPRA_HEADER_OFFSET_WIDTH = 13;
-    static final int PROPRA_HEADER_OFFSET_HEIGHT = 15;
-    static final int PROPRA_HEADER_OFFSET_BPP = 17;
-    static final int PROPRA_HEADER_OFFSET_DATALEN = 18;
-    static final int PROPRA_HEADER_OFFSET_CHECKSUM = 26;   
+    static private final String PROPRA_VERSION = "ProPraWiSe22";
+    static private final int PROPRA_HEADER_SIZE = 30;
+    static private final int PROPRA_HEADER_OFFSET_ENCODING = 12;
+    static private final int PROPRA_HEADER_OFFSET_WIDTH = 13;
+    static private final int PROPRA_HEADER_OFFSET_HEIGHT = 15;
+    static private final int PROPRA_HEADER_OFFSET_BPP = 17;
+    static private final int PROPRA_HEADER_OFFSET_DATALEN = 18;
+    static private final int PROPRA_HEADER_OFFSET_CHECKSUM = 26;   
     
     /**
      *
-     * @param streamLen
+     * @param stream
      */
     public ImageModuleProPra(RandomAccessFile stream) {
         super(stream);
@@ -38,7 +38,6 @@ public class ImageModuleProPra extends ImageModule {
      *  Wandelt einen allgemeinen Header in einen ProPra Header um
      * 
      * @param info
-     * @return Header als DataBuffer
      */
     @Override
     public void writeHeader(ImageHeader info) throws IOException {
@@ -84,7 +83,8 @@ public class ImageModuleProPra extends ImageModule {
         DataBuffer data = new DataBuffer(headerSize);
         ByteBuffer bytes = data.getBuffer();
         bytes.order(ByteOrder.LITTLE_ENDIAN);
-        stream.read(bytes.array());
+        
+        readDataFromStream(data, 0, headerSize);
         
         // Prüfe Formatkennung
         String version;
@@ -98,28 +98,28 @@ public class ImageModuleProPra extends ImageModule {
         }
         
         // Headerfelder einlesen
-        ImageHeader tInfo = new ImageHeader();
-        tInfo.setWidth(bytes.getShort(PROPRA_HEADER_OFFSET_WIDTH));
-        tInfo.setHeight(bytes.getShort(PROPRA_HEADER_OFFSET_HEIGHT));
-        tInfo.setPixelSize((int)bytes.get(PROPRA_HEADER_OFFSET_BPP) >> 3); 
-        tInfo.setChecksum(bytes.getInt(PROPRA_HEADER_OFFSET_CHECKSUM)); 
-        tInfo.setEncoding(ImageHeader.Encoding.UNCOMPRESSED);
+        ImageHeader newHeader = new ImageHeader();
+        newHeader.setWidth(bytes.getShort(PROPRA_HEADER_OFFSET_WIDTH));
+        newHeader.setHeight(bytes.getShort(PROPRA_HEADER_OFFSET_HEIGHT));
+        newHeader.setPixelSize((int)bytes.get(PROPRA_HEADER_OFFSET_BPP) >> 3); 
+        newHeader.setChecksum(bytes.getInt(PROPRA_HEADER_OFFSET_CHECKSUM)); 
+        newHeader.setEncoding(ImageHeader.Encoding.UNCOMPRESSED);
         long dataLen = bytes.getLong(PROPRA_HEADER_OFFSET_DATALEN);   
         
         // RBG Farbmapping setzen
-        tInfo.getColorType().setMapping(ColorFormat.RED,0);
-        tInfo.getColorType().setMapping(ColorFormat.GREEN,2);
-        tInfo.getColorType().setMapping(ColorFormat.BLUE,1);
+        newHeader.getColorType().setMapping(ColorFormat.RED,0);
+        newHeader.getColorType().setMapping(ColorFormat.GREEN,2);
+        newHeader.getColorType().setMapping(ColorFormat.BLUE,1);
         
         // Prüfe ProPra Spezifikationen
-        if( tInfo.isValid() == false 
-        ||  (tInfo.getBufferSize() != dataLen)
+        if( newHeader.isValid() == false 
+        ||  (newHeader.getBufferSize() != dataLen)
         ||  (dataLen != (stream.length() - PROPRA_HEADER_SIZE))
-        ||  (tInfo.getBufferSize() != (stream.length() - PROPRA_HEADER_SIZE))
+        ||  (newHeader.getBufferSize() != (stream.length() - PROPRA_HEADER_SIZE))
         ||  (bytes.get(PROPRA_HEADER_OFFSET_ENCODING) != 0)) {
             throw new UnsupportedOperationException("Ungültiges ProPra Dateiformat!");
         }
         
-        return (header = tInfo);
+        return (header = newHeader);
     }  
 }

@@ -1,5 +1,7 @@
 package propra.imageconverter.image;
 
+import propra.imageconverter.util.DataBuffer;
+
 /**
  * 
  *  Repräsentiert ein Farbformat mit 3 Bytes. 
@@ -60,37 +62,25 @@ public class ColorFormat implements Comparable<ColorFormat> {
      * Allgemeine Methode zum Konvertieren einer Farbe in ein Zielfarbformat.
      * 
      * @param input
-     * @param colorInfo
+     * @param inputFormat
      * @return 
      */
-    public byte[] convertColor(byte[] input, ColorFormat colorInfo) {
-        if ( input == null) {
-            throw new IllegalArgumentException();
-        }  
-        return convertColor(input, 0, colorInfo);
-    }
-    
-    
-    /**
-     * Allgemeine Methode zum Konvertieren einer Farbe in ein Zielfarbformat.
-     * 
-     * @param input
-     * @return 
-     */
-    public byte[] convertColor(byte[] input, int inputOffset, ColorFormat inputFormat) {
+    public DataBuffer convertColor(DataBuffer input, ColorFormat inputFormat) {
         if ( input == null) {
             throw new IllegalArgumentException();
         }  
         byte t0,t1,t2;
         int[] map = inputFormat.getMapping();
+        byte[] inBytes = input.getBytes();
+        int inputOffset = input.getCurrDataOffset();
         
-        t2 = input[inputOffset + map[RED]];
-        t1 = input[inputOffset + map[GREEN]];
-        t0 = input[inputOffset + map[BLUE]];
+        t2 = inBytes[inputOffset + map[RED]];
+        t1 = inBytes[inputOffset + map[GREEN]];
+        t0 = inBytes[inputOffset + map[BLUE]];
         
-        input[inputOffset + mapping[RED]] = t2;
-        input[inputOffset + mapping[GREEN]] = t1;
-        input[inputOffset + mapping[BLUE]] = t0;
+        inBytes[inputOffset + mapping[RED]] = t2;
+        inBytes[inputOffset + mapping[GREEN]] = t1;
+        inBytes[inputOffset + mapping[BLUE]] = t0;
                 
         return input;
     }
@@ -98,9 +88,8 @@ public class ColorFormat implements Comparable<ColorFormat> {
     /*
      * 
      */
-    public static byte[] convertColorArray( byte[] input, int srcOffset, ColorFormat srcFormat,
-                                            byte[] output, int dstOffset, ColorFormat dstFormat, 
-                                            int len) {
+    public static DataBuffer convertColorBuffer(DataBuffer input, ColorFormat srcFormat,
+                                                DataBuffer output,ColorFormat dstFormat) {
         if (input == null
         ||  output == null
         ||  srcFormat == null
@@ -110,23 +99,30 @@ public class ColorFormat implements Comparable<ColorFormat> {
         byte t0,t1,t2;
         int sIndex;
         int dIndex;
+        
+        byte[] inBytes = input.getBytes();
+        byte[] outBytes = output.getBytes();
+                
+        int srcOffset = input.getCurrDataOffset();
+        int dstOffset = output.getCurrDataOffset();
+        
         int[] srcMap = srcFormat.getMapping();
         int[] dstMap = dstFormat.getMapping();
         
-        for (int i=0; i<len; i+=3) {
+        for (int i=0; i<input.getCurrDataLength(); i+=3) {
             sIndex = srcOffset + i;
             dIndex = dstOffset + i;
             
-            t2 = input[sIndex + srcMap[RED]];
-            t1 = input[sIndex + srcMap[GREEN]];
-            t0 = input[sIndex + srcMap[BLUE]];
+            t2 = inBytes[sIndex + srcMap[RED]];
+            t1 = inBytes[sIndex + srcMap[GREEN]];
+            t0 = inBytes[sIndex + srcMap[BLUE]];
 
-            output[dIndex + dstMap[RED]] = t2;
-            output[dIndex + dstMap[GREEN]] = t1;
-            output[dIndex + dstMap[BLUE]] = t0;
+            outBytes[dIndex + dstMap[RED]] = t2;
+            outBytes[dIndex + dstMap[GREEN]] = t1;
+            outBytes[dIndex + dstMap[BLUE]] = t0;
         }
         
-        return input;
+        return output;
     }
     
     /**

@@ -10,9 +10,12 @@ import java.nio.ByteOrder;
  * 
  * @author pg
  */
-public class DataBuffer {
+public class DataBuffer implements Validatable {
 
     protected ByteBuffer buffer;
+    protected int currDataLength;
+    protected int currDataOffset;
+
 
     /**
      *
@@ -53,6 +56,7 @@ public class DataBuffer {
      *
      * @return
      */
+    @Override
     public boolean isValid() {
         return (buffer != null);
     }
@@ -127,8 +131,8 @@ public class DataBuffer {
         
         try {
             buffer.put(string.getBytes("UTF-8")
-                    , offset
-                    ,string.length());
+                        , offset
+                        ,string.length());
         } catch (UnsupportedEncodingException ex) {
             
         }
@@ -147,5 +151,21 @@ public class DataBuffer {
         byte[] str = new byte[len]; 
         buffer.get(str);
         return new String(str,"utf-8");
+    }
+       
+    public int getCurrDataLength() {
+        return currDataLength;
+    }
+
+    public void setCurrDataLength(int currDataLength) {
+        this.currDataLength = currDataLength;
+    }
+    
+    public int getCurrDataOffset() {
+        return currDataOffset;
+    }
+
+    public void setCurrDataOffset(int currDataOffset) {
+        this.currDataOffset = currDataOffset;
     }
 }

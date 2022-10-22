@@ -15,7 +15,7 @@ import propra.imageconverter.util.Validatable;
 public abstract class ImageModule implements Checkable, Validatable {
     
     protected ImageTranscoderColor colorTranscoder = new ImageTranscoderColor(); 
-    protected int blockSize = 4096 * 3;
+    protected int blockSize = 128 * 4096 * 3;
     protected RandomAccessFile stream;
     protected ImageHeader header;
     protected Checksum checksumObj;  
@@ -24,6 +24,7 @@ public abstract class ImageModule implements Checkable, Validatable {
 
     /**
      *
+     * @param stream
      */
     public ImageModule(RandomAccessFile stream) {
         this.stream = stream;
@@ -33,15 +34,15 @@ public abstract class ImageModule implements Checkable, Validatable {
      * Wandelt einen allgemeinen ImageHeader in Bytes um.
      * 
      * @param info
-     * @return
+     * @throws java.io.IOException
      */
     public abstract void writeHeader(ImageHeader info) throws IOException;
 
     /**
      * Wandelt Bytes in einen allgmeinen ImageHeader um. 
      * 
-     * @param data
      * @return
+     * @throws java.io.IOException
      */
     public abstract ImageHeader readHeader() throws IOException;
     
@@ -51,30 +52,29 @@ public abstract class ImageModule implements Checkable, Validatable {
      * @param data
      * @param colorFormat
      * @return
+     * @throws java.io.IOException
      */
-    public DataBuffer writeImageData(DataBuffer data, int len, ColorFormat colorFormat) throws IOException {
+    public DataBuffer writeImageData(DataBuffer data, ColorFormat colorFormat) throws IOException {
         if(!isValid() 
-        || data == null
-        || len <= 0) {
+        || data == null) {
             throw new IllegalArgumentException();
         }
-        
+
         colorTranscoder.encode( data, 
                                 colorFormat, 
                                 data, 
-                                header.getColorType(), 
-                                len);        
-        updateCheck(data.getBytes(), len);  
-        stream.write(data.getBytes(), 0, len);
-       
+                                header.getColorType());        
+        updateChecksum(data);  
+        writeDataToStream(data, 0, data.getCurrDataLength());
         return data;
     }
     
     /**
      * Erstellt Image aus Byte Daten 
      * 
-     * @param data
+     * @param buffer
      * @return
+     * @throws java.io.IOException
      */
     public int readImageData(DataBuffer buffer) throws IOException {
         if(!isValid() 
@@ -83,16 +83,12 @@ public abstract class ImageModule implements Checkable, Validatable {
         }
         
         int len = buffer.getSize();
-        
         if(bytesRead + buffer.getSize() > header.getBufferSize()) {
             len = (int)(header.getBufferSize() - bytesRead);
         }
         
-        if(len != stream.read(buffer.getBytes(), 0, len)) {
-            throw new IOException();
-        }
-        
-        updateCheck(buffer.getBytes(), len);   
+        readDataFromStream(buffer, 0, len);
+        updateChecksum(buffer);   
         bytesRead += len; 
         return len;
     }
@@ -119,6 +115,11 @@ public abstract class ImageModule implements Checkable, Validatable {
         return bytesRead;
     }
     
+    /**
+     *
+     * @return
+     * @throws IOException
+     */
     public boolean hasMoreImageData() throws IOException {
         return (header.getBufferSize() - bytesRead) != 0;
     }
@@ -132,6 +133,44 @@ public abstract class ImageModule implements Checkable, Validatable {
         return (checksumObj != null);
     }
 
+    /**
+     *
+     * @param buffer
+     * @param offset
+     * @param len
+     * @return
+     * @throws IOException
+     */
+    protected DataBuffer readDataFromStream(DataBuffer buffer, int offset, int len) throws IOException {
+        if(stream == null
+        || buffer == null) {
+            throw new IllegalArgumentException();
+        }
+        int rl = stream.read(buffer.getBytes(), offset, len);
+        if(rl != len) {
+            throw new IOException();
+        }
+        buffer.setCurrDataLength(len);
+        return buffer;
+    }
+    
+    /**
+     *
+     * @param buffer
+     * @param offset
+     * @param len
+     * @return
+     * @throws IOException
+     */
+    protected DataBuffer writeDataToStream(DataBuffer buffer, int offset, int len) throws IOException {
+        if(stream == null 
+        || buffer == null) {
+            throw new IllegalArgumentException();
+        }
+        stream.write(buffer.getBytes(), offset, len);
+        return buffer;
+    }
+    
     /**
      *
      * @return
@@ -158,14 +197,15 @@ public abstract class ImageModule implements Checkable, Validatable {
      *
      * @param bytes
      */
-    protected void updateCheck(byte[] bytes, int len) {
+    protected void updateChecksum(DataBuffer bytes) {
         if (bytes == null ) {
             throw new IllegalArgumentException();
         }
         if(isCheckable()) {
-            checksumObj.update(bytes,0,len);
+            checksumObj.update(bytes.getBytes(),0,bytes.getCurrDataLength());
         }
     } 
+    
     /**
      *
      * @return
@@ -184,6 +224,10 @@ public abstract class ImageModule implements Checkable, Validatable {
         return headerSize;
     }
 
+    /**
+     *
+     * @return
+     */
     public int getBlockSize() {
         return blockSize;
     }

@@ -8,9 +8,9 @@ package propra.imageconverter.util;
 public class ChecksumPropra extends Checksum {
 
     private static final int X = 65521;
-    int a_i;
-    int b_i = 1;
-    int runningIndex;
+    private int currAi;
+    private int currBi = 1;
+    private int currIndex;
      
     /**
      *
@@ -18,9 +18,9 @@ public class ChecksumPropra extends Checksum {
     @Override
     public void reset() {
         super.reset();
-        a_i = 0;
-        b_i = 1;
-        runningIndex = 0;
+        currAi = 0;
+        currBi = 1;
+        currIndex = 0;
     }
     
     /**
@@ -37,10 +37,10 @@ public class ChecksumPropra extends Checksum {
         int dindex = 0;
         
         for(int i=1; i<=data.length; i++) {
-            a_i = (i + a_i + Byte.toUnsignedInt(data[dindex++])) % X;
-            b_i = (b_i + a_i) % X; 
+            currAi = (i + currAi + Byte.toUnsignedInt(data[dindex++])) % X;
+            currBi = (currBi + currAi) % X; 
         }   
-        return (value = (a_i << 16) + b_i);
+        return (value = (currAi << 16) + currBi);
     }
     
     /**
@@ -59,11 +59,11 @@ public class ChecksumPropra extends Checksum {
         int dindex = offset;
         
         for(int i=1; i<=len; i++) {
-            a_i = (i + runningIndex + a_i + Byte.toUnsignedInt(data[dindex++])) % X;
-            b_i = (b_i + a_i) % X; 
+            currAi = (i + currIndex + currAi + Byte.toUnsignedInt(data[dindex++])) % X;
+            currBi = (currBi + currAi) % X; 
         }  
         
-        runningIndex += len;
+        currIndex += len;
     }
     
     /**
@@ -72,6 +72,6 @@ public class ChecksumPropra extends Checksum {
      */
     @Override
     public long end() {
-        return (value = (a_i << 16) + b_i);
+        return (value = (currAi << 16) + currBi);
     }
 }

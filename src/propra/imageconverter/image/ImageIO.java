@@ -17,6 +17,9 @@ public class ImageIO implements Validatable {
     private ImageModule inPlugin;
     private ImageModule outPlugin;
     
+    /**
+     *
+     */
     public ImageIO() {
     }
     
@@ -27,8 +30,7 @@ public class ImageIO implements Validatable {
      */
     public ImageIO( ImageModule inPlugin,
                     ImageModule outPlugin) {
-        wrapPlugins(inPlugin,
-                    outPlugin);
+        wrapPlugins(inPlugin,outPlugin);
     }
     
     /**
@@ -43,8 +45,6 @@ public class ImageIO implements Validatable {
     
     /**
      *
-     * @param inStream
-     * @param outStream
      * @param inPlugin
      * @param outPlugin
      */
@@ -62,6 +62,7 @@ public class ImageIO implements Validatable {
     /**
      *
      * @param cmd
+     * @throws java.io.FileNotFoundException
      */
     public void setupPlugins(CmdLine cmd) throws FileNotFoundException, IOException {
         if(cmd == null) {
@@ -117,8 +118,7 @@ public class ImageIO implements Validatable {
     }
     
     /**
-     *
-     * @return 
+     * 
      * @throws java.io.IOException 
      */
     public void transfer() throws IOException {
@@ -128,14 +128,13 @@ public class ImageIO implements Validatable {
 
         DataBuffer block = new DataBuffer(inPlugin.getBlockSize());
         ColorFormat cFormat = inPlugin.getHeader().getColorType();
-        int len;
         
         inPlugin.beginImageData();
         outPlugin.beginImageData();
         
         while(inPlugin.hasMoreImageData()) {
-            len = inPlugin.readImageData(block);
-            outPlugin.writeImageData(block, len, cFormat);
+            inPlugin.readImageData(block);
+            outPlugin.writeImageData(block,cFormat);
         }
         
         inPlugin.endImageData();
@@ -221,10 +220,12 @@ public class ImageIO implements Validatable {
      */
     private static ImageModule createModule(String ext, RandomAccessFile stream) {
         switch(ext) {
-            case "tga":
+            case "tga" -> {
                 return new ImageModuleTGA(stream);
-            case "propra":
+            }
+            case "propra" -> {
                 return new ImageModuleProPra(stream);
+            }
         }
         return null;
     }

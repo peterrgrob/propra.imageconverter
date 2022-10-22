@@ -15,18 +15,18 @@ import propra.imageconverter.util.Utility;
 public class ImageModuleTGA extends ImageModule {
 
     // Datei-Offsets der einzelnen Header-Felder
-    static final int TGA_HEADER_SIZE = 18;
-    static final int TGA_HEADER_OFFSET_ENCODING = 2;
-    static final int TGA_HEADER_OFFSET_X0 = 7;
-    static final int TGA_HEADER_OFFSET_Y0 = 9;
-    static final int TGA_HEADER_OFFSET_WIDTH = 12;
-    static final int TGA_HEADER_OFFSET_HEIGHT = 14;
-    static final int TGA_HEADER_OFFSET_BPP = 16;
-    static final int TGA_HEADER_OFFSET_ORIGIN = 17; 
+    static private final int TGA_HEADER_SIZE = 18;
+    static private final int TGA_HEADER_OFFSET_ENCODING = 2;
+    static private final int TGA_HEADER_OFFSET_X0 = 7;
+    static private final int TGA_HEADER_OFFSET_Y0 = 9;
+    static private final int TGA_HEADER_OFFSET_WIDTH = 12;
+    static private final int TGA_HEADER_OFFSET_HEIGHT = 14;
+    static private final int TGA_HEADER_OFFSET_BPP = 16;
+    static private final int TGA_HEADER_OFFSET_ORIGIN = 17; 
 
     /**
      *
-     * @param streamLen
+     * @param stream
      */
     public ImageModuleTGA(RandomAccessFile stream) {
         super(stream);
@@ -38,7 +38,6 @@ public class ImageModuleTGA extends ImageModule {
      * Wandelt einen allgemeinen Header in einen TGA Header um
      * 
      * @param info
-     * @return
      */
     @Override
     public void writeHeader(ImageHeader info) throws IOException {
@@ -70,7 +69,6 @@ public class ImageModuleTGA extends ImageModule {
     /**
      * Wandelt einen TGA Header in einen allgemeinen Header um 
      * 
-     * @param data
      * @return
      */
     @Override
@@ -78,17 +76,18 @@ public class ImageModuleTGA extends ImageModule {
         DataBuffer data = new DataBuffer(headerSize);
         ByteBuffer byteBuffer = data.getBuffer();
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-        stream.read(byteBuffer.array());
+       
+        readDataFromStream(data, 0, headerSize);
         
         // Headerfelder einlesen
-        ImageHeader tInfo = new ImageHeader();
-        tInfo.setWidth(byteBuffer.getShort(TGA_HEADER_OFFSET_WIDTH));
-        tInfo.setHeight(byteBuffer.getShort(TGA_HEADER_OFFSET_HEIGHT));
-        tInfo.setPixelSize(byteBuffer.get(TGA_HEADER_OFFSET_BPP) >> 3); 
-        tInfo.setEncoding(ImageHeader.Encoding.UNCOMPRESSED);
+        ImageHeader newHeader = new ImageHeader();
+        newHeader.setWidth(byteBuffer.getShort(TGA_HEADER_OFFSET_WIDTH));
+        newHeader.setHeight(byteBuffer.getShort(TGA_HEADER_OFFSET_HEIGHT));
+        newHeader.setPixelSize(byteBuffer.get(TGA_HEADER_OFFSET_BPP) >> 3); 
+        newHeader.setEncoding(ImageHeader.Encoding.UNCOMPRESSED);
         
         // Prüfe tga Spezifikationen
-        if(tInfo.isValid() == false
+        if(newHeader.isValid() == false
         || !Utility.checkBit(byteBuffer.get(TGA_HEADER_OFFSET_ORIGIN), (byte)6)
         || Utility.checkBit(byteBuffer.get(TGA_HEADER_OFFSET_ORIGIN), (byte)5)
         || byteBuffer.get(0) != 0
@@ -96,6 +95,6 @@ public class ImageModuleTGA extends ImageModule {
             throw new UnsupportedOperationException("Ungültiges TGA Dateiformat!");
         }
         
-        return (header = tInfo);
+        return (header = newHeader);
     }
 }

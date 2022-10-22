@@ -10,7 +10,7 @@ public class ImageTranscoderColor implements ImageTranscoder {
 
     @Override
     public DataBuffer encode(DataBuffer src, ColorFormat srcFormat, 
-                             DataBuffer target, ColorFormat targetFormat, int len) {
+                             DataBuffer target, ColorFormat targetFormat) {
         if( src == null 
         ||  srcFormat == null
         ||  target == null
@@ -19,17 +19,16 @@ public class ImageTranscoderColor implements ImageTranscoder {
         }
         
         // Generische Farbkonvertierung
-        ColorFormat.convertColorArray(  src.getBytes(), 0, srcFormat, 
-                                        target.getBytes(), 0, targetFormat,
-                                        len);
+        ColorFormat.convertColorBuffer( src, srcFormat, 
+                                        target, targetFormat);
         
         return target;
     }
 
     @Override
     public DataBuffer decode(DataBuffer src, ColorFormat srcFormat, 
-                             DataBuffer target, ColorFormat targetFormat, int len) {
+                             DataBuffer target, ColorFormat targetFormat) {
         
-        return encode(src, srcFormat, target, targetFormat, len);
+        return encode(src, srcFormat, target, targetFormat);
     }
 }

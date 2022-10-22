@@ -15,7 +15,7 @@ import propra.imageconverter.util.*;
 public class ImageConverter {
     
     // Fehlercode
-    protected static final int ERROR_EXIT_CODE = 123;
+    private static final int ERROR_EXIT_CODE = 123;
             
     /** 
      * Programmeinstieg
