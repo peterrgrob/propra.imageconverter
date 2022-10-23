@@ -14,8 +14,8 @@ import propra.imageconverter.util.Validatable;
  */
 public class ImageIO implements Validatable {
     
-    private ImageModule inPlugin;
-    private ImageModule outPlugin;
+    private ImageModel inModel;
+    private ImageModel outModel;
     
     /**
      *
@@ -28,9 +28,9 @@ public class ImageIO implements Validatable {
      * @param inPlugin
      * @param outPlugin
      */
-    public ImageIO( ImageModule inPlugin,
-                    ImageModule outPlugin) {
-        wrapPlugins(inPlugin,outPlugin);
+    public ImageIO( ImageModel inPlugin,
+                    ImageModel outPlugin) {
+        wrapModel(inPlugin,outPlugin);
     }
     
     /**
@@ -39,8 +39,8 @@ public class ImageIO implements Validatable {
      */
     @Override
     public boolean isValid() {
-        return (    inPlugin    != null
-                &&  outPlugin   != null);
+        return (    inModel    != null
+                &&  outModel   != null);
     }
     
     /**
@@ -48,15 +48,15 @@ public class ImageIO implements Validatable {
      * @param inPlugin
      * @param outPlugin
      */
-    public void wrapPlugins(ImageModule inPlugin,
-                            ImageModule outPlugin) {
+    public void wrapModel( ImageModel inPlugin,
+                           ImageModel outPlugin) {
         if( inPlugin == null
         ||  outPlugin == null) {
             throw new IllegalArgumentException();
         }
         
-        this.inPlugin = inPlugin;
-        this.outPlugin = outPlugin;
+        this.inModel = inPlugin;
+        this.outModel = outPlugin;
     }
     
     /**
@@ -64,15 +64,15 @@ public class ImageIO implements Validatable {
      * @param cmd
      * @throws java.io.FileNotFoundException
      */
-    public void setupPlugins(CmdLine cmd) throws FileNotFoundException, IOException {
+    public void setupModel(CmdLine cmd) throws FileNotFoundException, IOException {
         if(cmd == null) {
             throw new IllegalArgumentException();
         }
         
         RandomAccessFile inStream = new RandomAccessFile(cmd.getOption(CmdLine.Options.INPUT_FILE),"r");
-        inPlugin = createModule(cmd.getOption(CmdLine.Options.INPUT_EXT), 
+        inModel = createModel(cmd.getOption(CmdLine.Options.INPUT_EXT), 
                             inStream);
-        if(inPlugin == null) {
+        if(inModel == null) {
             throw new IOException("Nicht unterstütztes Bildformat.");
         }
 
@@ -83,9 +83,9 @@ public class ImageIO implements Validatable {
         }
         
         RandomAccessFile outStream = new RandomAccessFile(file,"rw");
-        outPlugin = createModule(cmd.getOption(CmdLine.Options.OUTPUT_EXT), 
+        outModel = createModel(cmd.getOption(CmdLine.Options.OUTPUT_EXT), 
                             outStream);
-        if(outPlugin == null) {
+        if(outModel == null) {
             throw new IOException("Nicht unterstütztes Bildformat.");
         }
     }
@@ -100,8 +100,8 @@ public class ImageIO implements Validatable {
             throw new IllegalStateException();
         }
         
-        ImageHeader inHeader = inPlugin.readHeader();
-        outPlugin.writeHeader(inHeader);
+        ImageHeader inHeader = inModel.readHeader();
+        outModel.writeHeader(inHeader);
         return inHeader;
     }
     
@@ -114,7 +114,7 @@ public class ImageIO implements Validatable {
             throw new IllegalStateException();
         }
 
-        outPlugin.writeHeader(outPlugin.getHeader());
+        outModel.writeHeader(outModel.getHeader());
     }
     
     /**
@@ -126,19 +126,19 @@ public class ImageIO implements Validatable {
             throw new IllegalArgumentException();
         }
 
-        DataBuffer block = new DataBuffer(inPlugin.getBlockSize());
-        ColorFormat cFormat = inPlugin.getHeader().getColorType();
+        DataBuffer block = new DataBuffer(inModel.getBlockSize());
+        ColorFormat cFormat = inModel.getHeader().getColorFormat();
         
-        inPlugin.beginImageData();
-        outPlugin.beginImageData();
+        inModel.beginImageData();
+        outModel.beginImageData();
         
-        while(inPlugin.hasMoreImageData()) {
-            inPlugin.readImageData(block);
-            outPlugin.writeImageData(block,cFormat);
+        while(inModel.hasMoreImageData()) {
+            inModel.readImageData(block);
+            outModel.writeImageData(block,cFormat);
         }
         
-        inPlugin.endImageData();
-        outPlugin.endImageData();
+        inModel.endImageData();
+        outModel.endImageData();
         isChecksumValid();
     }
     
@@ -151,16 +151,16 @@ public class ImageIO implements Validatable {
             throw new IllegalStateException();
         }
         
-        if(inPlugin.isCheckable()) {
-            if(inPlugin.getChecksumObj().getValue() 
-            != inPlugin.getHeader().getChecksum()) {
+        if(inModel.isCheckable()) {
+            if(inModel.getChecksumObj().getValue() 
+            != inModel.getHeader().getChecksum()) {
                 throw new IOException("Eingabe Prüfsummenfehler!");
             }
         }
-        if(outPlugin.isCheckable()
-        && inPlugin.isCheckable()) {
-            if(inPlugin.getChecksumObj().getValue() 
-            != inPlugin.getHeader().getChecksum()) {
+        if(outModel.isCheckable()
+        && inModel.isCheckable()) {
+            if(inModel.getChecksumObj().getValue() 
+            != inModel.getHeader().getChecksum()) {
                 throw new IOException("Ausgabe Prüfsummenfehler!");
             }
         }
@@ -175,8 +175,8 @@ public class ImageIO implements Validatable {
             throw new IllegalStateException();
         }
         
-        if(inPlugin.isCheckable()) {
-            return inPlugin.getChecksumObj().getValue();
+        if(inModel.isCheckable()) {
+            return inModel.getChecksumObj().getValue();
         }
         return 0;
     }
@@ -190,8 +190,8 @@ public class ImageIO implements Validatable {
             throw new IllegalStateException();
         }
         
-        if(outPlugin.isCheckable()) {
-            return outPlugin.getChecksumObj().getValue();
+        if(outModel.isCheckable()) {
+            return outModel.getChecksumObj().getValue();
         }
         return 0;
     }
@@ -200,16 +200,16 @@ public class ImageIO implements Validatable {
      *
      * @return
      */
-    public ImageModule getInputPlugin() {
-        return inPlugin;
+    public ImageModel getInputModel() {
+        return inModel;
     }
 
     /**
      *
      * @return
      */
-    public ImageModule getOutputPlugin() {
-        return outPlugin;
+    public ImageModel getOutputModel() {
+        return outModel;
     }
     
     /**
@@ -218,13 +218,13 @@ public class ImageIO implements Validatable {
      * @param streamLen
      * @return
      */
-    private static ImageModule createModule(String ext, RandomAccessFile stream) {
+    private static ImageModel createModel(String ext, RandomAccessFile stream) {
         switch(ext) {
             case "tga" -> {
-                return new ImageModuleTGA(stream);
+                return new ImageModelTGA(stream);
             }
             case "propra" -> {
-                return new ImageModuleProPra(stream);
+                return new ImageModelProPra(stream);
             }
         }
         return null;

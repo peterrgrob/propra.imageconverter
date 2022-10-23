@@ -57,33 +57,6 @@ public class ColorFormat implements Comparable<ColorFormat> {
         }
         return -1;
     }
-    
-    /**
-     * Allgemeine Methode zum Konvertieren einer Farbe in ein Zielfarbformat.
-     * 
-     * @param input
-     * @param inputFormat
-     * @return 
-     */
-    public DataBuffer convertColor(DataBuffer input, ColorFormat inputFormat) {
-        if ( input == null) {
-            throw new IllegalArgumentException();
-        }  
-        byte t0,t1,t2;
-        int[] map = inputFormat.getMapping();
-        byte[] inBytes = input.getBytes();
-        int inputOffset = input.getCurrDataOffset();
-        
-        t2 = inBytes[inputOffset + map[RED]];
-        t1 = inBytes[inputOffset + map[GREEN]];
-        t0 = inBytes[inputOffset + map[BLUE]];
-        
-        inBytes[inputOffset + mapping[RED]] = t2;
-        inBytes[inputOffset + mapping[GREEN]] = t1;
-        inBytes[inputOffset + mapping[BLUE]] = t0;
-                
-        return input;
-    }
       
     /*
      * 

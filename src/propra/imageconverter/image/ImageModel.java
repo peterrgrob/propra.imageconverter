@@ -12,22 +12,23 @@ import propra.imageconverter.util.Validatable;
  * 
  * @author pg
  */
-public abstract class ImageModule implements Checkable, Validatable {
+public abstract class ImageModel implements Checkable, Validatable {
     
-    protected ImageTranscoderColor colorTranscoder = new ImageTranscoderColor(); 
+    protected ImageTranscoderColor colorTranscoder; 
     protected int blockSize = 128 * 4096 * 3;
     protected RandomAccessFile stream;
     protected ImageHeader header;
     protected Checksum checksumObj;  
     protected int headerSize;
-    protected long bytesRead;
+    protected long bytesTransfered;
 
     /**
      *
      * @param stream
      */
-    public ImageModule(RandomAccessFile stream) {
+    public ImageModel(RandomAccessFile stream) {
         this.stream = stream;
+        this.colorTranscoder = new ImageTranscoderColor();
     }
             
     /**
@@ -63,7 +64,7 @@ public abstract class ImageModule implements Checkable, Validatable {
         colorTranscoder.encode( data, 
                                 colorFormat, 
                                 data, 
-                                header.getColorType());        
+                                header.getColorFormat());        
         updateChecksum(data);  
         writeDataToStream(data, 0, data.getCurrDataLength());
         return data;
@@ -83,13 +84,13 @@ public abstract class ImageModule implements Checkable, Validatable {
         }
         
         int len = buffer.getSize();
-        if(bytesRead + buffer.getSize() > header.getBufferSize()) {
-            len = (int)(header.getBufferSize() - bytesRead);
+        if(bytesTransfered + buffer.getSize() > header.getImageSize()) {
+            len = (int)(header.getImageSize() - bytesTransfered);
         }
         
         readDataFromStream(buffer, 0, len);
         updateChecksum(buffer);   
-        bytesRead += len; 
+        bytesTransfered += len; 
         return len;
     }
     
@@ -101,7 +102,7 @@ public abstract class ImageModule implements Checkable, Validatable {
             checksumObj.begin();
         }
         
-        bytesRead = 0;
+        bytesTransfered = 0;
     }
     
     /**
@@ -112,7 +113,7 @@ public abstract class ImageModule implements Checkable, Validatable {
         if(isCheckable()) {
             header.setChecksum(checksumObj.end());
         }
-        return bytesRead;
+        return bytesTransfered;
     }
     
     /**
@@ -121,7 +122,7 @@ public abstract class ImageModule implements Checkable, Validatable {
      * @throws IOException
      */
     public boolean hasMoreImageData() throws IOException {
-        return (header.getBufferSize() - bytesRead) != 0;
+        return (header.getImageSize() - bytesTransfered) != 0;
     }
     
     /** 

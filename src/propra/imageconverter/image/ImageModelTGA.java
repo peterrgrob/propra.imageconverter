@@ -12,7 +12,7 @@ import propra.imageconverter.util.Utility;
  * 
  * @author pg
  */
-public class ImageModuleTGA extends ImageModule {
+public class ImageModelTGA extends ImageModel {
 
     // Datei-Offsets der einzelnen Header-Felder
     static private final int TGA_HEADER_SIZE = 18;
@@ -28,7 +28,7 @@ public class ImageModuleTGA extends ImageModule {
      *
      * @param stream
      */
-    public ImageModuleTGA(RandomAccessFile stream) {
+    public ImageModelTGA(RandomAccessFile stream) {
         super(stream);
         headerSize = TGA_HEADER_SIZE;   
     }
@@ -37,29 +37,29 @@ public class ImageModuleTGA extends ImageModule {
     /**
      * Wandelt einen allgemeinen Header in einen TGA Header um
      * 
-     * @param info
+     * @param srcHeader
      */
     @Override
-    public void writeHeader(ImageHeader info) throws IOException {
-        if(info.isValid() == false) {
+    public void writeHeader(ImageHeader srcHeader) throws IOException {
+        if(srcHeader.isValid() == false) {
             throw new IllegalArgumentException();
         }
         
         // DataBuffer für Header erstellen
-        DataBuffer dataBuffer = new DataBuffer(ImageModuleTGA.TGA_HEADER_SIZE);
+        DataBuffer dataBuffer = new DataBuffer(ImageModelTGA.TGA_HEADER_SIZE);
         ByteBuffer byteBuffer = dataBuffer.getBuffer();
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         
-        header = new ImageHeader(info);
-        header.getColorType().setMapping(ColorFormat.RED,2);
-        header.getColorType().setMapping(ColorFormat.GREEN,1);
-        header.getColorType().setMapping(ColorFormat.BLUE,0);
+        header = new ImageHeader(srcHeader);
+        header.getColorFormat().setMapping(ColorFormat.RED,2);
+        header.getColorFormat().setMapping(ColorFormat.GREEN,1);
+        header.getColorFormat().setMapping(ColorFormat.BLUE,0);
         
         // Headerfelder in Buffer schreiben
         byteBuffer.put(TGA_HEADER_OFFSET_ENCODING, (byte)2);
-        byteBuffer.putShort(TGA_HEADER_OFFSET_WIDTH, (short)info.getWidth());
-        byteBuffer.putShort(TGA_HEADER_OFFSET_HEIGHT, (short)info.getHeight());
-        byteBuffer.put(TGA_HEADER_OFFSET_BPP, (byte)(info.getPixelSize() << 3));        
+        byteBuffer.putShort(TGA_HEADER_OFFSET_WIDTH, (short)srcHeader.getWidth());
+        byteBuffer.putShort(TGA_HEADER_OFFSET_HEIGHT, (short)srcHeader.getHeight());
+        byteBuffer.put(TGA_HEADER_OFFSET_BPP, (byte)(srcHeader.getPixelSize() << 3));        
         byteBuffer.put(TGA_HEADER_OFFSET_ORIGIN, (byte)(1 << 5));    
         
         stream.seek(0);

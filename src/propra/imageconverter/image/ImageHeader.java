@@ -11,7 +11,7 @@ public class ImageHeader implements Validatable {
     
     private int width;
     private int height;
-    private int elementSize;    
+    private int pixelSize;    
     private Encoding encoding;
     private long checksum;
     private ColorFormat colorType = new ColorFormat();
@@ -37,10 +37,10 @@ public class ImageHeader implements Validatable {
         
         this.width = src.width;
         this.height = src.height;
-        this.elementSize = src.elementSize;
+        this.pixelSize = src.pixelSize;
         this.encoding = src.encoding;
         this.checksum = src.checksum;
-        this.colorType = new ColorFormat(src.getColorType());
+        this.colorType = new ColorFormat(src.getColorFormat());
     }
     
     /**
@@ -50,7 +50,7 @@ public class ImageHeader implements Validatable {
     public boolean isValid() {
         return (    width > 0 
                 &&  height > 0 
-                &&  elementSize == 3);
+                &&  pixelSize == 3);
     }
     
     /**
@@ -71,21 +71,21 @@ public class ImageHeader implements Validatable {
      * 
      * @return 
      */
-    public int getBufferSize() {
-        return width * height * elementSize;
+    public int getImageSize() {
+        return width * height * pixelSize;
     }
     
     /**
      * @return the value of colorType
      */
-    public ColorFormat getColorType() {
+    public ColorFormat getColorFormat() {
         return colorType;
     }
 
     /**
      * @param colorType new value of colorType
      */
-    public void setColorType(ColorFormat colorType) {
+    public void setColorFormat(ColorFormat colorType) {
         this.colorType = colorType;
     }
     
@@ -98,17 +98,17 @@ public class ImageHeader implements Validatable {
     }
     
     /**
-     * @return the value of elementSize
+     * @return the value of pixelSize
      */
     public int getPixelSize() {
-        return elementSize;
+        return pixelSize;
     }
 
     /**
-     * @param elementSize new value of elementSize
+     * @param elementSize new value of pixelSize
      */
     public void setPixelSize(int elementSize) {
-        this.elementSize = elementSize;
+        this.pixelSize = elementSize;
     }
 
     /**

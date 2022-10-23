@@ -54,7 +54,7 @@ public class ImageConverter {
         long start = System.currentTimeMillis();
 
         ImageIO io = new ImageIO();
-        io.setupPlugins(cmdLine);
+        io.setupModel(cmdLine);
         ImageHeader inHeader = io.beginTransfer();
                 
         // Infos zum Eingabebild ausgeben

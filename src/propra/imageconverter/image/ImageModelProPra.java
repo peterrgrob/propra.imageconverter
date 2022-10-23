@@ -13,7 +13,7 @@ import propra.imageconverter.util.DataBuffer;
  * 
  * @author pg
  */
-public class ImageModuleProPra extends ImageModule {
+public class ImageModelProPra extends ImageModel {
     
     static private final String PROPRA_VERSION = "ProPraWiSe22";
     static private final int PROPRA_HEADER_SIZE = 30;
@@ -28,7 +28,7 @@ public class ImageModuleProPra extends ImageModule {
      *
      * @param stream
      */
-    public ImageModuleProPra(RandomAccessFile stream) {
+    public ImageModelProPra(RandomAccessFile stream) {
         super(stream);
         headerSize = PROPRA_HEADER_SIZE;  
         checksumObj = new ChecksumPropra();
@@ -37,11 +37,11 @@ public class ImageModuleProPra extends ImageModule {
     /**
      *  Wandelt einen allgemeinen Header in einen ProPra Header um
      * 
-     * @param info
+     * @param srcHeader
      */
     @Override
-    public void writeHeader(ImageHeader info) throws IOException {
-        if(info.isValid() == false) {
+    public void writeHeader(ImageHeader srcHeader) throws IOException {
+        if(srcHeader.isValid() == false) {
             throw new IllegalArgumentException();
         }
         
@@ -51,18 +51,18 @@ public class ImageModuleProPra extends ImageModule {
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         
         // ProPra spezifisches RBG Farbmapping setzen
-        header = new ImageHeader(info);
-        header.getColorType().setMapping(ColorFormat.RED,0);
-        header.getColorType().setMapping(ColorFormat.GREEN,2);
-        header.getColorType().setMapping(ColorFormat.BLUE,1);
+        header = new ImageHeader(srcHeader);
+        header.getColorFormat().setMapping(ColorFormat.RED,0);
+        header.getColorFormat().setMapping(ColorFormat.GREEN,2);
+        header.getColorFormat().setMapping(ColorFormat.BLUE,1);
         
         // Headerfelder in ByteBuffer schreiben
         dataBuffer.put(PROPRA_VERSION,0);
         byteBuffer.put(PROPRA_HEADER_OFFSET_ENCODING, (byte)0);
-        byteBuffer.putShort(PROPRA_HEADER_OFFSET_WIDTH,(short)info.getWidth());
-        byteBuffer.putShort(PROPRA_HEADER_OFFSET_HEIGHT,(short)info.getHeight());
-        byteBuffer.put(PROPRA_HEADER_OFFSET_BPP,(byte)(info.getPixelSize() << 3));
-        byteBuffer.putLong(PROPRA_HEADER_OFFSET_DATALEN,(long)info.getBufferSize());
+        byteBuffer.putShort(PROPRA_HEADER_OFFSET_WIDTH,(short)srcHeader.getWidth());
+        byteBuffer.putShort(PROPRA_HEADER_OFFSET_HEIGHT,(short)srcHeader.getHeight());
+        byteBuffer.put(PROPRA_HEADER_OFFSET_BPP,(byte)(srcHeader.getPixelSize() << 3));
+        byteBuffer.putLong(PROPRA_HEADER_OFFSET_DATALEN,(long)srcHeader.getImageSize());
         
         stream.seek(0);
         stream.write(byteBuffer.array());
@@ -71,7 +71,6 @@ public class ImageModuleProPra extends ImageModule {
     /**
      * Wandelt einen ProPra Header in allgemeinen Header um 
      * 
-     * @param data
      * @return Allgemeiner Header
      * @throws java.io.IOException
      */
@@ -107,15 +106,15 @@ public class ImageModuleProPra extends ImageModule {
         long dataLen = bytes.getLong(PROPRA_HEADER_OFFSET_DATALEN);   
         
         // RBG Farbmapping setzen
-        newHeader.getColorType().setMapping(ColorFormat.RED,0);
-        newHeader.getColorType().setMapping(ColorFormat.GREEN,2);
-        newHeader.getColorType().setMapping(ColorFormat.BLUE,1);
+        newHeader.getColorFormat().setMapping(ColorFormat.RED,0);
+        newHeader.getColorFormat().setMapping(ColorFormat.GREEN,2);
+        newHeader.getColorFormat().setMapping(ColorFormat.BLUE,1);
         
         // Prüfe ProPra Spezifikationen
         if( newHeader.isValid() == false 
-        ||  (newHeader.getBufferSize() != dataLen)
+        ||  (newHeader.getImageSize() != dataLen)
         ||  (dataLen != (stream.length() - PROPRA_HEADER_SIZE))
-        ||  (newHeader.getBufferSize() != (stream.length() - PROPRA_HEADER_SIZE))
+        ||  (newHeader.getImageSize() != (stream.length() - PROPRA_HEADER_SIZE))
         ||  (bytes.get(PROPRA_HEADER_OFFSET_ENCODING) != 0)) {
             throw new UnsupportedOperationException("Ungültiges ProPra Dateiformat!");
         }
