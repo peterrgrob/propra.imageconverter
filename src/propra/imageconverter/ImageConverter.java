@@ -56,18 +56,17 @@ public class ImageConverter {
         ImageIO io = new ImageIO();
         io.setupModel(cmdLine);
         ImageHeader inHeader = io.beginTransfer();
-                
-        // Infos zum Eingabebild ausgeben
-        System.out.print("Bildinfo: " + inHeader.getWidth());
-        System.out.print("x" + inHeader.getHeight());
-        System.out.print("x" + inHeader.getPixelSize());
-
         io.transfer();
         io.endTransfer();
         
         // Infos auf der Konsole ausgeben
         long finish = System.currentTimeMillis();
         long timeElapsed = finish - start;
+        
+        // Infos zum Eingabebild ausgeben
+        System.out.print("Bildinfo: " + inHeader.getWidth());
+        System.out.print("x" + inHeader.getHeight());
+        System.out.print("x" + inHeader.getPixelSize());
         System.out.print("\nEingabe Prüfsumme: "+String.format("0x%08X", (int)io.getInputChecksum()));
         System.out.print("\nAusgabe Prüfsumme: "+String.format("0x%08X", (int)io.getOutputChecksum()));
         System.out.println("\nKonvertierung abgeschlossen in (ms): " + String.valueOf(timeElapsed));

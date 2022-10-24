@@ -114,7 +114,12 @@ public class ImageIO implements Validatable {
             throw new IllegalStateException();
         }
 
-        outModel.writeHeader(outModel.getHeader());
+        if(outModel.isCheckable()) {
+            outModel.writeHeader(outModel.getHeader());
+        }
+        
+        inModel.close();
+        outModel.close();
     }
     
     /**

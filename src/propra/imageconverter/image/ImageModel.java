@@ -2,6 +2,7 @@ package propra.imageconverter.image;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.io.Closeable;
 import propra.imageconverter.util.Checkable;
 import propra.imageconverter.util.Checksum;
 import propra.imageconverter.util.DataBuffer;
@@ -12,7 +13,7 @@ import propra.imageconverter.util.Validatable;
  * 
  * @author pg
  */
-public abstract class ImageModel implements Checkable, Validatable {
+public abstract class ImageModel implements Closeable, Checkable, Validatable {
     
     protected ImageTranscoderColor colorTranscoder; 
     protected int blockSize = 128 * 4096 * 3;
@@ -132,6 +133,17 @@ public abstract class ImageModel implements Checkable, Validatable {
     @Override
     public boolean isCheckable() {
         return (checksumObj != null);
+    }
+    
+    /**
+     *
+     * @throws java.io.IOException
+     */
+    @Override
+    public void close() throws IOException {
+        if(stream != null) {
+            stream.close();
+        }
     }
 
     /**
