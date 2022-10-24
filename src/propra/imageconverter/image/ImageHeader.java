@@ -9,6 +9,7 @@ import propra.imageconverter.util.Validatable;
  */
 public class ImageHeader implements Validatable {
     
+    // Attribute
     private int width;
     private int height;
     private int pixelSize;    
@@ -47,46 +48,11 @@ public class ImageHeader implements Validatable {
      * 
      * @return true, wenn zulässiger Bildkopf vorliegt.
      */
+    @Override
     public boolean isValid() {
         return (    width > 0 
                 &&  height > 0 
                 &&  pixelSize == 3);
-    }
-    
-    /**
-     * @return the value of encoding
-     */
-    public Encoding getEncoding() {
-        return encoding;
-    }
-
-    /**
-     * @param encoding new value of encoding
-     */
-    public void setEncoding(Encoding encoding) {
-        this.encoding = encoding;
-    }
-    
-    /**
-     * 
-     * @return 
-     */
-    public int getImageSize() {
-        return width * height * pixelSize;
-    }
-    
-    /**
-     * @return the value of colorType
-     */
-    public ColorFormat getColorFormat() {
-        return colorType;
-    }
-
-    /**
-     * @param colorType new value of colorType
-     */
-    public void setColorFormat(ColorFormat colorType) {
-        this.colorType = colorType;
     }
     
     /**
@@ -97,58 +63,57 @@ public class ImageHeader implements Validatable {
         return width * height;
     }
     
-    /**
-     * @return the value of pixelSize
+    /*
+     *  Getter&Setter
      */
+    public Encoding getEncoding() {
+        return encoding;
+    }
+
+    public void setEncoding(Encoding encoding) {
+        this.encoding = encoding;
+    }
+    
+    public int getImageSize() {
+        return width * height * pixelSize;
+    }
+    
+    public ColorFormat getColorFormat() {
+        return colorType;
+    }
+
+    public void setColorFormat(ColorFormat colorType) {
+        this.colorType = colorType;
+    }
+    
     public int getPixelSize() {
         return pixelSize;
     }
 
-    /**
-     * @param elementSize new value of pixelSize
-     */
     public void setPixelSize(int elementSize) {
         this.pixelSize = elementSize;
     }
 
-    /**
-     * @return the value of checksum
-     */
     public long getChecksum() {
         return checksum;
     }
 
-    /**
-     * @param checksum new value of checksum
-     */
     public void setChecksum(long checksum) {
         this.checksum = checksum;
     }
     
-    /**
-     * @return the value of height
-     */
     public int getHeight() {
         return height;
     }
 
-    /**
-     * @param height new value of height
-     */
     public void setHeight(int height) {
         this.height = height;
     }
 
-    /**
-     * @return the value of width
-     */
     public int getWidth() {
         return width;
     }
 
-    /**
-     * @param width new value of width
-     */
     public void setWidth(int width) {
         this.width = width;
     }

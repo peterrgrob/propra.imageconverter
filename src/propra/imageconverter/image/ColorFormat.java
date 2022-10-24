@@ -98,28 +98,17 @@ public class ColorFormat implements Comparable<ColorFormat> {
         return output;
     }
     
-    /**
-     * 
-     * @param id
-     * @param newId
+    /*
+     *  Getter/Setter 
      */
     public void setMapping(int id, int newId) {
         mapping[id] = newId;
     }
-    
-    /**
-     *
-     * @param id
-     * @return
-     */
+
     public int getMapping(int id) {
         return mapping[id];
     }
-    
-    /**
-     *
-     * @return
-     */
+
     public int[] getMapping() {
         return mapping;
     }
