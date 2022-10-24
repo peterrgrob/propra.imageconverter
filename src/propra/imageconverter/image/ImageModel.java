@@ -112,7 +112,7 @@ public abstract class ImageModel implements Closeable, Checkable, Validatable {
      */
     public long endImageData() {
         if(isCheckable()) {
-            header.setChecksum(checksumObj.end());
+            checksumObj.end();
         }
         return bytesTransfered;
     }

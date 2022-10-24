@@ -69,9 +69,6 @@ public class ColorFormat implements Comparable<ColorFormat> {
         ||  dstFormat == null) {
             throw new IllegalArgumentException();
         }  
-        byte t0,t1,t2;
-        int sIndex;
-        int dIndex;
         
         byte[] inBytes = input.getBytes();
         byte[] outBytes = output.getBytes();
@@ -83,16 +80,12 @@ public class ColorFormat implements Comparable<ColorFormat> {
         int[] dstMap = dstFormat.getMapping();
         
         for (int i=0; i<input.getCurrDataLength(); i+=3) {
-            sIndex = srcOffset + i;
-            dIndex = dstOffset + i;
+            int sIndex = srcOffset + i;
+            int dIndex = dstOffset + i;
             
-            t2 = inBytes[sIndex + srcMap[RED]];
-            t1 = inBytes[sIndex + srcMap[GREEN]];
-            t0 = inBytes[sIndex + srcMap[BLUE]];
-
-            outBytes[dIndex + dstMap[RED]] = t2;
-            outBytes[dIndex + dstMap[GREEN]] = t1;
-            outBytes[dIndex + dstMap[BLUE]] = t0;
+            outBytes[dIndex + dstMap[RED]] = inBytes[sIndex + srcMap[RED]];
+            outBytes[dIndex + dstMap[GREEN]] = inBytes[sIndex + srcMap[GREEN]];
+            outBytes[dIndex + dstMap[BLUE]] = inBytes[sIndex + srcMap[BLUE]];
         }
         
         return output;
