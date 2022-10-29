@@ -19,8 +19,10 @@ public class ImageTranscoderColor implements ImageTranscoder {
         }
         
         // Generische Farbkonvertierung
-        ColorFormat.convertColorBuffer( src, srcFormat, 
+        if(!srcFormat.equals(targetFormat)) {
+            ColorFormat.convertColorBuffer( src, srcFormat, 
                                         target, targetFormat);
+        }
         
         return target;
     }

@@ -59,7 +59,7 @@ public class ChecksumPropra extends Checksum {
         int dindex = offset;
         
         for(int i=1; i<=len; i++) {
-            currAi = (i + currIndex + currAi + (data[dindex++]&0xFF)) % X;
+            currAi = (i + currIndex + currAi + (data[dindex++] & 0xFF)) % X;
             currBi = (currBi + currAi) % X; 
         }  
         
