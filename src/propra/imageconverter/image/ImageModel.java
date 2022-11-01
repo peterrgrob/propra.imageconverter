@@ -15,7 +15,7 @@ import propra.imageconverter.util.Validatable;
  */
 public abstract class ImageModel implements Closeable, Checkable, Validatable {
     
-    protected ImageTranscoderColor colorTranscoder; 
+    protected ImageFilterColor colorFilter; 
     protected int blockSize = 128 * 4096 * 3;
     protected RandomAccessFile stream;
     protected ImageHeader header;
@@ -29,7 +29,7 @@ public abstract class ImageModel implements Closeable, Checkable, Validatable {
      */
     public ImageModel(RandomAccessFile stream) {
         this.stream = stream;
-        this.colorTranscoder = new ImageTranscoderColor();
+        this.colorFilter = new ImageFilterColor();
     }
             
     /**
@@ -62,7 +62,7 @@ public abstract class ImageModel implements Closeable, Checkable, Validatable {
             throw new IllegalArgumentException();
         }
 
-        colorTranscoder.encode( data, 
+        colorFilter.filter(     data, 
                                 colorFormat, 
                                 data, 
                                 header.getColorFormat());        

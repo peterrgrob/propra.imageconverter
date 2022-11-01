@@ -6,7 +6,21 @@ import propra.imageconverter.util.DataBuffer;
  *
  * @author pg
  */
-public interface ImageTranscoder {
+public interface ImageFilter {
+
+    /**
+     *
+     * @return
+     */
+    public void beginFilter();
+    
+    /**
+     *
+     * @param src
+     * @param srcFormat
+     * @return
+     */
+    public DataBuffer filter(DataBuffer src, ColorFormat srcFormat);
     
     /**
      *
@@ -16,17 +30,12 @@ public interface ImageTranscoder {
      * @param targetFormat
      * @return
      */
-    public DataBuffer encode(   DataBuffer src, ColorFormat srcFormat, 
+    public DataBuffer filter(   DataBuffer src, ColorFormat srcFormat,
                                 DataBuffer target, ColorFormat targetFormat);
     
     /**
      *
-     * @param src
-     * @param srcFormat
-     * @param target
-     * @param targetFormat
      * @return
      */
-    public DataBuffer decode(   DataBuffer src, ColorFormat srcFormat, 
-                                DataBuffer target, ColorFormat targetFormat);
+    public void endFiter();
 }

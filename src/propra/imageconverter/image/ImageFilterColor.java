@@ -1,16 +1,25 @@
 package propra.imageconverter.image;
 
 import propra.imageconverter.util.DataBuffer;
+import propra.imageconverter.util.Validatable;
 
 /**
  *
  * @author pg
  */
-public class ImageTranscoderColor implements ImageTranscoder {
+public class ImageFilterColor implements ImageFilter, Validatable {
+    
+    @Override
+    public void beginFilter() {}
 
     @Override
-    public DataBuffer encode(DataBuffer src, ColorFormat srcFormat, 
-                             DataBuffer target, ColorFormat targetFormat) {
+    public DataBuffer filter(DataBuffer src, ColorFormat srcFormat) {
+        return filter(src, srcFormat, src, srcFormat);
+    }
+
+    @Override
+    public DataBuffer filter(   DataBuffer src, ColorFormat srcFormat, 
+                                DataBuffer target, ColorFormat targetFormat) {
         if( src == null 
         ||  srcFormat == null
         ||  target == null
@@ -28,9 +37,8 @@ public class ImageTranscoderColor implements ImageTranscoder {
     }
 
     @Override
-    public DataBuffer decode(DataBuffer src, ColorFormat srcFormat, 
-                             DataBuffer target, ColorFormat targetFormat) {
-        
-        return encode(src, srcFormat, target, targetFormat);
-    }
+    public void endFiter() {}
+
+    @Override
+    public boolean isValid() {return true;}
 }
