@@ -5,7 +5,7 @@ package propra.imageconverter.util;
  * 
  * @author pg
  */
-public abstract class Checksum {
+public abstract class Checksum implements DataFilter {
 
     /**
      * Aktuelle Prüfsumme
@@ -56,8 +56,10 @@ public abstract class Checksum {
      * @param data
      * @return
      */
-    public long check(byte[] data) {
-        reset();
+    public long check(DataBuffer buffer) {
+        begin();
+        filter(buffer);
+        end();
         return getValue();
     }
     
@@ -72,29 +74,12 @@ public abstract class Checksum {
      *
      * @return
      */
-    public long end() {
-        return getValue();
-    }
+    public abstract void end();
     
     /**
      * Aktualisiert die aktuelle Prüfsumme mit Bytes 
      * 
      * @param data
      */
-    public void update(byte[] data) {
-        if (data == null) {
-            throw new IllegalArgumentException();
-        }
-        update(data, 0, data.length);
-    }
-
-    /**
-     * Aktualisiert die aktuelle Prüfsumme mit Bytes 
-     * 
-     * @param data
-     * @param offset
-     * @param len
-     * @return 
-     */
-    public abstract void update(byte [] data, int offset, int len);
+    public abstract void filter(DataBuffer buffer);
 }

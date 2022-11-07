@@ -24,46 +24,25 @@ public class ChecksumPropra extends Checksum {
     }
     
     /**
-     *
-     * @param data
-     * @return
+     *  Aktualisiert Prüfsumme mit ProPra-Prüfsummen Verfahren, wie vorgegeben
+     * 
+     * @param buffer
      */
     @Override
-    public long check(byte[] data) {
-        if (data == null) {
+    public void filter(DataBuffer buffer) {
+        if (buffer == null) {
             throw new IllegalArgumentException();
         }
         
         int dindex = 0;
+        byte[] data = buffer.getBytes();
         
-        for(int i=1; i<=data.length; i++) {
-            currAi = (i + currAi + Byte.toUnsignedInt(data[dindex++])) % X;
-            currBi = (currBi + currAi) % X; 
-        }   
-        return (value = (currAi << 16) + currBi);
-    }
-    
-    /**
-     *  Aktualisiert Prüfsumme mit ProPra-Prüfsummen Verfahren, wie vorgegeben
-     * 
-     * @param data
-     * @param offset
-     * @param len
-     */
-    @Override
-    public void update(byte[] data, int offset, int len) {
-        if (data == null) {
-            throw new IllegalArgumentException();
-        }
-        
-        int dindex = offset;
-        
-        for(int i=1; i<=len; i++) {
+        for(int i=1; i<=buffer.getCurrDataLength(); i++) {
             currAi = (i + currIndex + currAi + (data[dindex++] & 0xFF)) % X;
             currBi = (currBi + currAi) % X; 
         }  
         
-        currIndex += len;
+        currIndex += buffer.getCurrDataLength();
     }
     
     /**
@@ -71,7 +50,16 @@ public class ChecksumPropra extends Checksum {
      * @return
      */
     @Override
-    public long end() {
-        return (value = (currAi << 16) + currBi);
+    public void end() {
+        value = (currAi << 16) + currBi;
+    }
+
+    /**
+     *
+     * @return
+     */
+    @Override
+    public boolean isValid() {
+        return true;
     }
 }

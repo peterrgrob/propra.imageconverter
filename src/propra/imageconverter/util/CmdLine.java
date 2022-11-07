@@ -1,27 +1,36 @@
 package propra.imageconverter.util;
-
 import java.util.HashMap;
 
 /**
  * Hilfsklasse die Kommandozeilenparameter parsed und speichert, diese
- * können über Options abgefragt werden.
+ können über Option abgefragt werden.
  * 
  * @author pg
  */
  public class CmdLine {
-     
-    private static final String INPUT_KEY = "--input";
-    private static final String OUTPUT_KEY = "--output";
-    private HashMap<Options,String> options = new HashMap();
+    private HashMap<Options,String> options = new HashMap<Options,String>();
     
     /*
      * 
      */
     public enum Options {
-        INPUT_FILE,
-        INPUT_EXT,
-        OUTPUT_FILE,
-        OUTPUT_EXT;
+        INPUT_FILE("--input"),
+        OUTPUT_FILE("--output"),
+        COMPRESSION("--compression"),
+        ENCODE_BASE_32("--encode-base-32"),
+        DECODE_BASE_32("--decode-base-32"),  
+        ENCODE_BASE_N("--encode-base-n"),
+        DECODE_BASE_N("--decode-base-n");
+        
+        private final String key;
+        
+        private Options(String key) {
+            this.key = key;
+        }
+        
+        public String getKey() {
+            return key;
+        }
     }
    
     /**
@@ -32,15 +41,16 @@ import java.util.HashMap;
         // Iteriere und parse alle Argumente
         for(var a: args) {
             String[] tupel = a.split("=");
-            if(tupel.length == 2) {
-                switch (tupel[0]) {
-                    case INPUT_KEY:
-                        options.put(Options.INPUT_FILE, tupel[1]); 
-                        options.put(Options.INPUT_EXT,getExtension(tupel[1]));
-                    case OUTPUT_KEY:
-                        options.put(Options.OUTPUT_FILE, tupel[1]);
-                        options.put(Options.OUTPUT_EXT,getExtension(tupel[1]));
-                }  
+            if(tupel.length > 0) {
+                for (Options opt : Options.values()) { 
+                    if(opt.getKey().equals(tupel[0])) {
+                        String param = "";
+                        if(tupel.length > 1) {
+                            param = tupel[1];
+                        }
+                        options.put(opt, param);
+                    }
+                }
             }
         }
     } 
@@ -52,6 +62,15 @@ import java.util.HashMap;
      */
     public String getOption(Options opt) {
         return options.get(opt);
+    }
+    
+    /**
+     *
+     * @param opt
+     * @return
+     */
+    public String getOptionExtension(Options opt) {
+        return getExtension(getOption(opt));
     }
     
     /**

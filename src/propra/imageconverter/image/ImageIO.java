@@ -70,7 +70,7 @@ public class ImageIO implements Validatable {
         }
         
         RandomAccessFile inStream = new RandomAccessFile(cmd.getOption(CmdLine.Options.INPUT_FILE),"r");
-        inModel = createModel(cmd.getOption(CmdLine.Options.INPUT_EXT), 
+        inModel = createModel(cmd.getOptionExtension(CmdLine.Options.INPUT_FILE), 
                             inStream);
         if(inModel == null) {
             throw new IOException("Nicht unterstütztes Bildformat.");
@@ -83,7 +83,7 @@ public class ImageIO implements Validatable {
         }
         
         RandomAccessFile outStream = new RandomAccessFile(file,"rw");
-        outModel = createModel(cmd.getOption(CmdLine.Options.OUTPUT_EXT), 
+        outModel = createModel(cmd.getOptionExtension(CmdLine.Options.OUTPUT_FILE), 
                             outStream);
         if(outModel == null) {
             throw new IOException("Nicht unterstütztes Bildformat.");

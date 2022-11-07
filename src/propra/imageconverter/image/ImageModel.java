@@ -215,7 +215,7 @@ public abstract class ImageModel implements Closeable, Checkable, Validatable {
             throw new IllegalArgumentException();
         }
         if(isCheckable()) {
-            checksumObj.update(bytes.getBytes(),0,bytes.getCurrDataLength());
+            checksumObj.filter(bytes);
         }
     } 
     
