@@ -6,6 +6,7 @@ import java.io.Closeable;
 import propra.imageconverter.util.Checkable;
 import propra.imageconverter.util.Checksum;
 import propra.imageconverter.util.DataBuffer;
+import propra.imageconverter.util.DataTranscoder;
 import propra.imageconverter.util.Validatable;
 
 /**
@@ -16,12 +17,18 @@ import propra.imageconverter.util.Validatable;
 public abstract class ImageModel implements Closeable, Checkable, Validatable {
     
     protected ImageFilterColor colorFilter; 
-    protected int blockSize = 128 * 4096 * 3;
-    protected RandomAccessFile stream;
-    protected ImageHeader header;
-    protected Checksum checksumObj;  
-    protected int headerSize;
+    protected ImageTranscoder colorCompression;    
+    
+    protected final int blockSize = 128 * 4096 * 3;
+    protected DataBuffer temporaryBuffer = new DataBuffer(blockSize);
     protected long bytesTransfered;
+        
+    protected RandomAccessFile stream;
+    protected Checksum checksumObj;  
+        
+    protected ImageHeader header;
+    protected int headerSize;
+
 
     /**
      *
@@ -62,10 +69,9 @@ public abstract class ImageModel implements Closeable, Checkable, Validatable {
             throw new IllegalArgumentException();
         }
 
-        colorFilter.filter(     data, 
-                                colorFormat, 
-                                data, 
-                                header.getColorFormat());        
+        colorFilter.setInFormat(colorFormat);
+        colorFilter.filter(data);        
+        
         updateChecksum(data);  
         writeDataToStream(data, 0, data.getCurrDataLength());
         return data;
@@ -84,15 +90,32 @@ public abstract class ImageModel implements Closeable, Checkable, Validatable {
             throw new IllegalArgumentException();
         }
         
-        int len = buffer.getSize();
-        if(bytesTransfered + buffer.getSize() > header.getImageSize()) {
-            len = (int)(header.getImageSize() - bytesTransfered);
+        // Kompression?
+        if(colorCompression != null) {
+            // Daten aus der Datei lesen und dekodieren
+            int len = temporaryBuffer.getSize();
+            long remainingBytes = stream.length() - stream.getFilePointer();
+            if(temporaryBuffer.getSize() > remainingBytes) {
+                len = (int)(remainingBytes);
+            }
+            readDataFromStream(temporaryBuffer, 0, len);
+            colorCompression.transcode( DataTranscoder.Operation.DECODE, 
+                                        temporaryBuffer, 
+                                        buffer);
+            
+        } else {
+            // Daten aus der Datei direkt in buffer lesen
+            int len = buffer.getSize();
+            if(bytesTransfered + buffer.getSize() > header.getImageSize()) {
+                len = (int)(header.getImageSize() - bytesTransfered);
+            }
+            readDataFromStream(buffer, 0, len);
         }
         
-        readDataFromStream(buffer, 0, len);
+        buffer.getBuffer().clear();
         updateChecksum(buffer);   
-        bytesTransfered += len; 
-        return len;
+        bytesTransfered += buffer.getCurrDataLength(); 
+        return buffer.getCurrDataLength();
     }
     
     /**
@@ -101,6 +124,14 @@ public abstract class ImageModel implements Closeable, Checkable, Validatable {
     public void beginImageData() {
         if(isCheckable()) {
             checksumObj.begin();
+        }
+        
+        colorFilter.setOutFormat(header.getColorFormat());
+        colorFilter.begin();
+        
+        colorCompression = header.getColorFormat().createTranscoder();
+        if(colorCompression != null) {
+            colorCompression.begin(header.getColorFormat());
         }
         
         bytesTransfered = 0;
@@ -113,6 +144,10 @@ public abstract class ImageModel implements Closeable, Checkable, Validatable {
     public long endImageData() {
         if(isCheckable()) {
             checksumObj.end();
+        }
+        colorFilter.end(); 
+        if(colorCompression != null) {
+            colorCompression.end();
         }
         return bytesTransfered;
     }

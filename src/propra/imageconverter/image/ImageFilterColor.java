@@ -7,38 +7,45 @@ import propra.imageconverter.util.Validatable;
  *
  * @author pg
  */
-public class ImageFilterColor implements ImageFilter, Validatable {
-    
+public class ImageFilterColor extends ImageFilter {
+       
     @Override
-    public void beginFilter() {}
+    public void begin() {}
 
     @Override
-    public DataBuffer filter(DataBuffer src, ColorFormat srcFormat) {
-        return filter(src, srcFormat, src, srcFormat);
+    public DataBuffer filter(DataBuffer inOut) {
+        return filter(inOut, inOut);
     }
 
     @Override
-    public DataBuffer filter(   DataBuffer src, ColorFormat srcFormat, 
-                                DataBuffer target, ColorFormat targetFormat) {
-        if( src == null 
-        ||  srcFormat == null
-        ||  target == null
-        ||  targetFormat == null) {
+    public DataBuffer filter(DataBuffer in, DataBuffer out) {
+        if( in == null 
+        ||  out == null
+        ||  !isValid()) {
             throw new IllegalArgumentException();
         }
         
         // Generische Farbkonvertierung
-        if(!srcFormat.equals(targetFormat)) {
-            ColorFormat.convertColorBuffer( src, srcFormat, 
-                                        target, targetFormat);
+        if(!inFormat.equals(outFormat)) {
+            ColorFormat.convertColorBuffer(in, inFormat, 
+                                            out, outFormat);
         }
         
-        return target;
+        return out;
     }
 
     @Override
-    public void endFiter() {}
+    public void end() {
+    }
 
     @Override
-    public boolean isValid() {return true;}
+    public boolean isValid() {
+        return (inFormat != null);
+    }
+
+    @Override
+    public void reset() {
+        inFormat = null;
+        outFormat = null;
+    }
 }

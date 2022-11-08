@@ -168,4 +168,8 @@ public class DataBuffer implements Validatable {
     public void setCurrDataOffset(int currDataOffset) {
         this.currDataOffset = currDataOffset;
     }
+    
+    public void skipBytes(int len) {
+        buffer.position(buffer.position() + len);
+    }
 }

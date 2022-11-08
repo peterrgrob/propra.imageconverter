@@ -79,7 +79,18 @@ public abstract class Checksum implements DataFilter {
     /**
      * Aktualisiert die aktuelle Prüfsumme mit Bytes 
      * 
-     * @param data
+     * @param in
      */
-    public abstract void filter(DataBuffer buffer);
+    @Override
+    public abstract DataBuffer filter(DataBuffer in);
+    
+    /**
+     *
+     * @param in
+     * @param out
+     */
+    @Override
+    public DataBuffer filter(DataBuffer in, DataBuffer out) {
+        return filter(in);
+    }
 }

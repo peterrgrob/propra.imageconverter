@@ -23,6 +23,9 @@ public class ImageModelTGA extends ImageModel {
     static private final int TGA_HEADER_OFFSET_HEIGHT = 14;
     static private final int TGA_HEADER_OFFSET_BPP = 16;
     static private final int TGA_HEADER_OFFSET_ORIGIN = 17; 
+    
+    static private final int TGA_HEADER_ENCODING_NONE = 2;     
+    static private final int TGA_HEADER_ENCODING_RLE = 10;     
 
     /**
      *
@@ -84,14 +87,24 @@ public class ImageModelTGA extends ImageModel {
         newHeader.setWidth(byteBuffer.getShort(TGA_HEADER_OFFSET_WIDTH));
         newHeader.setHeight(byteBuffer.getShort(TGA_HEADER_OFFSET_HEIGHT));
         newHeader.setPixelSize(byteBuffer.get(TGA_HEADER_OFFSET_BPP) >> 3); 
-        newHeader.setEncoding(ImageHeader.Encoding.UNCOMPRESSED);
+        
+        byte compression = byteBuffer.get(TGA_HEADER_OFFSET_ENCODING);
+        switch (compression) {
+            case TGA_HEADER_ENCODING_RLE:
+                newHeader.getColorFormat().setCompression(ColorFormat.Compression.RLE);
+                break;
+            case TGA_HEADER_ENCODING_NONE:
+                newHeader.getColorFormat().setCompression(ColorFormat.Compression.UNCOMPRESSED);            
+                break;
+            default:
+                throw new UnsupportedOperationException("Nicht unterstützte TGA Kompression!");
+        }
         
         // Prüfe tga Spezifikationen
         if(newHeader.isValid() == false
         || !Utility.checkBit(byteBuffer.get(TGA_HEADER_OFFSET_ORIGIN), (byte)6)
         || Utility.checkBit(byteBuffer.get(TGA_HEADER_OFFSET_ORIGIN), (byte)5)
-        || byteBuffer.get(0) != 0
-        || byteBuffer.get(TGA_HEADER_OFFSET_ENCODING) != 2) {
+        || byteBuffer.get(0) != 0) {
             throw new UnsupportedOperationException("Ungültiges TGA Dateiformat!");
         }
         

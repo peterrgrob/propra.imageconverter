@@ -1,6 +1,7 @@
 package propra.imageconverter.image;
 
 import propra.imageconverter.util.DataBuffer;
+import propra.imageconverter.util.DataFormat;
 
 /**
  * 
@@ -10,13 +11,20 @@ import propra.imageconverter.util.DataBuffer;
  * 
  * @author pg
  */
-public class ColorFormat implements Comparable<ColorFormat> {
-
+public class ColorFormat extends DataFormat implements Comparable<ColorFormat> {
+    
     // Konstanten zur Indizierung von Farbkomponenten (Little Endian)
     public static final int BLUE = 0;
     public static final int GREEN = 1;
     public static final int RED = 2;
+    
+    public enum Compression {
+        UNCOMPRESSED,
+        RLE,
+    }
 
+    private Compression compression = Compression.UNCOMPRESSED;
+    
     // Bildet Indizes der Farkomponenten ab
     protected int[] mapping = new int[3];
 
@@ -91,6 +99,22 @@ public class ColorFormat implements Comparable<ColorFormat> {
         return output;
     }
     
+    /**
+     *
+     * @return
+     */
+    public ImageTranscoder createTranscoder() {
+        switch(compression) {
+            case UNCOMPRESSED -> {
+                return null;
+            }
+            case RLE -> {
+                return new ImageTranscoderRLE();
+            }
+        }
+        return null;
+    }
+    
     /*
      *  Getter/Setter 
      */
@@ -104,5 +128,13 @@ public class ColorFormat implements Comparable<ColorFormat> {
 
     public int[] getMapping() {
         return mapping;
+    }
+
+    public Compression getCompression() {
+        return compression;
+    }
+
+    public void setCompression(Compression compression) {
+        this.compression = compression;
     }
 }

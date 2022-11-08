@@ -1,41 +1,48 @@
 package propra.imageconverter.image;
 
-import propra.imageconverter.util.DataBuffer;
+import propra.imageconverter.util.*;
 
 /**
  *
  * @author pg
  */
-public interface ImageFilter {
+public abstract class ImageFilter implements DataFilter {
+    
+    ColorFormat inFormat;
+    ColorFormat outFormat;
+
+    public ImageFilter() {
+    }
+    
+    /**
+     *
+     * @param format
+     */
+    public void setInFormat(ColorFormat format) {
+        this.inFormat = format;
+    }
+
+    /**
+     *
+     * @param format
+     */
+    public void setOutFormat(ColorFormat format) {
+        this.outFormat = format;
+    }
 
     /**
      *
      * @return
      */
-    public void beginFilter();
-    
-    /**
-     *
-     * @param src
-     * @param srcFormat
-     * @return
-     */
-    public DataBuffer filter(DataBuffer src, ColorFormat srcFormat);
-    
-    /**
-     *
-     * @param src
-     * @param srcFormat
-     * @param target
-     * @param targetFormat
-     * @return
-     */
-    public DataBuffer filter(   DataBuffer src, ColorFormat srcFormat,
-                                DataBuffer target, ColorFormat targetFormat);
-    
+    public ColorFormat getInFormat() {
+        return inFormat;
+    }
+
     /**
      *
      * @return
      */
-    public void endFiter();
+    public ColorFormat getOutFormat() {
+        return outFormat;
+    }
 }

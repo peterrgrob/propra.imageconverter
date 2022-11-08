@@ -29,7 +29,7 @@ public class ChecksumPropra extends Checksum {
      * @param buffer
      */
     @Override
-    public void filter(DataBuffer buffer) {
+    public DataBuffer filter(DataBuffer buffer) {
         if (buffer == null) {
             throw new IllegalArgumentException();
         }
@@ -43,6 +43,7 @@ public class ChecksumPropra extends Checksum {
         }  
         
         currIndex += buffer.getCurrDataLength();
+        return buffer;
     }
     
     /**

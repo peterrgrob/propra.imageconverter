@@ -13,13 +13,10 @@ public class ImageHeader implements Validatable {
     private int width;
     private int height;
     private int pixelSize;    
-    private Encoding encoding;
     private long checksum;
     private ColorFormat colorType = new ColorFormat();
 
-    public enum Encoding {
-        UNCOMPRESSED,
-    }
+
         
     /**
      * 
@@ -39,7 +36,6 @@ public class ImageHeader implements Validatable {
         this.width = src.width;
         this.height = src.height;
         this.pixelSize = src.pixelSize;
-        this.encoding = src.encoding;
         this.checksum = src.checksum;
         this.colorType = new ColorFormat(src.getColorFormat());
     }
@@ -61,17 +57,6 @@ public class ImageHeader implements Validatable {
      */
     public int getPixelCount() {
         return width * height;
-    }
-    
-    /*
-     *  Getter&Setter
-     */
-    public Encoding getEncoding() {
-        return encoding;
-    }
-
-    public void setEncoding(Encoding encoding) {
-        this.encoding = encoding;
     }
     
     public int getImageSize() {

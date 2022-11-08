@@ -7,6 +7,7 @@ package propra.imageconverter.util;
 public interface DataFilter extends Validatable {
     public void reset();
     public void begin();
-    public void filter(DataBuffer buffer);
+    public DataBuffer filter(DataBuffer inOut);
+    public DataBuffer filter(DataBuffer in, DataBuffer out);
     public void end();
 }

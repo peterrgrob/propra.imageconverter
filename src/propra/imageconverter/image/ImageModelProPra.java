@@ -102,7 +102,7 @@ public class ImageModelProPra extends ImageModel {
         newHeader.setHeight(bytes.getShort(PROPRA_HEADER_OFFSET_HEIGHT));
         newHeader.setPixelSize((int)bytes.get(PROPRA_HEADER_OFFSET_BPP) >> 3); 
         newHeader.setChecksum(bytes.getInt(PROPRA_HEADER_OFFSET_CHECKSUM)); 
-        newHeader.setEncoding(ImageHeader.Encoding.UNCOMPRESSED);
+        newHeader.getColorFormat().setCompression(ColorFormat.Compression.UNCOMPRESSED);
         long dataLen = bytes.getLong(PROPRA_HEADER_OFFSET_DATALEN);   
         
         // RBG Farbmapping setzen
