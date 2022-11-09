@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import propra.imageconverter.util.CmdLine;
+import propra.imageconverter.util.CmdLine.Options;
 import propra.imageconverter.util.DataBuffer;
 import propra.imageconverter.util.Validatable;
 
@@ -13,9 +14,10 @@ import propra.imageconverter.util.Validatable;
  * @author pg
  */
 public class ImageIO implements Validatable {
-    
+   
     private ImageModel inModel;
     private ImageModel outModel;
+    private ColorFormat.Encoding outEncoding = ColorFormat.Encoding.NONE;
     
     /**
      *
@@ -64,30 +66,35 @@ public class ImageIO implements Validatable {
      * @param cmd
      * @throws java.io.FileNotFoundException
      */
-    public void setupModel(CmdLine cmd) throws FileNotFoundException, IOException {
+    public void setupFromCmdline(CmdLine cmd) throws FileNotFoundException, IOException {
         if(cmd == null) {
             throw new IllegalArgumentException();
         }
         
-        RandomAccessFile inStream = new RandomAccessFile(cmd.getOption(CmdLine.Options.INPUT_FILE),"r");
-        inModel = createModel(cmd.getOptionExtension(CmdLine.Options.INPUT_FILE), 
+        // Eingabeobjekt erstellen
+        RandomAccessFile inStream = new RandomAccessFile(cmd.getOption(Options.INPUT_FILE),"r");
+        inModel = createModel(cmd.getOptionExtension(Options.INPUT_FILE), 
                             inStream);
         if(inModel == null) {
             throw new IOException("Nicht unterstütztes Bildformat.");
         }
 
-        String outPath = cmd.getOption(CmdLine.Options.OUTPUT_FILE);  
+        String outPath = cmd.getOption(Options.OUTPUT_FILE);  
         File file = new File(outPath);
         if(!file.exists()) {
             file.createNewFile();
         }
         
+        // Ausgabeobjekt erstellen
         RandomAccessFile outStream = new RandomAccessFile(file,"rw");
-        outModel = createModel(cmd.getOptionExtension(CmdLine.Options.OUTPUT_FILE), 
+        outModel = createModel(cmd.getOptionExtension(Options.OUTPUT_FILE), 
                             outStream);
         if(outModel == null) {
             throw new IOException("Nicht unterstütztes Bildformat.");
         }
+        
+        // Ausgabekompression setzen
+        outEncoding = cmd.getColorEncoding();
     }
     
     /**
@@ -100,8 +107,13 @@ public class ImageIO implements Validatable {
             throw new IllegalStateException();
         }
         
+        // Bildkopf einlesen
         ImageHeader inHeader = inModel.readHeader();
+        
+        // Bildkompression setzen und Bildkopf in Ausgabedatei schreiben
+        inHeader.getColorFormat().setEncoding(outEncoding);
         outModel.writeHeader(inHeader);
+        
         return inHeader;
     }
     
@@ -113,7 +125,8 @@ public class ImageIO implements Validatable {
         if(!isValid()) {
             throw new IllegalStateException();
         }
-
+        
+        // Falls nötig Prüfsumme in den Bildkopf schreiben
         if(outModel.isCheckable()) {
             outModel.writeHeader(outModel.getHeader());
         }
@@ -131,19 +144,25 @@ public class ImageIO implements Validatable {
             throw new IllegalArgumentException();
         }
 
+        // Datenblock für blockweise Übertragung erstellen
         DataBuffer block = new DataBuffer(inModel.getBlockSize());
-        ColorFormat cFormat = inModel.getHeader().getColorFormat();
+        ColorFormat inFormat = inModel.getColorFormat();
         
-        inModel.beginImageData();
-        outModel.beginImageData();
+        // blockweise Übertragung starten
+        inModel.beginImageBlocks();
+        outModel.beginImageBlocks();
         
+        // Blöcke übertragen 
         while(inModel.hasMoreImageData()) {
-            inModel.readImageData(block);
-            outModel.writeImageData(block,cFormat);
+            inModel.readImageBlock(block);
+            outModel.writeImageBlock(block,inFormat);
         }
         
-        inModel.endImageData();
-        outModel.endImageData();
+        // blockweise Übertragung beenden     
+        inModel.endImageBlocks();
+        outModel.endImageBlocks();
+        
+        // Prüfsumme prüfen
         isChecksumValid();
     }
     
@@ -179,11 +198,7 @@ public class ImageIO implements Validatable {
         if(!isValid()) {
             throw new IllegalStateException();
         }
-        
-        if(inModel.isCheckable()) {
-            return inModel.getChecksumObj().getValue();
-        }
-        return 0;
+        return inModel.getChecksum();
     }
     
     /**
@@ -194,11 +209,7 @@ public class ImageIO implements Validatable {
         if(!isValid()) {
             throw new IllegalStateException();
         }
-        
-        if(outModel.isCheckable()) {
-            return outModel.getChecksumObj().getValue();
-        }
-        return 0;
+      return outModel.getChecksum();
     }
 
     /**

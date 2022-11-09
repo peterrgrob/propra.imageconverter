@@ -54,7 +54,7 @@ public class ImageConverter {
         long start = System.currentTimeMillis();
 
         ImageIO io = new ImageIO();
-        io.setupModel(cmdLine);
+        io.setupFromCmdline(cmdLine);
         ImageHeader inHeader = io.beginTransfer();
         io.transfer();
         io.endTransfer();

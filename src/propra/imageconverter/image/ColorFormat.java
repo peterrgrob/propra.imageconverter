@@ -18,12 +18,12 @@ public class ColorFormat extends DataFormat implements Comparable<ColorFormat> {
     public static final int GREEN = 1;
     public static final int RED = 2;
     
-    public enum Compression {
-        UNCOMPRESSED,
+    public enum Encoding {
+        NONE,
         RLE,
     }
 
-    private Compression compression = Compression.UNCOMPRESSED;
+    private Encoding encoding = Encoding.NONE;
     
     // Bildet Indizes der Farkomponenten ab
     protected int[] mapping = new int[3];
@@ -49,6 +49,7 @@ public class ColorFormat extends DataFormat implements Comparable<ColorFormat> {
         setMapping(RED,src.getMapping(RED));
         setMapping(GREEN,src.getMapping(GREEN));
         setMapping(BLUE,src.getMapping(BLUE));
+        encoding = src.encoding;
     }
     
     /**
@@ -104,8 +105,9 @@ public class ColorFormat extends DataFormat implements Comparable<ColorFormat> {
      * @return
      */
     public ImageTranscoder createTranscoder() {
-        switch(compression) {
-            case UNCOMPRESSED -> {
+        switch(encoding) {
+
+            case NONE -> {
                 return null;
             }
             case RLE -> {
@@ -130,11 +132,11 @@ public class ColorFormat extends DataFormat implements Comparable<ColorFormat> {
         return mapping;
     }
 
-    public Compression getCompression() {
-        return compression;
+    public Encoding getEncoding() {
+        return encoding;
     }
 
-    public void setCompression(Compression compression) {
-        this.compression = compression;
+    public void setEncoding(Encoding compression) {
+        this.encoding = compression;
     }
 }

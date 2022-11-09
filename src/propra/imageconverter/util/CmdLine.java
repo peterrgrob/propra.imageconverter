@@ -1,5 +1,6 @@
 package propra.imageconverter.util;
 import java.util.HashMap;
+import propra.imageconverter.image.ColorFormat;
 
 /**
  * Hilfsklasse die Kommandozeilenparameter parsed und speichert, diese
@@ -40,8 +41,10 @@ import java.util.HashMap;
     public CmdLine(String[] args) {
         // Iteriere und parse alle Argumente
         for(var a: args) {
+            // Aufteilen in Komponenten
             String[] tupel = a.split("=");
             if(tupel.length > 0) {
+                // Mit enums vergleichen und bei Bedarf speichern
                 for (Options opt : Options.values()) { 
                     if(opt.getKey().equals(tupel[0])) {
                         String param = "";
@@ -62,6 +65,21 @@ import java.util.HashMap;
      */
     public String getOption(Options opt) {
         return options.get(opt);
+    }
+    
+    /**
+     *
+     * @param opt
+     * @return
+     */
+    public ColorFormat.Encoding getColorEncoding() {
+        String enc = getOption(Options.COMPRESSION);
+        if(enc != null) {
+            if(enc.compareTo("rle") == 0) {
+                return ColorFormat.Encoding.RLE;
+            }
+        }
+        return ColorFormat.Encoding.NONE;
     }
     
     /**

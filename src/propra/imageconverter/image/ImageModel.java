@@ -14,18 +14,20 @@ import propra.imageconverter.util.Validatable;
  * 
  * @author pg
  */
-public abstract class ImageModel implements Closeable, Checkable, Validatable {
-    
-    protected ImageFilterColor colorFilter; 
-    protected ImageTranscoder colorCompression;    
-    
-    protected final int blockSize = 128 * 4096 * 3;
-    protected DataBuffer temporaryBuffer = new DataBuffer(blockSize);
-    protected long bytesTransfered;
+public abstract class ImageModel implements Closeable, 
+                                            Checkable, 
+                                            Validatable {
         
+    protected final int BLOCK_SIZE = 128 * 4096 * 3;
+    protected DataBuffer temporaryBuffer = new DataBuffer(BLOCK_SIZE);
+    protected long bytesTransfered;
+
+    protected ImageFilterColor colorFilter; 
+    protected ImageTranscoder inEncoding;   
+    protected ImageTranscoder outEncoding;
+     
     protected RandomAccessFile stream;
     protected Checksum checksumObj;  
-        
     protected ImageHeader header;
     protected int headerSize;
 
@@ -36,12 +38,11 @@ public abstract class ImageModel implements Closeable, Checkable, Validatable {
      */
     public ImageModel(RandomAccessFile stream) {
         this.stream = stream;
+        this.outEncoding = null;
         this.colorFilter = new ImageFilterColor();
     }
             
-    /**
-     * Wandelt einen allgemeinen ImageHeader in Bytes um.
-     * 
+    /** 
      * @param info
      * @throws java.io.IOException
      */
@@ -55,6 +56,29 @@ public abstract class ImageModel implements Closeable, Checkable, Validatable {
      */
     public abstract ImageHeader readHeader() throws IOException;
     
+    
+    /**
+     *
+     */
+    public void beginImageBlocks() {
+        // Prüfsumme initialisieren
+        if(isCheckable()) {
+            checksumObj.begin();
+        }
+        
+        // Eingabeformat für Konvertierung setzen
+        colorFilter.setOutFormat(header.getColorFormat());
+        colorFilter.begin();
+        
+        // Kompression initialisieren
+        inEncoding = header.getColorFormat().createTranscoder();
+        if(inEncoding != null) {
+            inEncoding.begin(header.getColorFormat());
+        }
+        
+        bytesTransfered = 0;
+    }
+    
     /**
      * Wandelt Bilddaten in bytes um. 
      * 
@@ -63,17 +87,25 @@ public abstract class ImageModel implements Closeable, Checkable, Validatable {
      * @return
      * @throws java.io.IOException
      */
-    public DataBuffer writeImageData(DataBuffer data, ColorFormat colorFormat) throws IOException {
+    public DataBuffer writeImageBlock(DataBuffer data, ColorFormat colorFormat) throws IOException {
         if(!isValid() 
         || data == null) {
             throw new IllegalArgumentException();
         }
 
+        // Ausgabeformat für Konvertierung setzen und Block konvertieren
         colorFilter.setInFormat(colorFormat);
         colorFilter.filter(data);        
         
+        // Prüfsumme mit aktuellem Block aktualisieren
         updateChecksum(data);  
+        
+        // Block in Datei schreiben
         writeDataToStream(data, 0, data.getCurrDataLength());
+        
+        // Anzahl der kodierten Bytes merken
+        bytesTransfered += data.getCurrDataLength();
+        
         return data;
     }
     
@@ -84,71 +116,68 @@ public abstract class ImageModel implements Closeable, Checkable, Validatable {
      * @return
      * @throws java.io.IOException
      */
-    public int readImageData(DataBuffer buffer) throws IOException {
+    public int readImageBlock(DataBuffer buffer) throws IOException {
         if(!isValid() 
         || buffer == null) {
             throw new IllegalArgumentException();
         }
         
-        // Kompression?
-        if(colorCompression != null) {
-            // Daten aus der Datei lesen und dekodieren
+        // Dekompression erforderlich?
+        if(inEncoding != null) {
+            
+            // Aktuelle Blockgröße berechnen
             int len = temporaryBuffer.getSize();
             long remainingBytes = stream.length() - stream.getFilePointer();
             if(temporaryBuffer.getSize() > remainingBytes) {
                 len = (int)(remainingBytes);
             }
+            
+            // Block aus der Datei lesen
             readDataFromStream(temporaryBuffer, 0, len);
-            colorCompression.transcode( DataTranscoder.Operation.DECODE, 
+            
+            // Block dekomprimieren
+            inEncoding.transcode( DataTranscoder.Operation.DECODE, 
                                         temporaryBuffer, 
                                         buffer);
             
         } else {
-            // Daten aus der Datei direkt in buffer lesen
+            
+            // Aktuelle Blockgröße berechnen
             int len = buffer.getSize();
             if(bytesTransfered + buffer.getSize() > header.getImageSize()) {
                 len = (int)(header.getImageSize() - bytesTransfered);
             }
+            // Daten aus der Datei direkt in buffer lesen ohne Dekompression
             readDataFromStream(buffer, 0, len);
         }
         
-        buffer.getBuffer().clear();
+        // Prüfsumme mit aktuellem Block aktualisieren
         updateChecksum(buffer);   
+        
+        // Anzahl der dekodierten Bytes merken
         bytesTransfered += buffer.getCurrDataLength(); 
+        
         return buffer.getCurrDataLength();
     }
-    
-    /**
-     *
-     */
-    public void beginImageData() {
-        if(isCheckable()) {
-            checksumObj.begin();
-        }
-        
-        colorFilter.setOutFormat(header.getColorFormat());
-        colorFilter.begin();
-        
-        colorCompression = header.getColorFormat().createTranscoder();
-        if(colorCompression != null) {
-            colorCompression.begin(header.getColorFormat());
-        }
-        
-        bytesTransfered = 0;
-    }
-    
+     
     /**
      *
      * @return
      */
-    public long endImageData() {
+    public long endImageBlocks() {
         if(isCheckable()) {
             checksumObj.end();
         }
+        
+        // Farbkonvertierung abschließen
         colorFilter.end(); 
-        if(colorCompression != null) {
-            colorCompression.end();
+        
+        // Kompression abschließen
+        if(inEncoding != null) {
+            inEncoding.end();
         }
+        
+        // Anzahl aller bearbeiteten Bytes zurückgeben
         return bytesTransfered;
     }
     
@@ -194,11 +223,16 @@ public abstract class ImageModel implements Closeable, Checkable, Validatable {
         || buffer == null) {
             throw new IllegalArgumentException();
         }
+        
+        // Bytes vom Stream lesen
         int rl = stream.read(buffer.getBytes(), offset, len);
         if(rl != len) {
             throw new IOException();
         }
+        
+        // Tatsächlich gelesene Bytes im Buffer vermerken
         buffer.setCurrDataLength(len);
+        
         return buffer;
     }
     
@@ -215,7 +249,10 @@ public abstract class ImageModel implements Closeable, Checkable, Validatable {
         || buffer == null) {
             throw new IllegalArgumentException();
         }
+        
+        // Bytes in Stream schreiben
         stream.write(buffer.getBytes(), offset, len);
+        
         return buffer;
     }
     
@@ -277,7 +314,7 @@ public abstract class ImageModel implements Closeable, Checkable, Validatable {
      * @return
      */
     public int getBlockSize() {
-        return blockSize;
+        return BLOCK_SIZE;
     }
 
     /**
@@ -286,5 +323,16 @@ public abstract class ImageModel implements Closeable, Checkable, Validatable {
      */
     public ImageHeader getHeader() {
         return header;
+    }
+    
+    /**
+     *
+     * @return
+     */
+    public ColorFormat getColorFormat() {
+        if(header == null) {
+           throw new IllegalArgumentException();
+        }
+        return header.getColorFormat();
     }
 }

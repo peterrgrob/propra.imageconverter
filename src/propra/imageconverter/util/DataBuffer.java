@@ -13,6 +13,9 @@ import java.nio.ByteOrder;
 public class DataBuffer implements Validatable {
 
     protected ByteBuffer buffer;
+    
+    // Menge an Daten die im Buffer vorhanden sind und zugehöriger 
+    // Offset für die blockweise Verarbeitung von Daten
     protected int currDataLength;
     protected int currDataOffset;
 

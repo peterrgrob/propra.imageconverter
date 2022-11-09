@@ -24,6 +24,9 @@ public class ImageModelProPra extends ImageModel {
     static private final int PROPRA_HEADER_OFFSET_DATALEN = 18;
     static private final int PROPRA_HEADER_OFFSET_CHECKSUM = 26;   
     
+    static private final int PROPRA_HEADER_ENCODING_NONE = 0;     
+    static private final int PROPRA_HEADER_ENCODING_RLE = 1;   
+    
     /**
      *
      * @param stream
@@ -64,6 +67,20 @@ public class ImageModelProPra extends ImageModel {
         byteBuffer.put(PROPRA_HEADER_OFFSET_BPP,(byte)(srcHeader.getPixelSize() << 3));
         byteBuffer.putLong(PROPRA_HEADER_OFFSET_DATALEN,(long)srcHeader.getImageSize());
         
+        // Kompression 
+        switch(header.getColorFormat().getEncoding()) {
+            case RLE -> {
+                byteBuffer.put(PROPRA_HEADER_OFFSET_ENCODING, (byte)PROPRA_HEADER_ENCODING_RLE);
+            }
+            case NONE -> {
+                byteBuffer.put(PROPRA_HEADER_OFFSET_ENCODING, (byte)PROPRA_HEADER_ENCODING_NONE);
+            }
+            default -> {
+                throw new IllegalArgumentException("Ungültige Kompression.");
+            }                   
+        }
+        
+        // Headerbytes in Stream schreiben
         stream.seek(0);
         stream.write(byteBuffer.array());
     }
@@ -79,10 +96,13 @@ public class ImageModelProPra extends ImageModel {
         if(stream == null) {
             throw new IllegalArgumentException();
         }
+        
+        // DataBuffer für Header erstellen       
         DataBuffer data = new DataBuffer(headerSize);
         ByteBuffer bytes = data.getBuffer();
         bytes.order(ByteOrder.LITTLE_ENDIAN);
         
+        // Headerbytes von Stream lesen
         readDataFromStream(data, 0, headerSize);
         
         // Prüfe Formatkennung
@@ -96,13 +116,12 @@ public class ImageModelProPra extends ImageModel {
            throw new UnsupportedOperationException("Ungültige ProPra-Kennung!");
         }
         
-        // Headerfelder einlesen
+        // Headerfelder in allgemeinen Header konvertieren
         ImageHeader newHeader = new ImageHeader();
         newHeader.setWidth(bytes.getShort(PROPRA_HEADER_OFFSET_WIDTH));
         newHeader.setHeight(bytes.getShort(PROPRA_HEADER_OFFSET_HEIGHT));
         newHeader.setPixelSize((int)bytes.get(PROPRA_HEADER_OFFSET_BPP) >> 3); 
         newHeader.setChecksum(bytes.getInt(PROPRA_HEADER_OFFSET_CHECKSUM)); 
-        newHeader.getColorFormat().setCompression(ColorFormat.Compression.UNCOMPRESSED);
         long dataLen = bytes.getLong(PROPRA_HEADER_OFFSET_DATALEN);   
         
         // RBG Farbmapping setzen
@@ -110,15 +129,31 @@ public class ImageModelProPra extends ImageModel {
         newHeader.getColorFormat().setMapping(ColorFormat.GREEN,2);
         newHeader.getColorFormat().setMapping(ColorFormat.BLUE,1);
         
-        // Prüfe ProPra Spezifikationen
-        if( newHeader.isValid() == false 
-        ||  (newHeader.getImageSize() != dataLen)
-        ||  (dataLen != (stream.length() - PROPRA_HEADER_SIZE))
-        ||  (newHeader.getImageSize() != (stream.length() - PROPRA_HEADER_SIZE))
-        ||  (bytes.get(PROPRA_HEADER_OFFSET_ENCODING) != 0)) {
-            throw new UnsupportedOperationException("Ungültiges ProPra Dateiformat!");
+        // Kompression prüfen
+        switch (bytes.get(PROPRA_HEADER_OFFSET_ENCODING)) {
+            case PROPRA_HEADER_ENCODING_RLE:
+                newHeader.getColorFormat().setEncoding(ColorFormat.Encoding.RLE);
+                break;
+            case PROPRA_HEADER_ENCODING_NONE:
+                newHeader.getColorFormat().setEncoding(ColorFormat.Encoding.NONE);            
+                break;
+            default:
+                throw new UnsupportedOperationException("Nicht unterstützte Kompression!");
         }
         
-        return (header = newHeader);
+        // Prüfe ProPra Spezifikationen
+        if( newHeader.isValid() == false 
+        ||  (dataLen != (stream.length() - PROPRA_HEADER_SIZE))) {
+            throw new UnsupportedOperationException("Ungültiges ProPra Dateiformat!");
+        } else if(newHeader.getColorFormat().getEncoding() == ColorFormat.Encoding.NONE) {
+            // Prüfungen für unkomprimierte Dateien 
+            if(newHeader.getImageSize() != dataLen
+            || newHeader.getImageSize() != (stream.length() - PROPRA_HEADER_SIZE)) {
+                throw new UnsupportedOperationException("Ungültiges ProPra Dateiformat!");
+            }
+        }
+        
+        // Neuen Header zurückgeben
+        return new ImageHeader(header = newHeader);
     }  
 }

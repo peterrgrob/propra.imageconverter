@@ -53,6 +53,7 @@ public class ImageModelTGA extends ImageModel {
         ByteBuffer byteBuffer = dataBuffer.getBuffer();
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         
+        // Header speichern für blockweise Verarbeitung der Bilddaten
         header = new ImageHeader(srcHeader);
         header.getColorFormat().setMapping(ColorFormat.RED,2);
         header.getColorFormat().setMapping(ColorFormat.GREEN,1);
@@ -63,8 +64,22 @@ public class ImageModelTGA extends ImageModel {
         byteBuffer.putShort(TGA_HEADER_OFFSET_WIDTH, (short)srcHeader.getWidth());
         byteBuffer.putShort(TGA_HEADER_OFFSET_HEIGHT, (short)srcHeader.getHeight());
         byteBuffer.put(TGA_HEADER_OFFSET_BPP, (byte)(srcHeader.getPixelSize() << 3));        
-        byteBuffer.put(TGA_HEADER_OFFSET_ORIGIN, (byte)(1 << 5));    
+        byteBuffer.put(TGA_HEADER_OFFSET_ORIGIN, (byte)(1 << 5)); 
         
+        // Kompression
+        switch(header.getColorFormat().getEncoding()) {
+            case RLE -> {
+                byteBuffer.put(TGA_HEADER_OFFSET_ENCODING, (byte)TGA_HEADER_ENCODING_RLE);
+            }
+            case NONE -> {
+                byteBuffer.put(TGA_HEADER_OFFSET_ENCODING, (byte)TGA_HEADER_ENCODING_NONE);
+            }
+            default -> {
+                throw new IllegalArgumentException("Ungültige Kompression.");
+            }                   
+        }
+        
+        // In Stream schreiben
         stream.seek(0);
         stream.write(byteBuffer.array());
     }
@@ -76,25 +91,29 @@ public class ImageModelTGA extends ImageModel {
      */
     @Override
     public ImageHeader readHeader() throws IOException{
+        
+        // Buffer für Header erstellen
         DataBuffer data = new DataBuffer(headerSize);
         ByteBuffer byteBuffer = data.getBuffer();
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
        
+        // Headerbytes von Stream einlesen
         readDataFromStream(data, 0, headerSize);
         
-        // Headerfelder einlesen
+        // Headerfelder konvertieren
         ImageHeader newHeader = new ImageHeader();
         newHeader.setWidth(byteBuffer.getShort(TGA_HEADER_OFFSET_WIDTH));
         newHeader.setHeight(byteBuffer.getShort(TGA_HEADER_OFFSET_HEIGHT));
         newHeader.setPixelSize(byteBuffer.get(TGA_HEADER_OFFSET_BPP) >> 3); 
         
+        // Kompression prüfen
         byte compression = byteBuffer.get(TGA_HEADER_OFFSET_ENCODING);
         switch (compression) {
             case TGA_HEADER_ENCODING_RLE:
-                newHeader.getColorFormat().setCompression(ColorFormat.Compression.RLE);
+                newHeader.getColorFormat().setEncoding(ColorFormat.Encoding.RLE);
                 break;
             case TGA_HEADER_ENCODING_NONE:
-                newHeader.getColorFormat().setCompression(ColorFormat.Compression.UNCOMPRESSED);            
+                newHeader.getColorFormat().setEncoding(ColorFormat.Encoding.NONE);            
                 break;
             default:
                 throw new UnsupportedOperationException("Nicht unterstützte TGA Kompression!");
@@ -108,6 +127,6 @@ public class ImageModelTGA extends ImageModel {
             throw new UnsupportedOperationException("Ungültiges TGA Dateiformat!");
         }
         
-        return (header = newHeader);
+        return new ImageHeader((header = newHeader));
     }
 }

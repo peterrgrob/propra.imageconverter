@@ -29,15 +29,16 @@ public abstract class ImageTranscoder implements DataTranscoder {
     }
     
     @Override
-    public long transcode(Operation op,
-                                DataBuffer in,
-                                DataBuffer out) {
+    public long transcode(  Operation op,
+                            DataBuffer in,
+                            DataBuffer out) {
         if( in == null 
         ||  out == null
         ||  !isValid()) {
             throw new IllegalArgumentException();
         }
         
+        // Operation delegieren
         switch(op) {
             case PASS -> {
                 return _pass(in, out);
@@ -71,9 +72,31 @@ public abstract class ImageTranscoder implements DataTranscoder {
         return inFormat;
     }
     
+    // Zu implementierende Untermethoden
     protected abstract long _encode(DataBuffer in, DataBuffer out);
     protected abstract long _decode(DataBuffer in, DataBuffer out);
-    protected abstract long _pass(DataBuffer in, DataBuffer out);
+    
+    /**
+     *
+     * @param in
+     * @param out
+     * @return
+     */
+    protected long _pass(DataBuffer in, DataBuffer out) {
+        if(in.getSize() > out.getSize()) {
+            throw new IllegalArgumentException("Ungültige Blockgröße");
+        }
+        
+        // Daten kopieren
+        out.getBuffer().put(in.getBuffer());
+        
+        // Positionszeiger zurücksetzen
+        out.getBuffer().clear();
+        
+        // Anzahl der dekodierten Bytes setzen und zurückgeben
+        out.setCurrDataLength(in.getSize());        
+        return in.getSize();
+    }
     
     /**
      *
