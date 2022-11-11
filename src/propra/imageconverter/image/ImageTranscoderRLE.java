@@ -46,8 +46,64 @@ public class ImageTranscoderRLE extends ImageTranscoder {
      */
     @Override
     protected long _encode(DataBuffer in, DataBuffer out) {
-
-        return 0;
+        byte[] color = new byte[3];
+        ByteBuffer inBytes = in.getBuffer();
+        ByteBuffer outBytes = out.getBuffer();
+        int colorSize = 3;
+        int rawCounter = 0;
+           
+        // Über Bytes iterieren und gemäß RLE verarbeiten
+        while(inBytes.position() < in.getCurrDataLength()) {
+         
+            // Anzahl gleicher Farben zählen
+            int rleCtr = countRleColor(in.getBuffer());
+            if(rleCtr > 1) {
+                
+                // RLE Block verarbeiten
+                // Farbwert speichern
+                inBytes.get(color);
+                
+                // Paketkopf und Farbwert schreiben
+                outBytes.put((byte)(127 + rleCtr));
+                outBytes.put(color);
+                
+                // Gleiche Farben im Eingabepuffer überspringen
+                in.skipBytes((rleCtr - 1) * colorSize);
+                rleCtr = 0;
+                
+            } else {
+                
+                // Raw Block verarbeiten
+                int headerPosition = outBytes.position();
+                
+                // Paketkopfbyte überspringen 
+                out.skipBytes(1);
+                
+                // Unterschiedliche Farben iterieren
+                while(!compareColor(inBytes.array(), 
+                                    inBytes.position(),
+                                    inBytes.position() + colorSize) && rawCounter <= 127) {
+                    
+                    // Farbe übertragen
+                    inBytes.get(color);
+                    outBytes.put(color);
+                                    
+                    rawCounter++;
+                }
+                
+                // Paketkopf speichern
+                outBytes.put(headerPosition, (byte)(rawCounter - 1));
+                rawCounter = 0;
+            }
+        }
+        
+        // Anzahl der dekodierten Bytes setzen
+        out.setCurrDataLength(outBytes.position());  
+        
+        // Positionszeiger zurücksetzen
+        out.getBuffer().clear();
+              
+        return out.getCurrDataLength();
     }
 
     /**
@@ -115,5 +171,41 @@ public class ImageTranscoderRLE extends ImageTranscoder {
     @Override
     public boolean isValid() {
         return true;
+    }
+    
+    /**
+     * 
+     * @param data
+     * @return 
+     */
+    private int countRleColor(ByteBuffer data) {
+        byte[] array = data.array();
+        int baseOffset = data.position();
+        int runningOffset = baseOffset + 3;
+        int counter = 1;
+        
+        // Zählen solange Farben gleich sind
+        while (compareColor(array, baseOffset, runningOffset)) {
+            counter++;
+            if(counter >= 127) {
+                break;
+            }
+            runningOffset += 3;
+        }
+        
+        return counter;
+    }
+   
+    /**
+     * 
+     * @param array
+     * @param offset0
+     * @param offset1
+     * @return 
+     */
+    boolean compareColor(byte[] array, int offset0, int offset1) {
+        return (array[offset0 + 0] == array[offset1 + 0]
+            &&  array[offset0 + 1] == array[offset1 + 1]
+            &&  array[offset0 + 2] == array[offset1 + 2]);
     }
 }

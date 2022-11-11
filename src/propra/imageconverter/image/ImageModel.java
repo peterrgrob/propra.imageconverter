@@ -18,13 +18,13 @@ public abstract class ImageModel implements Closeable,
                                             Checkable, 
                                             Validatable {
         
-    protected final int BLOCK_SIZE = 128 * 4096 * 3;
+    protected final int BLOCK_SIZE = 1024 * 4096 * 3;
     protected DataBuffer temporaryBuffer = new DataBuffer(BLOCK_SIZE);
     protected long bytesTransfered;
 
+    // Farbverarbeitung
     protected ImageFilterColor colorFilter; 
-    protected ImageTranscoder inEncoding;   
-    protected ImageTranscoder outEncoding;
+    protected ImageTranscoder encoding;   
      
     protected RandomAccessFile stream;
     protected Checksum checksumObj;  
@@ -38,7 +38,6 @@ public abstract class ImageModel implements Closeable,
      */
     public ImageModel(RandomAccessFile stream) {
         this.stream = stream;
-        this.outEncoding = null;
         this.colorFilter = new ImageFilterColor();
     }
             
@@ -71,9 +70,9 @@ public abstract class ImageModel implements Closeable,
         colorFilter.begin();
         
         // Kompression initialisieren
-        inEncoding = header.getColorFormat().createTranscoder();
-        if(inEncoding != null) {
-            inEncoding.begin(header.getColorFormat());
+        encoding = header.getColorFormat().createTranscoder();
+        if(encoding != null) {
+            encoding.begin(header.getColorFormat());
         }
         
         bytesTransfered = 0;
@@ -92,19 +91,31 @@ public abstract class ImageModel implements Closeable,
         || data == null) {
             throw new IllegalArgumentException();
         }
-
+        
         // Ausgabeformat für Konvertierung setzen und Block konvertieren
         colorFilter.setInFormat(colorFormat);
-        colorFilter.filter(data);        
+        colorFilter.filter(data);   
+        
+        DataBuffer writeBuffer = data;
         
         // Prüfsumme mit aktuellem Block aktualisieren
-        updateChecksum(data);  
+        updateChecksum(data); 
+        
+        // Kompression erforderlich?
+        if(encoding != null) {
+            
+            // Block komprimieren
+            encoding.transcode( DataTranscoder.Operation.ENCODE, 
+                                data, 
+                                temporaryBuffer);
+            writeBuffer = temporaryBuffer;
+        } 
         
         // Block in Datei schreiben
-        writeDataToStream(data, 0, data.getCurrDataLength());
+        writeDataToStream(writeBuffer, 0, writeBuffer.getCurrDataLength());
         
         // Anzahl der kodierten Bytes merken
-        bytesTransfered += data.getCurrDataLength();
+        bytesTransfered += writeBuffer.getCurrDataLength();
         
         return data;
     }
@@ -123,7 +134,7 @@ public abstract class ImageModel implements Closeable,
         }
         
         // Dekompression erforderlich?
-        if(inEncoding != null) {
+        if(encoding != null) {
             
             // Aktuelle Blockgröße berechnen
             int len = temporaryBuffer.getSize();
@@ -135,8 +146,11 @@ public abstract class ImageModel implements Closeable,
             // Block aus der Datei lesen
             readDataFromStream(temporaryBuffer, 0, len);
             
+            // Prüfsumme mit aktuellem Block vor dekodierung aktualisieren
+            updateChecksum(temporaryBuffer);  
+            
             // Block dekomprimieren
-            inEncoding.transcode( DataTranscoder.Operation.DECODE, 
+            encoding.transcode( DataTranscoder.Operation.DECODE, 
                                         temporaryBuffer, 
                                         buffer);
             
@@ -149,10 +163,10 @@ public abstract class ImageModel implements Closeable,
             }
             // Daten aus der Datei direkt in buffer lesen ohne Dekompression
             readDataFromStream(buffer, 0, len);
-        }
-        
-        // Prüfsumme mit aktuellem Block aktualisieren
-        updateChecksum(buffer);   
+            
+            // Prüfsumme mit aktuellem Block aktualisieren
+            updateChecksum(buffer);  
+        } 
         
         // Anzahl der dekodierten Bytes merken
         bytesTransfered += buffer.getCurrDataLength(); 
@@ -165,6 +179,7 @@ public abstract class ImageModel implements Closeable,
      * @return
      */
     public long endImageBlocks() {
+        
         if(isCheckable()) {
             checksumObj.end();
         }
@@ -173,8 +188,8 @@ public abstract class ImageModel implements Closeable,
         colorFilter.end(); 
         
         // Kompression abschließen
-        if(inEncoding != null) {
-            inEncoding.end();
+        if(encoding != null) {
+            encoding.end();
         }
         
         // Anzahl aller bearbeiteten Bytes zurückgeben

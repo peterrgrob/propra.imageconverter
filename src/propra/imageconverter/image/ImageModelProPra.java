@@ -135,7 +135,7 @@ public class ImageModelProPra extends ImageModel {
                 newHeader.getColorFormat().setEncoding(ColorFormat.Encoding.RLE);
                 break;
             case PROPRA_HEADER_ENCODING_NONE:
-                newHeader.getColorFormat().setEncoding(ColorFormat.Encoding.NONE);            
+                newHeader.getColorFormat().setEncoding(ColorFormat.Encoding.NONE);  
                 break;
             default:
                 throw new UnsupportedOperationException("Nicht unterstützte Kompression!");
@@ -146,6 +146,7 @@ public class ImageModelProPra extends ImageModel {
         ||  (dataLen != (stream.length() - PROPRA_HEADER_SIZE))) {
             throw new UnsupportedOperationException("Ungültiges ProPra Dateiformat!");
         } else if(newHeader.getColorFormat().getEncoding() == ColorFormat.Encoding.NONE) {
+            
             // Prüfungen für unkomprimierte Dateien 
             if(newHeader.getImageSize() != dataLen
             || newHeader.getImageSize() != (stream.length() - PROPRA_HEADER_SIZE)) {
