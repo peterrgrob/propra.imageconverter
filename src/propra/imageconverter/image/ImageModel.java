@@ -98,9 +98,6 @@ public abstract class ImageModel implements Closeable,
         
         DataBuffer writeBuffer = data;
         
-        // Prüfsumme mit aktuellem Block aktualisieren
-        updateChecksum(data); 
-        
         // Kompression erforderlich?
         if(encoding != null) {
             
@@ -110,6 +107,9 @@ public abstract class ImageModel implements Closeable,
                                 temporaryBuffer);
             writeBuffer = temporaryBuffer;
         } 
+        
+        // Prüfsumme mit aktuellem Block aktualisieren
+        updateChecksum(writeBuffer); 
         
         // Block in Datei schreiben
         writeDataToStream(writeBuffer, 0, writeBuffer.getCurrDataLength());

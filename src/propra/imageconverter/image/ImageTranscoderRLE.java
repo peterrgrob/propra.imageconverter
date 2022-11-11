@@ -56,7 +56,7 @@ public class ImageTranscoderRLE extends ImageTranscoder {
         while(inBytes.position() < in.getCurrDataLength()) {
          
             // Anzahl gleicher Farben zählen
-            int rleCtr = countRleColor(in.getBuffer());
+            int rleCtr = countRleColor(in.getBuffer(), in.getCurrDataLength());
             if(rleCtr > 1) {
                 
                 // RLE Block verarbeiten
@@ -178,7 +178,7 @@ public class ImageTranscoderRLE extends ImageTranscoder {
      * @param data
      * @return 
      */
-    private int countRleColor(ByteBuffer data) {
+    private int countRleColor(ByteBuffer data, int length) {
         byte[] array = data.array();
         int baseOffset = data.position();
         int runningOffset = baseOffset + 3;
@@ -186,11 +186,15 @@ public class ImageTranscoderRLE extends ImageTranscoder {
         
         // Zählen solange Farben gleich sind
         while (compareColor(array, baseOffset, runningOffset)) {
+
             counter++;
-            if(counter >= 127) {
+            runningOffset += 3;
+            
+            // Zähler max, oder Ende erreicht?
+            if( counter > 127
+            ||  runningOffset >= length) {
                 break;
             }
-            runningOffset += 3;
         }
         
         return counter;

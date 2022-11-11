@@ -12,7 +12,7 @@ public interface DataTranscoder extends Validatable {
         PASS,
     }
     
-    public void begin(DataFormat inFormat);
+    public void begin();
      
     /**
      *

@@ -15,9 +15,7 @@ public class ImageHeader implements Validatable {
     private int pixelSize;    
     private long checksum;
     private ColorFormat colorType = new ColorFormat();
-
-
-        
+  
     /**
      * 
      */

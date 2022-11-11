@@ -103,7 +103,7 @@ public abstract class ImageTranscoder implements DataTranscoder {
      * @param inFormat
      */
     @Override
-    public void begin(DataFormat inFormat) {
-        
+    public void begin() {
+
     } 
 }
