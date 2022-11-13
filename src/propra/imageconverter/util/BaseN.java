@@ -6,24 +6,24 @@ package propra.imageconverter.util;
  */
 public class BaseN implements DataTranscoder {
     
-    // BaseN Alphabet
-    private String alphabet;
-    
+    public static String BASE_32_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUV";
+        
     // Binärblockgröße in Bit
     private int binaryBlockSize;
     
     // Datenformat 
     DataFormat format;
     
+    // Operation 
+    Operation op = Operation.PASS;
+    
     /**
      *
      * @param alphabet
      */
-    public BaseN(DataFormat format, String alphabet) {
-        alphabet = new String(alphabet);
+    public BaseN(DataFormat format, Operation op) {
         this.format = format;
-        
-
+        this.op = op;
     }
     
     /**
@@ -72,7 +72,7 @@ public class BaseN implements DataTranscoder {
                                                     binaryBlockSize);
                 
                 // Mit Alphabet kodieren und in Ausgabepuffer speichern
-                out.getBuffer().put(alphabet.getBytes()[value]);
+                out.getBuffer().put(format.getAlphabet().getBytes()[value]);
                 
                 // Position aktualisieren
                 if(bitIncrement > 0) {   
@@ -98,7 +98,6 @@ public class BaseN implements DataTranscoder {
 
     @Override
     public boolean isValid() {
-        return (    alphabet.length() > 0
-                &&  binaryBlockSize > 0);
+        return (binaryBlockSize > 0);
     }
 }

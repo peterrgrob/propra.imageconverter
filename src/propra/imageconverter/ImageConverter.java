@@ -19,9 +19,7 @@ public class ImageConverter implements Validatable {
     // Fehlercode
     private static final int ERROR_EXIT_CODE = 123;
     
-    private ImageModel inModel;
-    private ImageModel outModel;
-    private ColorFormat.Encoding outEncoding = ColorFormat.Encoding.NONE;
+
             
     /** 
      * Programmeinstieg

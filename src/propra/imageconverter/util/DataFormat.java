@@ -5,7 +5,7 @@ package propra.imageconverter.util;
  * @author pg
  */
 public class DataFormat {
-        
+    
     private Encoding encoding = Encoding.NONE;
     private String alphabet = new String();
     
@@ -26,6 +26,31 @@ public class DataFormat {
         }
     }
 
+    /**
+     *
+     * @param encoding
+     */
+    public DataFormat(Encoding encoding) {
+        setEncoding(encoding);
+    } 
+    
+    
+    /**
+     *
+     * @param alphabet
+     */
+    public DataFormat(String alphabet) {
+        setEncoding(this.alphabet);
+    } 
+    
+    /**
+     *
+     * @return
+     */
+    public String getAlphabet() {
+        return alphabet;
+    }
+    
     /**
      *
      * @return

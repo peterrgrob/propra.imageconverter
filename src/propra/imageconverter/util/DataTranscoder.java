@@ -10,6 +10,7 @@ public interface DataTranscoder extends Validatable {
         ENCODE,
         DECODE,
         PASS,
+        NONE;
     }
     
     public void begin();

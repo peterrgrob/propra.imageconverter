@@ -1,6 +1,7 @@
 package propra.imageconverter.util;
 import java.util.HashMap;
 import propra.imageconverter.image.ColorFormat;
+import propra.imageconverter.util.DataTranscoder.Operation;
 
 /**
  * Hilfsklasse die Kommandozeilenparameter parsed und speichert, diese
@@ -108,8 +109,21 @@ import propra.imageconverter.image.ColorFormat;
      *
      * @return
      */
-    public DataFormat.Encoding getBaseN() {
-        
+    public BaseN getBaseN() {
+        if( options.containsKey(Options.ENCODE_BASE_32)) {
+            return new BaseN(new DataFormat(BaseN.BASE_32_ALPHABET), 
+                            Operation.ENCODE);
+        } else if( options.containsKey(Options.DECODE_BASE_32)) {
+            return new BaseN(new DataFormat(BaseN.BASE_32_ALPHABET), 
+                            Operation.DECODE);
+        } else if(options.containsKey(Options.DECODE_BASE_N)) {
+            return new BaseN(new DataFormat(options.get(Options.DECODE_BASE_N)), 
+                            Operation.DECODE);
+        } else if(options.containsKey(Options.ENCODE_BASE_N)) {
+            return new BaseN(new DataFormat(options.get(Options.ENCODE_BASE_N)), 
+                            Operation.DECODE);
+        }
+        return null;
     }
     
     /**
