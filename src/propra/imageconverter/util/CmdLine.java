@@ -103,4 +103,22 @@ import propra.imageconverter.image.ColorFormat;
         }
         return components[components.length-1].toLowerCase();
     } 
+    
+    /**
+     *
+     * @return
+     */
+    public DataFormat.Encoding getBaseN() {
+        
+    }
+    
+    /**
+     * 
+     */
+    public boolean isBaseN() {
+        return (options.containsKey(Options.ENCODE_BASE_32)
+            ||  options.containsKey(Options.DECODE_BASE_32)
+            ||  options.containsKey(Options.ENCODE_BASE_N)
+            ||  options.containsKey(Options.DECODE_BASE_N));
+    }
 }
