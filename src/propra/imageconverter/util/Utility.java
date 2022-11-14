@@ -29,22 +29,12 @@ public class Utility {
      * @param bitLen
      * @return
      */
-    public static long extractBits( ByteBuffer data, 
-                                    int byteIndex, 
-                                    int bitIndex, 
-                                    int bitLen) {
-        
-        // nächstgrößere Blockgröße in Bytes ermitteln
-        int blockSize = (bitLen / 8);
-        if(bitLen % 8 != 0) {
-            blockSize += 1;
+    public static long bytesToLong(byte[] bytes, int len) {
+        long value = 0;
+        for(int i=0; i<len; i++) {
+            value <<= 8;
+            value += bytes[i];
         }
-                
-        // Block auslesen
-        byte[] result = new byte[blockSize];
-        data.get(byteIndex, result);
-        long value = new BigInteger(result).longValue();
-        value = value << 64 - bitIndex;
-        return value >> (bitIndex - bitLen);
+        return value;
     }
 }

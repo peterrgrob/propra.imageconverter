@@ -69,7 +69,7 @@ public class DataModel implements Validatable {
      */
     public long write(DataBuffer data) throws IOException {
         if(!isValid()
-        ||  readFile == null) {
+        ||  writeFile == null) {
             throw new IllegalStateException();
         }
         
@@ -103,7 +103,7 @@ public class DataModel implements Validatable {
         
         if(decoder != null) {
             readBuffer = new DataBuffer();
-            encoder.transcode(DataTranscoder.Operation.DECODE, buffer, readBuffer);
+            decoder.transcode(DataTranscoder.Operation.DECODE, buffer, readBuffer);
         }
 
         return readBuffer.getCurrDataLength();
@@ -115,6 +115,19 @@ public class DataModel implements Validatable {
         } else if(mode == IOMode.WRITE) {
             encoder.end();
         }
+    }
+    
+    /**
+     *
+     * @return
+     */
+    public long getContentSize(IOMode mode) throws IOException {
+        if(mode == IOMode.READ) {
+            return readFile.length();
+        } else if(mode == IOMode.WRITE) {
+            return writeFile.length();
+        }  
+        return 0;
     }
 
     @Override

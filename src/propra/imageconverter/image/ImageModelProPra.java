@@ -7,6 +7,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import propra.imageconverter.util.ChecksumPropra;
 import propra.imageconverter.util.DataBuffer;
+import propra.imageconverter.util.DataFormat.Encoding;
 
 /**
  *  ProPra spezifische Implementierung
@@ -132,10 +133,10 @@ public class ImageModelProPra extends ImageModel {
         // Kompression prüfen
         switch (bytes.get(PROPRA_HEADER_OFFSET_ENCODING)) {
             case PROPRA_HEADER_ENCODING_RLE:
-                newHeader.getColorFormat().setEncoding(ColorFormat.Encoding.RLE);
+                newHeader.getColorFormat().setEncoding(Encoding.RLE);
                 break;
             case PROPRA_HEADER_ENCODING_NONE:
-                newHeader.getColorFormat().setEncoding(ColorFormat.Encoding.NONE);  
+                newHeader.getColorFormat().setEncoding(Encoding.NONE);  
                 break;
             default:
                 throw new UnsupportedOperationException("Nicht unterstützte Kompression!");
@@ -145,7 +146,7 @@ public class ImageModelProPra extends ImageModel {
         if( newHeader.isValid() == false 
         ||  (dataLen != (stream.length() - PROPRA_HEADER_SIZE))) {
             throw new UnsupportedOperationException("Ungültiges ProPra Dateiformat!");
-        } else if(newHeader.getColorFormat().getEncoding() == ColorFormat.Encoding.NONE) {
+        } else if(newHeader.getColorFormat().getEncoding() == Encoding.NONE) {
             
             // Prüfungen für unkomprimierte Dateien 
             if(newHeader.getImageSize() != dataLen

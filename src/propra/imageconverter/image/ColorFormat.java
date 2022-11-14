@@ -18,13 +18,6 @@ public class ColorFormat extends DataFormat implements Comparable<ColorFormat> {
     public static final int GREEN = 1;
     public static final int RED = 2;
     
-    public enum Encoding {
-        NONE,
-        RLE,
-    }
-
-    private Encoding encoding = Encoding.NONE;
-    
     // Bildet Indizes der Farkomponenten ab
     protected int[] mapping = new int[3];
 
@@ -46,10 +39,10 @@ public class ColorFormat extends DataFormat implements Comparable<ColorFormat> {
      * @param src
      */
     public ColorFormat(ColorFormat src) {
+        super(src);
         setMapping(RED,src.getMapping(RED));
         setMapping(GREEN,src.getMapping(GREEN));
         setMapping(BLUE,src.getMapping(BLUE));
-        encoding = src.encoding;
     }
     
     /**
@@ -130,13 +123,5 @@ public class ColorFormat extends DataFormat implements Comparable<ColorFormat> {
 
     public int[] getMapping() {
         return mapping;
-    }
-
-    public Encoding getEncoding() {
-        return encoding;
-    }
-
-    public void setEncoding(Encoding compression) {
-        this.encoding = compression;
     }
 }

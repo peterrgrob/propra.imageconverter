@@ -78,7 +78,7 @@ public class DataBuffer implements Validatable {
      */
     public int getSize() {
         if (!isValid()) {
-            throw new IllegalStateException(); 
+            return 0; 
         }
         return buffer.capacity();
     }

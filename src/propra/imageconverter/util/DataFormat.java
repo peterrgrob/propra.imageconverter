@@ -6,26 +6,37 @@ package propra.imageconverter.util;
  */
 public class DataFormat {
     
-    private Encoding encoding = Encoding.NONE;
+    protected Encoding encoding = Encoding.NONE;
     private String alphabet = new String();
     
     // Verwendete Kodierung der Daten
     public enum Encoding {
-        NONE(0),
-        BASE_2(2),
-        BASE_4(4),
-        BASE_8(8),
-        BASE_16(16),       
-        BASE_32(32),
-        BASE_64(64);
+        NONE(0,0),
+        BASE_2(1,1),
+        BASE_4(2,1),
+        BASE_8(3,3),
+        BASE_16(4,1),       
+        BASE_32(5,5),
+        BASE_64(6,3),
+        RLE(0,0);
         
-        private final int bitLength;
+        // Bitlänge für BaseN Kodierungen
+        private final int blockLength;
+        private final int bitCount;
         
-        private Encoding(int bitLength) {
-            this.bitLength = bitLength; 
+        private Encoding(int bitCount, int blockLength) {
+            this.blockLength = blockLength; 
+            this.bitCount = bitCount;
         }
     }
 
+    /**
+     *
+     */
+    public DataFormat() {
+        
+    }
+    
     /**
      *
      * @param encoding
@@ -40,8 +51,16 @@ public class DataFormat {
      * @param alphabet
      */
     public DataFormat(String alphabet) {
-        setEncoding(this.alphabet);
+        setEncoding(alphabet);
     } 
+    
+        /**
+     * 
+     * @param src
+     */
+    public DataFormat(DataFormat src) {
+        encoding = src.encoding;
+    }
     
     /**
      *
@@ -55,8 +74,16 @@ public class DataFormat {
      *
      * @return
      */
-    public int getBitLength() {
-        return encoding.bitLength;
+    public int getBlockLength() {
+        return encoding.blockLength;
+    }
+    
+    /**
+     *
+     * @return
+     */
+    public int getBitCount() {
+        return encoding.bitCount;
     }
     
     /**
@@ -75,6 +102,7 @@ public class DataFormat {
         this.encoding = encoding;
     }
     
+    
     /**
      *
      * @param dataEncoding
@@ -83,6 +111,8 @@ public class DataFormat {
         if(alphabet == null) {
             throw new IllegalArgumentException();
         }
+        
+        this.alphabet = new String(alphabet);
         
         // Kodierung ableiten
         switch(alphabet.length()) {

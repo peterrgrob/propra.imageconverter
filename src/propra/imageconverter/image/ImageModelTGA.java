@@ -5,6 +5,7 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import propra.imageconverter.util.DataBuffer;
+import propra.imageconverter.util.DataFormat.Encoding;
 import propra.imageconverter.util.Utility;
 
 /**
@@ -110,10 +111,10 @@ public class ImageModelTGA extends ImageModel {
         byte compression = byteBuffer.get(TGA_HEADER_OFFSET_ENCODING);
         switch (compression) {
             case TGA_HEADER_ENCODING_RLE:
-                newHeader.getColorFormat().setEncoding(ColorFormat.Encoding.RLE);
+                newHeader.getColorFormat().setEncoding(Encoding.RLE);
                 break;
             case TGA_HEADER_ENCODING_NONE:
-                newHeader.getColorFormat().setEncoding(ColorFormat.Encoding.NONE);            
+                newHeader.getColorFormat().setEncoding(Encoding.NONE);            
                 break;
             default:
                 throw new UnsupportedOperationException("Nicht unterstützte TGA Kompression!");

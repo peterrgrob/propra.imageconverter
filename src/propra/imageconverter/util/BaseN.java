@@ -1,15 +1,16 @@
 package propra.imageconverter.util;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
 /**
  *
  * @author pg
  */
 public class BaseN implements DataTranscoder {
     
+    // Standard Base32 Alphabet
     public static String BASE_32_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUV";
-        
-    // Binärblockgröße in Bit
-    private int binaryBlockSize;
     
     // Datenformat 
     DataFormat format;
@@ -46,58 +47,113 @@ public class BaseN implements DataTranscoder {
         // Operation ausführen 
         if(op == Operation.ENCODE) {
             
-            // Anzahl der Ausgabezeichen ermitteln
-            int outLen = (in.getCurrDataLength() << 8) / binaryBlockSize;
-                    
             // Index und Inkremente setzen
-            int byteIndex = 0;
-            int bitIndex = 0;
-            int bitIncrement = 8 % binaryBlockSize;
-            int byteIncrement = 8 / binaryBlockSize;
+            int byteOffset = 0;
+            int byteCount = 0;
+            int blockLength = format.getBlockLength();
+            int totalBits = in.getCurrDataLength() << 3;
+            
+            // Temporäre Puffer erstellen
+            DataBuffer blockBuffer = new DataBuffer(8);
+            DataBuffer charBuffer = new DataBuffer(8);
+            ByteBuffer inBuffer = in.getBuffer();
+            ByteBuffer outBuffer = out.getBuffer();            
+            
+            // Anzahl der Ausgabezeichen ermitteln
+            int characterCount = totalBits / format.getBitCount();
+            if(totalBits % format.getBitCount() != 0) {
+                characterCount++;
+            }
             
             // Größe des Ausgabepuffer prüfen
-            if(out.getSize() < outLen) {
-                
+            if(out.getSize() < characterCount) {
                 // Puffer anpassen
-                out = new DataBuffer(outLen);
+                out = new DataBuffer(characterCount);
+                outBuffer = out.getBuffer();
             }
 
-            // Über Eingabebytes iterieren und Blöcke kodieren
-            while(byteIndex < in.getCurrDataLength()) {
+            // Über Eingabebytes iterieren und Binärblöcke kodieren
+            while(byteOffset < in.getCurrDataLength()) {
                 
-                // Block extrahieren
-                int value = (int)Utility.extractBits(in.getBuffer(), 
-                                                    byteIndex,
-                                                    bitIndex,
-                                                    binaryBlockSize);
-                
-                // Mit Alphabet kodieren und in Ausgabepuffer speichern
-                out.getBuffer().put(format.getAlphabet().getBytes()[value]);
-                
-                // Position aktualisieren
-                if(bitIncrement > 0) {   
-                    // Base-N mit N < 8 
-                    bitIndex += bitIncrement;
-                    if(bitIndex > 8) {
-                        byteIndex++;
-                        bitIndex = 0;
-                    }
-                } else {
-                    // Base-N mit N >= 8 
-                    byteIndex += byteIncrement;
+                // Blockgröße prüfen und anpassen
+                byteCount = blockLength;
+                if(byteOffset + byteCount > in.getBuffer().capacity()) {
+                    byteCount -= byteOffset + byteCount - in.getBuffer().capacity();
                 }
+                
+                // Bytes zur Verabeitung kopieren
+                inBuffer.get(blockBuffer.getBytes(), 0, byteCount);
+                blockBuffer.setCurrDataLength(byteCount);
+                
+                // Bitblöcke in Zeichen umwandeln
+                encodeBitBlocks(blockBuffer, charBuffer);
+                
+                // Ausgabe kopieren
+                outBuffer.put(charBuffer.getBytes(), 0, charBuffer.getCurrDataLength());
+                
+                byteOffset += byteCount;
             }
+            
+            return outBuffer.position();
         }
         
         return 0;
     }
 
+    /**
+     *
+     */
     @Override
     public void end() {
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public boolean isValid() {
-        return (binaryBlockSize > 0);
+        return true;
+    }
+    
+    /**
+     *
+     * @param data
+     * @param bitLen
+     */
+    public void encodeBitBlocks(DataBuffer in, 
+                                DataBuffer out) {
+        
+        byte[] alphabet = format.getAlphabet().getBytes();
+        int bitLength = format.getBitCount();
+        long mask = (1 << bitLength) - 1;
+
+        // Bytes in long umwandeln
+        long value = Utility.bytesToLong(in.getBytes(), in.getCurrDataLength());
+        
+        // Endblock behandeln, wenn nötig
+        int characterCount = (in.getCurrDataLength() << 3) / bitLength;
+        int mod = (in.getCurrDataLength() << 3) % bitLength;
+        if(mod != 0) {
+            value <<= bitLength - mod;
+            characterCount++;
+        }
+        
+        // Bitblöcke iterieren
+        for(int i=0; i<characterCount; i++) { 
+
+            // Wert extrahieren
+            int bitValue = (int)(value & mask);
+            
+            // zum nächsten Bitblock schieben
+            value = value >> bitLength;
+            
+            // Blockwert speichern
+            out.getBuffer().put(characterCount - 1 - i, alphabet[bitValue]);
+        }
+        
+        // Puffer aktualisieren
+        out.getBuffer().rewind();
+        out.setCurrDataLength(characterCount);
     }
 }

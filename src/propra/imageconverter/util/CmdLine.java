@@ -135,4 +135,12 @@ import propra.imageconverter.util.DataTranscoder.Operation;
             ||  options.containsKey(Options.ENCODE_BASE_N)
             ||  options.containsKey(Options.DECODE_BASE_N));
     }
+    
+    /**
+     * 
+     */
+    public boolean isBaseNDecode() {
+        return (options.containsKey(Options.DECODE_BASE_32)
+            ||  options.containsKey(Options.DECODE_BASE_N)); 
+    }
 }
