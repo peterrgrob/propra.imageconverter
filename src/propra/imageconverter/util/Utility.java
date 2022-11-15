@@ -29,11 +29,11 @@ public class Utility {
      * @param bitLen
      * @return
      */
-    public static long bytesToLong(byte[] bytes, int len) {
+    public static long bytesToLong(byte[] bytes, int offset, int len) {
         long value = 0;
         for(int i=0; i<len; i++) {
             value <<= 8;
-            value += bytes[i];
+            value += bytes[i + offset];
         }
         return value;
     }

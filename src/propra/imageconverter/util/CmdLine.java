@@ -111,17 +111,13 @@ import propra.imageconverter.util.DataTranscoder.Operation;
      */
     public BaseN getBaseN() {
         if( options.containsKey(Options.ENCODE_BASE_32)) {
-            return new BaseN(new DataFormat(BaseN.BASE_32_ALPHABET), 
-                            Operation.ENCODE);
+            return new BaseN(new DataFormat(BaseN.BASE_32_ALPHABET));
         } else if( options.containsKey(Options.DECODE_BASE_32)) {
-            return new BaseN(new DataFormat(BaseN.BASE_32_ALPHABET), 
-                            Operation.DECODE);
+            return new BaseN(new DataFormat(BaseN.BASE_32_ALPHABET));
         } else if(options.containsKey(Options.DECODE_BASE_N)) {
-            return new BaseN(new DataFormat(options.get(Options.DECODE_BASE_N)), 
-                            Operation.DECODE);
+            return new BaseN(new DataFormat(options.get(Options.DECODE_BASE_N)));
         } else if(options.containsKey(Options.ENCODE_BASE_N)) {
-            return new BaseN(new DataFormat(options.get(Options.ENCODE_BASE_N)), 
-                            Operation.DECODE);
+            return new BaseN(new DataFormat(options.get(Options.DECODE_BASE_N)));
         }
         return null;
     }

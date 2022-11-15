@@ -145,7 +145,7 @@ public class DataOperation {
         outModel.begin(DataModel.IOMode.WRITE);
         
         //inModel.read(block);
-        block.wrap(new String("foobar").getBytes());
+        block.wrap(new String("f").getBytes());
         block.setCurrDataLength(block.getSize());
         outModel.write(block);
         
