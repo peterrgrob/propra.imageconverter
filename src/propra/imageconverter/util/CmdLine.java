@@ -10,6 +10,7 @@ import propra.imageconverter.util.DataTranscoder.Operation;
  * @author pg
  */
  public class CmdLine {
+     
     private HashMap<Options,String> options = new HashMap<Options,String>();
     
     /*

@@ -33,8 +33,18 @@ public class Utility {
         long value = 0;
         for(int i=0; i<len; i++) {
             value <<= 8;
-            value += bytes[i + offset];
+            value += (int)(bytes[i + offset] & 0xFF);
         }
         return value;
+    }
+    
+    
+    static public byte[] longToBytes(long value, int len) {
+        byte[] nb = new byte[len];
+        for(int i=0; i<len;i++) {
+            nb[len - i - 1] = (byte)(value & 0xFF);
+            value >>= 8;
+        }
+        return nb;
     }
 }

@@ -81,7 +81,7 @@ public class DataModel implements Validatable {
         }
         
         // Bytes in Stream schreiben
-        readFile.write(writeBuffer.getBytes(), 0, writeBuffer.getCurrDataLength());
+        writeFile.write(writeBuffer.getBytes(), 0, writeBuffer.getCurrDataLength());
         return writeBuffer.getCurrDataLength();
     }
     
@@ -97,23 +97,41 @@ public class DataModel implements Validatable {
             throw new IllegalStateException();
         }
         
-        DataBuffer readBuffer = buffer;
+        // Daten einlesen
+        readFile.read(buffer.getBytes(), 0, buffer.getSize());
+        buffer.setCurrDataLength(buffer.getSize());
         
-        readFile.read(buffer.getBytes(), 0, buffer.getCurrDataLength());
-        
+        // Dekodierung notwendig?
         if(decoder != null) {
-            readBuffer = new DataBuffer();
-            decoder.transcode(DataTranscoder.Operation.DECODE, buffer, readBuffer);
+            
+            // In temporären Puffer dekodieren
+            DataBuffer decodeBuffer = new DataBuffer(buffer.getSize());
+            
+            decoder.transcode(  DataTranscoder.Operation.DECODE, 
+                                buffer, 
+                                decodeBuffer);
+            
+            // In Ausgabepuffer kopieren
+            buffer.getBuffer().put( 0, 
+                                    decodeBuffer.getBytes(), 
+                                    0, 
+                                    decodeBuffer.getCurrDataLength());
+            
+            buffer.setCurrDataLength(decodeBuffer.getCurrDataLength());
         }
 
-        return readBuffer.getCurrDataLength();
+        return buffer.getCurrDataLength();
     }
     
     public void end(IOMode mode) {
         if(mode == IOMode.READ) {
-            decoder.end();
+            if(decoder != null) {
+                decoder.end();
+            }
         } else if(mode == IOMode.WRITE) {
-            encoder.end();
+            if(encoder != null) {
+                encoder.end();
+            }
         }
     }
     

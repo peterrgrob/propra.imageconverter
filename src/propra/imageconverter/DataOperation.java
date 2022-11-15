@@ -7,6 +7,7 @@ import java.io.RandomAccessFile;
 import propra.imageconverter.util.CmdLine;
 import propra.imageconverter.util.DataBuffer;
 import propra.imageconverter.util.DataModel;
+import propra.imageconverter.util.DataTranscoder;
 
 /**
  *
@@ -34,39 +35,49 @@ public class DataOperation {
             throw new IllegalArgumentException();
         }
         
-        // Eingabedatei öffnen
-        RandomAccessFile inStream = new RandomAccessFile(cmd.getOption(CmdLine.Options.INPUT_FILE),"r");
+        DataTranscoder readCoding = null;
+        DataTranscoder writeCoding = null;  
         
-        // Objekte erstellen
+        // Eingabedatei öffnen
+        RandomAccessFile inStream = new RandomAccessFile(   cmd.getOption(CmdLine.Options.INPUT_FILE),
+                                                            "r");
+        
+        // Ausgabedatei Pfad ableiten
+        String outPath = cmd.getOption(CmdLine.Options.INPUT_FILE);      
+        
+        // Pfad und Transcoder wählen, je nach Operation
         if(cmd.isBaseNDecode()) {
             
-            // Ausgabedatei erstellen, öffnen
-            String outPath = cmd.getOption(CmdLine.Options.INPUT_FILE);
             outPath = outPath.replaceAll(".base-32", "");
-            File file = new File(outPath);
-            if(!file.exists()) {
-                file.createNewFile();
-            }
+            readCoding = cmd.getBaseN();
+            writeCoding = null;
             
-            RandomAccessFile outStream = new RandomAccessFile(file,"rw");
-
-            inModel = new DataModel(DataModel.IOMode.READ, inStream, cmd.getBaseN());
-            outModel = new DataModel(DataModel.IOMode.WRITE, outStream, null);
         } else {
             
-            // Ausgabedatei erstellen, öffnen
-            String outPath = cmd.getOption(CmdLine.Options.INPUT_FILE);
             outPath = outPath.concat(".base-32");
-            File file = new File(outPath);
-            if(!file.exists()) {
-                file.createNewFile();
-            }
+            readCoding = null;
+            writeCoding = cmd.getBaseN();
             
-            RandomAccessFile outStream = new RandomAccessFile(file,"rw");
-            
-            inModel = new DataModel(DataModel.IOMode.READ, inStream, null);
-            outModel = new DataModel(DataModel.IOMode.WRITE, inStream, cmd.getBaseN());
         }
+        
+        // Ausgabedatei erstellen
+        // TODO: Verzeichnis erstellen
+        File file = new File(outPath);
+        if(!file.exists()) {
+            file.createNewFile();
+        }
+            
+        // Datei öffnen
+        RandomAccessFile outStream = new RandomAccessFile(file,"rw");
+            
+        // Passende Ein- und Ausgabe Objekte erstellen
+        inModel = new DataModel(DataModel.IOMode.READ, 
+                                inStream, 
+                                readCoding);
+        outModel = new DataModel(DataModel.IOMode.WRITE, 
+                                outStream, 
+                                writeCoding);
+  
     }
     
     /**
@@ -145,6 +156,7 @@ public class DataOperation {
         inModel.begin(DataModel.IOMode.READ);
         outModel.begin(DataModel.IOMode.WRITE);
         
+        // Datenübertragung
         inModel.read(block);
         outModel.write(block);
         

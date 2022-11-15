@@ -1,9 +1,12 @@
 package propra.imageconverter.util;
 
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 /**
- *
+ * Klasse für allgemeine Base-N Kodierung, die Parametrisierung erfolgt
+ * über das per Konstruktor übergebene DataFormat Objekt. 
+ *  
  * @author pg
  */
 public class BaseN implements DataTranscoder {
@@ -44,8 +47,8 @@ public class BaseN implements DataTranscoder {
         // Operation ausführen 
         if(op == Operation.ENCODE) {
             return encode(in, out);
-        } else if(op == Operation.ENCODE) {
-            return 0;
+        } else if(op == Operation.DECODE) {
+            return decode(in, out);
         }
         
         return 0;
@@ -65,6 +68,48 @@ public class BaseN implements DataTranscoder {
     @Override
     public boolean isValid() {
         return true;
+    }
+    
+    /**
+     * 
+     * @param in
+     * @param out
+     * @return 
+     */
+    private long decode(DataBuffer in, DataBuffer out) {
+        
+        int charCtr = 0;
+        int charCount = 0;
+        int byteCtr = 0;
+        
+        // Größe der binären Base-N Byteblöcke
+        int blockLength = format.getBlockLength();
+        
+        // Zeichen iterieren und dekodieren
+        while(charCtr < in.getCurrDataLength()) {
+            
+            // Anzahl der Zeichen pro Byteblock
+            charCount = format.getCharLength();
+            
+            // Bei einem Endblock die Größe anpassen
+            if(charCtr + blockLength >= in.getCurrDataLength()) {
+                charCount = in.getCurrDataLength() - charCtr;
+            }
+            
+            // Zeichen in Bitblöcke dekodieren
+            byteCtr += decodeCharacters(in, 
+                                    charCtr, 
+                                    charCount, 
+                                    out);
+            
+            charCtr += charCount;
+        }
+        
+        // Ausgabepuffer setzen
+        out.getBuffer().rewind();
+        out.setCurrDataLength(byteCtr);
+        
+        return byteCtr;
     }
     
     /**
@@ -95,7 +140,7 @@ public class BaseN implements DataTranscoder {
         if(out.getSize() < totalCharacterCount) {
             
             // Puffer anpassen
-            out = new DataBuffer(totalCharacterCount);
+            out.create(totalCharacterCount);
             outBuffer = out.getBuffer();
         }
 
@@ -111,7 +156,7 @@ public class BaseN implements DataTranscoder {
             
             // Bitblöcke in Zeichen umwandeln
             encodeBits( in, 
-                        inBuffer.position(), 
+                        byteOffset, 
                         byteCount, 
                         charBuffer);
 
@@ -123,7 +168,61 @@ public class BaseN implements DataTranscoder {
             byteOffset += byteCount;
         }
         
+        out.setCurrDataLength(outBuffer.position());
+        outBuffer.rewind();
+
         return outBuffer.position();
+    }
+    
+    /**
+     * 
+     * @param in
+     * @param inOffset
+     * @param inLength
+     * @param out
+     * @return 
+     */
+    private int decodeCharacters(   DataBuffer in, 
+                                    int inOffset, 
+                                    int inLength, 
+                                    DataBuffer out) {
+        
+        long value = 0;
+        int bitCount = 0;
+        
+        byte[] bytes = in.getBytes();
+        byte[] alphabetMap = format.getAlphabetMap();
+        int bitLength = format.getBitCount();
+        
+        // Zeichen iterieren und Dekodieren
+        for(int i=0; i<inLength; i++) {
+            
+            // Bitpakete nach links schieben
+            value <<= bitLength; 
+            
+            // Eingabezeichen mit Alphabet-Map dekodieren
+            // und zum Wert aufaddieren
+            int v = bytes[i + inOffset];
+            value += (byte)alphabetMap[(byte)v];
+            
+            bitCount += bitLength;
+        }
+        
+        // Endpaket?
+        int modulo = (inLength * bitLength) % 8;
+        if( modulo != 0) {
+            // Überschüssige Bits wieder verwerfen 
+            value >>= modulo;
+            bitCount -= modulo;
+        }
+        
+        // Bitblöcke in den Ausgabepuffer schreiben
+        int byteCount = bitCount >> 3;
+        out.getBuffer().put(Utility.longToBytes(value, byteCount), 
+                            0, 
+                            byteCount);
+        
+        return byteCount;
     }
     
     /**
@@ -143,7 +242,7 @@ public class BaseN implements DataTranscoder {
         long value = Utility.bytesToLong(in.getBytes(), 
                                         inOffset, 
                                         inLen);
-        
+
         // Anzahl der Zeichen ermitteln
         int characterCount = (inLen << 3) / bitLength;
         

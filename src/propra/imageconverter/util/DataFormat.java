@@ -1,5 +1,7 @@
 package propra.imageconverter.util;
 
+import java.util.HashMap;
+
 /**
  *
  * @author pg
@@ -7,26 +9,34 @@ package propra.imageconverter.util;
 public class DataFormat {
     
     protected Encoding encoding = Encoding.NONE;
-    private String alphabet = new String();
     
-    // Verwendete Kodierung der Daten
+    // Alphabettabellen, aus Performancegründen keine Hashmap
+    private String alphabet = new String();
+    private byte[] alphabetMap = new byte[256];
+    
+    // Verwendete Kodierung der Daten mit parametrisierten
+    // Einstellungen für die Base-N Kodierung.
     public enum Encoding {
-        NONE(0,0),
-        BASE_2(1,1),
-        BASE_4(2,1),
-        BASE_8(3,3),
-        BASE_16(4,1),       
-        BASE_32(5,5),
-        BASE_64(6,3),
-        RLE(0,0);
+        NONE(0,0, 0),
+        BASE_2(1,1, 8),
+        BASE_4(2,1, 4),
+        BASE_8(3,3, 8),
+        BASE_16(4,1, 2),       
+        BASE_32(5,5, 8),
+        BASE_64(6,3,4),
+        RLE(0,0, 0);
         
         // Bitlänge für BaseN Kodierungen
         private final int blockLength;
+        private final int charLength;
         private final int bitCount;
         
-        private Encoding(int bitCount, int blockLength) {
+        private Encoding(   int bitCount, 
+                            int blockLength, 
+                            int charLength) {
             this.blockLength = blockLength; 
             this.bitCount = bitCount;
+            this.charLength = charLength;
         }
     }
 
@@ -74,6 +84,14 @@ public class DataFormat {
      *
      * @return
      */
+    public byte[] getAlphabetMap() {
+        return alphabetMap;
+    }
+    
+    /**
+     *
+     * @return
+     */
     public int getBlockLength() {
         return encoding.blockLength;
     }
@@ -84,6 +102,11 @@ public class DataFormat {
      */
     public int getBitCount() {
         return encoding.bitCount;
+    }
+    
+    
+    public int getCharLength() {
+        return encoding.charLength;
     }
     
     /**
@@ -112,7 +135,11 @@ public class DataFormat {
             throw new IllegalArgumentException();
         }
         
+        // Alphabet setzen und Mappingarray erstellen
         this.alphabet = new String(alphabet);
+        for(int i=0; i<alphabet.length(); i++) {
+            alphabetMap[alphabet.getBytes()[i]] = (byte)i;
+        }
         
         // Kodierung ableiten
         switch(alphabet.length()) {
