@@ -51,7 +51,7 @@ public class DataOperation {
             RandomAccessFile outStream = new RandomAccessFile(file,"rw");
 
             inModel = new DataModel(DataModel.IOMode.READ, inStream, cmd.getBaseN());
-            outModel = new DataModel(DataModel.IOMode.WRITE, inStream, null);
+            outModel = new DataModel(DataModel.IOMode.WRITE, outStream, null);
         } else {
             
             // Ausgabedatei erstellen, öffnen
@@ -101,6 +101,7 @@ public class DataOperation {
         String stateString = "Uninitialisiert.";
 
         if(isValid()) {
+            
         }
         
         return stateString;
@@ -144,16 +145,8 @@ public class DataOperation {
         inModel.begin(DataModel.IOMode.READ);
         outModel.begin(DataModel.IOMode.WRITE);
         
-        //inModel.read(block);
-        block.wrap(new String("f").getBytes());
-        block.setCurrDataLength(block.getSize());
+        inModel.read(block);
         outModel.write(block);
-        
-        // Blöcke übertragen 
-        /*while(inModel.hasMoreImageData()) {
-            inModel.readImageBlock(block);
-            outModel.writeImageBlock(block,inFormat);
-        }*/
         
         // Blockweise Übertragung beenden     
         inModel.end(DataModel.IOMode.READ);
