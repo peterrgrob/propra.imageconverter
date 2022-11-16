@@ -18,8 +18,8 @@ public class ImageModelTGA extends ImageModel {
     // Datei-Offsets der einzelnen Header-Felder
     static private final int TGA_HEADER_SIZE = 18;
     static private final int TGA_HEADER_OFFSET_ENCODING = 2;
-    static private final int TGA_HEADER_OFFSET_X0 = 7;
-    static private final int TGA_HEADER_OFFSET_Y0 = 9;
+    static private final int TGA_HEADER_OFFSET_X0 = 8;
+    static private final int TGA_HEADER_OFFSET_Y0 = 10;
     static private final int TGA_HEADER_OFFSET_WIDTH = 12;
     static private final int TGA_HEADER_OFFSET_HEIGHT = 14;
     static private final int TGA_HEADER_OFFSET_BPP = 16;

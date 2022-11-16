@@ -36,7 +36,7 @@ public class ImageConverter {
             // Klasseninstanz erstellen und task starten
             ImageConverter converter = new ImageConverter(); 
             if(cmdLine.isBaseTask()) {
-                converter.doDataTask(cmdLine);
+                converter.doBaseNTask(cmdLine);
             } else {
                 converter.doImageTask(cmdLine); 
             }
@@ -85,4 +85,18 @@ public class ImageConverter {
         op.doTask();   
         System.out.println(op.toString());
     }  
+    
+        /**
+     * 
+     * @param cmdLine
+     * @throws FileNotFoundException
+     * @throws IOException 
+     */
+    public void doBaseNTask(CmdLine cmdLine) throws FileNotFoundException, 
+                                                    IOException {    
+        // BaseN Kodierung ausführen
+        BaseNTask op = new BaseNTask(cmdLine);
+        op.doTask();   
+        System.out.println(op.toString());
+    } 
 }
