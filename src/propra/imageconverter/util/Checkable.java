@@ -1,5 +1,7 @@
 package propra.imageconverter.util;
 
+import propra.imageconverter.data.Checksum;
+
 /**
  * Interface für Klassen die Prüfsummenberechnung anbieten
  * 

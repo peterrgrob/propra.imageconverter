@@ -1,4 +1,6 @@
-package propra.imageconverter.util;
+package propra.imageconverter.data;
+
+import propra.imageconverter.util.Validatable;
 
 /**
  *

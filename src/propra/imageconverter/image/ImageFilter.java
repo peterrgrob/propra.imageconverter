@@ -1,5 +1,6 @@
 package propra.imageconverter.image;
 
+import propra.imageconverter.data.DataFilter;
 import propra.imageconverter.util.*;
 
 /**

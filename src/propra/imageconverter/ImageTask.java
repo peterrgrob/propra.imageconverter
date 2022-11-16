@@ -9,14 +9,13 @@ import propra.imageconverter.image.ImageHeader;
 import propra.imageconverter.image.ImageModel;
 import propra.imageconverter.image.ImageModelProPra;
 import propra.imageconverter.image.ImageModelTGA;
-import propra.imageconverter.util.CmdLine;
-import propra.imageconverter.util.DataBuffer;
+import propra.imageconverter.data.DataBuffer;
 
 /**
  *
  * @author pg
  */
-public class ImageOperation {
+public class ImageTask {
     
     private ImageModel inModel;
     private ImageModel outModel;
@@ -25,7 +24,7 @@ public class ImageOperation {
     /**
      *
      */
-    public ImageOperation() {
+    public ImageTask() {
         
     }
     

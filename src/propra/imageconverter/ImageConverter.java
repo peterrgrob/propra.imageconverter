@@ -4,7 +4,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.logging.*;
 import java.util.logging.Level;
-import propra.imageconverter.util.*;
 
 /**
  * Einstiegsklasse für ImageConverter 
@@ -25,6 +24,9 @@ public class ImageConverter {
      */
     public static void main(String[] args) {
         try {
+            // Zeitmessung starten
+            long start = System.currentTimeMillis();   
+        
             // Komandozeilenparameter parsen.
             CmdLine cmdLine = new CmdLine(args);
             
@@ -33,9 +35,20 @@ public class ImageConverter {
             System.out.println(cmdLine.getOption(CmdLine.Options.INPUT_FILE));
             System.out.println(cmdLine.getOption(CmdLine.Options.OUTPUT_FILE));
             
-            // Klasseninstanz erstellen und konvertierung starten
+            // Klasseninstanz erstellen und task starten
             ImageConverter converter = new ImageConverter(); 
-            converter.convertImage(cmdLine);
+            if(cmdLine.isBaseTask()) {
+                converter.doDataTask(cmdLine);
+            } else {
+                converter.doImageTask(cmdLine); 
+            }
+            
+            // Zeitmessung beenden
+            long finish = System.currentTimeMillis();
+            long timeElapsed = finish - start;
+
+            // Infos Programmablauf ausgeben
+            System.out.println("\nKonvertierung abgeschlossen in (ms): " + String.valueOf(timeElapsed));
         }
         catch(IOException e) {
             Logger.getLogger(ImageConverter.class.getName()).log(Level.SEVERE, null, e);
@@ -51,30 +64,27 @@ public class ImageConverter {
      * @param cmdLine Kommandozeilenparamater 
      * @throws java.io.FileNotFoundException 
      */
-    public void convertImage(CmdLine cmdLine) throws FileNotFoundException, IOException {    
-        
-        // Zeitmessung starten
-        long start = System.currentTimeMillis();      
-        
-        if(!cmdLine.isBaseN()) {
-            // Konvertierung ausführen
-            ImageOperation op = new ImageOperation();
-            op.initialize(cmdLine);
-            op.convert(); 
-            System.out.println(op.toString());
-        } else {
-            // BaseN Kodierung ausführen
-            DataOperation op = new DataOperation();
-            op.initialize(cmdLine);
-            op.convert();   
-            System.out.println(op.toString());
-        }
-        
-        // Infos auf der Konsole ausgeben
-        long finish = System.currentTimeMillis();
-        long timeElapsed = finish - start;
-        
-        // Infos Programmablauf ausgeben
-        System.out.println("\nKonvertierung abgeschlossen in (ms): " + String.valueOf(timeElapsed));
+    public void doImageTask(CmdLine cmdLine) throws FileNotFoundException, 
+                                                    IOException {      
+        // Konvertierung ausführen
+        ImageTask op = new ImageTask();
+        op.initialize(cmdLine);
+        op.convert(); 
+        System.out.println(op.toString());
     }   
+    
+    /**
+     * 
+     * @param cmdLine
+     * @throws FileNotFoundException
+     * @throws IOException 
+     */
+    public void doDataTask(CmdLine cmdLine) throws  FileNotFoundException, 
+                                                    IOException {    
+        // BaseN Kodierung ausführen
+        DataTask op = new DataTask();
+        op.initialize(cmdLine);
+        op.doTask();   
+        System.out.println(op.toString());
+    }  
 }

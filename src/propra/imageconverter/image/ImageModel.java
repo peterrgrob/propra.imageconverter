@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.Closeable;
 import propra.imageconverter.util.Checkable;
-import propra.imageconverter.util.Checksum;
-import propra.imageconverter.util.DataBuffer;
-import propra.imageconverter.util.DataTranscoder;
+import propra.imageconverter.data.Checksum;
+import propra.imageconverter.data.DataBuffer;
+import propra.imageconverter.data.DataTranscoder;
 import propra.imageconverter.util.Validatable;
 
 /**

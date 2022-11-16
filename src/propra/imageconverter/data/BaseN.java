@@ -1,7 +1,7 @@
-package propra.imageconverter.util;
+package propra.imageconverter.data;
 
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import propra.imageconverter.util.Utility;
 
 /**
  * Klasse für allgemeine Base-N Kodierung, die Parametrisierung erfolgt
@@ -15,13 +15,12 @@ public class BaseN implements DataTranscoder {
     public static String BASE_32_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUV";
     
     // Datenformat 
-    DataFormat format;
+    private DataFormat format;
     
     
     /**
      *
      * @param format
-     * @param alphabet
      */
     public BaseN(DataFormat format) {
         this.format = format;
@@ -269,5 +268,22 @@ public class BaseN implements DataTranscoder {
         // Puffer aktualisieren
         out.getBuffer().rewind();
         out.setCurrDataLength(characterCount);
+    }
+    
+    /**
+     * 
+     * @param dataFormat 
+     */
+    public void setDataFormat(DataFormat dataFormat) {
+        
+    }
+
+    /**
+     *
+     * @return
+     */
+    @Override
+    public DataFormat getDataFormat() {
+        return format;
     }
 }

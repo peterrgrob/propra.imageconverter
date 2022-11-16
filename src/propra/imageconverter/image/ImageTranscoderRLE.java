@@ -1,7 +1,8 @@
 package propra.imageconverter.image;
 
 import java.nio.ByteBuffer;
-import propra.imageconverter.util.DataBuffer;
+import propra.imageconverter.data.DataBuffer;
+import propra.imageconverter.data.DataFormat;
 
 /**
  *
@@ -211,5 +212,14 @@ public class ImageTranscoderRLE extends ImageTranscoder {
         return (array[offset0 + 0] == array[offset1 + 0]
             &&  array[offset0 + 1] == array[offset1 + 1]
             &&  array[offset0 + 2] == array[offset1 + 2]);
+    }
+
+    @Override
+    public void setDataFormat(DataFormat dataFormat) {
+    }
+
+    @Override
+    public DataFormat getDataFormat() {
+        return null;
     }
 }

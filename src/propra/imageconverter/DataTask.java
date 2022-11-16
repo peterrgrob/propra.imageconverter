@@ -1,19 +1,27 @@
 package propra.imageconverter;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import propra.imageconverter.util.CmdLine;
-import propra.imageconverter.util.DataBuffer;
-import propra.imageconverter.util.DataModel;
-import propra.imageconverter.util.DataTranscoder;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import propra.imageconverter.data.BaseN;
+import propra.imageconverter.data.DataBuffer;
+import propra.imageconverter.data.DataFormat;
+import propra.imageconverter.data.DataModel;
+import propra.imageconverter.data.DataTranscoder;
 
 /**
  *
  * @author pg
  */
-public class DataOperation {
+public class DataTask {
     
     private DataModel inModel;
     private DataModel outModel;
@@ -21,7 +29,7 @@ public class DataOperation {
     /**
      *
      */
-    public DataOperation() {
+    public DataTask() {
         
     }
     
@@ -37,61 +45,60 @@ public class DataOperation {
         
         DataTranscoder readCoding = null;
         DataTranscoder writeCoding = null;  
-        
-        // Eingabedatei öffnen
-        RandomAccessFile inStream = new RandomAccessFile(   cmd.getOption(CmdLine.Options.INPUT_FILE),
-                                                            "r");
+        DataFormat dataFormat = null;
         
         // Ausgabedatei Pfad ableiten
         String outPath = cmd.getOption(CmdLine.Options.INPUT_FILE);      
         
-        // Pfad und Transcoder wählen, je nach Operation
-        if(cmd.isBaseNDecode()) {
+        // Datenformat ableiten
+        dataFormat = cmd.getBaseNDataFormat();            
             
-            outPath = outPath.replaceAll(".base-32", "");
-            readCoding = cmd.getBaseN();
-            writeCoding = null;
-            
+        // Ausgabeendung ableiten
+        String outExt;
+        if(cmd.isBase32()) {
+            outExt = ".base-32";
         } else {
-            
-            outPath = outPath.concat(".base-32");
-            readCoding = null;
-            writeCoding = cmd.getBaseN();
-            
+            outExt = ".base-n";
         }
         
+        // Pfad und Transcoder wählen, je nach Operation
+        if(cmd.isBaseNDecode()) {
+            readCoding = new BaseN(dataFormat);
+            outPath = outPath.replaceAll(outExt, "");  
+        } else {    
+            // Prüfen ob ein gültiges Alphabet übergeben wurde
+            if(!dataFormat.isValid()) {
+                throw new IllegalArgumentException("Ungültiges Base-N Alpahabet.");
+            }
+        
+            outPath = outPath.concat(outExt);
+            writeCoding = new BaseN(dataFormat); 
+        }                    
+        
+        // Verzeichnisse erstellen, falls nötig
+        Path outDirs = Paths.get(outPath);
+        Files.createDirectories(outDirs.getParent());
+        
         // Ausgabedatei erstellen
-        // TODO: Verzeichnis erstellen
         File file = new File(outPath);
         if(!file.exists()) {
             file.createNewFile();
         }
-            
-        // Datei öffnen
-        RandomAccessFile outStream = new RandomAccessFile(file,"rw");
-            
-        // Passende Ein- und Ausgabe Objekte erstellen
-        inModel = new DataModel(DataModel.IOMode.READ, 
-                                inStream, 
-                                readCoding);
-        outModel = new DataModel(DataModel.IOMode.WRITE, 
-                                outStream, 
-                                writeCoding);
-  
-    }
-    
-    /**
-     *
-     * @throws IOException
-     */
-    public void convert() throws IOException {
-        if(!isValid()) {
-            throw new IllegalStateException();
-        }
         
-        begin();
-        process();
-        end(); 
+        // Passende Ein- und Ausgabe Objekte erstellen
+        inModel = new DataModel(DataModel.IOMode.READ,  
+                                readCoding);
+        outModel = new DataModel(DataModel.IOMode.WRITE,  
+                                writeCoding);
+            
+        // Dateistreams erstellen
+        if(cmd.isBaseNDecode()) {
+            inModel.SetInputOutput(new RandomAccessFile(cmd.getOption(CmdLine.Options.INPUT_FILE),"r"), null);
+            outModel.SetInputOutput(null, new RandomAccessFile(file,"rw"));
+        } else {
+            outModel.SetInputOutput(null, new BufferedWriter(new FileWriter(file)));
+            inModel.SetInputOutput(new RandomAccessFile(   cmd.getOption(CmdLine.Options.INPUT_FILE),"r"), null);
+        }   
     }
     
     /**
@@ -119,32 +126,10 @@ public class DataOperation {
     }
     
     /**
-     *
-     * @return 
-     * @throws IOException
-     */
-    private void begin() throws IOException {
-        if(!isValid()) {
-            throw new IllegalStateException();
-        }
-    }
-    
-    /**
-     *
-     * @throws IOException
-     */
-    private void end() throws IOException {
-        if(!isValid()) {
-            throw new IllegalStateException();
-        }
-       
-    }
-    
-    /**
      * 
      * @throws java.io.IOException 
      */
-    private void process() throws IOException {
+    public void doTask() throws IOException {
         if(!isValid()) {
             throw new IllegalArgumentException();
         }

@@ -1,7 +1,10 @@
-package propra.imageconverter.util;
+package propra.imageconverter.data;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import propra.imageconverter.util.Validatable;
 
 /**
  *
@@ -13,7 +16,9 @@ public class DataModel implements Validatable {
     protected DataTranscoder decoder;
     protected RandomAccessFile readFile;
     protected RandomAccessFile writeFile;
-        
+    protected BufferedReader txtReader;    
+    protected BufferedWriter txtWriter;     
+    
     public enum IOMode {
         READ,
         WRITE,
@@ -30,19 +35,37 @@ public class DataModel implements Validatable {
     /**
      *
      * @param mode
-     * @param file
      * @param coder
      */
-    public DataModel(IOMode mode,
-                    RandomAccessFile file, 
+    public DataModel(IOMode mode, 
                     DataTranscoder coder) {
         if(mode == IOMode.READ) {
-            readFile = file;
             decoder = coder;
         } else if(mode == IOMode.WRITE) {
-            writeFile = file;
             encoder = coder;            
         }
+    }
+    
+    /**
+     *
+     * @param txtReader
+     * @param txtWriter
+     */
+    public void SetInputOutput( BufferedReader txtReader, 
+                                BufferedWriter txtWriter) {
+        this.txtReader = txtReader;
+        this.txtWriter = txtWriter;
+    }
+    
+        /**
+     *
+     * @param binReader
+     * @param binWriter
+     */
+    public void SetInputOutput( RandomAccessFile binReader, 
+                                RandomAccessFile binWriter) {
+        this.readFile = binReader;
+        this.writeFile = binWriter;
     }
     
     /**
@@ -68,8 +91,7 @@ public class DataModel implements Validatable {
      * @throws IOException
      */
     public long write(DataBuffer data) throws IOException {
-        if(!isValid()
-        ||  writeFile == null) {
+        if(!isValid()) {
             throw new IllegalStateException();
         }
         
@@ -78,11 +100,21 @@ public class DataModel implements Validatable {
         if(encoder != null) {
             writeBuffer = new DataBuffer();
             encoder.transcode(DataTranscoder.Operation.ENCODE, data, writeBuffer);
+            
+            // Alphabet in Datei schreiben
+            if(encoder.getDataFormat().isBaseN()) {
+                txtWriter.write(encoder.getDataFormat().getAlphabet() + "\n");
+            }
+            
+            // Zeichen in Datei schreiben
+            writeBinaryToTextFile(writeBuffer);
+        } else {
+            // Bytes in Stream schreiben
+            writeFile.write(writeBuffer.getBytes(), 0, writeBuffer.getCurrDataLength());
+            return writeBuffer.getCurrDataLength();
         }
         
-        // Bytes in Stream schreiben
-        writeFile.write(writeBuffer.getBytes(), 0, writeBuffer.getCurrDataLength());
-        return writeBuffer.getCurrDataLength();
+        return 0;
     }
     
     /**
@@ -92,21 +124,30 @@ public class DataModel implements Validatable {
      * @throws IOException
      */
     public long read(DataBuffer buffer) throws IOException {
-        if(!isValid()
-        ||  readFile == null) {
+        if(!isValid()) {
             throw new IllegalStateException();
         }
-        
-        // Daten einlesen
-        readFile.read(buffer.getBytes(), 0, buffer.getSize());
-        buffer.setCurrDataLength(buffer.getSize());
         
         // Dekodierung notwendig?
         if(decoder != null) {
             
+            buffer.setCurrDataLength(buffer.getSize());
+            
+            // Alphabet vorhanden?
+            if(decoder.getDataFormat().getAlphabet().length() == 0) {
+                
+                // Alphabet aus Datei einlesen und DatenFormat ableiten
+                String alphabet = readFile.readLine();
+  
+                decoder.getDataFormat().setEncoding(alphabet);
+                buffer.setCurrDataLength(buffer.getSize() - alphabet.length() - 1);
+            }
+            
+            // Daten einlesen
+            readFile.read(buffer.getBytes(), 0, buffer.getCurrDataLength());
+
             // In temporären Puffer dekodieren
             DataBuffer decodeBuffer = new DataBuffer(buffer.getSize());
-            
             decoder.transcode(  DataTranscoder.Operation.DECODE, 
                                 buffer, 
                                 decodeBuffer);
@@ -118,8 +159,13 @@ public class DataModel implements Validatable {
                                     decodeBuffer.getCurrDataLength());
             
             buffer.setCurrDataLength(decodeBuffer.getCurrDataLength());
+            
+        } else {
+            // Binärdaten einlesen
+            readFile.read(buffer.getBytes(), 0, buffer.getSize());
+            buffer.setCurrDataLength(buffer.getSize());
         }
-
+        
         return buffer.getCurrDataLength();
     }
     
@@ -133,6 +179,22 @@ public class DataModel implements Validatable {
                 encoder.end();
             }
         }
+    }
+    
+    /**
+     * 
+     * @param buffer
+     * @throws IOException 
+     */
+    private void writeBinaryToTextFile(DataBuffer buffer) throws IOException {
+        if(buffer == null) {
+            throw new IllegalArgumentException();
+        }
+        
+        while(buffer.getBuffer().hasRemaining()) {
+            txtWriter.write(buffer.getBuffer().get());
+        }
+        txtWriter.flush();
     }
     
     /**

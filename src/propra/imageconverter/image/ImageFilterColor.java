@@ -1,6 +1,6 @@
 package propra.imageconverter.image;
 
-import propra.imageconverter.util.DataBuffer;
+import propra.imageconverter.data.DataBuffer;
 import propra.imageconverter.util.Validatable;
 
 /**

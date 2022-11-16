@@ -1,8 +1,8 @@
 package propra.imageconverter.image;
 
-import propra.imageconverter.util.DataBuffer;
-import propra.imageconverter.util.DataFormat;
-import propra.imageconverter.util.DataTranscoder;
+import propra.imageconverter.data.DataBuffer;
+import propra.imageconverter.data.DataFormat;
+import propra.imageconverter.data.DataTranscoder;
 
 /**
  *

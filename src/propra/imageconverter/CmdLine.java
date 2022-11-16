@@ -1,7 +1,9 @@
-package propra.imageconverter.util;
+package propra.imageconverter;
+import propra.imageconverter.data.BaseN;
+import propra.imageconverter.data.DataFormat;
 import java.util.HashMap;
+import propra.imageconverter.data.DataFormat.Encoding;
 import propra.imageconverter.image.ColorFormat;
-import propra.imageconverter.util.DataTranscoder.Operation;
 
 /**
  * Hilfsklasse die Kommandozeilenparameter parsed und speichert, diese
@@ -11,7 +13,7 @@ import propra.imageconverter.util.DataTranscoder.Operation;
  */
  public class CmdLine {
      
-    private HashMap<Options,String> options = new HashMap<Options,String>();
+    private final HashMap<Options,String> options = new HashMap<>();
     
     /*
      * 
@@ -41,18 +43,24 @@ import propra.imageconverter.util.DataTranscoder.Operation;
      * @param args 
      */
     public CmdLine(String[] args) {
+        
         // Iteriere und parse alle Argumente
         for(var a: args) {
+            
             // Aufteilen in Komponenten
             String[] tupel = a.split("=");
             if(tupel.length > 0) {
+                
                 // Mit enums vergleichen und bei Bedarf speichern
                 for (Options opt : Options.values()) { 
+                    
                     if(opt.getKey().equals(tupel[0])) {
                         String param = "";
+                        
                         if(tupel.length > 1) {
                             param = tupel[1];
                         }
+                        
                         options.put(opt, param);
                     }
                 }
@@ -71,7 +79,6 @@ import propra.imageconverter.util.DataTranscoder.Operation;
     
     /**
      *
-     * @param opt
      * @return
      */
     public ColorFormat.Encoding getColorEncoding() {
@@ -110,23 +117,32 @@ import propra.imageconverter.util.DataTranscoder.Operation;
      *
      * @return
      */
-    public BaseN getBaseN() {
-        if( options.containsKey(Options.ENCODE_BASE_32)) {
-            return new BaseN(new DataFormat(BaseN.BASE_32_ALPHABET));
-        } else if( options.containsKey(Options.DECODE_BASE_32)) {
-            return new BaseN(new DataFormat(BaseN.BASE_32_ALPHABET));
-        } else if(options.containsKey(Options.DECODE_BASE_N)) {
-            return new BaseN(new DataFormat(options.get(Options.DECODE_BASE_N)));
-        } else if(options.containsKey(Options.ENCODE_BASE_N)) {
-            return new BaseN(new DataFormat(options.get(Options.DECODE_BASE_N)));
-        }
-        return null;
+    public DataFormat getBaseNDataFormat() {
+        String alphabet = null;
+        
+        // Alphabet setzen
+        if( options.containsKey(Options.ENCODE_BASE_32)
+        ||  options.containsKey(Options.DECODE_BASE_32)) {
+            alphabet = BaseN.BASE_32_ALPHABET;
+        } else if(  options.containsKey(Options.DECODE_BASE_N)) {
+            // Alphabet wird aus Datei geladen
+            return new DataFormat();
+        }else if(  options.containsKey(Options.ENCODE_BASE_N)) {
+            alphabet = options.get(Options.ENCODE_BASE_N);
+            if(alphabet == null) {
+               throw new IllegalArgumentException("Ungültiges Alphabet für Base-N Kodierung.");
+            }
+        }  
+        
+        // DataFormat Objekt zurückgeben
+        return new DataFormat(alphabet);
     }
     
     /**
      * 
+     * @return 
      */
-    public boolean isBaseN() {
+    public boolean isBaseTask() {
         return (options.containsKey(Options.ENCODE_BASE_32)
             ||  options.containsKey(Options.DECODE_BASE_32)
             ||  options.containsKey(Options.ENCODE_BASE_N)
@@ -135,9 +151,20 @@ import propra.imageconverter.util.DataTranscoder.Operation;
     
     /**
      * 
+     * @return 
      */
     public boolean isBaseNDecode() {
         return (options.containsKey(Options.DECODE_BASE_32)
             ||  options.containsKey(Options.DECODE_BASE_N)); 
+    }
+    
+    public boolean isBaseN() {
+        return (options.containsKey(Options.ENCODE_BASE_N)
+            ||  options.containsKey(Options.DECODE_BASE_N)); 
+    }
+    
+    public boolean isBase32() {
+        return (options.containsKey(Options.ENCODE_BASE_32)
+            ||  options.containsKey(Options.DECODE_BASE_32)); 
     }
 }

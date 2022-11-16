@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import propra.imageconverter.util.DataBuffer;
-import propra.imageconverter.util.DataFormat.Encoding;
+import propra.imageconverter.data.DataBuffer;
+import propra.imageconverter.data.DataFormat.Encoding;
 import propra.imageconverter.util.Utility;
 
 /**

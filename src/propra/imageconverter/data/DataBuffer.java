@@ -1,8 +1,9 @@
-package propra.imageconverter.util;
+package propra.imageconverter.data;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import propra.imageconverter.util.Validatable;
 
 /**
  *  Hilfsklasse zur Datenverwaltung, kapselt intern einen ByteBuffer und
@@ -15,7 +16,8 @@ public class DataBuffer implements Validatable {
     protected ByteBuffer buffer;
     
     // Menge an Daten die im Buffer vorhanden sind und zugehöriger 
-    // Offset für die blockweise Verarbeitung von Daten
+    // Offset für die blockweise Verarbeitung von Daten. Ermöglicht die
+    // wiederverwendung eines DataBuffers.
     protected int currDataLength;
     protected int currDataOffset;
 

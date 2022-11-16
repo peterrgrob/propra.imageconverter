@@ -1,6 +1,4 @@
-package propra.imageconverter.util;
-
-import java.util.HashMap;
+package propra.imageconverter.data;
 
 /**
  *
@@ -14,8 +12,11 @@ public class DataFormat {
     private String alphabet = new String();
     private byte[] alphabetMap = new byte[256];
     
-    // Verwendete Kodierung der Daten mit parametrisierten
-    // Einstellungen für die Base-N Kodierung.
+    /* 
+     * Verwendete Kodierung der Daten mit parametrisierten
+     * Einstellungen für die Base-N Kodierung, dabei ist die Blocklänge
+     * immer ein vielfaches von 8 Bit und dem Bitcount der Base-N Kodierung
+     */
     public enum Encoding {
         NONE(0,0, 0),
         BASE_2(1,1, 8),
@@ -26,7 +27,7 @@ public class DataFormat {
         BASE_64(6,3,4),
         RLE(0,0, 0);
         
-        // Bitlänge für BaseN Kodierungen
+        // Daten für Base-N Kodierungen
         private final int blockLength;
         private final int charLength;
         private final int bitCount;
@@ -69,7 +70,10 @@ public class DataFormat {
      * @param src
      */
     public DataFormat(DataFormat src) {
-        encoding = src.encoding;
+        this.alphabet = new String(src.alphabet);
+        System.arraycopy(src.alphabetMap , 0, 
+                        this.alphabetMap, 0, 256);
+        this.encoding = src.encoding;
     }
     
     /**
@@ -135,21 +139,65 @@ public class DataFormat {
             throw new IllegalArgumentException();
         }
         
-        // Alphabet setzen und Mappingarray erstellen
-        this.alphabet = new String(alphabet);
-        for(int i=0; i<alphabet.length(); i++) {
-            alphabetMap[alphabet.getBytes()[i]] = (byte)i;
+        if(alphabet.length() > 0) {
+            
+            // Alphabet setzen und Mappingarray erstellen
+            this.alphabet = new String(alphabet);
+            for(int i=0; i<alphabet.length(); i++) {
+                alphabetMap[alphabet.getBytes()[i]] = (byte)i;
+            }
+
+            // Kodierung ableiten
+            switch(alphabet.length()) {
+                case 2 -> {this.encoding = Encoding.BASE_2;}
+                case 4 -> {this.encoding = Encoding.BASE_4;}     
+                case 8 -> {this.encoding = Encoding.BASE_8;}
+                case 16 -> {this.encoding = Encoding.BASE_16;}
+                case 32 -> {this.encoding = Encoding.BASE_32;}
+                case 64 -> {this.encoding = Encoding.BASE_64;}
+                default -> {throw new IllegalArgumentException("Ungültige Base-N Alphabetlänge");}
+            }
+        }
+    }
+    
+    /**
+     *
+     * @return
+     */
+    public boolean isValid() {
+        switch(this.encoding) {
+            case BASE_2, BASE_4, BASE_8, BASE_16, BASE_32, BASE_64 -> {
+                if(alphabet == null) {
+                    return false;
+                }
+                if(!(alphabet.length() == 2
+                        || alphabet.length() == 4
+                        || alphabet.length() == 8
+                        || alphabet.length() == 16
+                        || alphabet.length() == 32
+                        || alphabet.length() == 64)) {
+                    return false;
+                }
+            }
         }
         
-        // Kodierung ableiten
-        switch(alphabet.length()) {
-            case 2 -> {this.encoding = Encoding.BASE_2;}
-            case 4 -> {this.encoding = Encoding.BASE_4;}     
-            case 8 -> {this.encoding = Encoding.BASE_8;}
-            case 16 -> {this.encoding = Encoding.BASE_16;}
-            case 32 -> {this.encoding = Encoding.BASE_32;}
-            case 64 -> {this.encoding = Encoding.BASE_64;}
-            default -> {throw new IllegalArgumentException("Ungültige Base-N Alphabetlänge");}
+        return true;
+    }
+    
+    /**
+     *
+     * @return
+     */
+    public boolean isBaseN() {
+        switch(this.encoding) {
+            case BASE_2, BASE_4, BASE_8, BASE_16, BASE_64 -> {
+                return true;
+            }
         }
+        return false;
+    }
+    
+    public boolean isBinary() {
+        return (encoding == Encoding.RLE);
     }
 }

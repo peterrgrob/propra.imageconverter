@@ -1,7 +1,5 @@
 package propra.imageconverter.util;
 
-import java.math.BigInteger;
-import java.nio.ByteBuffer;
 
 /**
  * Diverse Utility Methoden
