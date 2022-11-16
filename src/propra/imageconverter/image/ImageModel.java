@@ -182,6 +182,7 @@ public abstract class ImageModel implements Closeable,
         
         if(isCheckable()) {
             checksumObj.end();
+            header.setChecksum(getChecksum());
         }
         
         // Farbkonvertierung abschließen

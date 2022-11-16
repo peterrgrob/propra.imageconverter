@@ -66,15 +66,17 @@ public class ImageModelProPra extends ImageModel {
         byteBuffer.putShort(PROPRA_HEADER_OFFSET_WIDTH,(short)srcHeader.getWidth());
         byteBuffer.putShort(PROPRA_HEADER_OFFSET_HEIGHT,(short)srcHeader.getHeight());
         byteBuffer.put(PROPRA_HEADER_OFFSET_BPP,(byte)(srcHeader.getPixelSize() << 3));
-        byteBuffer.putLong(PROPRA_HEADER_OFFSET_DATALEN,(long)srcHeader.getImageSize());
+        byteBuffer.putInt(PROPRA_HEADER_OFFSET_CHECKSUM, (int)srcHeader.getChecksum());
         
         // Kompression 
         switch(header.getColorFormat().getEncoding()) {
             case RLE -> {
                 byteBuffer.put(PROPRA_HEADER_OFFSET_ENCODING, (byte)PROPRA_HEADER_ENCODING_RLE);
+                byteBuffer.putLong(PROPRA_HEADER_OFFSET_DATALEN,srcHeader.getEncodedSize());
             }
             case NONE -> {
                 byteBuffer.put(PROPRA_HEADER_OFFSET_ENCODING, (byte)PROPRA_HEADER_ENCODING_NONE);
+                byteBuffer.putLong(PROPRA_HEADER_OFFSET_DATALEN,(long)srcHeader.getImageSize());
             }
             default -> {
                 throw new IllegalArgumentException("Ungültige Kompression.");
@@ -134,6 +136,7 @@ public class ImageModelProPra extends ImageModel {
         switch (bytes.get(PROPRA_HEADER_OFFSET_ENCODING)) {
             case PROPRA_HEADER_ENCODING_RLE:
                 newHeader.getColorFormat().setEncoding(Encoding.RLE);
+                newHeader.setEncodedSize(dataLen);
                 break;
             case PROPRA_HEADER_ENCODING_NONE:
                 newHeader.getColorFormat().setEncoding(Encoding.NONE);  

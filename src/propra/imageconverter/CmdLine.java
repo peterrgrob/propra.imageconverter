@@ -2,7 +2,6 @@ package propra.imageconverter;
 import propra.imageconverter.data.BaseN;
 import propra.imageconverter.data.DataFormat;
 import java.util.HashMap;
-import propra.imageconverter.data.DataFormat.Encoding;
 import propra.imageconverter.image.ColorFormat;
 
 /**
@@ -13,7 +12,7 @@ import propra.imageconverter.image.ColorFormat;
  */
  public class CmdLine {
      
-    private final HashMap<Options,String> options = new HashMap<>();
+    private final HashMap<Options, String> options;
     
     /*
      * 
@@ -43,6 +42,7 @@ import propra.imageconverter.image.ColorFormat;
      * @param args 
      */
     public CmdLine(String[] args) {
+        this.options = new HashMap<>();
         
         // Iteriere und parse alle Argumente
         for(var a: args) {

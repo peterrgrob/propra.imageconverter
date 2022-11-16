@@ -4,12 +4,16 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import propra.imageconverter.image.ColorFormat;
 import propra.imageconverter.image.ImageHeader;
 import propra.imageconverter.image.ImageModel;
 import propra.imageconverter.image.ImageModelProPra;
 import propra.imageconverter.image.ImageModelTGA;
 import propra.imageconverter.data.DataBuffer;
+import propra.imageconverter.data.DataFormat.Encoding;
 
 /**
  *
@@ -45,8 +49,13 @@ public class ImageTask {
         if(inModel == null) {
             throw new IOException("Nicht unterstütztes Bildformat.");
         }
+        
 
+        
+        // Verzeichnisse und Datei erstellen, falls nötig
         String outPath = cmd.getOption(CmdLine.Options.OUTPUT_FILE);  
+        Path outDirs = Paths.get(outPath);
+        Files.createDirectories(outDirs.getParent());
         File file = new File(outPath);
         if(!file.exists()) {
             file.createNewFile();
@@ -160,8 +169,9 @@ public class ImageTask {
             throw new IllegalStateException();
         }
         
-        // Falls nötig Prüfsumme in den Bildkopf schreiben
-        if(outModel.isCheckable()) {
+        // Falls nötig Header aktualisieren
+        if( outModel.isCheckable()
+        ||  outModel.getColorFormat().getEncoding() == Encoding.RLE) {
             outModel.writeHeader(outModel.getHeader());
         }
         

@@ -14,9 +14,7 @@ public class ImageConverter {
     
     // Fehlercode
     private static final int ERROR_EXIT_CODE = 123;
-    
-
-            
+        
     /** 
      * Programmeinstieg
      * 
@@ -48,7 +46,7 @@ public class ImageConverter {
             long timeElapsed = finish - start;
 
             // Infos Programmablauf ausgeben
-            System.out.println("\nKonvertierung abgeschlossen in (ms): " + String.valueOf(timeElapsed));
+            System.out.println("Task abgeschlossen in (ms): " + String.valueOf(timeElapsed));
         }
         catch(IOException e) {
             Logger.getLogger(ImageConverter.class.getName()).log(Level.SEVERE, null, e);
@@ -69,7 +67,7 @@ public class ImageConverter {
         // Konvertierung ausführen
         ImageTask op = new ImageTask();
         op.initialize(cmdLine);
-        op.convert(); 
+        op.convert();
         System.out.println(op.toString());
     }   
     

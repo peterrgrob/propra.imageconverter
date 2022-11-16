@@ -74,6 +74,7 @@ public class ColorFormat extends DataFormat implements Comparable<ColorFormat> {
         
         byte[] inBytes = input.getBytes();
         byte[] outBytes = output.getBytes();
+        byte r,g,b;
                 
         int srcOffset = input.getCurrDataOffset();
         int dstOffset = output.getCurrDataOffset();
@@ -85,9 +86,13 @@ public class ColorFormat extends DataFormat implements Comparable<ColorFormat> {
             int sIndex = srcOffset + i;
             int dIndex = dstOffset + i;
             
-            outBytes[dIndex + dstMap[RED]] = inBytes[sIndex + srcMap[RED]];
-            outBytes[dIndex + dstMap[GREEN]] = inBytes[sIndex + srcMap[GREEN]];
-            outBytes[dIndex + dstMap[BLUE]] = inBytes[sIndex + srcMap[BLUE]];
+            r = inBytes[sIndex + srcMap[RED]];
+            g = inBytes[sIndex + srcMap[GREEN]];
+            b = inBytes[sIndex + srcMap[BLUE]];
+            
+            outBytes[dIndex + dstMap[RED]] = r;
+            outBytes[dIndex + dstMap[GREEN]] = g;
+            outBytes[dIndex + dstMap[BLUE]] = b;
         }
         
         return output;

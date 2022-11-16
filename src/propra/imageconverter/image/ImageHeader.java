@@ -12,7 +12,9 @@ public class ImageHeader implements Validatable {
     // Attribute
     private int width;
     private int height;
-    private int pixelSize;    
+    private int pixelSize;   
+    private long encodedSize;
+
     private long checksum;
     private ColorFormat colorType = new ColorFormat();
   
@@ -101,4 +103,11 @@ public class ImageHeader implements Validatable {
         this.width = width;
     }
 
+    public long getEncodedSize() {
+        return encodedSize;
+    }
+
+    public void setEncodedSize(long encodedSize) {
+        this.encodedSize = encodedSize;
+    }
 }
