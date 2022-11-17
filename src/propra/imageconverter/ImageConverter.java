@@ -65,28 +65,15 @@ public class ImageConverter {
     public void doImageTask(CmdLine cmdLine) throws FileNotFoundException, 
                                                     IOException {      
         // Konvertierung ausführen
-        ImageTask op = new ImageTask();
+        /*ImageTask op = new ImageTask();
         op.initialize(cmdLine);
+        op.convert();*/
+        ImageTask op = new ImageTask(cmdLine);
         op.convert();
         System.out.println(op.toString());
     }   
     
     /**
-     * 
-     * @param cmdLine
-     * @throws FileNotFoundException
-     * @throws IOException 
-     */
-    public void doDataTask(CmdLine cmdLine) throws  FileNotFoundException, 
-                                                    IOException {    
-        // BaseN Kodierung ausführen
-        DataTask op = new DataTask();
-        op.initialize(cmdLine);
-        op.doTask();   
-        System.out.println(op.toString());
-    }  
-    
-        /**
      * 
      * @param cmdLine
      * @throws FileNotFoundException

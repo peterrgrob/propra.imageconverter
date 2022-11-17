@@ -1,17 +1,15 @@
 package propra.imageconverter.data;
 
-import propra.imageconverter.util.Validatable;
-
 /**
  *
  * @author pg
  */
-public interface DataTranscoder extends Validatable {
+public interface DataTranscoder {
     
     public enum Operation {
         ENCODE,
         DECODE,
-        PASS,
+        FILTER,
         NONE;
     }
     
@@ -27,9 +25,9 @@ public interface DataTranscoder extends Validatable {
      * @param out
      * @return Anzahl der kodierten Bytes
      */
-    public long transcode(  Operation op,
-                            DataBuffer in,
-                            DataBuffer out);
+    public long apply(  Operation op,
+                        DataBuffer in,
+                        DataBuffer out);
     
     /**
      *
@@ -40,11 +38,11 @@ public interface DataTranscoder extends Validatable {
      *
      * @param dataFormat
      */
-    public void setDataFormat(DataFormat dataFormat);
+    public void dataFormat(DataFormat dataFormat);
     
     /**
      *
      * @return Aktuelles Daten Format
      */
-    public DataFormat getDataFormat();
+    public DataFormat dataFormat();
 }

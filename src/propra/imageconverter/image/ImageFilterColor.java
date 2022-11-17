@@ -1,24 +1,37 @@
 package propra.imageconverter.image;
 
 import propra.imageconverter.data.DataBuffer;
-import propra.imageconverter.util.Validatable;
 
 /**
  *
  * @author pg
  */
 public class ImageFilterColor extends ImageFilter {
-       
+
+    /**
+     * 
+     */
     @Override
     public void begin() {}
 
+    /**
+     * 
+     * @param inOut
+     * @return 
+     */
     @Override
-    public DataBuffer filter(DataBuffer inOut) {
-        return filter(inOut, inOut);
+    public DataBuffer apply(DataBuffer inOut) {
+        return apply(inOut, inOut);
     }
 
+    /**
+     * 
+     * @param in
+     * @param out
+     * @return 
+     */
     @Override
-    public DataBuffer filter(DataBuffer in, DataBuffer out) {
+    public DataBuffer apply(DataBuffer in, DataBuffer out) {
         if( in == null 
         ||  out == null
         ||  !isValid()) {
@@ -34,18 +47,18 @@ public class ImageFilterColor extends ImageFilter {
         return out;
     }
 
+    /**
+     * 
+     */
     @Override
     public void end() {
     }
 
-    @Override
+    /**
+     * 
+     * @return 
+     */
     public boolean isValid() {
         return (inFormat != null);
-    }
-
-    @Override
-    public void reset() {
-        inFormat = null;
-        outFormat = null;
     }
 }

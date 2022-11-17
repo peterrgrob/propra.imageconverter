@@ -1,6 +1,11 @@
-package propra.imageconverter.data;
+package propra.imageconverter.basen;
 
 import java.io.IOException;
+import propra.imageconverter.data.DataBuffer;
+import propra.imageconverter.data.DataFormat;
+import propra.imageconverter.data.DataFormat.Mode;
+import propra.imageconverter.data.DataReader;
+import propra.imageconverter.data.DataTranscoder;
 
 /**
  *
@@ -11,10 +16,16 @@ public class BaseNReader extends DataReader {
     private final BaseN decoder;
     private final DataFormat format;
     
+    /**
+     * 
+     * @param file
+     * @param format
+     * @throws IOException 
+     */
     public BaseNReader(String file, DataFormat format) throws IOException {
         super(file, Mode.BINARY);
         this.format = format;
-        decoder = new BaseN(format);
+        decoder = new BaseN(this.format);
     }
     
     /**
@@ -30,22 +41,22 @@ public class BaseNReader extends DataReader {
             throw new IllegalStateException();
         }
         
-        buffer.setCurrDataLength(buffer.getSize());
+        buffer.setDataLength(buffer.getSize());
             
         // Alphabet vorhanden?
-        if(decoder.getDataFormat().getAlphabet().length() == 0) {
+        if(decoder.dataFormat().getAlphabet().length() == 0) {
             // Alphabet aus Datei einlesen und DatenFormat ableiten
             String alphabet = binaryReader.readLine();
-            decoder.getDataFormat().setEncoding(alphabet);
-            buffer.setCurrDataLength(buffer.getSize() - alphabet.length() - 1);
+            decoder.dataFormat().setEncoding(alphabet);
+            buffer.setDataLength(buffer.getSize() - alphabet.length() - 1);
         }
             
         // Daten einlesen
-        binaryReader.read(buffer.getBytes(), 0, buffer.getCurrDataLength());
+        binaryReader.read(buffer.getBytes(), 0, buffer.getDataLength());
 
         // In temporären Puffer dekodieren
         DataBuffer decodeBuffer = new DataBuffer(buffer.getSize());
-        decoder.transcode(  DataTranscoder.Operation.DECODE, 
+        decoder.apply(  DataTranscoder.Operation.DECODE, 
                             buffer, 
                             decodeBuffer);
 
@@ -53,10 +64,10 @@ public class BaseNReader extends DataReader {
         buffer.getBuffer().put( 0, 
                                 decodeBuffer.getBytes(), 
                                 0, 
-                                decodeBuffer.getCurrDataLength());
+                                decodeBuffer.getDataLength());
 
-        buffer.setCurrDataLength(decodeBuffer.getCurrDataLength());
+        buffer.setDataLength(decodeBuffer.getDataLength());
         
-        return buffer.getCurrDataLength();
+        return buffer.getDataLength();
     }
 }

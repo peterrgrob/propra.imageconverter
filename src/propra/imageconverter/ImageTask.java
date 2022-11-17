@@ -3,17 +3,29 @@ package propra.imageconverter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import propra.imageconverter.CmdLine;
 import propra.imageconverter.image.ColorFormat;
 import propra.imageconverter.image.ImageHeader;
-import propra.imageconverter.image.ImageModel;
-import propra.imageconverter.image.ImageModelProPra;
-import propra.imageconverter.image.ImageModelTGA;
 import propra.imageconverter.data.DataBuffer;
 import propra.imageconverter.data.DataFormat.Encoding;
+import propra.imageconverter.data.DataFormat.Mode;
+import propra.imageconverter.image.ColorFormat;
+import propra.imageconverter.image.ImageHeader;
+import propra.imageconverter.image.ImageReader;
+import propra.imageconverter.image.ImageReader;
+import propra.imageconverter.image.ImageReaderProPra;
+import propra.imageconverter.image.ImageReaderProPra;
+import propra.imageconverter.image.ImageReaderTGA;
+import propra.imageconverter.image.ImageReaderTGA;
+import propra.imageconverter.image.ImageWriter;
+import propra.imageconverter.image.ImageWriter;
+import propra.imageconverter.image.ImageWriterProPra;
+import propra.imageconverter.image.ImageWriterProPra;
+import propra.imageconverter.image.ImageWriterTGA;
+import propra.imageconverter.image.ImageWriterTGA;
 
 /**
  *
@@ -21,37 +33,26 @@ import propra.imageconverter.data.DataFormat.Encoding;
  */
 public class ImageTask {
     
-    private ImageModel inModel;
-    private ImageModel outModel;
+    private ImageReader inReader;
+    private ImageWriter outWriter;
     private ColorFormat.Encoding outEncoding = ColorFormat.Encoding.NONE;
-
-    /**
-     *
-     */
-    public ImageTask() {
-        
-    }
     
-     /**
-     *
+    /**
+     * 
      * @param cmd
-     * @throws java.io.FileNotFoundException
+     * @throws IOException 
      */
-    public void initialize(CmdLine cmd) throws FileNotFoundException, IOException {
+    public ImageTask(CmdLine cmd) throws IOException {
         if(cmd == null) {
             throw new IllegalArgumentException();
         }
         
-        // Eingabeobjekt erstellen
-        RandomAccessFile inStream = new RandomAccessFile(cmd.getOption(CmdLine.Options.INPUT_FILE),"r");
-        inModel = createImageModel(cmd.getOptionExtension(CmdLine.Options.INPUT_FILE), 
-                            inStream);
-        if(inModel == null) {
+        inReader = createImageReader(   cmd.getOption(CmdLine.Options.INPUT_FILE), 
+                                        cmd.getOptionExtension(CmdLine.Options.INPUT_FILE));
+        if(inReader == null) {
             throw new IOException("Nicht unterstütztes Bildformat.");
         }
-        
-
-        
+       
         // Verzeichnisse und Datei erstellen, falls nötig
         String outPath = cmd.getOption(CmdLine.Options.OUTPUT_FILE);  
         Path outDirs = Paths.get(outPath);
@@ -62,16 +63,16 @@ public class ImageTask {
         }
         
         // Ausgabeobjekt erstellen
-        RandomAccessFile outStream = new RandomAccessFile(file,"rw");
-        outModel = createImageModel(cmd.getOptionExtension(CmdLine.Options.OUTPUT_FILE), 
-                            outStream);
-        if(outModel == null) {
+        outWriter = createImageWriter(  cmd.getOption(CmdLine.Options.OUTPUT_FILE),
+                                        cmd.getOptionExtension(CmdLine.Options.OUTPUT_FILE));
+        if(outWriter == null) {
             throw new IOException("Nicht unterstütztes Bildformat.");
         }
         
         // Ausgabekompression setzen
         outEncoding = cmd.getColorEncoding();
     }
+    
     
     /**
      *
@@ -82,62 +83,9 @@ public class ImageTask {
             throw new IllegalStateException();
         }
         
-        ImageHeader inHeader = begin();
+        begin();
         process();
         end(); 
-    }
-    
-    /**
-     *
-     * @throws java.io.IOException
-     */
-    public void isChecksumValid() throws IOException {
-        if(!isValid()) {
-            throw new IllegalStateException();
-        }
-        
-        if(inModel.isCheckable()) {
-            if(inModel.getChecksumObj().getValue() 
-            != inModel.getHeader().getChecksum()) {
-                throw new IOException("Eingabe Prüfsummenfehler!");
-            }
-        }
-        if(outModel.isCheckable()
-        && inModel.isCheckable()) {
-            if(inModel.getChecksumObj().getValue() 
-            != inModel.getHeader().getChecksum()) {
-                throw new IOException("Ausgabe Prüfsummenfehler!");
-            }
-        }
-    }
-    
-    /**
-     *
-     * @return
-     */
-    public boolean isValid() {
-        return (    inModel    != null
-                &&  outModel   != null);
-    }
-    
-    /**
-     *
-     * @return
-     */
-    @Override
-    public String toString() {
-        String stateString = "Uninitialisiert.";
-
-        if(isValid()) {
-            ImageHeader header = inModel.getHeader();
-            stateString = "Bildinfo: \n" + header.getWidth();
-            stateString = stateString.concat("x" + header.getHeight());
-            stateString = stateString.concat("x" + header.getPixelSize());
-            stateString = stateString.concat("\nEingabe Prüfsumme: "+String.format("0x%08X", (int)inModel.getChecksum()));
-            stateString = stateString.concat("\nAusgabe Prüfsumme: "+String.format("0x%08X", (int)outModel.getChecksum()));
-        }
-        
-        return stateString;
     }
     
     /**
@@ -151,32 +99,13 @@ public class ImageTask {
         }
         
         // Bildkopf einlesen
-        ImageHeader inHeader = inModel.readHeader();
+        ImageHeader inHeader = new ImageHeader(inReader.readHeader());
         
         // Bildkompression setzen und Bildkopf in Ausgabedatei schreiben
-        inHeader.getColorFormat().setEncoding(outEncoding);
-        outModel.writeHeader(inHeader);
+        inHeader.colorFormat().setEncoding(outEncoding);
+        outWriter.writeHeader(inHeader);
         
         return inHeader;
-    }
-    
-    /**
-     *
-     * @throws IOException
-     */
-    private void end() throws IOException {
-        if(!isValid()) {
-            throw new IllegalStateException();
-        }
-        
-        // Falls nötig Header aktualisieren
-        if( outModel.isCheckable()
-        ||  outModel.getColorFormat().getEncoding() == Encoding.RLE) {
-            outModel.writeHeader(outModel.getHeader());
-        }
-        
-        inModel.close();
-        outModel.close();
     }
     
     /**
@@ -189,25 +118,97 @@ public class ImageTask {
         }
 
         // Datenblock für blockweise Übertragung erstellen
-        DataBuffer block = new DataBuffer(inModel.getBlockSize());
-        ColorFormat inFormat = inModel.getColorFormat();
+        DataBuffer block = new DataBuffer(inReader.getBlockSize());
+        ColorFormat inFormat = inReader.getHeader().colorFormat();
         
         // Blockweise Übertragung starten
-        inModel.beginImageBlocks();
-        outModel.beginImageBlocks();
+        inReader.begin();
+        outWriter.begin();
         
         // Blöcke übertragen 
-        while(inModel.hasMoreImageData()) {
-            inModel.readImageBlock(block);
-            outModel.writeImageBlock(block,inFormat);
+        while(inReader.hasMoreData()) {
+            inReader.read(block);
+            outWriter.write(block);
         }
         
         // blockweise Übertragung beenden     
-        inModel.endImageBlocks();
-        outModel.endImageBlocks();
+        inReader.end();
+        outWriter.end();
         
         // Prüfsumme prüfen
         isChecksumValid();
+    }
+    
+    /**
+     *
+     * @throws IOException
+     */
+    private void end() throws IOException {
+        if(!isValid()) {
+            throw new IllegalStateException();
+        }
+        
+        // Falls nötig Header aktualisieren
+        if( outWriter.getChecksumObj() != null
+        ||  outWriter.getHeader().colorFormat().getEncoding() == Encoding.RLE) {
+            outWriter.writeHeader(outWriter.getHeader());
+        }
+        
+        inReader.close();
+        outWriter.close();
+    }
+    
+    /**
+     *
+     * @throws java.io.IOException
+     */
+    public void isChecksumValid() throws IOException {
+        if(!isValid()) {
+            throw new IllegalStateException();
+        }
+        
+        if(inReader.getChecksumObj() != null) {
+            if(inReader.getChecksumObj().getValue() 
+            != inReader.getHeader().checksum()) {
+                throw new IOException("Eingabe Prüfsummenfehler!");
+            }
+        }
+        if(outWriter.getChecksumObj() != null
+        && inReader.getChecksumObj() != null) {
+            if(inReader.getChecksumObj().getValue() 
+            != inReader.getHeader().checksum()) {
+                throw new IOException("Ausgabe Prüfsummenfehler!");
+            }
+        }
+    }
+    
+    /**
+     *
+     * @return
+     */
+    public boolean isValid() {
+        return (    inReader    != null
+                &&  outWriter   != null);
+    }
+    
+    /**
+     *
+     * @return
+     */
+    @Override
+    public String toString() {
+        String stateString = "Uninitialisiert.";
+
+        if(isValid()) {
+            ImageHeader header = inReader.getHeader();
+            stateString = "Bildinfo: \n" + header.width();
+            stateString = stateString.concat("x" + header.height());
+            stateString = stateString.concat("x" + header.pixelSize());
+            stateString = stateString.concat("\nEingabe Prüfsumme: "+String.format("0x%08X", (int)inReader.getChecksum()));
+            stateString = stateString.concat("\nAusgabe Prüfsumme: "+String.format("0x%08X", (int)outWriter.getChecksum()));
+        }
+        
+        return stateString;
     }
     
     /**
@@ -216,13 +217,31 @@ public class ImageTask {
      * @param streamLen
      * @return
      */
-    private ImageModel createImageModel(String ext, RandomAccessFile stream) {
+    private ImageWriter createImageWriter(String path, String ext) throws IOException {
         switch(ext) {
             case "tga" -> {
-                return new ImageModelTGA(stream);
+                return new ImageWriterTGA(path, Mode.BINARY);
             }
             case "propra" -> {
-                return new ImageModelProPra(stream);
+                return new ImageWriterProPra(path, Mode.BINARY);
+            }
+        }
+        return null;
+    }
+    
+    /**
+     *
+     * @param ext
+     * @param streamLen
+     * @return
+     */
+    private ImageReader createImageReader(String path, String ext) throws IOException {
+        switch(ext) {
+            case "tga" -> {
+                return new ImageReaderTGA(path, Mode.BINARY);
+            }
+            case "propra" -> {
+                return new ImageReaderProPra(path, Mode.BINARY);
             }
         }
         return null;

@@ -1,7 +1,6 @@
 package propra.imageconverter.image;
 
 import propra.imageconverter.data.DataFilter;
-import propra.imageconverter.util.*;
 
 /**
  *
@@ -12,14 +11,28 @@ public abstract class ImageFilter implements DataFilter {
     ColorFormat inFormat;
     ColorFormat outFormat;
 
+    /**
+     * 
+     */
     public ImageFilter() {
+        
+    }
+    
+    /**
+     * 
+     * @param in
+     * @param out 
+     */
+    public ImageFilter(ColorFormat in, ColorFormat out) {
+        inFormat = in;
+        outFormat = out;
     }
     
     /**
      *
      * @param format
      */
-    public void setInFormat(ColorFormat format) {
+    public void inFormat(ColorFormat format) {
         this.inFormat = format;
     }
 
@@ -27,7 +40,7 @@ public abstract class ImageFilter implements DataFilter {
      *
      * @param format
      */
-    public void setOutFormat(ColorFormat format) {
+    public void outFormat(ColorFormat format) {
         this.outFormat = format;
     }
 
@@ -35,7 +48,7 @@ public abstract class ImageFilter implements DataFilter {
      *
      * @return
      */
-    public ColorFormat getInFormat() {
+    public ColorFormat inFormat() {
         return inFormat;
     }
 
@@ -43,7 +56,7 @@ public abstract class ImageFilter implements DataFilter {
      *
      * @return
      */
-    public ColorFormat getOutFormat() {
+    public ColorFormat outFormat() {
         return outFormat;
     }
 }

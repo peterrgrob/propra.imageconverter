@@ -1,4 +1,6 @@
-package propra.imageconverter.data;
+package propra.imageconverter.checksum;
+
+import propra.imageconverter.data.DataBuffer;
 
 /**
  *  ProPra Implementierung einer Prüfsumme
@@ -11,13 +13,12 @@ public class ChecksumPropra extends Checksum {
     private int currAi;
     private int currBi = 1;
     private int currIndex;
-     
+
     /**
-     *
+     * 
      */
     @Override
-    public void reset() {
-        super.reset();
+    public void begin() {
         currAi = 0;
         currBi = 1;
         currIndex = 0;
@@ -29,7 +30,7 @@ public class ChecksumPropra extends Checksum {
      * @param buffer
      */
     @Override
-    public DataBuffer filter(DataBuffer buffer) {
+    public DataBuffer apply(DataBuffer buffer) {
         if (buffer == null) {
             throw new IllegalArgumentException();
         }
@@ -37,12 +38,12 @@ public class ChecksumPropra extends Checksum {
         int dindex = 0;
         byte[] data = buffer.getBytes();
         
-        for(int i=1; i<=buffer.getCurrDataLength(); i++) {
+        for(int i=1; i<=buffer.getDataLength(); i++) {
             currAi = (i + currIndex + currAi + (data[dindex++] & 0xFF)) % X;
             currBi = (currBi + currAi) % X; 
         }  
         
-        currIndex += buffer.getCurrDataLength();
+        currIndex += buffer.getDataLength();
         return buffer;
     }
     
@@ -59,7 +60,6 @@ public class ChecksumPropra extends Checksum {
      *
      * @return
      */
-    @Override
     public boolean isValid() {
         return true;
     }

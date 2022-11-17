@@ -2,11 +2,12 @@ package propra.imageconverter;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import propra.imageconverter.data.BaseNReader;
-import propra.imageconverter.data.BaseNWriter;
+import propra.imageconverter.CmdLine;
+import propra.imageconverter.basen.BaseNReader;
+import propra.imageconverter.basen.BaseNWriter;
 import propra.imageconverter.data.DataBuffer;
 import propra.imageconverter.data.DataFormat;
+import propra.imageconverter.data.DataFormat.Mode;
 import propra.imageconverter.data.DataReader;
 import propra.imageconverter.data.DataWriter;
 
@@ -66,9 +67,9 @@ public class BaseNTask {
         // Reader/Writer erstellen
         if(cmd.isBaseNDecode()) {
             reader = new BaseNReader(cmd.getOption(CmdLine.Options.INPUT_FILE), dataFormat);
-            writer = new DataWriter(outPath, DataWriter.Mode.BINARY);
+            writer = new DataWriter(outPath, Mode.BINARY);
         } else {
-            reader = new DataReader(cmd.getOption(CmdLine.Options.INPUT_FILE), DataReader.Mode.BINARY);
+            reader = new DataReader(cmd.getOption(CmdLine.Options.INPUT_FILE), Mode.BINARY);
             writer = new BaseNWriter(outPath, dataFormat);
         }   
     }
@@ -108,7 +109,7 @@ public class BaseNTask {
 
         // Datenblock für blockweise Übertragung erstellen
         DataBuffer block = new DataBuffer((int)reader.getSize());
-        block.setCurrDataLength((int)reader.getSize());
+        block.setDataLength((int)reader.getSize());
         
         // Blockweise Übertragung starten
         reader.begin();

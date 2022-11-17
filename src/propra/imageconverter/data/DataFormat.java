@@ -40,6 +40,12 @@ public class DataFormat {
             this.charLength = charLength;
         }
     }
+    
+    // Datenmodus für Ein- und Ausgabe
+    public enum Mode {
+        BINARY,
+        TEXT;
+    }
 
     /**
      *

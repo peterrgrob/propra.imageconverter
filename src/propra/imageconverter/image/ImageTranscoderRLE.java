@@ -54,10 +54,10 @@ public class ImageTranscoderRLE extends ImageTranscoder {
         int rawCounter = 0;
            
         // Über Bytes iterieren und gemäß RLE verarbeiten
-        while(inBytes.position() < in.getCurrDataLength()) {
+        while(inBytes.position() < in.getDataLength()) {
          
             // Anzahl gleicher Farben zählen
-            int rleCtr = countRleColor(in.getBuffer(), in.getCurrDataLength());
+            int rleCtr = countRleColor(in.getBuffer(), in.getDataLength());
             if(rleCtr > 1) {
                 
                 // RLE Block verarbeiten
@@ -99,12 +99,12 @@ public class ImageTranscoderRLE extends ImageTranscoder {
         }
         
         // Anzahl der dekodierten Bytes setzen
-        out.setCurrDataLength(outBytes.position());  
+        out.setDataLength(outBytes.position());  
         
         // Positionszeiger zurücksetzen
         out.getBuffer().clear();
               
-        return out.getCurrDataLength();
+        return out.getDataLength();
     }
 
     /**
@@ -120,7 +120,7 @@ public class ImageTranscoderRLE extends ImageTranscoder {
         ByteBuffer outBytes = out.getBuffer();
         
         // Über Bytes iterieren und gemäß RLE verarbeiten
-        while(inBytes.position() < in.getCurrDataLength()) {
+        while(inBytes.position() < in.getDataLength()) {
             
             // Paketkopf und Wiederholungen einlesen
             currentPacketHeader = inBytes.get() & 0xFF;
@@ -161,7 +161,7 @@ public class ImageTranscoderRLE extends ImageTranscoder {
         out.getBuffer().clear();
         
         // Anzahl der dekodierten Bytes setzen und zurückgeben
-        out.setCurrDataLength(decodedBytes);        
+        out.setDataLength(decodedBytes);        
         return decodedBytes;
     }
     
@@ -214,12 +214,20 @@ public class ImageTranscoderRLE extends ImageTranscoder {
             &&  array[offset0 + 2] == array[offset1 + 2]);
     }
 
+    /**
+     * 
+     * @param dataFormat 
+     */
     @Override
-    public void setDataFormat(DataFormat dataFormat) {
+    public void dataFormat(DataFormat dataFormat) {
     }
 
+    /**
+     * 
+     * @return 
+     */
     @Override
-    public DataFormat getDataFormat() {
+    public DataFormat dataFormat() {
         return null;
     }
 }

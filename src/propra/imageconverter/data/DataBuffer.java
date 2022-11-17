@@ -3,15 +3,15 @@ package propra.imageconverter.data;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import propra.imageconverter.util.Validatable;
 
 /**
  *  Hilfsklasse zur Datenverwaltung, kapselt intern einen ByteBuffer und
- *  erweitert diesen mit zusätzlichen Methoden.
+ *  erweitert diesen mit zusätzlichen Methoden für eine blockweise Verarbeitung
+ *  von Daten.
  * 
  * @author pg
  */
-public class DataBuffer implements Validatable {
+public class DataBuffer {
 
     protected ByteBuffer buffer;
     
@@ -55,45 +55,6 @@ public class DataBuffer implements Validatable {
             throw new IllegalArgumentException();
         }
         buffer = ByteBuffer.allocate(size);
-    }
-    
-    /**
-     *
-     * @return
-     */
-    @Override
-    public boolean isValid() {
-        return (buffer != null);
-    }
-    
-    /**
-     *
-     * @return
-     */
-    public ByteBuffer getBuffer() {
-        return buffer;
-    }
-    
-    /**
-     *
-     * @return
-     */
-    public int getSize() {
-        if (!isValid()) {
-            return 0; 
-        }
-        return buffer.capacity();
-    }
-    
-    /**
-     *
-     * @return
-     */
-    public byte[] getBytes() {
-        if (buffer == null) {
-            throw new IllegalArgumentException(); 
-        }
-        return buffer.array();
     }
     
     /**
@@ -157,20 +118,58 @@ public class DataBuffer implements Validatable {
         buffer.get(str);
         return new String(str,"utf-8");
     }
+    
+        /**
+     *
+     * @return
+     */
+    public boolean isValid() {
+        return (buffer != null);
+    }
+    
+    /**
+     *
+     * @return
+     */
+    public ByteBuffer getBuffer() {
+        return buffer;
+    }
+    
+    /**
+     *
+     * @return
+     */
+    public int getSize() {
+        if (!isValid()) {
+            return 0; 
+        }
+        return buffer.capacity();
+    }
+    
+    /**
+     *
+     * @return
+     */
+    public byte[] getBytes() {
+        if (buffer == null) {
+            throw new IllegalArgumentException(); 
+        }
+        return buffer.array();
+    }
        
-    public int getCurrDataLength() {
+    public int getDataLength() {
         return currDataLength;
     }
 
-    public void setCurrDataLength(int currDataLength) {
+    public void setDataLength(int currDataLength) {
         this.currDataLength = currDataLength;
     }
     
-    public int getCurrDataOffset() {
+    public int getDataOffset() {
         return currDataOffset;
     }
 
-    public void setCurrDataOffset(int currDataOffset) {
+    public void setDataOffset(int currDataOffset) {
         this.currDataOffset = currDataOffset;
     }
     

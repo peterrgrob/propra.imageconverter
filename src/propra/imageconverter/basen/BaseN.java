@@ -1,7 +1,10 @@
-package propra.imageconverter.data;
+package propra.imageconverter.basen;
 
 import java.nio.ByteBuffer;
-import propra.imageconverter.util.Utility;
+import propra.imageconverter.data.DataBuffer;
+import propra.imageconverter.data.DataFormat;
+import propra.imageconverter.data.DataTranscoder;
+import propra.imageconverter.data.Utility;
 
 /**
  * Klasse für allgemeine Base-N Kodierung, die Parametrisierung erfolgt
@@ -15,7 +18,7 @@ public class BaseN implements DataTranscoder {
     public static String BASE_32_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUV";
     
     // Datenformat 
-    private DataFormat format;
+    private final DataFormat format;
     
     
     /**
@@ -36,7 +39,7 @@ public class BaseN implements DataTranscoder {
     }
 
     @Override
-    public long transcode(Operation op, DataBuffer in, DataBuffer out) {
+    public long apply(Operation op, DataBuffer in, DataBuffer out) {
         if( !isValid()
         ||  in == null
         ||  out == null) {
@@ -64,7 +67,6 @@ public class BaseN implements DataTranscoder {
      *
      * @return
      */
-    @Override
     public boolean isValid() {
         return true;
     }
@@ -85,14 +87,14 @@ public class BaseN implements DataTranscoder {
         int blockLength = format.getBlockLength();
         
         // Zeichen iterieren und dekodieren
-        while(charCtr < in.getCurrDataLength()) {
+        while(charCtr < in.getDataLength()) {
             
             // Anzahl der Zeichen pro Byteblock
             charCount = format.getCharLength();
             
             // Bei einem Endblock die Größe anpassen
-            if(charCtr + blockLength >= in.getCurrDataLength()) {
-                charCount = in.getCurrDataLength() - charCtr;
+            if(charCtr + blockLength >= in.getDataLength()) {
+                charCount = in.getDataLength() - charCtr;
             }
             
             // Zeichen in Bitblöcke dekodieren
@@ -106,7 +108,7 @@ public class BaseN implements DataTranscoder {
         
         // Ausgabepuffer setzen
         out.getBuffer().rewind();
-        out.setCurrDataLength(byteCtr);
+        out.setDataLength(byteCtr);
         
         return byteCtr;
     }
@@ -123,7 +125,7 @@ public class BaseN implements DataTranscoder {
         int byteOffset = 0;
         int byteCount = 0;
         int blockLength = format.getBlockLength();
-        int totalBits = in.getCurrDataLength() << 3;
+        int totalBits = in.getDataLength() << 3;
 
         DataBuffer charBuffer = new DataBuffer(8);
         ByteBuffer inBuffer = in.getBuffer();
@@ -144,13 +146,13 @@ public class BaseN implements DataTranscoder {
         }
 
         // Über Bitblöcke iterieren und kodieren
-        while(byteOffset < in.getCurrDataLength()) {
+        while(byteOffset < in.getDataLength()) {
             
             byteCount = blockLength;
                     
             // Endblock?
-            if(byteOffset + blockLength > in.getCurrDataLength()) {
-                byteCount = in.getCurrDataLength() - byteOffset;
+            if(byteOffset + blockLength > in.getDataLength()) {
+                byteCount = in.getDataLength() - byteOffset;
             }
             
             // Bitblöcke in Zeichen umwandeln
@@ -162,12 +164,12 @@ public class BaseN implements DataTranscoder {
             // In Ausgabe kopieren
             outBuffer.put(charBuffer.getBytes(), 
                         0, 
-                        charBuffer.getCurrDataLength());
+                        charBuffer.getDataLength());
 
             byteOffset += byteCount;
         }
         
-        out.setCurrDataLength(outBuffer.position());
+        out.setDataLength(outBuffer.position());
         outBuffer.rewind();
 
         return outBuffer.position();
@@ -267,14 +269,14 @@ public class BaseN implements DataTranscoder {
         
         // Puffer aktualisieren
         out.getBuffer().rewind();
-        out.setCurrDataLength(characterCount);
+        out.setDataLength(characterCount);
     }
     
     /**
      * 
      * @param dataFormat 
      */
-    public void setDataFormat(DataFormat dataFormat) {
+    public void dataFormat(DataFormat dataFormat) {
         
     }
 
@@ -283,7 +285,7 @@ public class BaseN implements DataTranscoder {
      * @return
      */
     @Override
-    public DataFormat getDataFormat() {
+    public DataFormat dataFormat() {
         return format;
     }
 }

@@ -1,7 +1,6 @@
 package propra.imageconverter.image;
 
 import propra.imageconverter.data.DataBuffer;
-import propra.imageconverter.data.DataFormat;
 import propra.imageconverter.data.DataTranscoder;
 
 /**
@@ -29,9 +28,9 @@ public abstract class ImageTranscoder implements DataTranscoder {
     }
     
     @Override
-    public long transcode(  Operation op,
-                            DataBuffer in,
-                            DataBuffer out) {
+    public long apply(  Operation op,
+                        DataBuffer in,
+                        DataBuffer out) {
         if( in == null 
         ||  out == null
         ||  !isValid()) {
@@ -40,9 +39,6 @@ public abstract class ImageTranscoder implements DataTranscoder {
         
         // Operation delegieren
         switch(op) {
-            case PASS -> {
-                return _pass(in, out);
-            }
             case ENCODE -> {
                 return _encode(in, out);
             }
@@ -58,7 +54,6 @@ public abstract class ImageTranscoder implements DataTranscoder {
      *
      * @return
      */
-    @Override
     public boolean isValid() {
         return true;
     }
@@ -94,7 +89,7 @@ public abstract class ImageTranscoder implements DataTranscoder {
         out.getBuffer().clear();
         
         // Anzahl der dekodierten Bytes setzen und zurückgeben
-        out.setCurrDataLength(in.getSize());        
+        out.setDataLength(in.getSize());        
         return in.getSize();
     }
     

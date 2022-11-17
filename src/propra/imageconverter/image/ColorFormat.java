@@ -76,13 +76,13 @@ public class ColorFormat extends DataFormat implements Comparable<ColorFormat> {
         byte[] outBytes = output.getBytes();
         byte r,g,b;
                 
-        int srcOffset = input.getCurrDataOffset();
-        int dstOffset = output.getCurrDataOffset();
+        int srcOffset = input.getDataOffset();
+        int dstOffset = output.getDataOffset();
         
         int[] srcMap = srcFormat.getMapping();
         int[] dstMap = dstFormat.getMapping();
         
-        for (int i=0; i<input.getCurrDataLength(); i+=3) {
+        for (int i=0; i<input.getDataLength(); i+=3) {
             int sIndex = srcOffset + i;
             int dIndex = dstOffset + i;
             
@@ -121,11 +121,11 @@ public class ColorFormat extends DataFormat implements Comparable<ColorFormat> {
     public void setMapping(int id, int newId) {
         mapping[id] = newId;
     }
-
+    
     public int getMapping(int id) {
         return mapping[id];
     }
-
+    
     public int[] getMapping() {
         return mapping;
     }

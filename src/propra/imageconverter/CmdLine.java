@@ -1,5 +1,5 @@
 package propra.imageconverter;
-import propra.imageconverter.data.BaseN;
+import propra.imageconverter.basen.BaseN;
 import propra.imageconverter.data.DataFormat;
 import java.util.HashMap;
 import propra.imageconverter.image.ColorFormat;
