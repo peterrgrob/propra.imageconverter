@@ -38,13 +38,14 @@ public class ImageTask {
             throw new IllegalArgumentException();
         }
         
+        // Readerobjekt erstellen
         inReader = createImageReader(   cmd.getOption(CmdLine.Options.INPUT_FILE), 
-                                        cmd.getOptionExtension(CmdLine.Options.INPUT_FILE));
+                                        cmd.getExtension(CmdLine.Options.INPUT_FILE));
         if(inReader == null) {
             throw new IOException("Nicht unterstütztes Bildformat.");
         }
        
-        // Verzeichnisse und Datei erstellen, falls nötig
+        // Verzeichnisse und Datei für die Ausgabe erstellen, falls nötig
         String outPath = cmd.getOption(CmdLine.Options.OUTPUT_FILE);  
         Path outDirs = Paths.get(outPath);
         Files.createDirectories(outDirs.getParent());
@@ -55,7 +56,7 @@ public class ImageTask {
         
         // Ausgabeobjekt erstellen
         outWriter = createImageWriter(  cmd.getOption(CmdLine.Options.OUTPUT_FILE),
-                                        cmd.getOptionExtension(CmdLine.Options.OUTPUT_FILE));
+                                        cmd.getExtension(CmdLine.Options.OUTPUT_FILE));
         if(outWriter == null) {
             throw new IOException("Nicht unterstütztes Bildformat.");
         }
@@ -75,7 +76,7 @@ public class ImageTask {
         }
         
         begin();
-        process();
+            process();
         end(); 
     }
     
@@ -84,7 +85,7 @@ public class ImageTask {
      * @return 
      * @throws IOException
      */
-    private ImageHeader begin() throws IOException {
+    private void begin() throws IOException {
         if(!isValid()) {
             throw new IllegalStateException();
         }
@@ -95,8 +96,6 @@ public class ImageTask {
         // Bildkompression setzen und Bildkopf in Ausgabedatei schreiben
         inHeader.colorFormat().encoding(outEncoding);
         outWriter.writeHeader(inHeader);
-        
-        return inHeader;
     }
     
     /**
@@ -110,7 +109,6 @@ public class ImageTask {
 
         // Datenblock für blockweise Übertragung erstellen
         ByteBuffer block = ByteBuffer.allocate(inReader.getBlockSize());
-        ColorFormat inFormat = inReader.getHeader().colorFormat();
         
         // Blockweise Übertragung starten
         inReader.begin();

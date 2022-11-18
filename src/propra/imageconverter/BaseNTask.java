@@ -19,6 +19,9 @@ public class BaseNTask {
     private DataReader reader;
     private DataWriter writer;
     
+    /**
+     * 
+     */
     public BaseNTask() {
         reader = null;
         writer = null;
@@ -34,13 +37,11 @@ public class BaseNTask {
             throw new IllegalArgumentException();
         }
         
-        BaseNFormat dataFormat = null;
-        
         // Ausgabedatei Pfad ableiten
         String outPath = cmd.getOption(CmdLine.Options.INPUT_FILE);      
         
         // Datenformat ableiten
-        dataFormat = cmd.getBaseNDataFormat();            
+        BaseNFormat dataFormat = cmd.getBaseNDataFormat();            
             
         // Ausgabeendung ableiten
         String outExt;
@@ -50,7 +51,7 @@ public class BaseNTask {
             outExt = ".base-n";
         }
         
-        // Pfad anpassen
+        // Pfad für die Ausgabedatei anpassen
         if(cmd.isBaseNDecode()) {
             outPath = outPath.replaceAll(outExt, "");  
         } else {    

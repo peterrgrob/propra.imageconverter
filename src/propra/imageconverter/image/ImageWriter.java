@@ -17,6 +17,7 @@ public class ImageWriter extends DataWriter {
     protected ByteBuffer writeBuffer;
     protected long contentTransfered;
     protected ImageHeader header;
+    protected ColorFormat readColorFormat;
     protected ColorFormat writeColorFormat;
 
     // Farbverarbeitung
@@ -34,6 +35,7 @@ public class ImageWriter extends DataWriter {
         BLOCK_SIZE = 1024 * 4096 * 3;
         this.writeBuffer = ByteBuffer.allocate(BLOCK_SIZE);
         writeColorFormat = new ColorFormat();
+        readColorFormat = new ColorFormat();
     }
     
     /**
@@ -42,7 +44,8 @@ public class ImageWriter extends DataWriter {
      * @throws IOException 
      */
     public void writeHeader(ImageHeader srcHeader) throws IOException {
-        srcHeader = new ImageHeader(header);
+        header = new ImageHeader(srcHeader);
+        readColorFormat = srcHeader.colorFormat();
     }
     
     /**
@@ -57,6 +60,10 @@ public class ImageWriter extends DataWriter {
         encoder = header.colorFormat().createTranscoder();
         if(encoder != null) {
             encoder.begin(header.colorFormat());
+        }
+        
+        if(checksumObj != null) {
+            checksumObj.begin();
         }
         
         contentTransfered = 0;
@@ -74,14 +81,16 @@ public class ImageWriter extends DataWriter {
         || buffer == null) {
             throw new IllegalArgumentException();
         }
-        
-        // Farbkonvertierung
-        if(!header.colorFormat().equals(writeColorFormat)) {
-            ColorFormat.convertColorBuffer(buffer, header.colorFormat(), 
-                                            buffer, writeColorFormat);
-        }
 
         ByteBuffer tmpBuffer = buffer;
+        
+        // Unterschiedliche Farbformate?
+        if(!readColorFormat.equals(writeColorFormat)) {
+
+            // Farben konvertieren
+            ColorFormat.convertColorBuffer( buffer, readColorFormat, 
+                                            buffer, writeColorFormat);
+        }
         
         // Kompression erforderlich?
         if(encoder != null) {

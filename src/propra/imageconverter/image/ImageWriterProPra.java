@@ -35,13 +35,14 @@ public class ImageWriterProPra extends ImageWriter {
             throw new IllegalArgumentException();
         }
         
+        super.writeHeader(srcHeader);
+        
         // DataBuffer für Header erstellen
         ByteBuffer byteBuffer = ByteBuffer.allocate(ImageReaderProPra.PROPRA_HEADER_SIZE);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         
         // ProPra spezifisches RBG Farbmapping setzen
-        header = new ImageHeader(srcHeader);
-        header.colorFormat(writeColorFormat);
+        header.colorFormat().setMapping(writeColorFormat.getMapping());
         
         // Headerfelder in ByteBuffer schreiben
         DataFormat.putStringToByteBuffer(byteBuffer, 0, ImageReaderProPra.PROPRA_VERSION);

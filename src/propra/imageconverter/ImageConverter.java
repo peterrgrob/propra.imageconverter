@@ -28,11 +28,6 @@ public class ImageConverter {
             // Komandozeilenparameter parsen.
             CmdLine cmdLine = new CmdLine(args);
             
-            // Ein- und Ausgabedateipfad auf der Konsole ausgeben
-            System.out.println("Dateien:");
-            System.out.println(cmdLine.getOption(CmdLine.Options.INPUT_FILE));
-            System.out.println(cmdLine.getOption(CmdLine.Options.OUTPUT_FILE));
-            
             // Klasseninstanz erstellen und task starten
             ImageConverter converter = new ImageConverter(); 
             if(cmdLine.isBaseTask()) {
@@ -64,12 +59,15 @@ public class ImageConverter {
      */
     public void doImageTask(CmdLine cmdLine) throws FileNotFoundException, 
                                                     IOException {      
-        // Konvertierung ausführen
-        /*ImageTask op = new ImageTask();
-        op.initialize(cmdLine);
-        op.convert();*/
+        // Ein- und Ausgabedateipfad auf der Konsole ausgeben
+        System.out.println("Dateien:");
+        System.out.println(cmdLine.getOption(CmdLine.Options.INPUT_FILE));
+        System.out.println(cmdLine.getOption(CmdLine.Options.OUTPUT_FILE));
+        
         ImageTask op = new ImageTask(cmdLine);
         op.convert();
+        
+        // Info ausgeben
         System.out.println(op.toString());
     }   
     
@@ -81,9 +79,15 @@ public class ImageConverter {
      */
     public void doBaseNTask(CmdLine cmdLine) throws FileNotFoundException, 
                                                     IOException {    
+        // Eingabedateipfad auf der Konsole ausgeben
+        System.out.println("Dateien:");
+        System.out.println(cmdLine.getOption(CmdLine.Options.INPUT_FILE));
+        
         // BaseN Kodierung ausführen
         BaseNTask op = new BaseNTask(cmdLine);
         op.doTask();   
+        
+        // Info ausgeben
         System.out.println(op.toString());
     } 
 }

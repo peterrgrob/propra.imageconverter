@@ -96,7 +96,7 @@ import propra.imageconverter.image.ColorFormat;
      * @param opt
      * @return
      */
-    public String getOptionExtension(Options opt) {
+    public String getExtension(Options opt) {
         return getExtension(getOption(opt));
     }
     
@@ -120,21 +120,28 @@ import propra.imageconverter.image.ColorFormat;
     public BaseNFormat getBaseNDataFormat() {
         String alphabet = null;
         
-        // Alphabet setzen
+        // Alphabet wählen
         if( options.containsKey(Options.ENCODE_BASE_32)
         ||  options.containsKey(Options.DECODE_BASE_32)) {
+            
             alphabet = BaseN.BASE_32_ALPHABET;
+            
         } else if(  options.containsKey(Options.DECODE_BASE_N)) {
-            // Alphabet wird aus Datei geladen
+            
+            // Leeres Alphabet, wird später aus Datei geladen
             return new BaseNFormat();
+            
         }else if(  options.containsKey(Options.ENCODE_BASE_N)) {
+            
+            // Von der Kommandozeile übernhemen
             alphabet = options.get(Options.ENCODE_BASE_N);
             if(alphabet == null) {
                throw new IllegalArgumentException("Ungültiges Alphabet für Base-N Kodierung.");
             }
+            
         }  
         
-        // DataFormat Objekt zurückgeben
+        // Format Objekt zurückgeben
         return new BaseNFormat(alphabet);
     }
     

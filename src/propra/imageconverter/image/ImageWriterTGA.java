@@ -29,19 +29,19 @@ public class ImageWriterTGA extends ImageWriter {
      * @param srcHeader
      * @throws java.io.IOException
      */
+    @Override
     public void writeHeader(ImageHeader srcHeader) throws IOException {
         if(srcHeader.isValid() == false) {
             throw new IllegalArgumentException();
         }
         
+        super.writeHeader(srcHeader);
+        header.colorFormat().setMapping(writeColorFormat.getMapping());
+                
         // DataBuffer für Header erstellen
         ByteBuffer byteBuffer = ByteBuffer.allocate(ImageReaderTGA.TGA_HEADER_SIZE);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-        
-        // Header speichern für blockweise Verarbeitung der Bilddaten
-        header = new ImageHeader(srcHeader);
-        header.colorFormat(writeColorFormat);
-        
+                
         // Headerfelder in Buffer schreiben
         byteBuffer.put(ImageReaderTGA.TGA_HEADER_OFFSET_ENCODING, 
                         (byte)2);

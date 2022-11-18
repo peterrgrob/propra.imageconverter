@@ -1,7 +1,6 @@
 package propra.imageconverter.image;
 
 import java.nio.ByteBuffer;
-import propra.imageconverter.data.DataFormat;
 
 /**
  *
@@ -67,7 +66,6 @@ public class ImageTranscoderRLE extends ImageTranscoder {
                 
                 // Gleiche Farben im Eingabepuffer überspringen
                 in.position(in.position() + (rleCtr - 1) * colorSize);
-                rleCtr = 0;
                 
             } else {
                 
@@ -99,7 +97,7 @@ public class ImageTranscoderRLE extends ImageTranscoder {
         out.limit(out.position());  
         
         // Positionszeiger zurücksetzen
-        out.clear();
+        out.rewind();
               
         return out.limit();
     }
@@ -153,7 +151,7 @@ public class ImageTranscoderRLE extends ImageTranscoder {
         }
         
         // Positionszeiger zurücksetzen
-        out.clear();
+        out.rewind();
         
         // Anzahl der dekodierten Bytes setzen und zurückgeben
         out.limit(decodedBytes);        
