@@ -3,9 +3,8 @@ package propra.imageconverter.image;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import propra.imageconverter.data.DataBuffer;
 import propra.imageconverter.data.DataFormat;
-import propra.imageconverter.data.Utility;
+
 
 /**
  *
@@ -30,7 +29,7 @@ public class ImageReaderTGA extends ImageReader {
      *
      * @param stream
      */
-    public ImageReaderTGA(String file, DataFormat.Mode mode) throws IOException {
+    public ImageReaderTGA(String file, DataFormat.IOMode mode) throws IOException {
         super(file, mode);
         formatHeaderSize = TGA_HEADER_SIZE;   
     }
@@ -42,28 +41,27 @@ public class ImageReaderTGA extends ImageReader {
      */
     public ImageHeader readHeader() throws IOException {
         
-        // Buffer für Header erstellen
-        DataBuffer data = new DataBuffer(formatHeaderSize);
-        ByteBuffer byteBuffer = data.getBuffer();
-        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+        // DataBuffer für Header erstellen       
+        ByteBuffer bytes = ByteBuffer.allocate(formatHeaderSize);
+        bytes.order(ByteOrder.LITTLE_ENDIAN);
        
         // Headerbytes von Stream einlesen
-        read(data, 0, formatHeaderSize);
+        read(bytes, 0, formatHeaderSize);
         
         // Headerfelder konvertieren
         ImageHeader newHeader = new ImageHeader();
-        newHeader.width(byteBuffer.getShort(TGA_HEADER_OFFSET_WIDTH));
-        newHeader.height(byteBuffer.getShort(TGA_HEADER_OFFSET_HEIGHT));
-        newHeader.pixelSize(byteBuffer.get(TGA_HEADER_OFFSET_BPP) >> 3); 
+        newHeader.width(bytes.getShort(TGA_HEADER_OFFSET_WIDTH));
+        newHeader.height(bytes.getShort(TGA_HEADER_OFFSET_HEIGHT));
+        newHeader.pixelSize(bytes.get(TGA_HEADER_OFFSET_BPP) >> 3); 
         
         // Kompression prüfen
-        byte compression = byteBuffer.get(TGA_HEADER_OFFSET_ENCODING);
+        byte compression = bytes.get(TGA_HEADER_OFFSET_ENCODING);
         switch (compression) {
             case TGA_HEADER_ENCODING_RLE:
-                newHeader.colorFormat().setEncoding(DataFormat.Encoding.RLE);
+                newHeader.colorFormat().encoding(DataFormat.Encoding.RLE);
                 break;
             case TGA_HEADER_ENCODING_NONE:
-                newHeader.colorFormat().setEncoding(DataFormat.Encoding.NONE);            
+                newHeader.colorFormat().encoding(DataFormat.Encoding.NONE);            
                 break;
             default:
                 throw new UnsupportedOperationException("Nicht unterstützte TGA Kompression!");
@@ -71,9 +69,9 @@ public class ImageReaderTGA extends ImageReader {
         
         // Prüfe tga Spezifikationen
         if(newHeader.isValid() == false
-        || !Utility.checkBit(byteBuffer.get(TGA_HEADER_OFFSET_ORIGIN), (byte)6)
-        || Utility.checkBit(byteBuffer.get(TGA_HEADER_OFFSET_ORIGIN), (byte)5)
-        || byteBuffer.get(0) != 0) {
+        || !DataFormat.checkBit(bytes.get(TGA_HEADER_OFFSET_ORIGIN), (byte)6)
+        || DataFormat.checkBit(bytes.get(TGA_HEADER_OFFSET_ORIGIN), (byte)5)
+        || bytes.get(0) != 0) {
             throw new UnsupportedOperationException("Ungültiges TGA Dateiformat!");
         }
         

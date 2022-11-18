@@ -6,8 +6,8 @@ import java.io.Closeable;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import propra.imageconverter.data.DataFormat.Mode;
-import propra.imageconverter.image.ImageHeader;
+import java.nio.ByteBuffer;
+import propra.imageconverter.data.DataFormat.IOMode;
 
 /**
  *
@@ -15,7 +15,7 @@ import propra.imageconverter.image.ImageHeader;
  */
 public class DataReader implements Closeable {
     
-    private final Mode mode;
+    private final IOMode ioMode;
     protected RandomAccessFile binaryReader;
     protected BufferedReader txtReader;
     protected Checksum checksumObj; 
@@ -26,9 +26,9 @@ public class DataReader implements Closeable {
      * @param mode
      * @throws IOException 
      */
-    public DataReader(String file, Mode mode) throws IOException {
-        this.mode = mode;
-        if(mode == Mode.BINARY) {
+    public DataReader(String file, IOMode mode) throws IOException {
+        this.ioMode = mode;
+        if(mode == IOMode.BINARY) {
             binaryReader = createBinaryReader(file);
         } else {
             txtReader = createTextReader(file);
@@ -39,8 +39,8 @@ public class DataReader implements Closeable {
      * 
      * @return 
      */
-    public Mode getMode() {
-        return mode;
+    public IOMode getMode() {
+        return ioMode;
     }
     
     /**
@@ -68,8 +68,8 @@ public class DataReader implements Closeable {
      * @return
      * @throws IOException 
      */
-    public int read(DataBuffer buffer) throws IOException {
-        return read(buffer, 0, buffer.getDataLength());
+    public int read(ByteBuffer buffer) throws IOException {
+        return read(buffer, 0, buffer.limit());
     }
     
     /**
@@ -80,17 +80,17 @@ public class DataReader implements Closeable {
      * @return
      * @throws IOException 
      */
-    public int read(DataBuffer buffer, int offset, int len) throws IOException {
+    public int read(ByteBuffer buffer, int offset, int len) throws IOException {
         if(!isValid()
         ||  buffer == null) {
             throw new IllegalStateException();
         }
         
-        if(mode == Mode.BINARY) {
-            binaryReader.read( buffer.getBytes(), 
+        if(ioMode == IOMode.BINARY) {
+            binaryReader.read( buffer.array(), 
                                 offset, 
                                 len);
-            buffer.setDataLength(len);
+            buffer.limit(len);
         } else {
             throw new UnsupportedOperationException("");
         }
@@ -104,7 +104,7 @@ public class DataReader implements Closeable {
      * @throws IOException 
      */
     public String readLine() throws IOException {
-        if(mode == Mode.BINARY) {
+        if(ioMode == IOMode.BINARY) {
             return binaryReader.readLine();
         } else {
             return txtReader.readLine();
@@ -117,7 +117,7 @@ public class DataReader implements Closeable {
      * @throws java.io.IOException
      */
     public long getSize() throws IOException {
-        if(mode == Mode.BINARY) {
+        if(ioMode == IOMode.BINARY) {
             return binaryReader.length();
         } else {
             throw new UnsupportedOperationException("");
@@ -131,40 +131,12 @@ public class DataReader implements Closeable {
      * @throws IOException
      */
     public boolean hasMoreData() throws IOException {
-        if(mode == mode.BINARY) {
+        if(ioMode == ioMode.BINARY) {
             return (binaryReader.length() < binaryReader.getFilePointer());
         } 
         return false;
     }
     
-    /**
-     * 
-     * @return 
-     */
-    public boolean isValid() {
-        return true;
-    }
-    
-    /**
-     * 
-     * @param filePath
-     * @return
-     * @throws IOException 
-     */
-    private BufferedReader createTextReader(String filePath) throws IOException {
-        return new BufferedReader(new FileReader(filePath)); 
-    }
-    
-    /**
-     * 
-     * @param filePath
-     * @return
-     * @throws IOException 
-     */
-    private RandomAccessFile createBinaryReader(String filePath) throws IOException {
-        return new RandomAccessFile(filePath, "rw");
-    }
-
     /**
      *
      * @throws IOException
@@ -180,6 +152,18 @@ public class DataReader implements Closeable {
     }
     
     /**
+     * 
+     * @return 
+     */
+    public boolean isValid() {
+        if(ioMode == ioMode.BINARY) {
+            return binaryReader != null;
+        } else {
+            return txtReader != null;
+        }
+    }
+    
+        /**
      *
      * @return
      */
@@ -202,12 +186,32 @@ public class DataReader implements Closeable {
      *
      * @param bytes
      */
-    protected void updateChecksum(DataBuffer bytes) {
+    protected void updateChecksum(ByteBuffer bytes) {
         if (bytes == null ) {
             throw new IllegalArgumentException();
         }
         if(checksumObj != null) {
             checksumObj.apply(bytes);
         }
+    }
+    
+    /**
+     * 
+     * @param filePath
+     * @return
+     * @throws IOException 
+     */
+    private static BufferedReader createTextReader(String filePath) throws IOException {
+        return new BufferedReader(new FileReader(filePath)); 
+    }
+    
+    /**
+     * 
+     * @param filePath
+     * @return
+     * @throws IOException 
+     */
+    private static RandomAccessFile createBinaryReader(String filePath) throws IOException {
+        return new RandomAccessFile(filePath, "rw");
     }
 }

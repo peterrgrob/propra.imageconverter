@@ -1,11 +1,11 @@
 package propra.imageconverter.basen;
 
 import java.io.IOException;
-import propra.imageconverter.data.DataBuffer;
+import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataFormat;
-import propra.imageconverter.data.DataFormat.Mode;
+import propra.imageconverter.data.DataFormat.IOMode;
 import propra.imageconverter.data.DataReader;
-import propra.imageconverter.data.DataTranscoder;
+import propra.imageconverter.data.IDataTranscoder;
 
 /**
  *
@@ -14,7 +14,7 @@ import propra.imageconverter.data.DataTranscoder;
 public class BaseNReader extends DataReader {
     
     private final BaseN decoder;
-    private final DataFormat format;
+    private final BaseNFormat format;
     
     /**
      * 
@@ -22,8 +22,8 @@ public class BaseNReader extends DataReader {
      * @param format
      * @throws IOException 
      */
-    public BaseNReader(String file, DataFormat format) throws IOException {
-        super(file, Mode.BINARY);
+    public BaseNReader(String file, BaseNFormat format) throws IOException {
+        super(file, IOMode.BINARY);
         this.format = format;
         decoder = new BaseN(this.format);
     }
@@ -35,39 +35,39 @@ public class BaseNReader extends DataReader {
      * @throws IOException
      */
     @Override
-    public int read(DataBuffer buffer) throws IOException {
+    public int read(ByteBuffer buffer) throws IOException {
         if(!isValid()
         ||  buffer == null) {
             throw new IllegalStateException();
         }
         
-        buffer.setDataLength(buffer.getSize());
+        buffer.limit(buffer.capacity());
             
         // Alphabet vorhanden?
         if(decoder.dataFormat().getAlphabet().length() == 0) {
             // Alphabet aus Datei einlesen und DatenFormat ableiten
             String alphabet = binaryReader.readLine();
             decoder.dataFormat().setEncoding(alphabet);
-            buffer.setDataLength(buffer.getSize() - alphabet.length() - 1);
+            buffer.limit(buffer.capacity() - alphabet.length() - 1);
         }
             
         // Daten einlesen
-        binaryReader.read(buffer.getBytes(), 0, buffer.getDataLength());
+        binaryReader.read(buffer.array(), 0, buffer.limit());
 
         // In temporären Puffer dekodieren
-        DataBuffer decodeBuffer = new DataBuffer(buffer.getSize());
-        decoder.apply(  DataTranscoder.Operation.DECODE, 
+        ByteBuffer decodeBuffer = ByteBuffer.allocate(buffer.capacity());
+        decoder.apply(IDataTranscoder.Operation.DECODE, 
                             buffer, 
                             decodeBuffer);
 
         // In Ausgabepuffer kopieren
-        buffer.getBuffer().put( 0, 
-                                decodeBuffer.getBytes(), 
-                                0, 
-                                decodeBuffer.getDataLength());
+        buffer.put( 0, 
+                    decodeBuffer.array(), 
+                    0, 
+                    decodeBuffer.limit());
 
-        buffer.setDataLength(decodeBuffer.getDataLength());
+        buffer.limit(decodeBuffer.limit());
         
-        return buffer.getDataLength();
+        return buffer.limit();
     }
 }

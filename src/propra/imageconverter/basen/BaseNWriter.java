@@ -1,11 +1,11 @@
 package propra.imageconverter.basen;
 
 import java.io.IOException;
-import propra.imageconverter.data.DataBuffer;
+import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataFormat;
-import propra.imageconverter.data.DataFormat.Mode;
-import propra.imageconverter.data.DataTranscoder;
+import propra.imageconverter.data.DataFormat.IOMode;
 import propra.imageconverter.data.DataWriter;
+import propra.imageconverter.data.IDataTranscoder;
 
 /**
  *
@@ -14,7 +14,7 @@ import propra.imageconverter.data.DataWriter;
 public class BaseNWriter extends DataWriter {
     
     private final BaseN encoder;
-    private final DataFormat format;
+    private final BaseNFormat format;
     
     /**
      * 
@@ -22,8 +22,8 @@ public class BaseNWriter extends DataWriter {
      * @param format
      * @throws IOException 
      */
-    public BaseNWriter(String file, DataFormat format) throws IOException {
-        super(file, Mode.TEXT);
+    public BaseNWriter(String file, BaseNFormat format) throws IOException {
+        super(file, IOMode.TEXT);
         this.format = format;
         encoder = new BaseN(format);
     }
@@ -35,25 +35,25 @@ public class BaseNWriter extends DataWriter {
      * @throws IOException
      */
     @Override
-    public int write(DataBuffer buffer) throws IOException {
+    public int write(ByteBuffer buffer) throws IOException {
         if(!isValid()) {
             throw new IllegalStateException();
         }
         
         // Daten kodieren
-        DataBuffer encodeBuffer = new DataBuffer();
-        encoder.apply(  DataTranscoder.Operation.ENCODE, 
+        ByteBuffer encodeBuffer = ByteBuffer.allocate(0);
+        encoder.apply(IDataTranscoder.Operation.ENCODE, 
                             buffer, 
                             encodeBuffer);
 
         // Alphabet in Datei schreiben
-        if(format.isBaseN()) {
+        if(format.encoding() == DataFormat.Encoding.BASEN) {
             txtWriter.write(encoder.dataFormat().getAlphabet() + "\n");
         }
 
         // Zeichen in Datei schreiben
         writeBinaryToTextFile(encodeBuffer);
         
-        return encodeBuffer.getDataLength();
+        return encodeBuffer.limit();
     }
 }

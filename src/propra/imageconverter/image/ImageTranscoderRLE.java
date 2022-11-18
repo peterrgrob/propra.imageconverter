@@ -1,7 +1,6 @@
 package propra.imageconverter.image;
 
 import java.nio.ByteBuffer;
-import propra.imageconverter.data.DataBuffer;
 import propra.imageconverter.data.DataFormat;
 
 /**
@@ -46,65 +45,63 @@ public class ImageTranscoderRLE extends ImageTranscoder {
      * @return
      */
     @Override
-    protected long _encode(DataBuffer in, DataBuffer out) {
+    protected long _encode(ByteBuffer in, ByteBuffer out) {
         byte[] color = new byte[3];
-        ByteBuffer inBytes = in.getBuffer();
-        ByteBuffer outBytes = out.getBuffer();
         int colorSize = 3;
         int rawCounter = 0;
            
         // Über Bytes iterieren und gemäß RLE verarbeiten
-        while(inBytes.position() < in.getDataLength()) {
+        while(in.position() < in.limit()) {
          
             // Anzahl gleicher Farben zählen
-            int rleCtr = countRleColor(in.getBuffer(), in.getDataLength());
+            int rleCtr = countRleColor(in, in.limit());
             if(rleCtr > 1) {
                 
                 // RLE Block verarbeiten
                 // Farbwert speichern
-                inBytes.get(color);
+                in.get(color);
                 
                 // Paketkopf und Farbwert schreiben
-                outBytes.put((byte)(127 + rleCtr));
-                outBytes.put(color);
+                out.put((byte)(127 + rleCtr));
+                out.put(color);
                 
                 // Gleiche Farben im Eingabepuffer überspringen
-                in.skipBytes((rleCtr - 1) * colorSize);
+                in.position(in.position() + (rleCtr - 1) * colorSize);
                 rleCtr = 0;
                 
             } else {
                 
                 // Raw Block verarbeiten
-                int headerPosition = outBytes.position();
+                int headerPosition = out.position();
                 
                 // Paketkopfbyte überspringen 
-                out.skipBytes(1);
+                out.position(out.position() + 1);
                 
                 // Unterschiedliche Farben iterieren
-                while(!compareColor(inBytes.array(), 
-                                    inBytes.position(),
-                                    inBytes.position() + colorSize) && rawCounter <= 127) {
+                while(!compareColor(in.array(), 
+                                    in.position(),
+                                    in.position() + colorSize) && rawCounter <= 127) {
                     
                     // Farbe übertragen
-                    inBytes.get(color);
-                    outBytes.put(color);
+                    in.get(color);
+                    out.put(color);
                                     
                     rawCounter++;
                 }
                 
                 // Paketkopf speichern
-                outBytes.put(headerPosition, (byte)(rawCounter - 1));
+                out.put(headerPosition, (byte)(rawCounter - 1));
                 rawCounter = 0;
             }
         }
         
         // Anzahl der dekodierten Bytes setzen
-        out.setDataLength(outBytes.position());  
+        out.limit(out.position());  
         
         // Positionszeiger zurücksetzen
-        out.getBuffer().clear();
+        out.clear();
               
-        return out.getDataLength();
+        return out.limit();
     }
 
     /**
@@ -114,54 +111,52 @@ public class ImageTranscoderRLE extends ImageTranscoder {
      * @return
      */
     @Override
-    protected long _decode(DataBuffer in, DataBuffer out) {
+    protected long _decode(ByteBuffer in, ByteBuffer out) {
         byte[] color = new byte[3];
-        ByteBuffer inBytes = in.getBuffer();
-        ByteBuffer outBytes = out.getBuffer();
         
         // Über Bytes iterieren und gemäß RLE verarbeiten
-        while(inBytes.position() < in.getDataLength()) {
+        while(in.position() < in.limit()) {
             
             // Paketkopf und Wiederholungen einlesen
-            currentPacketHeader = inBytes.get() & 0xFF;
+            currentPacketHeader = in.get() & 0xFF;
             currentRepetitionCount = getRepetitionCount();
             
             // Anzahl der zu extrahierenden Bytes
             int currentBytes = currentRepetitionCount * 3;
 
             // Auf fehlerhafte Datenlänge prüfen
-            if(decodedBytes + currentBytes > outBytes.capacity()) {
+            if(decodedBytes + currentBytes > out.capacity()) {
                 throw new IllegalArgumentException("arg");
             }
             
             // RLE oder RAW Paket?
             if(isRlePacket()) {
                 // Farbwert lesen
-                inBytes.get(color);
+                in.get(color);
                 
                 // Farbwert in Ausgabebuffer schreiben
                 for(int i=0;i<currentRepetitionCount;i++) {
-                    outBytes.put(color);
+                    out.put(color);
                 }
                 
             } else {
                 // RAW Farben übertragen
-                inBytes.get(outBytes.array(), 
+                in.get(out.array(), 
                             decodedBytes, 
                             currentBytes);
                 
                 // Positionszeiger weiterschieben
-                out.skipBytes(currentBytes);
+                out.position(out.position() + currentBytes);
             }
             
             decodedBytes += currentBytes;
         }
         
         // Positionszeiger zurücksetzen
-        out.getBuffer().clear();
+        out.clear();
         
         // Anzahl der dekodierten Bytes setzen und zurückgeben
-        out.setDataLength(decodedBytes);        
+        out.limit(decodedBytes);        
         return decodedBytes;
     }
     
@@ -212,22 +207,5 @@ public class ImageTranscoderRLE extends ImageTranscoder {
         return (array[offset0 + 0] == array[offset1 + 0]
             &&  array[offset0 + 1] == array[offset1 + 1]
             &&  array[offset0 + 2] == array[offset1 + 2]);
-    }
-
-    /**
-     * 
-     * @param dataFormat 
-     */
-    @Override
-    public void dataFormat(DataFormat dataFormat) {
-    }
-
-    /**
-     * 
-     * @return 
-     */
-    @Override
-    public DataFormat dataFormat() {
-        return null;
     }
 }

@@ -1,10 +1,10 @@
 package propra.imageconverter.image;
 
 import java.io.IOException;
-import propra.imageconverter.data.DataBuffer;
+import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataFormat;
-import propra.imageconverter.data.DataTranscoder;
 import propra.imageconverter.data.DataWriter;
+import propra.imageconverter.data.IDataTranscoder;
 
 /**
  *
@@ -14,12 +14,12 @@ public class ImageWriter extends DataWriter {
     
     protected final int BLOCK_SIZE;
     protected int formatHeaderSize;
-    protected DataBuffer writeBuffer;
+    protected ByteBuffer writeBuffer;
     protected long contentTransfered;
     protected ImageHeader header;
+    protected ColorFormat writeColorFormat;
 
     // Farbverarbeitung
-    protected ImageFilterColor colorConverter; 
     protected ImageTranscoder encoder;    
 
 
@@ -29,11 +29,11 @@ public class ImageWriter extends DataWriter {
      * @param mode
      * @throws IOException 
      */
-    public ImageWriter(String file, DataFormat.Mode mode) throws IOException {
+    public ImageWriter(String file, DataFormat.IOMode mode) throws IOException {
         super(file, mode);
         BLOCK_SIZE = 1024 * 4096 * 3;
-        this.writeBuffer = new DataBuffer(BLOCK_SIZE);
-        colorConverter = new ImageFilterColor();
+        this.writeBuffer = ByteBuffer.allocate(BLOCK_SIZE);
+        writeColorFormat = new ColorFormat();
     }
     
     /**
@@ -53,11 +53,7 @@ public class ImageWriter extends DataWriter {
     public void begin() throws IOException {     
         super.begin();
         
-        // Format für die Konvertierung setzen
-        colorConverter.outFormat(header.colorFormat());
-        colorConverter.begin();
-        
-        // Enkoder erstellen
+        // Encoder erstellen
         encoder = header.colorFormat().createTranscoder();
         if(encoder != null) {
             encoder.begin(header.colorFormat());
@@ -73,22 +69,24 @@ public class ImageWriter extends DataWriter {
      * @throws java.io.IOException
      */
     @Override
-    public int write(DataBuffer buffer) throws IOException {
+    public int write(ByteBuffer buffer) throws IOException {
         if(!isValid() 
         || buffer == null) {
             throw new IllegalArgumentException();
         }
         
-        // Ausgabeformat für Konvertierung setzen und Block konvertieren
-        colorConverter.inFormat(header.colorFormat());
-        colorConverter.apply(buffer);   
-        
-        DataBuffer tmpBuffer = buffer;
+        // Farbkonvertierung
+        if(!header.colorFormat().equals(writeColorFormat)) {
+            ColorFormat.convertColorBuffer(buffer, header.colorFormat(), 
+                                            buffer, writeColorFormat);
+        }
+
+        ByteBuffer tmpBuffer = buffer;
         
         // Kompression erforderlich?
         if(encoder != null) {
             // Block komprimieren
-            encoder.apply( DataTranscoder.Operation.ENCODE, 
+            encoder.apply(IDataTranscoder.Operation.ENCODE, 
                                 buffer, 
                                 writeBuffer);
             tmpBuffer = writeBuffer;
@@ -98,11 +96,11 @@ public class ImageWriter extends DataWriter {
         updateChecksum(tmpBuffer); 
         
         // Block in Datei schreiben
-        write(tmpBuffer, 0, tmpBuffer.getDataLength());
+        write(tmpBuffer, 0, tmpBuffer.limit());
         
         // Anzahl der kodierten Bytes merken
-        contentTransfered += tmpBuffer.getDataLength();
-        return tmpBuffer.getDataLength();
+        contentTransfered += tmpBuffer.limit();
+        return tmpBuffer.limit();
     }
     
     /**
@@ -118,9 +116,6 @@ public class ImageWriter extends DataWriter {
             checksumObj.end();
             header.checksum(getChecksum());
         }
-        
-        // Farbkonvertierung abschließen
-        colorConverter.end(); 
         
         // Kompression abschließen
         if(encoder != null) {

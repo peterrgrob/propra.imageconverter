@@ -1,10 +1,12 @@
 package propra.imageconverter.data;
 
+import java.nio.ByteBuffer;
+
 /**
  *
  * @author pg
  */
-public interface DataTranscoder {
+public interface IDataTranscoder {
     
     public enum Operation {
         ENCODE,
@@ -26,23 +28,11 @@ public interface DataTranscoder {
      * @return Anzahl der kodierten Bytes
      */
     public long apply(  Operation op,
-                        DataBuffer in,
-                        DataBuffer out);
+                        ByteBuffer in,
+                        ByteBuffer out);
     
     /**
      *
      */
     public void end();
-    
-    /**
-     *
-     * @param dataFormat
-     */
-    public void dataFormat(DataFormat dataFormat);
-    
-    /**
-     *
-     * @return Aktuelles Daten Format
-     */
-    public DataFormat dataFormat();
 }

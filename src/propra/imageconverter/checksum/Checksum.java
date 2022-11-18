@@ -1,14 +1,14 @@
 package propra.imageconverter.checksum;
 
-import propra.imageconverter.data.DataBuffer;
-import propra.imageconverter.data.DataFilter;
+import java.nio.ByteBuffer;
+import propra.imageconverter.data.IDataFilter;
 
 /**
  * Basisklasse für Prüfsummen-Algorithmen
  * 
  * @author pg
  */
-public abstract class Checksum implements DataFilter {
+public abstract class Checksum implements IDataFilter {
 
     /**
      * Aktuelle Prüfsumme
@@ -51,7 +51,7 @@ public abstract class Checksum implements DataFilter {
      * @param buffer
      * @return
      */
-    public long check(DataBuffer buffer) {
+    public long check(ByteBuffer buffer) {
         begin();
         apply(buffer);
         end();
@@ -79,7 +79,7 @@ public abstract class Checksum implements DataFilter {
      * @return 
      */
     @Override
-    public abstract DataBuffer apply(DataBuffer in);
+    public abstract ByteBuffer apply(ByteBuffer in);
     
     /**
      *
@@ -88,7 +88,7 @@ public abstract class Checksum implements DataFilter {
      * @return 
      */
     @Override
-    public DataBuffer apply(DataBuffer in, DataBuffer out) {
+    public ByteBuffer apply(ByteBuffer in, ByteBuffer out) {
         return apply(in);
     }
 }

@@ -1,13 +1,13 @@
 package propra.imageconverter.image;
 
-import propra.imageconverter.data.DataBuffer;
-import propra.imageconverter.data.DataTranscoder;
+import java.nio.ByteBuffer;
+import propra.imageconverter.data.IDataTranscoder;
 
 /**
  *
  * @author pg
  */
-public abstract class ImageTranscoder implements DataTranscoder {
+public abstract class ImageTranscoder implements IDataTranscoder {
     
     private ColorFormat inFormat;
 
@@ -29,8 +29,8 @@ public abstract class ImageTranscoder implements DataTranscoder {
     
     @Override
     public long apply(  Operation op,
-                        DataBuffer in,
-                        DataBuffer out) {
+                        ByteBuffer in,
+                        ByteBuffer out) {
         if( in == null 
         ||  out == null
         ||  !isValid()) {
@@ -68,8 +68,8 @@ public abstract class ImageTranscoder implements DataTranscoder {
     }
     
     // Zu implementierende Untermethoden
-    protected abstract long _encode(DataBuffer in, DataBuffer out);
-    protected abstract long _decode(DataBuffer in, DataBuffer out);
+    protected abstract long _encode(ByteBuffer in, ByteBuffer out);
+    protected abstract long _decode(ByteBuffer in, ByteBuffer out);
     
     /**
      *
@@ -77,20 +77,20 @@ public abstract class ImageTranscoder implements DataTranscoder {
      * @param out
      * @return
      */
-    protected long _pass(DataBuffer in, DataBuffer out) {
-        if(in.getSize() > out.getSize()) {
+    protected long _pass(ByteBuffer in, ByteBuffer out) {
+        if(in.limit()> out.limit()) {
             throw new IllegalArgumentException("Ungültige Blockgröße");
         }
         
         // Daten kopieren
-        out.getBuffer().put(in.getBuffer());
+        out.put(in);
         
         // Positionszeiger zurücksetzen
-        out.getBuffer().clear();
+        out.clear();
         
         // Anzahl der dekodierten Bytes setzen und zurückgeben
-        out.setDataLength(in.getSize());        
-        return in.getSize();
+        out.limit(in.limit());        
+        return in.limit();
     }
     
     /**

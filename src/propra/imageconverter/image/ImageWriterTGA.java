@@ -3,7 +3,6 @@ package propra.imageconverter.image;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import propra.imageconverter.data.DataBuffer;
 import propra.imageconverter.data.DataFormat;
 
 /**
@@ -18,9 +17,10 @@ public class ImageWriterTGA extends ImageWriter {
      * @param mode
      * @throws java.io.IOException
      */
-    public ImageWriterTGA(String file, DataFormat.Mode mode) throws IOException {
+    public ImageWriterTGA(String file, DataFormat.IOMode mode) throws IOException {
         super(file, mode);
-        formatHeaderSize = ImageReaderTGA.TGA_HEADER_SIZE;   
+        formatHeaderSize = ImageReaderTGA.TGA_HEADER_SIZE;
+        writeColorFormat = new ColorFormat(2, 1, 0);
     }
     
     /**
@@ -35,15 +35,12 @@ public class ImageWriterTGA extends ImageWriter {
         }
         
         // DataBuffer für Header erstellen
-        DataBuffer dataBuffer = new DataBuffer(ImageReaderTGA.TGA_HEADER_SIZE);
-        ByteBuffer byteBuffer = dataBuffer.getBuffer();
+        ByteBuffer byteBuffer = ByteBuffer.allocate(ImageReaderTGA.TGA_HEADER_SIZE);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         
         // Header speichern für blockweise Verarbeitung der Bilddaten
         header = new ImageHeader(srcHeader);
-        header.colorFormat().setMapping(ColorFormat.RED,2);
-        header.colorFormat().setMapping(ColorFormat.GREEN,1);
-        header.colorFormat().setMapping(ColorFormat.BLUE,0);
+        header.colorFormat(writeColorFormat);
         
         // Headerfelder in Buffer schreiben
         byteBuffer.put(ImageReaderTGA.TGA_HEADER_OFFSET_ENCODING, 
@@ -58,7 +55,7 @@ public class ImageWriterTGA extends ImageWriter {
                             (byte)(1 << 5)); 
         
         // Kompression
-        switch(header.colorFormat().getEncoding()) {
+        switch(header.colorFormat().encoding()) {
             case RLE -> {
                 byteBuffer.put(ImageReaderTGA.TGA_HEADER_OFFSET_ENCODING, 
                                     (byte)ImageReaderTGA.TGA_HEADER_ENCODING_RLE);
@@ -74,7 +71,7 @@ public class ImageWriterTGA extends ImageWriter {
         
         // In Stream schreiben
         binaryWriter.seek(0);
-        write(dataBuffer, 0, formatHeaderSize);
+        write(byteBuffer, 0, formatHeaderSize);
     }
     
 }

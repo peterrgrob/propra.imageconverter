@@ -1,10 +1,10 @@
 package propra.imageconverter.image;
 
 import java.io.IOException;
-import propra.imageconverter.data.DataBuffer;
+import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataFormat;
 import propra.imageconverter.data.DataReader;
-import propra.imageconverter.data.DataTranscoder;
+import propra.imageconverter.data.IDataTranscoder;
 
 /**
  *
@@ -14,20 +14,17 @@ public class ImageReader extends DataReader {
 
     protected final int BLOCK_SIZE;
     protected int formatHeaderSize;
-    protected DataBuffer readBuffer;
+    protected ByteBuffer readBuffer;
     protected long contentTransfered;
 
-    // Farbverarbeitung
-    protected ImageFilterColor colorConverter; 
     protected ImageTranscoder decoder;    
     protected ImageHeader header;
 
     
-    public ImageReader(String file, DataFormat.Mode mode) throws IOException {
+    public ImageReader(String file, DataFormat.IOMode mode) throws IOException {
         super(file, mode);
         BLOCK_SIZE = 1024 * 4096 * 3;
-        this.readBuffer = new DataBuffer(BLOCK_SIZE);
-        colorConverter = null;//new ImageFilterColor();
+        this.readBuffer = ByteBuffer.allocate(BLOCK_SIZE);
     }
     
     /**
@@ -67,7 +64,7 @@ public class ImageReader extends DataReader {
      * @return
      * @throws java.io.IOException
      */
-    public int read(DataBuffer buffer) throws IOException {
+    public int read(ByteBuffer buffer) throws IOException {
         if(!isValid() 
         || buffer == null) {
             throw new IllegalArgumentException();
@@ -79,9 +76,9 @@ public class ImageReader extends DataReader {
         if(decoder != null) {
             
             // Aktuelle Blockgröße berechnen
-            len = readBuffer.getSize();
+            len = readBuffer.capacity();
             long remainingBytes = binaryReader.length() - binaryReader.getFilePointer();
-            if(readBuffer.getSize() > remainingBytes) {
+            if(readBuffer.capacity() > remainingBytes) {
                 len = (int)(remainingBytes);
             }
             
@@ -92,17 +89,17 @@ public class ImageReader extends DataReader {
             updateChecksum(readBuffer);  
             
             // Block dekomprimieren
-            decoder.apply(DataTranscoder.Operation.DECODE, 
+            decoder.apply(IDataTranscoder.Operation.DECODE, 
                                         readBuffer, 
                                         buffer);
             
-            len = buffer.getDataLength();
+            len = buffer.limit();
             
         } else {
             
             // Aktuelle Blockgröße berechnen
-            len = buffer.getSize();
-            if(contentTransfered + buffer.getSize() > header.imageSize()) {
+            len = buffer.capacity();
+            if(contentTransfered + buffer.capacity() > header.imageSize()) {
                 len = (int)(header.imageSize() - contentTransfered);
             }
             

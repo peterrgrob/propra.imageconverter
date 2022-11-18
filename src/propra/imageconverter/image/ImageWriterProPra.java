@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import propra.imageconverter.checksum.ChecksumPropra;
-import propra.imageconverter.data.DataBuffer;
 import propra.imageconverter.data.DataFormat;
 
 /**
@@ -18,10 +17,12 @@ public class ImageWriterProPra extends ImageWriter {
      * @param mode
      * @throws java.io.IOException
      */
-    public ImageWriterProPra(String file, DataFormat.Mode mode) throws IOException {
+    public ImageWriterProPra(String file, DataFormat.IOMode mode) throws IOException {
         super(file, mode);
         formatHeaderSize = ImageReaderProPra.PROPRA_HEADER_SIZE;
         checksumObj = new ChecksumPropra();
+        
+        this.writeColorFormat = new ColorFormat(0, 2, 1);
     }
     
     /**
@@ -35,18 +36,15 @@ public class ImageWriterProPra extends ImageWriter {
         }
         
         // DataBuffer für Header erstellen
-        DataBuffer dataBuffer = new DataBuffer(ImageReaderProPra.PROPRA_HEADER_SIZE);
-        ByteBuffer byteBuffer = dataBuffer.getBuffer();
+        ByteBuffer byteBuffer = ByteBuffer.allocate(ImageReaderProPra.PROPRA_HEADER_SIZE);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         
         // ProPra spezifisches RBG Farbmapping setzen
         header = new ImageHeader(srcHeader);
-        header.colorFormat().setMapping(ColorFormat.RED,0);
-        header.colorFormat().setMapping(ColorFormat.GREEN,2);
-        header.colorFormat().setMapping(ColorFormat.BLUE,1);
+        header.colorFormat(writeColorFormat);
         
         // Headerfelder in ByteBuffer schreiben
-        dataBuffer.put(ImageReaderProPra.PROPRA_VERSION,0);
+        DataFormat.putStringToByteBuffer(byteBuffer, 0, ImageReaderProPra.PROPRA_VERSION);
         byteBuffer.put(ImageReaderProPra.PROPRA_HEADER_OFFSET_ENCODING, (byte)0);
         byteBuffer.putShort(ImageReaderProPra.PROPRA_HEADER_OFFSET_WIDTH,(short)srcHeader.width());
         byteBuffer.putShort(ImageReaderProPra.PROPRA_HEADER_OFFSET_HEIGHT,(short)srcHeader.height());
@@ -54,7 +52,7 @@ public class ImageWriterProPra extends ImageWriter {
         byteBuffer.putInt(ImageReaderProPra.PROPRA_HEADER_OFFSET_CHECKSUM, (int)srcHeader.checksum());
         
         // Kompression 
-        switch(header.colorFormat().getEncoding()) {
+        switch(header.colorFormat().encoding()) {
             case RLE -> {
                 byteBuffer.put(ImageReaderProPra.PROPRA_HEADER_OFFSET_ENCODING, (byte)ImageReaderProPra.PROPRA_HEADER_ENCODING_RLE);
                 byteBuffer.putLong(ImageReaderProPra.PROPRA_HEADER_OFFSET_DATALEN,srcHeader.encodedSize());
@@ -70,6 +68,6 @@ public class ImageWriterProPra extends ImageWriter {
         
         // In Stream schreiben
         binaryWriter.seek(0);
-        write(dataBuffer,0 ,formatHeaderSize);
+        write(byteBuffer,0 ,formatHeaderSize);
     }
 }

@@ -1,6 +1,6 @@
 package propra.imageconverter.image;
 
-import propra.imageconverter.data.DataBuffer;
+import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataFormat;
 
 /**
@@ -33,6 +33,14 @@ public class ColorFormat extends DataFormat implements Comparable<ColorFormat> {
         setMapping(BLUE, 0);
     }
     
+    /**
+     * 
+     */
+    public ColorFormat(int r, int g, int b) {
+        setMapping(RED, r);
+        setMapping(GREEN,g);
+        setMapping(BLUE, b);
+    }
     
     /**
      * 
@@ -63,8 +71,8 @@ public class ColorFormat extends DataFormat implements Comparable<ColorFormat> {
     /*
      * 
      */
-    public static DataBuffer convertColorBuffer(DataBuffer input, ColorFormat srcFormat,
-                                                DataBuffer output,ColorFormat dstFormat) {
+    public static ByteBuffer convertColorBuffer(ByteBuffer input, ColorFormat srcFormat,
+                                                ByteBuffer output,ColorFormat dstFormat) {
         if (input == null
         ||  output == null
         ||  srcFormat == null
@@ -72,17 +80,17 @@ public class ColorFormat extends DataFormat implements Comparable<ColorFormat> {
             throw new IllegalArgumentException();
         }  
         
-        byte[] inBytes = input.getBytes();
-        byte[] outBytes = output.getBytes();
+        byte[] inBytes = input.array();
+        byte[] outBytes = output.array();
         byte r,g,b;
                 
-        int srcOffset = input.getDataOffset();
-        int dstOffset = output.getDataOffset();
+        int srcOffset = 0;
+        int dstOffset = 0;
         
         int[] srcMap = srcFormat.getMapping();
         int[] dstMap = dstFormat.getMapping();
         
-        for (int i=0; i<input.getDataLength(); i+=3) {
+        for (int i=0; i<input.limit(); i+=3) {
             int sIndex = srcOffset + i;
             int dIndex = dstOffset + i;
             

@@ -7,10 +7,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import propra.imageconverter.data.DataFormat.Mode;
+import propra.imageconverter.data.DataFormat.IOMode;
 
 /**
  *
@@ -18,7 +19,7 @@ import propra.imageconverter.data.DataFormat.Mode;
  */
 public class DataWriter implements Closeable {
     
-    protected final Mode mode;
+    protected final IOMode mode;
     protected RandomAccessFile binaryWriter;
     protected BufferedWriter txtWriter;
     protected Checksum checksumObj; 
@@ -29,9 +30,9 @@ public class DataWriter implements Closeable {
      * @param mode
      * @throws IOException
      */
-    public DataWriter(String file, Mode mode) throws IOException {
+    public DataWriter(String file, IOMode mode) throws IOException {
         this.mode = mode;
-        if(mode == Mode.BINARY) {
+        if(mode == IOMode.BINARY) {
             binaryWriter = createBinaryWriter(file);
         } else {
             txtWriter = createTextWriter(file);
@@ -40,6 +41,7 @@ public class DataWriter implements Closeable {
     
     /**
      *
+     * @throws java.io.IOException
      */
     public void begin() throws IOException {
     }
@@ -56,32 +58,34 @@ public class DataWriter implements Closeable {
      * @return
      * @throws IOException 
      */
-    public int write(DataBuffer buffer) throws IOException {
-        return write(buffer, 0, buffer.getDataLength());
+    public int write(ByteBuffer buffer) throws IOException {
+        return write(buffer, 0, buffer.limit());
     }
     
     /**
      *
      * @param buffer
+     * @param offset
+     * @param len
      * @return
      * @throws IOException
      */
-    public int write(DataBuffer buffer, int offset, int len) throws IOException {
+    public int write(ByteBuffer buffer, int offset, int len) throws IOException {
         if(!isValid()
         ||  buffer == null) {
             throw new IllegalStateException();
         }
         
         // Binär oder als Text in Ausgabedatei schreiben
-        if(mode == Mode.BINARY) {
-            binaryWriter.write( buffer.getBytes(), 
+        if(mode == IOMode.BINARY) {
+            binaryWriter.write( buffer.array(), 
                                 offset, 
                                 len);
         } else {
             writeBinaryToTextFile(buffer);
         }
         
-        return buffer.getDataLength();
+        return buffer.limit();
     }
     
     /**
@@ -89,7 +93,11 @@ public class DataWriter implements Closeable {
      * @return
      */
     public boolean isValid() {
-        return true;
+        if(mode == mode.BINARY) {
+            return binaryWriter != null;
+        } else {
+            return txtWriter != null;
+        }
     }
     
         
@@ -97,73 +105,11 @@ public class DataWriter implements Closeable {
      *
      * @return
      */
-    public Mode getMode() {
+    public IOMode getMode() {
         return mode;
     }
     
-    /**
-     *
-     * @param buffer
-     * @throws IOException
-     */
-    protected void writeBinaryToTextFile(DataBuffer buffer) throws IOException {
-        if(buffer == null) {
-            throw new IllegalArgumentException();
-        }
-        
-        // Bytes iterieren und als Zeichen in Datei schreiben
-        while(buffer.getBuffer().hasRemaining()) {
-            txtWriter.write((byte)buffer.getBuffer().get());
-        }
-        
-        // Schreiben erzwingen
-        txtWriter.flush();
-    }
-    
-    /**
-     * 
-     * @param filePath
-     * @return
-     * @throws IOException 
-     */
-    private BufferedWriter createTextWriter(String filePath) throws IOException {
-        File fileObj = createFileAndDirectory(filePath);
-        return new BufferedWriter(new FileWriter(fileObj)); 
-    }
-    
-    /**
-     * 
-     * @param filePath
-     * @return
-     * @throws IOException 
-     */
-    private RandomAccessFile createBinaryWriter(String filePath) throws IOException {
-        File fileObj = createFileAndDirectory(filePath);
-        return new RandomAccessFile(fileObj, "rw");
-    }
-    
-    /**
-     * 
-     * @param filePath
-     * @return
-     * @throws IOException 
-     */
-    private File createFileAndDirectory(String filePath) throws IOException {
-        
-        // Verzeichnisse erstellen, falls nötig
-        Path outDirs = Paths.get(filePath);
-        Files.createDirectories(outDirs.getParent());
-        
-        // Ausgabedatei erstellen
-        File file = new File(filePath);
-        if(!file.exists()) {
-            file.createNewFile();
-        }
-        
-        return file;
-    }
-    
-    /**
+        /**
      *
      * @throws IOException
      */
@@ -200,12 +146,74 @@ public class DataWriter implements Closeable {
      *
      * @param bytes
      */
-    protected void updateChecksum(DataBuffer bytes) {
+    protected void updateChecksum(ByteBuffer bytes) {
         if (bytes == null ) {
             throw new IllegalArgumentException();
         }
         if(checksumObj != null) {
             checksumObj.apply(bytes);
         }
+    }
+    
+    /**
+     *
+     * @param buffer
+     * @throws IOException
+     */
+    protected void writeBinaryToTextFile(ByteBuffer buffer) throws IOException {
+        if(buffer == null) {
+            throw new IllegalArgumentException();
+        }
+        
+        // Bytes iterieren und als Zeichen in Datei schreiben
+        while(buffer.hasRemaining()) {
+            txtWriter.write((byte)buffer.get());
+        }
+        
+        // Schreiben erzwingen
+        txtWriter.flush();
+    }
+    
+    /**
+     * 
+     * @param filePath
+     * @return
+     * @throws IOException 
+     */
+    private static BufferedWriter createTextWriter(String filePath) throws IOException {
+        File fileObj = createFileAndDirectory(filePath);
+        return new BufferedWriter(new FileWriter(fileObj)); 
+    }
+    
+    /**
+     * 
+     * @param filePath
+     * @return
+     * @throws IOException 
+     */
+    private static RandomAccessFile createBinaryWriter(String filePath) throws IOException {
+        File fileObj = createFileAndDirectory(filePath);
+        return new RandomAccessFile(fileObj, "rw");
+    }
+    
+    /**
+     * 
+     * @param filePath
+     * @return
+     * @throws IOException 
+     */
+    private static File createFileAndDirectory(String filePath) throws IOException {
+        
+        // Verzeichnisse erstellen, falls nötig
+        Path outDirs = Paths.get(filePath);
+        Files.createDirectories(outDirs.getParent());
+        
+        // Ausgabedatei erstellen
+        File file = new File(filePath);
+        if(!file.exists()) {
+            file.createNewFile();
+        }
+        
+        return file;
     }
 }

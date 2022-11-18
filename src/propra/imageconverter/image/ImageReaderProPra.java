@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import propra.imageconverter.data.DataBuffer;
 import propra.imageconverter.data.DataFormat;
 
 /**
@@ -29,7 +28,7 @@ public class ImageReaderProPra extends ImageReader {
      *
      * @param stream
      */
-    public ImageReaderProPra(String file, DataFormat.Mode mode) throws IOException {
+    public ImageReaderProPra(String file, DataFormat.IOMode mode) throws IOException {
         super(file, mode);
         formatHeaderSize = PROPRA_HEADER_SIZE;   
     }
@@ -46,17 +45,16 @@ public class ImageReaderProPra extends ImageReader {
         }
         
         // DataBuffer für Header erstellen       
-        DataBuffer data = new DataBuffer(formatHeaderSize);
-        ByteBuffer bytes = data.getBuffer();
+        ByteBuffer bytes = ByteBuffer.allocate(formatHeaderSize);
         bytes.order(ByteOrder.LITTLE_ENDIAN);
         
         // Headerbytes von Stream lesen
-        read(data, 0, formatHeaderSize);
+        read(bytes, 0, formatHeaderSize);
         
         // Prüfe Formatkennung
         String version;
         try {
-            version = data.getString(PROPRA_VERSION.length());
+            version = DataFormat.getStringFromByteBuffer(bytes, PROPRA_VERSION.length());
         } catch (UnsupportedEncodingException ex) {
             return null;
         }
@@ -81,10 +79,10 @@ public class ImageReaderProPra extends ImageReader {
         // Kompression prüfen
         switch (bytes.get(PROPRA_HEADER_OFFSET_ENCODING)) {
             case PROPRA_HEADER_ENCODING_RLE:
-                newHeader.colorFormat().setEncoding(DataFormat.Encoding.RLE);
+                newHeader.colorFormat().encoding(DataFormat.Encoding.RLE);
                 break;
             case PROPRA_HEADER_ENCODING_NONE:
-                newHeader.colorFormat().setEncoding(DataFormat.Encoding.NONE);  
+                newHeader.colorFormat().encoding(DataFormat.Encoding.NONE);  
                 break;
             default:
                 throw new UnsupportedOperationException("Nicht unterstützte Kompression!");
@@ -94,7 +92,7 @@ public class ImageReaderProPra extends ImageReader {
         if( newHeader.isValid() == false 
         ||  (dataLen != (binaryReader.length() - PROPRA_HEADER_SIZE))) {
             throw new UnsupportedOperationException("Ungültiges ProPra Dateiformat!");
-        } else if(newHeader.colorFormat().getEncoding() == DataFormat.Encoding.NONE) {
+        } else if(newHeader.colorFormat().encoding() == DataFormat.Encoding.NONE) {
             
             // Prüfungen für unkomprimierte Dateien 
             if(newHeader.imageSize() != dataLen
