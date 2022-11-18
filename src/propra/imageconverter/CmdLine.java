@@ -1,7 +1,7 @@
 package propra.imageconverter;
 import propra.imageconverter.basen.BaseN;
-import propra.imageconverter.data.DataFormat;
 import java.util.HashMap;
+import propra.imageconverter.basen.BaseNFormat;
 import propra.imageconverter.image.ColorFormat;
 
 /**
@@ -117,7 +117,7 @@ import propra.imageconverter.image.ColorFormat;
      *
      * @return
      */
-    public DataFormat getBaseNDataFormat() {
+    public BaseNFormat getBaseNDataFormat() {
         String alphabet = null;
         
         // Alphabet setzen
@@ -126,7 +126,7 @@ import propra.imageconverter.image.ColorFormat;
             alphabet = BaseN.BASE_32_ALPHABET;
         } else if(  options.containsKey(Options.DECODE_BASE_N)) {
             // Alphabet wird aus Datei geladen
-            return new DataFormat();
+            return new BaseNFormat();
         }else if(  options.containsKey(Options.ENCODE_BASE_N)) {
             alphabet = options.get(Options.ENCODE_BASE_N);
             if(alphabet == null) {
@@ -135,7 +135,7 @@ import propra.imageconverter.image.ColorFormat;
         }  
         
         // DataFormat Objekt zurückgeben
-        return new DataFormat(alphabet);
+        return new BaseNFormat(alphabet);
     }
     
     /**

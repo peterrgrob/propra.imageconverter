@@ -3,28 +3,19 @@ package propra.imageconverter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import propra.imageconverter.CmdLine;
-import propra.imageconverter.image.ColorFormat;
-import propra.imageconverter.image.ImageHeader;
-import propra.imageconverter.data.DataBuffer;
 import propra.imageconverter.data.DataFormat.Encoding;
-import propra.imageconverter.data.DataFormat.Mode;
+import propra.imageconverter.data.DataFormat.IOMode;
 import propra.imageconverter.image.ColorFormat;
 import propra.imageconverter.image.ImageHeader;
 import propra.imageconverter.image.ImageReader;
-import propra.imageconverter.image.ImageReader;
-import propra.imageconverter.image.ImageReaderProPra;
 import propra.imageconverter.image.ImageReaderProPra;
 import propra.imageconverter.image.ImageReaderTGA;
-import propra.imageconverter.image.ImageReaderTGA;
-import propra.imageconverter.image.ImageWriter;
 import propra.imageconverter.image.ImageWriter;
 import propra.imageconverter.image.ImageWriterProPra;
-import propra.imageconverter.image.ImageWriterProPra;
-import propra.imageconverter.image.ImageWriterTGA;
 import propra.imageconverter.image.ImageWriterTGA;
 
 /**
@@ -102,7 +93,7 @@ public class ImageTask {
         ImageHeader inHeader = new ImageHeader(inReader.readHeader());
         
         // Bildkompression setzen und Bildkopf in Ausgabedatei schreiben
-        inHeader.colorFormat().setEncoding(outEncoding);
+        inHeader.colorFormat().encoding(outEncoding);
         outWriter.writeHeader(inHeader);
         
         return inHeader;
@@ -118,7 +109,7 @@ public class ImageTask {
         }
 
         // Datenblock für blockweise Übertragung erstellen
-        DataBuffer block = new DataBuffer(inReader.getBlockSize());
+        ByteBuffer block = ByteBuffer.allocate(inReader.getBlockSize());
         ColorFormat inFormat = inReader.getHeader().colorFormat();
         
         // Blockweise Übertragung starten
@@ -150,7 +141,7 @@ public class ImageTask {
         
         // Falls nötig Header aktualisieren
         if( outWriter.getChecksumObj() != null
-        ||  outWriter.getHeader().colorFormat().getEncoding() == Encoding.RLE) {
+        ||  outWriter.getHeader().colorFormat().encoding() == Encoding.RLE) {
             outWriter.writeHeader(outWriter.getHeader());
         }
         
@@ -217,14 +208,15 @@ public class ImageTask {
      * @param streamLen
      * @return
      */
-    private ImageWriter createImageWriter(String path, String ext) throws IOException {
+    private static ImageWriter createImageWriter(String path, String ext) throws IOException {
         switch(ext) {
             case "tga" -> {
-                return new ImageWriterTGA(path, Mode.BINARY);
+                return new ImageWriterTGA(path, IOMode.BINARY);
             }
             case "propra" -> {
-                return new ImageWriterProPra(path, Mode.BINARY);
+                return new ImageWriterProPra(path, IOMode.BINARY);
             }
+
         }
         return null;
     }
@@ -235,14 +227,15 @@ public class ImageTask {
      * @param streamLen
      * @return
      */
-    private ImageReader createImageReader(String path, String ext) throws IOException {
+    private static ImageReader createImageReader(String path, String ext) throws IOException {
         switch(ext) {
             case "tga" -> {
-                return new ImageReaderTGA(path, Mode.BINARY);
+                return new ImageReaderTGA(path, IOMode.BINARY);
             }
             case "propra" -> {
-                return new ImageReaderProPra(path, Mode.BINARY);
+                return new ImageReaderProPra(path, IOMode.BINARY);
             }
+
         }
         return null;
     }
