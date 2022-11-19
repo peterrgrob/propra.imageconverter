@@ -2,7 +2,6 @@ package propra.imageconverter.basen;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import propra.imageconverter.data.DataFormat;
 import propra.imageconverter.data.DataFormat.IOMode;
 import propra.imageconverter.data.DataWriter;
 import propra.imageconverter.data.IDataTranscoder;
@@ -40,14 +39,17 @@ public class BaseNWriter extends DataWriter {
             throw new IllegalStateException();
         }
         
+        // Puffer erstellen
+        int len = encoder.transcodedBufferLength(IDataTranscoder.Operation.ENCODE, buffer);
+        ByteBuffer encodeBuffer = ByteBuffer.allocate(len);
+        
         // Daten kodieren
-        ByteBuffer encodeBuffer = ByteBuffer.allocate(0);
         encoder.apply(IDataTranscoder.Operation.ENCODE, 
                             buffer, 
                             encodeBuffer);
 
-        // Alphabet in Datei schreiben
-        if(format.encoding() == DataFormat.Encoding.BASEN) {
+        // Alphabet in Datei schreiben 
+        if(format.getBaseEncoding() != BaseNFormat.BaseNEncoding.BASE_32) {
             txtWriter.write(encoder.dataFormat().getAlphabet() + "\n");
         }
 

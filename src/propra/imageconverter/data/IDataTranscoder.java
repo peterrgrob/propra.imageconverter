@@ -35,4 +35,11 @@ public interface IDataTranscoder {
      *
      */
     public void end();
+    
+    /**
+     * 
+     * @param buffer
+     * @return 
+     */
+    public int transcodedBufferLength(Operation op, ByteBuffer buffer);
 }

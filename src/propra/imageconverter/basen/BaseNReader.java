@@ -2,7 +2,6 @@ package propra.imageconverter.basen;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import propra.imageconverter.data.DataFormat;
 import propra.imageconverter.data.DataFormat.IOMode;
 import propra.imageconverter.data.DataReader;
 import propra.imageconverter.data.IDataTranscoder;
@@ -40,8 +39,6 @@ public class BaseNReader extends DataReader {
         ||  buffer == null) {
             throw new IllegalStateException();
         }
-        
-        buffer.limit(buffer.capacity());
             
         // Alphabet vorhanden?
         if(decoder.dataFormat().getAlphabet().length() == 0) {
@@ -51,23 +48,16 @@ public class BaseNReader extends DataReader {
             buffer.limit(buffer.capacity() - alphabet.length() - 1);
         }
             
-        // Daten einlesen
-        binaryReader.read(buffer.array(), 0, buffer.limit());
+        // Daten in temoprären Puffer einlesen
+        ByteBuffer readBuffer = ByteBuffer.allocate(buffer.capacity());
+        binaryReader.read(readBuffer.array(), 0, readBuffer.capacity());
 
-        // In temporären Puffer dekodieren
-        ByteBuffer decodeBuffer = ByteBuffer.allocate(buffer.capacity());
-        decoder.apply(IDataTranscoder.Operation.DECODE, 
-                            buffer, 
-                            decodeBuffer);
+        // In Puffer dekodieren
+        int decodedLen = (int)decoder.apply( IDataTranscoder.Operation.DECODE, 
+                                            readBuffer, 
+                                            buffer);
 
-        // In Ausgabepuffer kopieren
-        buffer.put( 0, 
-                    decodeBuffer.array(), 
-                    0, 
-                    decodeBuffer.limit());
-
-        buffer.limit(decodeBuffer.limit());
-        
-        return buffer.limit();
+        buffer.limit(decodedLen);
+        return decodedLen;
     }
 }

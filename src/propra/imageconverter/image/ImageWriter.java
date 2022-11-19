@@ -12,13 +12,16 @@ import propra.imageconverter.data.IDataTranscoder;
  */
 public class ImageWriter extends DataWriter {
     
+    // IO Variablen
     protected final int BLOCK_SIZE;
-    protected int formatHeaderSize;
     protected ByteBuffer writeBuffer;
     protected long contentTransfered;
+    
+    // Formatespezifische Variablen
     protected ImageHeader header;
     protected ColorFormat readColorFormat;
     protected ColorFormat writeColorFormat;
+    protected int formatHeaderSize;
 
     // Farbverarbeitung
     protected ImageTranscoder encoder;    

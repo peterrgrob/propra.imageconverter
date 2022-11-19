@@ -59,6 +59,20 @@ public abstract class ImageTranscoder implements IDataTranscoder {
     }
     
     /**
+     * 
+     * @param op
+     * @param buffer
+     * @return 
+     */
+    @Override
+    public int transcodedBufferLength(Operation op, ByteBuffer buffer) {
+        if(buffer != null) {
+            return buffer.limit();
+        }
+        return 0;
+    }
+    
+    /**
      * Get the value of inFormat
      *
      * @return the value of inFormat

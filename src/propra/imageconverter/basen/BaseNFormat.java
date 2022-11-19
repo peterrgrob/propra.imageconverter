@@ -97,7 +97,15 @@ public class BaseNFormat extends DataFormat {
             encoding = Encoding.BASEN;
         }
     }
-    
+
+    /**
+     * 
+     * @return 
+     */
+    public BaseNEncoding getBaseEncoding() {
+        return baseEncoding;
+    }
+   
     /**
      *
      * @return

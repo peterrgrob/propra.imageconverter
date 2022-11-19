@@ -71,6 +71,28 @@ public class BaseN implements IDataTranscoder {
     
     /**
      * 
+     * @param op
+     * @param buffer
+     * @return 
+     */
+    @Override
+    public int transcodedBufferLength(Operation op, ByteBuffer buffer) {
+        if( buffer == null 
+        ||  !isValid()) {
+            throw new IllegalArgumentException();
+        }
+        
+        if(op == Operation.ENCODE) {
+            int totalBits = buffer.limit() << 3;
+            return totalBits / format.getBitCount(); 
+        } else {
+            return buffer.limit();
+        }
+            
+    }
+    
+    /**
+     * 
      * @param in
      * @param out
      * @return 
@@ -125,8 +147,7 @@ public class BaseN implements IDataTranscoder {
         int blockLength = format.getBlockLength();
         int totalBits = in.limit() << 3;
 
-        ByteBuffer charBuffer = ByteBuffer.allocate(8);
-        ByteBuffer outBuffer = out;            
+        ByteBuffer charBuffer = ByteBuffer.allocate(8);         
 
         // Anzahl der Ausgabezeichen ermitteln
         int totalCharacterCount = totalBits / format.getBitCount();
@@ -136,10 +157,7 @@ public class BaseN implements IDataTranscoder {
 
         // Größe des Ausgabepuffer prüfen
         if(out.capacity() < totalCharacterCount) {
-            
-            // Puffer anpassen
-            out = ByteBuffer.allocate(totalCharacterCount);
-            outBuffer = out;
+            throw new IllegalStateException("Puffergröße ungültig!");
         }
 
         // Über Bitblöcke iterieren und kodieren
@@ -159,17 +177,17 @@ public class BaseN implements IDataTranscoder {
                         charBuffer);
 
             // In Ausgabe kopieren
-            outBuffer.put(charBuffer.array(), 
-                        0, 
-                        charBuffer.limit());
+            out.put(charBuffer.array(), 
+                    0, 
+                    charBuffer.limit());
 
             byteOffset += byteCount;
         }
         
-        out.limit(outBuffer.position());
-        outBuffer.rewind();
+        out.limit(out.position());
+        out.rewind();
 
-        return outBuffer.position();
+        return out.limit();
     }
     
     /**
