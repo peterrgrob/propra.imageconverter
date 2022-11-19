@@ -139,7 +139,7 @@ import propra.imageconverter.image.ColorFormat;
                throw new IllegalArgumentException("Ungültiges Alphabet für Base-N Kodierung.");
             }
             
-        }  
+        } 
         
         // Format Objekt zurückgeben
         return new BaseNFormat(alphabet);

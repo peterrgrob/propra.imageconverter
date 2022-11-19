@@ -25,6 +25,11 @@ public class ImageConverter {
             // Zeitmessung starten
             long start = System.currentTimeMillis();   
         
+            if(args.length == 0) {
+                System.out.println("Keine Parameter übergeben!");
+                System.exit(ERROR_EXIT_CODE);
+            }
+            
             // Komandozeilenparameter parsen.
             CmdLine cmdLine = new CmdLine(args);
             
@@ -35,7 +40,7 @@ public class ImageConverter {
             } else {
                 converter.doImageTask(cmdLine); 
             }
-            
+        
             // Zeitmessung beenden
             long finish = System.currentTimeMillis();
             long timeElapsed = finish - start;
@@ -43,7 +48,11 @@ public class ImageConverter {
             // Infos Programmablauf ausgeben
             System.out.println("Task abgeschlossen in (ms): " + String.valueOf(timeElapsed));
         }
-        catch(IOException e) {
+        catch(FileNotFoundException e) {
+            System.out.println("Datei nicht gefunden!");
+            System.exit(ERROR_EXIT_CODE);
+        }
+        catch(Exception e) {
             Logger.getLogger(ImageConverter.class.getName()).log(Level.SEVERE, null, e);
             System.err.println(e.toString());
             System.exit(ERROR_EXIT_CODE);

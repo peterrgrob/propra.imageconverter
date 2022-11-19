@@ -63,6 +63,7 @@ public class BaseNTask {
             outPath = outPath.concat(outExt);
         }          
 
+        System.out.println(outPath);
             
         // Reader/Writer erstellen
         if(cmd.isBaseNDecode()) {
@@ -92,7 +93,6 @@ public class BaseNTask {
         String stateString = "";
 
         if(isValid()) {
-  
         }
         
         return stateString;

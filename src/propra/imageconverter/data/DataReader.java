@@ -3,6 +3,8 @@ package propra.imageconverter.data;
 import propra.imageconverter.checksum.Checksum;
 import java.io.BufferedReader;
 import java.io.Closeable;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -28,6 +30,12 @@ public class DataReader implements Closeable {
      */
     public DataReader(String file, IOMode mode) throws IOException {
         this.ioMode = mode;
+        
+        // Prüfe auf existenz
+        if(!fileExists(file)) {
+            throw new FileNotFoundException("Datei nicht gefunden!");
+        }
+        
         if(mode == IOMode.BINARY) {
             binaryReader = createBinaryReader(file);
         } else {
@@ -213,5 +221,18 @@ public class DataReader implements Closeable {
      */
     private static RandomAccessFile createBinaryReader(String filePath) throws IOException {
         return new RandomAccessFile(filePath, "rw");
+    }
+    
+    /**
+     * 
+     * @param file
+     * @return 
+     */
+    private static boolean fileExists(String file) {
+        File f = new File(file);
+        if(!f.exists()) {
+            return false;
+        }
+        return true;
     }
 }

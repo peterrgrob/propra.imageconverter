@@ -186,7 +186,7 @@ public class ImageTask {
      */
     @Override
     public String toString() {
-        String stateString = "Uninitialisiert.";
+        String stateString = "";
 
         if(isValid()) {
             ImageHeader header = inReader.getHeader();

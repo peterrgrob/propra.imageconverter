@@ -29,7 +29,6 @@ public class BaseN implements IDataTranscoder {
     
     /**
      *
-     * @param format
      */
     @Override
     public void begin() {
@@ -83,8 +82,16 @@ public class BaseN implements IDataTranscoder {
         }
         
         if(op == Operation.ENCODE) {
+            
             int totalBits = buffer.limit() << 3;
-            return totalBits / format.getBitCount(); 
+            int len = totalBits / format.getBitCount();
+            
+            // Aufzufüllende Bits berücksichtigen
+            if(totalBits % format.getBitCount() != 0) {
+                len++;
+            }
+            
+            return len;
         } else {
             return buffer.limit();
         }
@@ -100,7 +107,6 @@ public class BaseN implements IDataTranscoder {
     private long decode(ByteBuffer in, ByteBuffer out) {
         
         int charCtr = 0;
-        int charCount = 0;
         int byteCtr = 0;
         
         // Größe der binären Base-N Byteblöcke
@@ -110,7 +116,7 @@ public class BaseN implements IDataTranscoder {
         while(charCtr < in.limit()) {
             
             // Anzahl der Zeichen pro Byteblock
-            charCount = format.getCharLength();
+            int charCount = format.getCharLength();
             
             // Bei einem Endblock die Größe anpassen
             if(charCtr + blockLength >= in.limit()) {
@@ -143,7 +149,6 @@ public class BaseN implements IDataTranscoder {
         
         // Index und Inkremente setzen
         int byteOffset = 0;
-        int byteCount = 0;
         int blockLength = format.getBlockLength();
         int totalBits = in.limit() << 3;
 
@@ -163,7 +168,7 @@ public class BaseN implements IDataTranscoder {
         // Über Bitblöcke iterieren und kodieren
         while(byteOffset < in.limit()) {
             
-            byteCount = blockLength;
+            int byteCount = blockLength;
                     
             // Endblock?
             if(byteOffset + blockLength > in.limit()) {
