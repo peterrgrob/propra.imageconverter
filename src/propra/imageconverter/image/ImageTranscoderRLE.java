@@ -44,7 +44,7 @@ public class ImageTranscoderRLE extends ImageTranscoder {
      * @return
      */
     @Override
-    protected long _encode(ByteBuffer in, ByteBuffer out) {
+    protected ByteBuffer _encode(ByteBuffer in, ByteBuffer out) {
         byte[] color = new byte[3];
         int colorSize = 3;
         int rawCounter = 0;
@@ -99,7 +99,7 @@ public class ImageTranscoderRLE extends ImageTranscoder {
         // Positionszeiger zurücksetzen
         out.rewind();
               
-        return out.limit();
+        return out;
     }
 
     /**
@@ -109,7 +109,7 @@ public class ImageTranscoderRLE extends ImageTranscoder {
      * @return
      */
     @Override
-    protected long _decode(ByteBuffer in, ByteBuffer out) {
+    protected ByteBuffer _decode(ByteBuffer in, ByteBuffer out) {
         byte[] color = new byte[3];
         
         // Über Bytes iterieren und gemäß RLE verarbeiten
@@ -124,7 +124,9 @@ public class ImageTranscoderRLE extends ImageTranscoder {
 
             // Auf fehlerhafte Datenlänge prüfen
             if(decodedBytes + currentBytes > out.capacity()) {
-                throw new IllegalArgumentException("arg");
+                ByteBuffer t = ByteBuffer.allocate(out.capacity()<<1);
+                t.put(out.array(), 0, out.capacity());
+                out = t;
             }
             
             // RLE oder RAW Paket?
@@ -155,7 +157,7 @@ public class ImageTranscoderRLE extends ImageTranscoder {
         
         // Anzahl der dekodierten Bytes setzen und zurückgeben
         out.limit(decodedBytes);        
-        return decodedBytes;
+        return out;
     }
     
     /**

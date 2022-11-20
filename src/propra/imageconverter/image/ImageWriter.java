@@ -100,10 +100,9 @@ public class ImageWriter extends DataWriter {
             writeBuffer = ByteBuffer.allocate(buffer.capacity()<<1);
             
             // Block komprimieren
-            encoder.apply(IDataTranscoder.Operation.ENCODE, 
-                                buffer, 
-                                writeBuffer);
-            tmpBuffer = writeBuffer;
+            tmpBuffer = encoder.apply(IDataTranscoder.Operation.ENCODE, 
+                                    buffer, 
+                                    writeBuffer);
         } 
         
         // Prüfsumme mit aktuellem Block aktualisieren

@@ -97,9 +97,9 @@ public class ImageReader extends DataReader {
             updateChecksum(readBuffer);  
             
             // Block dekomprimieren
-            decoder.apply(IDataTranscoder.Operation.DECODE, 
-                                        readBuffer, 
-                                        buffer);
+            buffer = decoder.apply(IDataTranscoder.Operation.DECODE, 
+                                    readBuffer, 
+                                    buffer);
             
             len = buffer.limit();
             

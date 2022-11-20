@@ -54,11 +54,10 @@ public class BaseNReader extends DataReader {
         binaryReader.read(readBuffer.array(), 0, readBuffer.capacity());
 
         // In Puffer dekodieren
-        int decodedLen = (int)decoder.apply( IDataTranscoder.Operation.DECODE, 
+        buffer = decoder.apply( IDataTranscoder.Operation.DECODE, 
                                             readBuffer, 
                                             buffer);
 
-        buffer.limit(decodedLen);
-        return decodedLen;
+        return buffer.limit();
     }
 }

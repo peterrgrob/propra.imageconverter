@@ -28,9 +28,9 @@ public abstract class ImageTranscoder implements IDataTranscoder {
     }
     
     @Override
-    public long apply(  Operation op,
-                        ByteBuffer in,
-                        ByteBuffer out) {
+    public ByteBuffer apply(  Operation op,
+                             ByteBuffer in,
+                             ByteBuffer out) {
         if( in == null 
         ||  out == null
         ||  !isValid()) {
@@ -47,7 +47,7 @@ public abstract class ImageTranscoder implements IDataTranscoder {
             }
         }
             
-        return 0;
+        return out;
     }
 
     /**
@@ -82,8 +82,8 @@ public abstract class ImageTranscoder implements IDataTranscoder {
     }
     
     // Zu implementierende Untermethoden
-    protected abstract long _encode(ByteBuffer in, ByteBuffer out);
-    protected abstract long _decode(ByteBuffer in, ByteBuffer out);
+    protected abstract ByteBuffer _encode(ByteBuffer in, ByteBuffer out);
+    protected abstract ByteBuffer _decode(ByteBuffer in, ByteBuffer out);
     
     /**
      *

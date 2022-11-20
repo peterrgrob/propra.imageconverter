@@ -25,11 +25,11 @@ public interface IDataTranscoder {
      * @param op
      * @param in
      * @param out
-     * @return Anzahl der kodierten Bytes
+     * @return Ausgabepuffer
      */
-    public long apply(  Operation op,
-                        ByteBuffer in,
-                        ByteBuffer out);
+    public ByteBuffer apply(  Operation op,
+                            ByteBuffer in,
+                            ByteBuffer out);
     
     /**
      *

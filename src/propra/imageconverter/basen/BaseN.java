@@ -43,7 +43,7 @@ public class BaseN implements IDataTranscoder {
      * @return Anzahl der verarbeiteten Bytes
      */
     @Override
-    public long apply(Operation op, ByteBuffer in, ByteBuffer out) {
+    public ByteBuffer apply(Operation op, ByteBuffer in, ByteBuffer out) {
         if( !isValid()
         ||  in == null
         ||  out == null) {
@@ -57,7 +57,7 @@ public class BaseN implements IDataTranscoder {
             return decode(in, out);
         }
         
-        return 0;
+        return out;
     }
 
     /**
@@ -110,7 +110,7 @@ public class BaseN implements IDataTranscoder {
      * @param out
      * @return Datenmenge
      */
-    private long decode(ByteBuffer in, ByteBuffer out) {
+    private ByteBuffer decode(ByteBuffer in, ByteBuffer out) {
         
         int charCtr = 0;
         int byteCtr = 0;
@@ -142,7 +142,7 @@ public class BaseN implements IDataTranscoder {
         out.rewind();
         out.limit(byteCtr);
         
-        return byteCtr;
+        return out;
     }
     
     /**
@@ -151,7 +151,7 @@ public class BaseN implements IDataTranscoder {
      * @param out
      * @return Datenmenge
      */
-    private long encode(ByteBuffer in, ByteBuffer out) {
+    private ByteBuffer encode(ByteBuffer in, ByteBuffer out) {
         
         // Index und Inkremente setzen
         int byteOffset = 0;
@@ -198,7 +198,7 @@ public class BaseN implements IDataTranscoder {
         out.limit(out.position());
         out.rewind();
 
-        return out.limit();
+        return out;
     }
     
     /**
