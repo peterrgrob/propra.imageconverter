@@ -76,7 +76,7 @@ public class DataReader implements Closeable {
      * @return
      * @throws IOException 
      */
-    public int read(ByteBuffer buffer) throws IOException {
+    public ByteBuffer read(ByteBuffer buffer) throws IOException {
         return read(buffer, 0, buffer.limit());
     }
     
@@ -88,7 +88,7 @@ public class DataReader implements Closeable {
      * @return
      * @throws IOException 
      */
-    public int read(ByteBuffer buffer, int offset, int len) throws IOException {
+    public ByteBuffer read(ByteBuffer buffer, int offset, int len) throws IOException {
         if(!isValid()
         ||  buffer == null) {
             throw new IllegalStateException();
@@ -103,7 +103,7 @@ public class DataReader implements Closeable {
             throw new UnsupportedOperationException("");
         }
         
-        return len;
+        return buffer;
     }
     
     /**

@@ -34,7 +34,7 @@ public class BaseNWriter extends DataWriter {
      * @throws IOException
      */
     @Override
-    public int write(ByteBuffer buffer) throws IOException {
+    public ByteBuffer write(ByteBuffer buffer) throws IOException {
         if(!isValid()) {
             throw new IllegalStateException();
         }
@@ -56,6 +56,6 @@ public class BaseNWriter extends DataWriter {
         // Zeichen in Datei schreiben
         writeBinaryToTextFile(encodeBuffer);
         
-        return encodeBuffer.limit();
+        return encodeBuffer;
     }
 }

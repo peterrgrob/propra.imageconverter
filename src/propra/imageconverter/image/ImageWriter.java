@@ -79,7 +79,7 @@ public class ImageWriter extends DataWriter {
      * @throws java.io.IOException
      */
     @Override
-    public int write(ByteBuffer buffer) throws IOException {
+    public ByteBuffer write(ByteBuffer buffer) throws IOException {
         if(!isValid() 
         || buffer == null) {
             throw new IllegalArgumentException();
@@ -113,7 +113,7 @@ public class ImageWriter extends DataWriter {
         
         // Anzahl der kodierten Bytes merken
         contentTransfered += tmpBuffer.limit();
-        return tmpBuffer.limit();
+        return tmpBuffer;
     }
     
     /**

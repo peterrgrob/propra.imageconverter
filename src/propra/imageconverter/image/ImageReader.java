@@ -70,7 +70,7 @@ public class ImageReader extends DataReader {
      * @throws java.io.IOException
      */
     @Override
-    public int read(ByteBuffer buffer) throws IOException {
+    public ByteBuffer read(ByteBuffer buffer) throws IOException {
         if(!isValid() 
         || buffer == null) {
             throw new IllegalArgumentException();
@@ -121,7 +121,7 @@ public class ImageReader extends DataReader {
         // Anzahl der dekodierten Bytes merken
         contentTransfered += len; 
         
-        return len;
+        return buffer;
     }
     
     /**

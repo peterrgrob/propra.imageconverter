@@ -125,7 +125,7 @@ public class ImageTranscoderRLE extends ImageTranscoder {
             // Auf fehlerhafte Datenlänge prüfen
             if(decodedBytes + currentBytes > out.capacity()) {
                 ByteBuffer t = ByteBuffer.allocate(out.capacity()<<1);
-                t.put(out.array(), 0, out.capacity());
+                t.put(out.array(), 0, out.position());
                 out = t;
             }
             

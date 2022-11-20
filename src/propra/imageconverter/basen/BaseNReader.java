@@ -34,7 +34,7 @@ public class BaseNReader extends DataReader {
      * @throws IOException
      */
     @Override
-    public int read(ByteBuffer buffer) throws IOException {
+    public ByteBuffer read(ByteBuffer buffer) throws IOException {
         if(!isValid()
         ||  buffer == null) {
             throw new IllegalStateException();
@@ -58,6 +58,6 @@ public class BaseNReader extends DataReader {
                                             readBuffer, 
                                             buffer);
 
-        return buffer.limit();
+        return buffer;
     }
 }

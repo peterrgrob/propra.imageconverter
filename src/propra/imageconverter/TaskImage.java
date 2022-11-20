@@ -118,7 +118,7 @@ public class TaskImage {
         
         // Blöcke übertragen 
         while(inReader.hasMoreData()) {
-            inReader.read(block);
+            block = inReader.read(block);
             outWriter.write(block);
         }
         

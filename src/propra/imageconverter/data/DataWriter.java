@@ -58,7 +58,7 @@ public class DataWriter implements Closeable {
      * @return
      * @throws IOException 
      */
-    public int write(ByteBuffer buffer) throws IOException {
+    public ByteBuffer write(ByteBuffer buffer) throws IOException {
         return write(buffer, 0, buffer.limit());
     }
     
@@ -70,7 +70,7 @@ public class DataWriter implements Closeable {
      * @return
      * @throws IOException
      */
-    public int write(ByteBuffer buffer, int offset, int len) throws IOException {
+    public ByteBuffer write(ByteBuffer buffer, int offset, int len) throws IOException {
         if(!isValid()
         ||  buffer == null) {
             throw new IllegalStateException();
@@ -85,7 +85,7 @@ public class DataWriter implements Closeable {
             writeBinaryToTextFile(buffer);
         }
         
-        return buffer.limit();
+        return buffer;
     }
     
     /**
