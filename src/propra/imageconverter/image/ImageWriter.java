@@ -36,7 +36,7 @@ public class ImageWriter extends DataWriter {
      */
     public ImageWriter(String file, DataFormat.IOMode mode) throws IOException {
         super(file, mode);
-        BLOCK_SIZE = 4096 * 4096 * 3;
+        BLOCK_SIZE = 4096 * 3;
         writeColorFormat = new ColorFormat();
         readColorFormat = new ColorFormat();
     }

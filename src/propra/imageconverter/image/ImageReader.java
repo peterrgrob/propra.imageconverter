@@ -28,7 +28,7 @@ public class ImageReader extends DataReader {
      */
     public ImageReader(String file, DataFormat.IOMode mode) throws IOException {
         super(file, mode);
-        BLOCK_SIZE = 4096 * 4096 * 3;
+        BLOCK_SIZE = 4096 * 3;
     }
     
     /**
