@@ -49,7 +49,6 @@ public class ChecksumPropra extends Checksum {
     
     /**
      *
-     * @return
      */
     @Override
     public void end() {

@@ -27,7 +27,9 @@ public class ImageReaderTGA extends ImageReader {
 
     /**
      *
-     * @param stream
+     * @param file
+     * @param mode
+     * @throws java.io.IOException
      */
     public ImageReaderTGA(String file, DataFormat.IOMode mode) throws IOException {
         super(file, mode);
@@ -59,14 +61,9 @@ public class ImageReaderTGA extends ImageReader {
         // Kompression prüfen
         byte compression = bytes.get(TGA_HEADER_OFFSET_ENCODING);
         switch (compression) {
-            case TGA_HEADER_ENCODING_RLE:
-                newHeader.colorFormat().encoding(DataFormat.Encoding.RLE);
-                break;
-            case TGA_HEADER_ENCODING_NONE:
-                newHeader.colorFormat().encoding(DataFormat.Encoding.NONE);            
-                break;
-            default:
-                throw new UnsupportedOperationException("Nicht unterstützte TGA Kompression!");
+            case TGA_HEADER_ENCODING_RLE -> newHeader.colorFormat().encoding(DataFormat.Encoding.RLE);
+            case TGA_HEADER_ENCODING_NONE -> newHeader.colorFormat().encoding(DataFormat.Encoding.NONE);
+            default -> throw new UnsupportedOperationException("Nicht unterstützte TGA Kompression!");
         }
         
         // Prüfe tga Spezifikationen

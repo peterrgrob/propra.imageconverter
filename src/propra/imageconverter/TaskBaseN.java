@@ -11,37 +11,46 @@ import propra.imageconverter.data.DataReader;
 import propra.imageconverter.data.DataWriter;
 
 /**
- *
+ * Klasse implementiert BaseN Programmfunktionalität
+ * 
  * @author pg
  */
-public class BaseNTask {
+public class TaskBaseN {
     
+    // Ein- und Ausgabeobjekt 
     private DataReader reader;
     private DataWriter writer;
     
     /**
      * 
      */
-    public BaseNTask() {
+    public TaskBaseN() {
         reader = null;
         writer = null;
     }
     
     /**
-     *
+     * Konstruktor, initialisiert den Task 
+     * 
      * @param cmd
      * @throws java.io.FileNotFoundException
      */
-    public BaseNTask(CmdLine cmd) throws FileNotFoundException, IOException {
+    public TaskBaseN(CmdLine cmd) throws FileNotFoundException, IOException {
         if(cmd == null) {
             throw new IllegalArgumentException();
         }
         
         // Ausgabedatei Pfad ableiten
         String outPath = cmd.getOption(CmdLine.Options.INPUT_FILE);      
+        if(outPath == null) {
+            throw new FileNotFoundException("Keine Eingabedatei gegeben!");            
+        }
         
         // Datenformat ableiten
-        BaseNFormat dataFormat = cmd.getBaseNDataFormat();            
+        BaseNFormat dataFormat = cmd.getBaseNDataFormat();  
+        if(dataFormat == null) {
+            throw new IOException("Kein Alphabet gegeben!");            
+        }
             
         // Ausgabeendung ableiten
         String outExt;
@@ -77,7 +86,7 @@ public class BaseNTask {
     
     /**
      *
-     * @return
+     * @return true, wenn IO gesetzt
      */
     public boolean isValid() {
         return (    reader    != null
@@ -86,7 +95,7 @@ public class BaseNTask {
     
     /**
      *
-     * @return
+     * @return Statusstring
      */
     @Override
     public String toString() {
@@ -99,6 +108,7 @@ public class BaseNTask {
     }
     
     /**
+     * Aufgabe ausführen
      * 
      * @throws java.io.IOException 
      */

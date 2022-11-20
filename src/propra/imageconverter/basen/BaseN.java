@@ -35,6 +35,13 @@ public class BaseN implements IDataTranscoder {
 
     }
 
+    /**
+     * Führt die gewünschte Operation durch
+     * @param op
+     * @param in
+     * @param out
+     * @return Anzahl der verarbeiteten Bytes
+     */
     @Override
     public long apply(Operation op, ByteBuffer in, ByteBuffer out) {
         if( !isValid()
@@ -61,7 +68,6 @@ public class BaseN implements IDataTranscoder {
     }
 
     /**
-     *
      * @return
      */
     public boolean isValid() {
@@ -69,10 +75,9 @@ public class BaseN implements IDataTranscoder {
     }
     
     /**
-     * 
      * @param op
      * @param buffer
-     * @return 
+     * @return Gibt die vorraussichtliche Datenmenge einer Operation zurück
      */
     @Override
     public int transcodedBufferLength(Operation op, ByteBuffer buffer) {
@@ -99,10 +104,11 @@ public class BaseN implements IDataTranscoder {
     }
     
     /**
+     * Dekodiert BaseN kodierte Daten
      * 
      * @param in
      * @param out
-     * @return 
+     * @return Datenmenge
      */
     private long decode(ByteBuffer in, ByteBuffer out) {
         
@@ -140,10 +146,10 @@ public class BaseN implements IDataTranscoder {
     }
     
     /**
-     * 
+     * Kodiert Binärdaten in BaseN
      * @param in
      * @param out
-     * @return 
+     * @return Datenmenge
      */
     private long encode(ByteBuffer in, ByteBuffer out) {
         

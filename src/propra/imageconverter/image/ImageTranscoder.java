@@ -109,7 +109,6 @@ public abstract class ImageTranscoder implements IDataTranscoder {
     
     /**
      *
-     * @param inFormat
      */
     @Override
     public void begin() {

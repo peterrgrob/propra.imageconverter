@@ -6,17 +6,16 @@ import propra.imageconverter.image.ColorFormat;
 
 /**
  * Hilfsklasse die Kommandozeilenparameter parsed und speichert, diese
- können über Option abgefragt werden.
+ * können über Option abgefragt werden.
  * 
  * @author pg
  */
  public class CmdLine {
-     
+    
+    // Enthält geparste Optionen, ggfs. mit Wert
     private final HashMap<Options, String> options;
     
-    /*
-     * 
-     */
+    // Optionen für die Kommandozeile
     public enum Options {
         INPUT_FILE("--input"),
         OUTPUT_FILE("--output"),
@@ -69,17 +68,15 @@ import propra.imageconverter.image.ColorFormat;
     } 
     
     /**
-     * 
      * @param opt
-     * @return 
+     * @return Wert der Option oder null
      */
     public String getOption(Options opt) {
         return options.get(opt);
     }
     
     /**
-     *
-     * @return
+     * @return Encoding, je nach Options
      */
     public ColorFormat.Encoding getColorEncoding() {
         String enc = getOption(Options.COMPRESSION);
@@ -94,7 +91,7 @@ import propra.imageconverter.image.ColorFormat;
     /**
      *
      * @param opt
-     * @return
+     * @return 
      */
     public String getExtension(Options opt) {
         return getExtension(getOption(opt));
@@ -103,7 +100,7 @@ import propra.imageconverter.image.ColorFormat;
     /**
      * 
      * @param path
-     * @return 
+     * @return Extrahiert Dateiendung
      */
     private String getExtension(String path) {
         String[] components = path.split("\\.");
@@ -115,7 +112,7 @@ import propra.imageconverter.image.ColorFormat;
     
     /**
      *
-     * @return
+     * @return Gibt passendes BaseNFormat Objekt zurück, oder null
      */
     public BaseNFormat getBaseNDataFormat() {
         String alphabet = null;
@@ -136,9 +133,10 @@ import propra.imageconverter.image.ColorFormat;
             // Von der Kommandozeile übernhemen
             alphabet = options.get(Options.ENCODE_BASE_N);
             if(alphabet == null) {
-               throw new IllegalArgumentException("Ungültiges Alphabet für Base-N Kodierung.");
-            }
-            
+               return null;
+            } else if(alphabet.length() == 0) {
+               return null; 
+            }           
         } 
         
         // Format Objekt zurückgeben
@@ -147,7 +145,7 @@ import propra.imageconverter.image.ColorFormat;
     
     /**
      * 
-     * @return 
+     * @return true wenn Base en- oder dekodierung 
      */
     public boolean isBaseTask() {
         return (options.containsKey(Options.ENCODE_BASE_32)
@@ -157,19 +155,24 @@ import propra.imageconverter.image.ColorFormat;
     }
     
     /**
-     * 
-     * @return 
+     * @return true, wenn BaseN&Base32 Dekodierung
      */
     public boolean isBaseNDecode() {
         return (options.containsKey(Options.DECODE_BASE_32)
             ||  options.containsKey(Options.DECODE_BASE_N)); 
     }
     
+    /**
+     * @return true, wenn BaseN Verarbeitung
+     */
     public boolean isBaseN() {
         return (options.containsKey(Options.ENCODE_BASE_N)
             ||  options.containsKey(Options.DECODE_BASE_N)); 
     }
     
+    /**
+     * @return true, wenn Base32 Verarbeitung
+     */
     public boolean isBase32() {
         return (options.containsKey(Options.ENCODE_BASE_32)
             ||  options.containsKey(Options.DECODE_BASE_32)); 

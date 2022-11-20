@@ -11,7 +11,7 @@ public class DataFormat {
     
     protected Encoding encoding = Encoding.NONE;
     
-    // Kodierungen der Daten
+    // Kodierung der Daten
     public enum Encoding {
         NONE,
         RLE,
@@ -48,9 +48,8 @@ public class DataFormat {
         this.encoding = src.encoding;
     }
     
-        /**
-     *
-     * @param dataEncoding
+    /**
+     * @param encoding
      */
     public void encoding(Encoding encoding) {
         this.encoding = encoding;
@@ -71,6 +70,10 @@ public class DataFormat {
         return true;
     }
     
+    /**
+     * 
+     * @return 
+     */
     public boolean isBinary() {
         return (encoding == Encoding.RLE);
     }

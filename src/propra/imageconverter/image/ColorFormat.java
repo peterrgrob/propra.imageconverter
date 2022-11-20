@@ -129,17 +129,14 @@ public class ColorFormat extends DataFormat implements Comparable<ColorFormat> {
     public void setMapping(int id, int newId) {
         mapping[id] = newId;
     }
-    
     public void setMapping(int[] map) {
         System.arraycopy(map, 0, 
                         this.mapping,0, 
                         map.length);
     }
-    
     public int getMapping(int id) {
         return mapping[id];
-    }
-    
+    }  
     public int[] getMapping() {
         return mapping;
     }

@@ -93,7 +93,7 @@ public class DataWriter implements Closeable {
      * @return
      */
     public boolean isValid() {
-        if(mode == mode.BINARY) {
+        if(mode == IOMode.BINARY) {
             return binaryWriter != null;
         } else {
             return txtWriter != null;

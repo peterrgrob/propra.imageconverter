@@ -38,6 +38,7 @@ public interface IDataTranscoder {
     
     /**
      * 
+     * @param op
      * @param buffer
      * @return 
      */

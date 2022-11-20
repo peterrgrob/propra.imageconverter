@@ -8,23 +8,20 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import propra.imageconverter.data.DataFormat.Encoding;
 import propra.imageconverter.data.DataFormat.IOMode;
-import propra.imageconverter.image.ColorFormat;
-import propra.imageconverter.image.ImageHeader;
-import propra.imageconverter.image.ImageReader;
-import propra.imageconverter.image.ImageReaderProPra;
-import propra.imageconverter.image.ImageReaderTGA;
-import propra.imageconverter.image.ImageWriter;
-import propra.imageconverter.image.ImageWriterProPra;
-import propra.imageconverter.image.ImageWriterTGA;
+import propra.imageconverter.image.*;
 
 /**
- *
+ * Klasse implementiert Bildkonvertierung
+ * 
  * @author pg
  */
-public class ImageTask {
+public class TaskImage {
     
+    // IO Objekte
     private ImageReader inReader;
     private ImageWriter outWriter;
+    
+    // Kodierung des Ausgbaebildes
     private ColorFormat.Encoding outEncoding = ColorFormat.Encoding.NONE;
     
     /**
@@ -32,7 +29,7 @@ public class ImageTask {
      * @param cmd
      * @throws IOException 
      */
-    public ImageTask(CmdLine cmd) throws IOException {
+    public TaskImage(CmdLine cmd) throws IOException {
         if(cmd == null) {
             throw new IllegalArgumentException();
         }
@@ -46,6 +43,10 @@ public class ImageTask {
        
         // Verzeichnisse und Datei für die Ausgabe erstellen, falls nötig
         String outPath = cmd.getOption(CmdLine.Options.OUTPUT_FILE);  
+        if(outPath == null) {
+            throw new IOException("Kein Ausgabepfad gegeben!");            
+        }
+        
         Path outDirs = Paths.get(outPath);
         Files.createDirectories(outDirs.getParent());
         File file = new File(outPath);
@@ -66,7 +67,8 @@ public class ImageTask {
     
     
     /**
-     *
+     * Konvertierung ausführen
+     * 
      * @throws IOException
      */
     public void convert() throws IOException {
@@ -80,8 +82,8 @@ public class ImageTask {
     }
     
     /**
+     * Bereitet blockweise Konvertierung der Bilddaten vor
      *
-     * @return 
      * @throws IOException
      */
     private void begin() throws IOException {
@@ -98,6 +100,7 @@ public class ImageTask {
     }
     
     /**
+     * Blockweise Konvertierung der Bilddaten
      * 
      * @throws java.io.IOException 
      */
@@ -125,7 +128,8 @@ public class ImageTask {
     }
     
     /**
-     *
+     * Blockweise Konvertierung der Bilddaten abschließen 
+     * 
      * @throws IOException
      */
     private void end() throws IOException {
@@ -147,7 +151,6 @@ public class ImageTask {
     }
     
     /**
-     *
      * @throws java.io.IOException
      */
     public void isChecksumValid() throws IOException {
@@ -161,7 +164,6 @@ public class ImageTask {
     }
     
     /**
-     *
      * @return
      */
     public boolean isValid() {
@@ -170,7 +172,6 @@ public class ImageTask {
     }
     
     /**
-     *
      * @return
      */
     @Override
@@ -190,7 +191,8 @@ public class ImageTask {
     }
     
     /**
-     *
+     *  Erstellt Ausgabe Objekt
+     * 
      * @param ext
      * @param streamLen
      * @return
@@ -209,7 +211,8 @@ public class ImageTask {
     }
     
     /**
-     *
+     * Erstellt Eingabe Objekt
+     * 
      * @param ext
      * @param streamLen
      * @return

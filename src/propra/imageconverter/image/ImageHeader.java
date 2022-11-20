@@ -13,7 +13,6 @@ public class ImageHeader {
     private int height;
     private int pixelSize;   
     private long dataLength;
-
     private long checksum;
     private ColorFormat colorType = new ColorFormat();
   
@@ -49,9 +48,8 @@ public class ImageHeader {
                 &&  pixelSize == 3);
     }
     
-    /**
-     * 
-     * @return 
+    /*
+     *  Getter/Setter
      */
     public int pixelCount() {
         return width * height;

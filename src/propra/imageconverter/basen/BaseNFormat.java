@@ -3,7 +3,8 @@ package propra.imageconverter.basen;
 import propra.imageconverter.data.DataFormat;
 
 /**
- *
+ * BaseN Datenformat
+ * 
  * @author pg
  */
 public class BaseNFormat extends DataFormat {
@@ -41,8 +42,12 @@ public class BaseNFormat extends DataFormat {
         }
     }
 
+    /**
+     * 
+     */
     public BaseNFormat() {
         this.baseEncoding = BaseNEncoding.NONE;
+        this.encoding = Encoding.BASEN;
     }
     
     /**
@@ -68,7 +73,6 @@ public class BaseNFormat extends DataFormat {
     /**
      *
      * @param alphabet
-     * @param dataEncoding
      */
     public void setEncoding(String alphabet) {
         if(alphabet == null) {
@@ -131,7 +135,7 @@ public class BaseNFormat extends DataFormat {
         return true;
     }
     
-        /**
+    /**
      *
      * @return
      */
@@ -163,6 +167,10 @@ public class BaseNFormat extends DataFormat {
         return baseEncoding.bitCount;
     }
     
+    /**
+     * 
+     * @return 
+     */
     public int getCharLength() {
         return baseEncoding.charLength;
     }

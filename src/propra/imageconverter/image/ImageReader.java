@@ -20,7 +20,12 @@ public class ImageReader extends DataReader {
     protected ImageTranscoder decoder;    
     protected ImageHeader header;
 
-    
+    /**
+     * 
+     * @param file
+     * @param mode
+     * @throws IOException 
+     */
     public ImageReader(String file, DataFormat.IOMode mode) throws IOException {
         super(file, mode);
         BLOCK_SIZE = 1024 * 4096 * 3;
@@ -50,6 +55,7 @@ public class ImageReader extends DataReader {
     
     /**
      * 
+     * @return 
      * @throws IOException 
      */
     public ImageHeader readHeader() throws IOException {

@@ -84,14 +84,9 @@ public class ImageReaderProPra extends ImageReader {
         
         // Kompression prüfen
         switch (bytes.get(PROPRA_HEADER_OFFSET_ENCODING)) {
-            case PROPRA_HEADER_ENCODING_RLE:
-                newHeader.colorFormat().encoding(DataFormat.Encoding.RLE);
-                break;
-            case PROPRA_HEADER_ENCODING_NONE:
-                newHeader.colorFormat().encoding(DataFormat.Encoding.NONE);  
-                break;
-            default:
-                throw new UnsupportedOperationException("Nicht unterstützte Kompression!");
+            case PROPRA_HEADER_ENCODING_RLE -> newHeader.colorFormat().encoding(DataFormat.Encoding.RLE);
+            case PROPRA_HEADER_ENCODING_NONE -> newHeader.colorFormat().encoding(DataFormat.Encoding.NONE);
+            default -> throw new UnsupportedOperationException("Nicht unterstützte Kompression!");
         }
         
         // Prüfe ProPra Spezifikationen

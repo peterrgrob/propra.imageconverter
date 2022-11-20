@@ -33,7 +33,7 @@ public class ImageConverter {
             // Komandozeilenparameter parsen.
             CmdLine cmdLine = new CmdLine(args);
             
-            // Klasseninstanz erstellen und task starten
+            // Klasseninstanz erstellen und gewünschten Task starten
             ImageConverter converter = new ImageConverter(); 
             if(cmdLine.isBaseTask()) {
                 converter.doBaseNTask(cmdLine);
@@ -47,11 +47,14 @@ public class ImageConverter {
 
             // Infos Programmablauf ausgeben
             System.out.println("Task abgeschlossen in (ms): " + String.valueOf(timeElapsed));
-        }
-        catch(FileNotFoundException e) {
+        } catch(FileNotFoundException e) {
             System.out.println("Datei nicht gefunden!");
             System.exit(ERROR_EXIT_CODE);
         }
+        catch(IOException e) {
+            System.out.println("Ungültige Parameter!");
+            System.exit(ERROR_EXIT_CODE);
+        } 
         catch(Exception e) {
             Logger.getLogger(ImageConverter.class.getName()).log(Level.SEVERE, null, e);
             System.err.println(e.toString());
@@ -73,14 +76,15 @@ public class ImageConverter {
         System.out.println(cmdLine.getOption(CmdLine.Options.INPUT_FILE));
         System.out.println(cmdLine.getOption(CmdLine.Options.OUTPUT_FILE));
         
-        ImageTask op = new ImageTask(cmdLine);
+        // Task ausführen
+        TaskImage op = new TaskImage(cmdLine);
         op.convert();
         
-        // Info ausgeben
         System.out.println(op.toString());
     }   
     
     /**
+     * BaseN Kodierung entsprechend der Kommandozeilenparameter
      * 
      * @param cmdLine
      * @throws FileNotFoundException
@@ -93,7 +97,7 @@ public class ImageConverter {
         System.out.println(cmdLine.getOption(CmdLine.Options.INPUT_FILE));
         
         // BaseN Kodierung ausführen
-        BaseNTask op = new BaseNTask(cmdLine);
+        TaskBaseN op = new TaskBaseN(cmdLine);
         op.doTask();   
         
         // Info ausgeben

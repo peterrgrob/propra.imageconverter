@@ -42,14 +42,15 @@ public class BaseNReader extends DataReader {
             
         // Alphabet vorhanden?
         if(decoder.dataFormat().getAlphabet().length() == 0) {
+            
             // Alphabet aus Datei einlesen und DatenFormat ableiten
             String alphabet = binaryReader.readLine();
             decoder.dataFormat().setEncoding(alphabet);
             buffer.limit(buffer.capacity() - alphabet.length() - 1);
         }
-            
+                    
         // Daten in temoprären Puffer einlesen
-        ByteBuffer readBuffer = ByteBuffer.allocate(buffer.capacity());
+        ByteBuffer readBuffer = ByteBuffer.allocate(buffer.limit());
         binaryReader.read(readBuffer.array(), 0, readBuffer.capacity());
 
         // In Puffer dekodieren

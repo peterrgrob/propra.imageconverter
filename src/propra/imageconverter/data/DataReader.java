@@ -139,7 +139,7 @@ public class DataReader implements Closeable {
      * @throws IOException
      */
     public boolean hasMoreData() throws IOException {
-        if(ioMode == ioMode.BINARY) {
+        if(ioMode == IOMode.BINARY) {
             return (binaryReader.length() < binaryReader.getFilePointer());
         } 
         return false;
@@ -164,14 +164,14 @@ public class DataReader implements Closeable {
      * @return 
      */
     public boolean isValid() {
-        if(ioMode == ioMode.BINARY) {
+        if(ioMode == IOMode.BINARY) {
             return binaryReader != null;
         } else {
             return txtReader != null;
         }
     }
     
-        /**
+    /**
      *
      * @return
      */
