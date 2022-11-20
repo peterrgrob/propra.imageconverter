@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import propra.imageconverter.checksum.ChecksumPropra;
 import propra.imageconverter.data.DataFormat;
 
 /**
@@ -24,13 +25,18 @@ public class ImageReaderProPra extends ImageReader {
     static final int PROPRA_HEADER_ENCODING_NONE = 0;     
     static final int PROPRA_HEADER_ENCODING_RLE = 1;   
     
+    int referenceChecksum;
+    
     /**
      *
-     * @param stream
+     * @param file
+     * @param mode
+     * @throws java.io.IOException
      */
     public ImageReaderProPra(String file, DataFormat.IOMode mode) throws IOException {
         super(file, mode);
         formatHeaderSize = PROPRA_HEADER_SIZE;   
+        checksumObj = new ChecksumPropra();
     }
     
     /**
@@ -67,7 +73,7 @@ public class ImageReaderProPra extends ImageReader {
         newHeader.width(bytes.getShort(PROPRA_HEADER_OFFSET_WIDTH));
         newHeader.height(bytes.getShort(PROPRA_HEADER_OFFSET_HEIGHT));
         newHeader.pixelSize((int)bytes.get(PROPRA_HEADER_OFFSET_BPP) >> 3); 
-        newHeader.checksum(bytes.getInt(PROPRA_HEADER_OFFSET_CHECKSUM)); 
+        referenceChecksum = bytes.getInt(PROPRA_HEADER_OFFSET_CHECKSUM); 
         long dataLen = bytes.getLong(PROPRA_HEADER_OFFSET_DATALEN); 
         newHeader.encodedSize(dataLen);
         
@@ -104,4 +110,16 @@ public class ImageReaderProPra extends ImageReader {
         header = newHeader;
         return header;
     }  
+
+    /**
+     * 
+     * @return 
+     */
+    @Override
+    public boolean validChecksum() {
+        if(checksumObj != null) {
+            return referenceChecksum == header.checksum();
+        }
+        return true;
+    }   
 }

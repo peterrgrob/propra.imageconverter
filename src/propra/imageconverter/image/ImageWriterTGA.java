@@ -49,6 +49,8 @@ public class ImageWriterTGA extends ImageWriter {
                             (short)srcHeader.width());
         byteBuffer.putShort(ImageReaderTGA.TGA_HEADER_OFFSET_HEIGHT, 
                             (short)srcHeader.height());
+        byteBuffer.putShort(ImageReaderTGA.TGA_HEADER_OFFSET_Y0, 
+                            (short)srcHeader.height());
         byteBuffer.put(ImageReaderTGA.TGA_HEADER_OFFSET_BPP, 
                             (byte)(srcHeader.pixelSize() << 3));        
         byteBuffer.put(ImageReaderTGA.TGA_HEADER_OFFSET_ORIGIN, 

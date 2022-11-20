@@ -191,6 +191,14 @@ public class DataReader implements Closeable {
     }
     
     /**
+     * 
+     * @return 
+     */
+    public boolean validChecksum() {
+        return true;
+    }
+    
+    /**
      *
      * @param bytes
      */

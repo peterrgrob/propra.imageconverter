@@ -37,8 +37,10 @@ public class ImageReaderTGA extends ImageReader {
     /**
      * 
      * 
+     * @return 
      * @throws java.io.IOException
      */
+    @Override
     public ImageHeader readHeader() throws IOException {
         
         // DataBuffer für Header erstellen       

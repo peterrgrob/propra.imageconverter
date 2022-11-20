@@ -64,6 +64,7 @@ public class ImageReader extends DataReader {
      * @return
      * @throws java.io.IOException
      */
+    @Override
     public int read(ByteBuffer buffer) throws IOException {
         if(!isValid() 
         || buffer == null) {
@@ -127,11 +128,9 @@ public class ImageReader extends DataReader {
         
         // Checksumme im Header vermerken
         if(checksumObj != null) {
+            checksumObj.end();
             header.checksum(getChecksum());
         }
-        
-        //// Farbkonvertierung abschließen
-        //colorConverter.end(); 
         
         // Kompression abschließen
         if(decoder != null) {
@@ -147,6 +146,7 @@ public class ImageReader extends DataReader {
      * @return
      * @throws IOException
      */
+    @Override
     public boolean hasMoreData() throws IOException {
         return (header.imageSize() - contentTransfered) != 0;
     }

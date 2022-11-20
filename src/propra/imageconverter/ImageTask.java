@@ -1,7 +1,6 @@
 package propra.imageconverter;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
@@ -123,9 +122,6 @@ public class ImageTask {
         // blockweise Übertragung beenden     
         inReader.end();
         outWriter.end();
-        
-        // Prüfsumme prüfen
-        isChecksumValid();
     }
     
     /**
@@ -136,6 +132,9 @@ public class ImageTask {
         if(!isValid()) {
             throw new IllegalStateException();
         }
+        
+        // Prüfsumme prüfen
+        isChecksumValid();
         
         // Falls nötig Header aktualisieren
         if( outWriter.getChecksumObj() != null
@@ -156,18 +155,8 @@ public class ImageTask {
             throw new IllegalStateException();
         }
         
-        if(inReader.getChecksumObj() != null) {
-            if(inReader.getChecksumObj().getValue() 
-            != inReader.getHeader().checksum()) {
-                throw new IOException("Eingabe Prüfsummenfehler!");
-            }
-        }
-        if(outWriter.getChecksumObj() != null
-        && inReader.getChecksumObj() != null) {
-            if(inReader.getChecksumObj().getValue() 
-            != inReader.getHeader().checksum()) {
-                throw new IOException("Ausgabe Prüfsummenfehler!");
-            }
+        if(!inReader.validChecksum()) {
+            throw new IOException("Eingabe Prüfsummenfehler!");
         }
     }
     
