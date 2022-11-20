@@ -7,7 +7,7 @@ import propra.imageconverter.checksum.ChecksumPropra;
 import propra.imageconverter.data.DataFormat;
 
 /**
- *
+ * Schreibt ProPra Header
  * @author pg
  */
 public class ImageWriterProPra extends ImageWriter {
@@ -26,10 +26,11 @@ public class ImageWriterProPra extends ImageWriter {
     }
     
     /**
-     *  Wandelt einen allgemeinen Header in einen ProPra Header um
+     * Schreibt allgemeinen Header als ProPra Header
      * 
      * @param srcHeader
      */
+    @Override
     public void writeHeader(ImageHeader srcHeader) throws IOException {
         if(srcHeader.isValid() == false) {
             throw new IllegalArgumentException();

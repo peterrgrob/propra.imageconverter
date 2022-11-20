@@ -7,7 +7,8 @@ import propra.imageconverter.data.DataWriter;
 import propra.imageconverter.data.IDataTranscoder;
 
 /**
- *
+ * Oberklasse für formatspezifische ImageWriter
+ * 
  * @author pg
  */
 public class ImageWriter extends DataWriter {

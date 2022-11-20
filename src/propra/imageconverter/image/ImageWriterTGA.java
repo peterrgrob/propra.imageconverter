@@ -6,7 +6,8 @@ import java.nio.ByteOrder;
 import propra.imageconverter.data.DataFormat;
 
 /**
- *
+ *  Schreibt TGA Header
+ * 
  * @author pg
  */
 public class ImageWriterTGA extends ImageWriter {  
@@ -24,7 +25,7 @@ public class ImageWriterTGA extends ImageWriter {
     }
     
     /**
-     * Wandelt einen allgemeinen Header in einen TGA Header um
+     * Schreibt allgemeinen Header als TGA Header
      * 
      * @param srcHeader
      * @throws java.io.IOException
