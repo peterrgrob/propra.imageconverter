@@ -110,7 +110,7 @@ public class TaskImage {
         }
 
         // Datenblock für blockweise Übertragung erstellen
-        ByteBuffer block = ByteBuffer.allocate(inReader.getBlockSize());
+        ByteBuffer block = ByteBuffer.allocate((int)inReader.getSize()<<1);
         
         // Blockweise Übertragung starten
         inReader.begin();

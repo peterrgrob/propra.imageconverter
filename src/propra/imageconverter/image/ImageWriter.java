@@ -36,8 +36,7 @@ public class ImageWriter extends DataWriter {
      */
     public ImageWriter(String file, DataFormat.IOMode mode) throws IOException {
         super(file, mode);
-        BLOCK_SIZE = 1024 * 4096 * 3;
-        this.writeBuffer = ByteBuffer.allocate(BLOCK_SIZE);
+        BLOCK_SIZE = 4096 * 4096 * 3;
         writeColorFormat = new ColorFormat();
         readColorFormat = new ColorFormat();
     }
@@ -98,6 +97,8 @@ public class ImageWriter extends DataWriter {
         
         // Kompression erforderlich?
         if(encoder != null) {
+            writeBuffer = ByteBuffer.allocate(buffer.capacity()<<1);
+            
             // Block komprimieren
             encoder.apply(IDataTranscoder.Operation.ENCODE, 
                                 buffer, 

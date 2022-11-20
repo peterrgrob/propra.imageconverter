@@ -28,8 +28,7 @@ public class ImageReader extends DataReader {
      */
     public ImageReader(String file, DataFormat.IOMode mode) throws IOException {
         super(file, mode);
-        BLOCK_SIZE = 1024 * 4096 * 3;
-        this.readBuffer = ByteBuffer.allocate(BLOCK_SIZE);
+        BLOCK_SIZE = 4096 * 4096 * 3;
     }
     
     /**
@@ -82,8 +81,10 @@ public class ImageReader extends DataReader {
         // Dekompression erforderlich?
         if(decoder != null) {
             
-            // Aktuelle Blockgröße berechnen
-            len = readBuffer.capacity();
+            // Temp. Puffer
+            len = buffer.capacity();
+            readBuffer = ByteBuffer.allocate(len);
+            
             long remainingBytes = binaryReader.length() - binaryReader.getFilePointer();
             if(readBuffer.capacity() > remainingBytes) {
                 len = (int)(remainingBytes);
