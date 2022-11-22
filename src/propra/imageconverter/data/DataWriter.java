@@ -17,7 +17,8 @@ import propra.imageconverter.data.DataFormat.IOMode;
  *
  * @author pg
  */
-public class DataWriter implements Closeable {
+public class DataWriter implements  Writeable,
+                                    Closeable {
     
     protected final IOMode mode;
     protected RandomAccessFile binaryWriter;
@@ -37,19 +38,6 @@ public class DataWriter implements Closeable {
         } else {
             txtWriter = createTextWriter(file);
         }
-    }
-    
-    /**
-     *
-     * @throws java.io.IOException
-     */
-    public void begin() throws IOException {
-    }
-    
-    /**
-     *
-     */
-    public void end() {
     }
     
     /**

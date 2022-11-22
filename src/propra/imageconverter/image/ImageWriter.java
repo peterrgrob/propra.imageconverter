@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataFormat;
 import propra.imageconverter.data.DataWriter;
+import propra.imageconverter.data.IDataCallback;
 import propra.imageconverter.data.IDataTranscoder;
 
 /**
@@ -11,7 +12,7 @@ import propra.imageconverter.data.IDataTranscoder;
  * 
  * @author pg
  */
-public class ImageWriter extends DataWriter {
+public class ImageWriter extends DataWriter implements IDataCallback {
     
     // IO Variablen
     protected final int BLOCK_SIZE;
@@ -52,25 +53,16 @@ public class ImageWriter extends DataWriter {
     }
     
     /**
-     *
-     * @throws java.io.IOException
+     * 
+     * @param data 
      */
     @Override
-    public void begin() throws IOException {     
-        super.begin();
-        
-        // Encoder erstellen
-        encoder = header.colorFormat().createTranscoder();
-        if(encoder != null) {
-            encoder.begin(header.colorFormat());
+    public void dataCallback(ByteBuffer data) throws IOException {
+        if(data != null) {
+            write(data);
         }
-        
-        if(checksumObj != null) {
-            checksumObj.begin();
-        }
-        
-        contentTransfered = 0;
     }
+    
     
     /**
      * Wandelt Bilddaten in bytes um. 
@@ -114,27 +106,6 @@ public class ImageWriter extends DataWriter {
         // Anzahl der kodierten Bytes merken
         contentTransfered += tmpBuffer.limit();
         return tmpBuffer;
-    }
-    
-    /**
-     *
-     */
-    @Override
-    public void end() {
-        
-        super.end();
-        
-        // Checksumme im Header vermerken
-        if(checksumObj != null) {
-            checksumObj.end();
-            header.checksum(getChecksum());
-        }
-        
-        // Kompression abschließen
-        if(encoder != null) {
-            encoder.end();
-            header.encodedSize(contentTransfered);
-        }
     }
     
     /**

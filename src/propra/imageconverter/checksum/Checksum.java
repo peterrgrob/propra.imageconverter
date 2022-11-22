@@ -52,9 +52,9 @@ public abstract class Checksum implements IDataFilter {
      * @return
      */
     public long check(ByteBuffer buffer) {
-        begin();
+        beginFilter();
         apply(buffer);
-        end();
+        endFilter();
         return getValue();
     }
     
@@ -62,7 +62,7 @@ public abstract class Checksum implements IDataFilter {
      *
      */
     @Override
-    public void begin() {
+    public void beginFilter() {
         value = 0;
     }
     
@@ -70,7 +70,7 @@ public abstract class Checksum implements IDataFilter {
      *
      */
     @Override
-    public abstract void end();
+    public abstract void endFilter();
     
     /**
      * Aktualisiert die aktuelle Prüfsumme mit Bytes 
@@ -80,15 +80,4 @@ public abstract class Checksum implements IDataFilter {
      */
     @Override
     public abstract ByteBuffer apply(ByteBuffer in);
-    
-    /**
-     *
-     * @param in
-     * @param out
-     * @return 
-     */
-    @Override
-    public ByteBuffer apply(ByteBuffer in, ByteBuffer out) {
-        return apply(in);
-    }
 }

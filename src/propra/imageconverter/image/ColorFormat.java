@@ -110,14 +110,14 @@ public class ColorFormat extends DataFormat implements Comparable<ColorFormat> {
      *
      * @return
      */
-    public ImageTranscoder createTranscoder() {
+    public ImageCoder createTranscoder() {
         switch(encoding) {
 
             case NONE -> {
-                return null;
+                return new ImageCoder();
             }
             case RLE -> {
-                return new ImageTranscoderRLE();
+                return new ImageCoderRLE();
             }
         }
         return null;

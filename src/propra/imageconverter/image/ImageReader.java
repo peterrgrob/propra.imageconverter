@@ -3,8 +3,9 @@ package propra.imageconverter.image;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataFormat;
+import propra.imageconverter.data.DataFormat.Operation;
 import propra.imageconverter.data.DataReader;
-import propra.imageconverter.data.IDataTranscoder;
+import propra.imageconverter.data.IDataCallback;
 
 /**
  *
@@ -12,12 +13,11 @@ import propra.imageconverter.data.IDataTranscoder;
  */
 public class ImageReader extends DataReader {
 
-    protected final int BLOCK_SIZE;
     protected int formatHeaderSize;
     protected ByteBuffer readBuffer;
     protected long contentTransfered;
 
-    protected ImageTranscoder decoder;    
+    protected ImageCoder decoder;    
     protected ImageHeader header;
 
     /**
@@ -28,30 +28,9 @@ public class ImageReader extends DataReader {
      */
     public ImageReader(String file, DataFormat.IOMode mode) throws IOException {
         super(file, mode);
-        BLOCK_SIZE = 4096 * 3;
     }
     
-    /**
-     *
-     */
-    @Override
-    public void begin() throws IOException {
-        
-        super.begin();
-        
-        // Format für die Konvertierung setzen
-        //colorConverter.outFormat(header.colorFormat());
-        //colorConverter.begin();
-        
-        // Dekoder erstellen
-        decoder = header.colorFormat().createTranscoder();
-        if(decoder != null) {
-            decoder.begin(header.colorFormat());
-        }
-        
-        contentTransfered = 0;
-    }
-    
+
     /**
      * 
      * @return 
@@ -63,99 +42,33 @@ public class ImageReader extends DataReader {
     
     
     /**
-     * Erstellt Image aus Byte Daten 
      * 
-     * @param buffer
-     * @return
+     * @param dataTarget
      * @throws java.io.IOException
      */
-    @Override
-    public ByteBuffer read(ByteBuffer buffer) throws IOException {
+    public void readImage(IDataCallback dataTarget) throws IOException {
         if(!isValid() 
-        || buffer == null) {
+        || dataTarget == null) {
             throw new IllegalArgumentException();
         }
         
-        int len = 0;
+        // Dekoder erstellen
+        decoder = header.colorFormat().createTranscoder();
+        decoder.begin(  Operation.DECODE,
+                        header.colorFormat(), 
+                        checksumObj);
         
-        // Dekompression erforderlich?
-        if(decoder != null) {
+        // Dekomprimieren
+        decoder.decode( binaryReader,
+                        dataTarget);
             
-            // Temp. Puffer
-            len = buffer.capacity();
-            readBuffer = ByteBuffer.allocate(len);
-            
-            long remainingBytes = binaryReader.length() - binaryReader.getFilePointer();
-            if(readBuffer.capacity() > remainingBytes) {
-                len = (int)(remainingBytes);
-            }
-            
-            // Block aus der Datei lesen
-            read(readBuffer, 0, len);
-            
-            // Prüfsumme mit aktuellem Block vor dekodierung aktualisieren
-            updateChecksum(readBuffer);  
-            
-            // Block dekomprimieren
-            buffer = decoder.apply(IDataTranscoder.Operation.DECODE, 
-                                    readBuffer, 
-                                    buffer);
-            
-            len = buffer.limit();
-            
-        } else {
-            
-            // Aktuelle Blockgröße berechnen
-            len = buffer.capacity();
-            if(contentTransfered + buffer.capacity() > header.imageSize()) {
-                len = (int)(header.imageSize() - contentTransfered);
-            }
-            
-            // Daten aus der Datei direkt in buffer lesen ohne Dekompression
-            read(buffer, 0, len);
-            
-            // Prüfsumme mit aktuellem Block aktualisieren
-            updateChecksum(buffer);  
-        } 
-        
-        // Anzahl der dekodierten Bytes merken
-        contentTransfered += len; 
-        
-        return buffer;
-    }
-    
-    /**
-     *
-     * @return
-     */
-    @Override
-    public long end() {
-        
-        super.end();
         
         // Checksumme im Header vermerken
         if(checksumObj != null) {
-            checksumObj.end();
-            header.checksum(getChecksum());
+            header.checksum(checksumObj.getValue());
         }
         
-        // Kompression abschließen
-        if(decoder != null) {
-            decoder.end();
-        }
-        
-        // Anzahl aller bearbeiteten Bytes zurückgeben
-        return contentTransfered;
-    }
-    
-    /**
-     *
-     * @return
-     * @throws IOException
-     */
-    @Override
-    public boolean hasMoreData() throws IOException {
-        return (header.imageSize() - contentTransfered) != 0;
+        decoder.end();
     }
     
     /**
@@ -164,14 +77,6 @@ public class ImageReader extends DataReader {
      */
     public int getHeaderSize() {
         return formatHeaderSize;
-    }
-
-    /**
-     *
-     * @return
-     */
-    public int getBlockSize() {
-        return BLOCK_SIZE;
     }
 
     /**

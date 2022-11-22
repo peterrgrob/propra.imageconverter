@@ -109,23 +109,8 @@ public class TaskImage {
             throw new IllegalArgumentException();
         }
 
-        // Datenblock für blockweise Übertragung erstellen
-        ByteBuffer block = ByteBuffer.allocate((int)inReader.getSize()<<1);
-        
-        // Blockweise Übertragung starten
-        inReader.begin();
-        outWriter.begin();
-        
-        // Blöcke übertragen 
-        while(inReader.hasMoreData()) {
-            block = inReader.read(block);
-            outWriter.write(block);
-        }
-        
-        // blockweise Übertragung beenden     
-        inReader.end();
-        outWriter.end();
-    }
+        inReader.readImage(outWriter);
+    }    
     
     /**
      * Blockweise Konvertierung der Bilddaten abschließen 

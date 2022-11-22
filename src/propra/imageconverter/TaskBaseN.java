@@ -121,16 +121,8 @@ public class TaskBaseN {
         ByteBuffer block = ByteBuffer.allocate((int)reader.getSize());
         block.limit((int)reader.getSize());
         
-        // Blockweise Übertragung starten
-        reader.begin();
-        writer.begin();
-        
         // Datenübertragung
         reader.read(block);
         writer.write(block);
-        
-        // Blockweise Übertragung beenden     
-        reader.end();
-        writer.end();
     }
 }

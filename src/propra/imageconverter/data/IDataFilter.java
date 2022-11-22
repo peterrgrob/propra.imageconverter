@@ -10,7 +10,7 @@ public interface IDataFilter {
     /**
      * 
      */
-    public void begin();
+    public void beginFilter();
     
     /**
      * 
@@ -21,14 +21,6 @@ public interface IDataFilter {
     
     /**
      * 
-     * @param in
-     * @param out
-     * @return 
      */
-    public ByteBuffer apply(ByteBuffer in, ByteBuffer out);
-    
-    /**
-     * 
-     */
-    public void end();
+    public void endFilter();
 }

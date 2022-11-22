@@ -24,6 +24,14 @@ public class DataFormat {
         BINARY,
         TEXT;
     }
+    
+    // Datenoperation
+    public enum Operation {
+        ENCODE,
+        DECODE,
+        FILTER,
+        NONE;
+    }
 
     /**
      *

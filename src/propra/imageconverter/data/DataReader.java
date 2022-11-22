@@ -15,7 +15,8 @@ import propra.imageconverter.data.DataFormat.IOMode;
  *
  * @author pg
  */
-public class DataReader implements Closeable {
+public class DataReader implements  Readable,
+                                    Closeable {
     
     private final IOMode ioMode;
     protected RandomAccessFile binaryReader;
@@ -30,7 +31,7 @@ public class DataReader implements Closeable {
      */
     public DataReader(String file, IOMode mode) throws IOException {
         this.ioMode = mode;
-        
+
         // Prüfe auf existenz
         if(!fileExists(file)) {
             throw new FileNotFoundException("Datei nicht gefunden!");
@@ -49,25 +50,6 @@ public class DataReader implements Closeable {
      */
     public IOMode getMode() {
         return ioMode;
-    }
-    
-    /**
-     * 
-     * @throws java.io.IOException
-     */
-    public void begin() throws IOException {
-        // Prüfsumme initialisieren
-        if(checksumObj != null) {
-            checksumObj.begin();
-        }
-    }
-    
-    /**
-     * 
-     * @return 
-     */
-    public long end() {
-        return 0;
     }
     
     /**

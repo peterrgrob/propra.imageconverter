@@ -18,7 +18,7 @@ public class ChecksumPropra extends Checksum {
      * 
      */
     @Override
-    public void begin() {
+    public void beginFilter() {
         currAi = 0;
         currBi = 1;
         currIndex = 0;
@@ -51,7 +51,7 @@ public class ChecksumPropra extends Checksum {
      *
      */
     @Override
-    public void end() {
+    public void endFilter() {
         value = (currAi << 16) + currBi;
     }
 
