@@ -31,9 +31,10 @@ public class ImageReaderTGA extends ImageReader {
      * @param mode
      * @throws java.io.IOException
      */
-    public ImageReaderTGA(String file, DataFormat.IOMode mode) throws IOException {
+    public ImageReaderTGA(  String file, 
+                            DataFormat.IOMode mode) throws IOException {
         super(file, mode);
-        formatHeaderSize = TGA_HEADER_SIZE;   
+        fileHeaderSize = TGA_HEADER_SIZE;   
     }
 
     /**
@@ -46,11 +47,11 @@ public class ImageReaderTGA extends ImageReader {
     public ImageHeader readHeader() throws IOException {
         
         // DataBuffer für Header erstellen       
-        ByteBuffer bytes = ByteBuffer.allocate(formatHeaderSize);
+        ByteBuffer bytes = ByteBuffer.allocate(fileHeaderSize);
         bytes.order(ByteOrder.LITTLE_ENDIAN);
        
         // Headerbytes von Stream einlesen
-        read(bytes, 0, formatHeaderSize);
+        read(bytes, 0, fileHeaderSize);
         
         // Headerfelder konvertieren
         ImageHeader newHeader = new ImageHeader();

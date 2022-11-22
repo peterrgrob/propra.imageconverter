@@ -40,13 +40,12 @@ public class BaseNWriter extends DataWriter {
         }
         
         // Puffer erstellen
-        int len = encoder.transcodedBufferLength(IDataTranscoder.Operation.ENCODE, buffer);
-        ByteBuffer encodeBuffer = ByteBuffer.allocate(len);
+        /*int len = encoder.transcodedBufferLength(IDataTranscoder.Operation.ENCODE, buffer);
+        ByteBuffer encodeBuffer = ByteBuffer.allocate(len);*/
         
         // Daten kodieren
-        encoder.apply(IDataTranscoder.Operation.ENCODE, 
-                            buffer, 
-                            encodeBuffer);
+        encoder.encode( binaryWriter, 
+                        buffer);
 
         // Alphabet in Datei schreiben 
         if(format.getBaseEncoding() != BaseNFormat.BaseNEncoding.BASE_32) {
@@ -54,8 +53,8 @@ public class BaseNWriter extends DataWriter {
         }
 
         // Zeichen in Datei schreiben
-        writeBinaryToTextFile(encodeBuffer);
+        //writeBinaryToTextFile(encodeBuffer);
         
-        return encodeBuffer;
+        return buffer;
     }
 }

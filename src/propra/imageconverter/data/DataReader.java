@@ -15,8 +15,7 @@ import propra.imageconverter.data.DataFormat.IOMode;
  *
  * @author pg
  */
-public class DataReader implements  Readable,
-                                    Closeable {
+public class DataReader implements Closeable {
     
     private final IOMode ioMode;
     protected RandomAccessFile binaryReader;

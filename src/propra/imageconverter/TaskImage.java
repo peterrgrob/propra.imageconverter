@@ -2,7 +2,6 @@ package propra.imageconverter;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -77,7 +76,7 @@ public class TaskImage {
         }
         
         begin();
-            process();
+            inReader.readImage(outWriter);
         end(); 
     }
     
@@ -97,20 +96,7 @@ public class TaskImage {
         // Bildkompression setzen und Bildkopf in Ausgabedatei schreiben
         inHeader.colorFormat().encoding(outEncoding);
         outWriter.writeHeader(inHeader);
-    }
-    
-    /**
-     * Blockweise Konvertierung der Bilddaten
-     * 
-     * @throws java.io.IOException 
-     */
-    private void process() throws IOException {
-        if(!isValid()) {
-            throw new IllegalArgumentException();
-        }
-
-        inReader.readImage(outWriter);
-    }    
+    } 
     
     /**
      * Blockweise Konvertierung der Bilddaten abschließen 

@@ -17,8 +17,7 @@ import propra.imageconverter.data.DataFormat.IOMode;
  *
  * @author pg
  */
-public class DataWriter implements  Writeable,
-                                    Closeable {
+public class DataWriter implements Closeable {
     
     protected final IOMode mode;
     protected RandomAccessFile binaryWriter;

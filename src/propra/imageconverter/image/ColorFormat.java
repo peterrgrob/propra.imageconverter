@@ -11,7 +11,8 @@ import propra.imageconverter.data.DataFormat;
  * 
  * @author pg
  */
-public class ColorFormat extends DataFormat implements Comparable<ColorFormat> {
+public class ColorFormat extends DataFormat 
+                        implements Comparable<ColorFormat> {
     
     // Konstanten zur Indizierung von Farbkomponenten (Little Endian)
     public static final int BLUE = 0;
@@ -110,14 +111,14 @@ public class ColorFormat extends DataFormat implements Comparable<ColorFormat> {
      *
      * @return
      */
-    public ImageCoder createTranscoder() {
+    public ImageTranscoder createTranscoder() {
         switch(encoding) {
 
             case NONE -> {
-                return new ImageCoder();
+                return new ImageTranscoder();
             }
             case RLE -> {
-                return new ImageCoderRLE();
+                return new ImageTranscoderRLE();
             }
         }
         return null;

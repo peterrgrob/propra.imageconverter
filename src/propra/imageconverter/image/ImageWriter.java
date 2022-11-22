@@ -5,7 +5,6 @@ import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataFormat;
 import propra.imageconverter.data.DataWriter;
 import propra.imageconverter.data.IDataCallback;
-import propra.imageconverter.data.IDataTranscoder;
 
 /**
  * Oberklasse für formatspezifische ImageWriter
@@ -15,15 +14,13 @@ import propra.imageconverter.data.IDataTranscoder;
 public class ImageWriter extends DataWriter implements IDataCallback {
     
     // IO Variablen
-    protected final int BLOCK_SIZE;
-    protected ByteBuffer writeBuffer;
     protected long contentTransfered;
     
     // Formatespezifische Variablen
     protected ImageHeader header;
     protected ColorFormat readColorFormat;
     protected ColorFormat writeColorFormat;
-    protected int formatHeaderSize;
+    protected int fileHeaderSize;
 
     // Farbverarbeitung
     protected ImageTranscoder encoder;    
@@ -35,9 +32,9 @@ public class ImageWriter extends DataWriter implements IDataCallback {
      * @param mode
      * @throws IOException 
      */
-    public ImageWriter(String file, DataFormat.IOMode mode) throws IOException {
+    public ImageWriter( String file, 
+                        DataFormat.IOMode mode) throws IOException {
         super(file, mode);
-        BLOCK_SIZE = 4096 * 3;
         writeColorFormat = new ColorFormat();
         readColorFormat = new ColorFormat();
     }
@@ -49,12 +46,16 @@ public class ImageWriter extends DataWriter implements IDataCallback {
      */
     public void writeHeader(ImageHeader srcHeader) throws IOException {
         header = new ImageHeader(srcHeader);
-        readColorFormat = srcHeader.colorFormat();
+        writeColorFormat = srcHeader.colorFormat();
+        
+        // Dekoder erstellen
+        encoder = writeColorFormat.createTranscoder();
     }
     
     /**
      * 
      * @param data 
+     * @throws java.io.IOException 
      */
     @Override
     public void dataCallback(ByteBuffer data) throws IOException {
@@ -76,8 +77,6 @@ public class ImageWriter extends DataWriter implements IDataCallback {
         || buffer == null) {
             throw new IllegalArgumentException();
         }
-
-        ByteBuffer tmpBuffer = buffer;
         
         // Unterschiedliche Farbformate?
         if(!readColorFormat.equals(writeColorFormat)) {
@@ -87,41 +86,21 @@ public class ImageWriter extends DataWriter implements IDataCallback {
                                             buffer, writeColorFormat);
         }
         
-        // Kompression erforderlich?
-        if(encoder != null) {
-            writeBuffer = ByteBuffer.allocate(buffer.capacity()<<1);
-            
-            // Block komprimieren
-            tmpBuffer = encoder.apply(IDataTranscoder.Operation.ENCODE, 
-                                    buffer, 
-                                    writeBuffer);
-        } 
-        
-        // Prüfsumme mit aktuellem Block aktualisieren
-        updateChecksum(tmpBuffer); 
-        
-        // Block in Datei schreiben
-        write(tmpBuffer, 0, tmpBuffer.limit());
+        // In Datei kodieren
+        encoder.encode( binaryWriter, 
+                        buffer);
         
         // Anzahl der kodierten Bytes merken
-        contentTransfered += tmpBuffer.limit();
-        return tmpBuffer;
+        contentTransfered += buffer.limit();
+        return buffer;
     }
     
     /**
      *
      * @return
      */
-    public int getHeaderSize() {
-        return formatHeaderSize;
-    }
-
-    /**
-     *
-     * @return
-     */
-    public int getBlockSize() {
-        return BLOCK_SIZE;
+    public int getFileHeaderSize() {
+        return fileHeaderSize;
     }
 
     /**

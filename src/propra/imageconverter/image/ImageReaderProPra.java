@@ -33,14 +33,14 @@ public class ImageReaderProPra extends ImageReader {
      * @param mode
      * @throws java.io.IOException
      */
-    public ImageReaderProPra(String file, DataFormat.IOMode mode) throws IOException {
+    public ImageReaderProPra(String file, 
+                             DataFormat.IOMode mode) throws IOException {
         super(file, mode);
-        formatHeaderSize = PROPRA_HEADER_SIZE;   
+        fileHeaderSize = PROPRA_HEADER_SIZE;   
         checksumObj = new ChecksumPropra();
     }
     
     /**
-     * Wandelt einen ProPra Header in allgemeinen Header um 
      * 
      * @throws java.io.IOException
      */
@@ -51,11 +51,11 @@ public class ImageReaderProPra extends ImageReader {
         }
         
         // DataBuffer für Header erstellen       
-        ByteBuffer bytes = ByteBuffer.allocate(formatHeaderSize);
+        ByteBuffer bytes = ByteBuffer.allocate(fileHeaderSize);
         bytes.order(ByteOrder.LITTLE_ENDIAN);
         
         // Headerbytes von Stream lesen
-        read(bytes, 0, formatHeaderSize);
+        read(bytes, 0, fileHeaderSize);
         
         // Prüfe Formatkennung
         String version;

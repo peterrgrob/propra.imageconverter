@@ -1,9 +1,7 @@
 package propra.imageconverter.image;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataFormat;
-import propra.imageconverter.data.DataFormat.Operation;
 import propra.imageconverter.data.DataReader;
 import propra.imageconverter.data.IDataCallback;
 
@@ -13,11 +11,8 @@ import propra.imageconverter.data.IDataCallback;
  */
 public class ImageReader extends DataReader {
 
-    protected int formatHeaderSize;
-    protected ByteBuffer readBuffer;
-    protected long contentTransfered;
-
-    protected ImageCoder decoder;    
+    protected int fileHeaderSize;
+    protected ImageTranscoder decoder;    
     protected ImageHeader header;
 
     /**
@@ -26,7 +21,8 @@ public class ImageReader extends DataReader {
      * @param mode
      * @throws IOException 
      */
-    public ImageReader(String file, DataFormat.IOMode mode) throws IOException {
+    public ImageReader( String file, 
+                        DataFormat.IOMode mode) throws IOException {
         super(file, mode);
     }
     
@@ -54,9 +50,8 @@ public class ImageReader extends DataReader {
         
         // Dekoder erstellen
         decoder = header.colorFormat().createTranscoder();
-        decoder.begin(  Operation.DECODE,
-                        header.colorFormat(), 
-                        checksumObj);
+        decoder.begin(header.colorFormat(), 
+                      checksumObj);
         
         // Dekomprimieren
         decoder.decode( binaryReader,
@@ -75,8 +70,8 @@ public class ImageReader extends DataReader {
      *
      * @return
      */
-    public int getHeaderSize() {
-        return formatHeaderSize;
+    public int getFileHeaderSize() {
+        return fileHeaderSize;
     }
 
     /**

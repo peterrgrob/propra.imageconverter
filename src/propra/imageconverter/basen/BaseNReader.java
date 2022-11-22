@@ -1,10 +1,9 @@
 package propra.imageconverter.basen;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataFormat.IOMode;
 import propra.imageconverter.data.DataReader;
-import propra.imageconverter.data.IDataTranscoder;
+import propra.imageconverter.data.IDataCallback;
 
 /**
  *
@@ -33,10 +32,9 @@ public class BaseNReader extends DataReader {
      * @return
      * @throws IOException
      */
-    @Override
-    public ByteBuffer read(ByteBuffer buffer) throws IOException {
-        if(!isValid()
-        ||  buffer == null) {
+    public void read(IDataCallback dataTarget) throws IOException {
+        if( !isValid()
+        ||  dataTarget == null) {
             throw new IllegalStateException();
         }
             
@@ -46,18 +44,11 @@ public class BaseNReader extends DataReader {
             // Alphabet aus Datei einlesen und DatenFormat ableiten
             String alphabet = binaryReader.readLine();
             decoder.dataFormat().setEncoding(alphabet);
-            buffer.limit(buffer.capacity() - alphabet.length() - 1);
         }
-                    
-        // Daten in temoprären Puffer einlesen
-        ByteBuffer readBuffer = ByteBuffer.allocate(buffer.limit());
-        binaryReader.read(readBuffer.array(), 0, readBuffer.capacity());
 
-        // In Puffer dekodieren
-        buffer = decoder.apply( IDataTranscoder.Operation.DECODE, 
-                                            readBuffer, 
-                                            buffer);
+        // In Ausgabe dekodieren
+        decoder.decode( binaryReader, 
+                        dataTarget);
 
-        return buffer;
     }
 }

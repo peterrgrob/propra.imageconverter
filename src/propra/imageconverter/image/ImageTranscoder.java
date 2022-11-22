@@ -1,53 +1,100 @@
 package propra.imageconverter.image;
 
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import propra.imageconverter.data.IDataCallback;
+import propra.imageconverter.data.IDataFilter;
 import propra.imageconverter.data.IDataTranscoder;
 
 /**
  *
  * @author pg
  */
-public abstract class ImageTranscoder implements IDataTranscoder {
+public class ImageTranscoder implements IDataTranscoder {
     
-    private ColorFormat inFormat;
-
+    protected int DATA_BLOCK_SIZE = 4096*3;
+    protected ColorFormat colorFormat;
+    protected IDataFilter dataFilter;
+    
     /**
      *
-     * @param inFormat
      */
-    public void begin(ColorFormat inFormat) {
-        this.inFormat = inFormat;
+    @Override
+    public void begin(IDataFilter dataFilter) {
+        this.dataFilter = dataFilter;
+    } 
+    
+    /**
+     *
+     * @param colorFormat
+     * @param dataFilter
+     */
+    public void begin(  ColorFormat colorFormat, 
+                        IDataFilter dataFilter) {
+        begin(dataFilter);
+        this.colorFormat = colorFormat;
+        if(dataFilter != null) {
+            dataFilter.beginFilter();
+        }
     }   
+
+    /**
+     * 
+     * @param out
+     * @param in
+     * @throws IOException 
+     */
+    @Override
+    public void encode( RandomAccessFile out, 
+                        ByteBuffer in) throws IOException {
+        
+        // Eingabedaten filtern
+        applyFilter(in);
+        
+        // Daten schreiben
+        out.write(in.array(), 0, in.limit());
+    }
+    
+    /**
+     * 
+     * @param in
+     * @param out
+     * @throws IOException 
+     */
+    @Override
+    public void decode( RandomAccessFile in, 
+                        IDataCallback out) throws IOException {
+        
+        ByteBuffer dataBlock = ByteBuffer.allocate(DATA_BLOCK_SIZE);
+        
+        // Datei in Blöcken kopieren
+        while(in.getFilePointer() < in.length()) {
+            
+            // Blockpuffer anpassen gegen Ende
+            if(in.getFilePointer() + dataBlock.capacity() > in.length()) {
+                dataBlock.limit(dataBlock.capacity() - (int)((in.getFilePointer() + dataBlock.capacity()) - in.length()));
+            }
+            
+            // Block lesen und ausgeben
+            in.read(dataBlock.array(), 0, dataBlock.limit());
+            
+            // Eingabedaten filtern
+            applyFilter(dataBlock);
+            
+            // Daten ausgeben
+            out.dataCallback(dataBlock);
+        }
+    }
 
     /**
      *
      */
     @Override
     public void end() {
- 
-    }
-    
-    @Override
-    public ByteBuffer apply(  Operation op,
-                             ByteBuffer in,
-                             ByteBuffer out) {
-        if( in == null 
-        ||  out == null
-        ||  !isValid()) {
-            throw new IllegalArgumentException();
+        if(dataFilter != null) {
+            dataFilter.endFilter();
         }
-        
-        // Operation delegieren
-        switch(op) {
-            case ENCODE -> {
-                return _encode(in, out);
-            }
-            case DECODE -> {   
-                return _decode(in, out);
-            }
-        }
-            
-        return out;
     }
 
     /**
@@ -60,58 +107,32 @@ public abstract class ImageTranscoder implements IDataTranscoder {
     
     /**
      * 
-     * @param op
-     * @param buffer
-     * @return 
+     * @param data
      */
-    @Override
-    public int transcodedBufferLength(Operation op, ByteBuffer buffer) {
-        if(buffer != null) {
-            return buffer.limit();
+    protected void applyFilter(ByteBuffer data) {
+        if(dataFilter != null) {
+            dataFilter.apply(data);
         }
-        return 0;
     }
     
     /**
-     * Get the value of inFormat
+     * 
+     * @param out
+     * @param data
+     * @throws java.io.IOException
+     */
+    protected static void applyCallback(IDataCallback out, 
+                                        ByteBuffer data) throws IOException {
+        data.flip();
+        out.dataCallback(data);
+        data.clear();
+    }
+    
+    /**
      *
      * @return the value of inFormat
      */
-    public ColorFormat getFormat() {
-        return inFormat;
+    public ColorFormat getColorFormat() {
+        return colorFormat;
     }
-    
-    // Zu implementierende Untermethoden
-    protected abstract ByteBuffer _encode(ByteBuffer in, ByteBuffer out);
-    protected abstract ByteBuffer _decode(ByteBuffer in, ByteBuffer out);
-    
-    /**
-     *
-     * @param in
-     * @param out
-     * @return
-     */
-    protected long _pass(ByteBuffer in, ByteBuffer out) {
-        if(in.limit()> out.limit()) {
-            throw new IllegalArgumentException("Ungültige Blockgröße");
-        }
-        
-        // Daten kopieren
-        out.put(in);
-        
-        // Positionszeiger zurücksetzen
-        out.clear();
-        
-        // Anzahl der dekodierten Bytes setzen und zurückgeben
-        out.limit(in.limit());        
-        return in.limit();
-    }
-    
-    /**
-     *
-     */
-    @Override
-    public void begin() {
-
-    } 
 }

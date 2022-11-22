@@ -19,7 +19,7 @@ public class ImageWriterProPra extends ImageWriter {
      */
     public ImageWriterProPra(String file, DataFormat.IOMode mode) throws IOException {
         super(file, mode);
-        formatHeaderSize = ImageReaderProPra.PROPRA_HEADER_SIZE;
+        fileHeaderSize = ImageReaderProPra.PROPRA_HEADER_SIZE;
         checksumObj = new ChecksumPropra();
         
         this.writeColorFormat = new ColorFormat(0, 2, 1);
@@ -70,6 +70,6 @@ public class ImageWriterProPra extends ImageWriter {
         
         // In Stream schreiben
         binaryWriter.seek(0);
-        write(byteBuffer,0 ,formatHeaderSize);
+        write(byteBuffer,0 ,fileHeaderSize);
     }
 }

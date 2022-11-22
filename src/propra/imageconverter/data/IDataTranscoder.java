@@ -1,5 +1,7 @@
 package propra.imageconverter.data;
 
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 
 /**
@@ -7,40 +9,26 @@ import java.nio.ByteBuffer;
  * @author pg
  */
 public interface IDataTranscoder {
-    
-    public enum Operation {
-        ENCODE,
-        DECODE,
-        FILTER,
-        NONE;
-    }
-    
     /**
      *
+     * @param dataFilter
      */
-    public void begin();
+    public void begin(IDataFilter dataFilter);
      
-    /**
-     *
-     * @param op
-     * @param in
+    /*
      * @param out
      * @return Ausgabepuffer
      */
-    public ByteBuffer apply(  Operation op,
-                            ByteBuffer in,
-                            ByteBuffer out);
+    public void encode(RandomAccessFile out, ByteBuffer in) throws IOException;
+    
+    /*
+     * @param out
+     * @return Ausgabepuffer
+     */
+    public void decode(RandomAccessFile in, IDataCallback out) throws IOException;
     
     /**
      *
      */
     public void end();
-    
-    /**
-     * 
-     * @param op
-     * @param buffer
-     * @return 
-     */
-    public int transcodedBufferLength(Operation op, ByteBuffer buffer);
 }

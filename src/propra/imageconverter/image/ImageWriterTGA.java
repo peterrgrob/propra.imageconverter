@@ -20,7 +20,7 @@ public class ImageWriterTGA extends ImageWriter {
      */
     public ImageWriterTGA(String file, DataFormat.IOMode mode) throws IOException {
         super(file, mode);
-        formatHeaderSize = ImageReaderTGA.TGA_HEADER_SIZE;
+        fileHeaderSize = ImageReaderTGA.TGA_HEADER_SIZE;
         writeColorFormat = new ColorFormat(2, 1, 0);
     }
     
@@ -74,7 +74,7 @@ public class ImageWriterTGA extends ImageWriter {
         
         // In Stream schreiben
         binaryWriter.seek(0);
-        write(byteBuffer, 0, formatHeaderSize);
+        write(byteBuffer, 0, fileHeaderSize);
     }
     
 }
