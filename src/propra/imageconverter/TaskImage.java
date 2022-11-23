@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import propra.imageconverter.checksum.Checksum;
+import propra.imageconverter.checksum.ChecksumPropra;
+import propra.imageconverter.data.DataController;
 import propra.imageconverter.data.DataFormat.Encoding;
 import propra.imageconverter.data.DataFormat.IOMode;
 import propra.imageconverter.image.*;
@@ -17,8 +20,10 @@ import propra.imageconverter.image.*;
 public class TaskImage {
     
     // IO Objekte
-    private ImageReader inReader;
-    private ImageWriter outWriter;
+    private ImageResource inReader;
+    private ImageResource outWriter;
+    private Checksum inChecksum;
+    private Checksum outChecksum;  
     
     // Kodierung des Ausgbaebildes
     private ColorFormat.Encoding outEncoding = ColorFormat.Encoding.NONE;
@@ -33,9 +38,12 @@ public class TaskImage {
             throw new IllegalArgumentException();
         }
         
+        String inExt = cmd.getExtension(CmdLine.Options.INPUT_FILE);
+        String outExt = cmd.getExtension(CmdLine.Options.OUTPUT_FILE);
+        
         // Readerobjekt erstellen
         inReader = createImageReader(   cmd.getOption(CmdLine.Options.INPUT_FILE), 
-                                        cmd.getExtension(CmdLine.Options.INPUT_FILE));
+                                        inExt);
         if(inReader == null) {
             throw new IOException("Nicht unterstütztes Bildformat.");
         }
@@ -55,13 +63,21 @@ public class TaskImage {
         
         // Ausgabeobjekt erstellen
         outWriter = createImageWriter(  cmd.getOption(CmdLine.Options.OUTPUT_FILE),
-                                        cmd.getExtension(CmdLine.Options.OUTPUT_FILE));
+                                        outExt);
         if(outWriter == null) {
             throw new IOException("Nicht unterstütztes Bildformat.");
         }
         
         // Ausgabekompression setzen
         outEncoding = cmd.getColorEncoding();
+        
+        if(inExt.compareTo("propra") == 0) {
+            inChecksum = new ChecksumPropra();
+        }
+        
+        if(outExt.compareTo("propra") == 0) {
+            inChecksum = new ChecksumPropra();
+        }
     }
     
     
@@ -75,44 +91,24 @@ public class TaskImage {
             throw new IllegalStateException();
         }
         
-        begin();
-            inReader.readImage(outWriter);
-        end(); 
-    }
-    
-    /**
-     * Bereitet blockweise Konvertierung der Bilddaten vor
-     *
-     * @throws IOException
-     */
-    private void begin() throws IOException {
-        if(!isValid()) {
-            throw new IllegalStateException();
-        }
-        
         // Bildkopf einlesen
         ImageHeader inHeader = new ImageHeader(inReader.readHeader());
         
         // Bildkompression setzen und Bildkopf in Ausgabedatei schreiben
         inHeader.colorFormat().encoding(outEncoding);
         outWriter.writeHeader(inHeader);
-    } 
-    
-    /**
-     * Blockweise Konvertierung der Bilddaten abschließen 
-     * 
-     * @throws IOException
-     */
-    private void end() throws IOException {
-        if(!isValid()) {
-            throw new IllegalStateException();
-        }
+        
+        ImageCodec inCodec = new ImageCodec(inReader, inChecksum);
+        ImageCodec outCodec = new ImageCodec(outWriter, outChecksum);
+        DataController controller = new DataController(inCodec, outCodec);
+        
+        controller.process();
         
         // Prüfsumme prüfen
         isChecksumValid();
         
         // Falls nötig Header aktualisieren
-        if( outWriter.getChecksumObj() != null
+        if( outChecksum != null
         ||  outWriter.getHeader().colorFormat().encoding() == Encoding.RLE) {
             outWriter.writeHeader(outWriter.getHeader());
         }
@@ -121,16 +117,13 @@ public class TaskImage {
         outWriter.close();
     }
     
+    
     /**
      * @throws java.io.IOException
      */
     public void isChecksumValid() throws IOException {
         if(!isValid()) {
             throw new IllegalStateException();
-        }
-        
-        if(!inReader.validChecksum()) {
-            throw new IOException("Eingabe Prüfsummenfehler!");
         }
     }
     
@@ -154,8 +147,14 @@ public class TaskImage {
             stateString = "Bildinfo: \n" + header.width();
             stateString = stateString.concat("x" + header.height());
             stateString = stateString.concat("x" + header.pixelSize());
-            stateString = stateString.concat("\nEingabe Prüfsumme: "+String.format("0x%08X", (int)inReader.getChecksum()));
-            stateString = stateString.concat("\nAusgabe Prüfsumme: "+String.format("0x%08X", (int)outWriter.getChecksum()));
+            
+            if(inChecksum != null) {
+                stateString = stateString.concat("\nEingabe Prüfsumme OK: "+String.format("0x%08X", (int)inChecksum.getValue()));
+            }
+            
+            if(outChecksum != null) {
+                stateString = stateString.concat("\nAusgabe Prüfsumme: "+String.format("0x%08X", (int)outChecksum.getValue()));
+            }
         }
         
         return stateString;
@@ -168,13 +167,13 @@ public class TaskImage {
      * @param streamLen
      * @return
      */
-    private static ImageWriter createImageWriter(String path, String ext) throws IOException {
+    private static ImageResource createImageWriter(String path, String ext) throws IOException {
         switch(ext) {
             case "tga" -> {
-                return new ImageWriterTGA(path, IOMode.BINARY);
+                return new ImageResourceTGA(path, IOMode.BINARY);
             }
             case "propra" -> {
-                return new ImageWriterProPra(path, IOMode.BINARY);
+                return new ImageResourceProPra(path, IOMode.BINARY);
             }
 
         }
@@ -188,13 +187,13 @@ public class TaskImage {
      * @param streamLen
      * @return
      */
-    private static ImageReader createImageReader(String path, String ext) throws IOException {
+    private static ImageResource createImageReader(String path, String ext) throws IOException {
         switch(ext) {
             case "tga" -> {
-                return new ImageReaderTGA(path, IOMode.BINARY);
+                return new ImageResourceTGA(path, IOMode.BINARY);
             }
             case "propra" -> {
-                return new ImageReaderProPra(path, IOMode.BINARY);
+                return new ImageResourceProPra(path, IOMode.BINARY);
             }
 
         }

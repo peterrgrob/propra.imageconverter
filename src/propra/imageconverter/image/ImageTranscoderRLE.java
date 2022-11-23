@@ -113,7 +113,7 @@ public class ImageTranscoderRLE extends ImageTranscoder {
                         ByteBuffer in,
                         boolean endBlock) throws IOException{
 
-        int colorSize = 3;
+  /*      int colorSize = 3;
         int rawCounter = 0;
            
         // Über Bytes iterieren und gemäß RLE verarbeiten
@@ -162,7 +162,7 @@ public class ImageTranscoderRLE extends ImageTranscoder {
                 
                 rawCounter = 0;
             }
-        }
+        }*/
     }
     
     /**

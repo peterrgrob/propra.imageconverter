@@ -1,5 +1,6 @@
 package propra.imageconverter.data;
 
+import java.io.IOException;
 import propra.imageconverter.checksum.Checksum;
 import propra.imageconverter.data.DataFormat.Operation;
 
@@ -10,8 +11,8 @@ import propra.imageconverter.data.DataFormat.Operation;
 public interface IDataCodec {
     public void setup(  IDataResource resource,
                         Checksum checksum);
-    public void begin(Operation op);
-    public void processBlock(Operation op, DataBlock data);
-    public boolean isDataAvailable();
-    public void end(Operation op);
+    public void begin(Operation op) throws IOException;
+    public void processBlock(Operation op, DataBlock data) throws IOException;
+    public boolean isDataAvailable() throws IOException;
+    public void end(Operation op) throws IOException;
 }

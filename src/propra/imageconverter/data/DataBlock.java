@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
  * @author pg
  */
 public class DataBlock {
-    private ByteBuffer data;
-    private long sourcePosition;
-    private long sourceLength;
+    public ByteBuffer data;
+    public long sourcePosition;
+    public long sourceLength;
 }

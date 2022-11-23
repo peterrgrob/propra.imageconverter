@@ -19,6 +19,8 @@ public class ColorFormat extends DataFormat
     public static final int GREEN = 1;
     public static final int RED = 2;
     
+    public static final ColorFormat FORMAT_RGB = new ColorFormat(RED, GREEN, BLUE);
+    
     // Bildet Indizes der Farkomponenten ab
     protected int[] mapping = new int[3];
 
@@ -111,9 +113,8 @@ public class ColorFormat extends DataFormat
      *
      * @return
      */
-    public ImageTranscoder createTranscoder() {
+    public ImageTranscoder createCodec() {
         switch(encoding) {
-
             case NONE -> {
                 return new ImageTranscoder();
             }

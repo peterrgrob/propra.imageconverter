@@ -157,7 +157,17 @@ public class DataResource implements IDataResource {
 
     @Override
     public void read(ByteBuffer buffer) throws IOException {
-        read(position(), buffer);
+        if(!isValid()
+        ||  buffer == null) {
+            throw new IllegalStateException();
+        }
+        
+        if(mode == DataFormat.IOMode.BINARY) {
+            int len = binaryFile.read(  buffer.array(), 
+                                        buffer.position(), 
+                                        buffer.capacity());
+            buffer.limit(len);
+        } 
     }
 
     @Override
@@ -168,9 +178,15 @@ public class DataResource implements IDataResource {
         }
         
         if(mode == DataFormat.IOMode.BINARY) {
-            binaryFile.read(buffer.array(), 
-                            (int)offset, 
-                            buffer.capacity());
+            long p = binaryFile.getFilePointer();
+            binaryFile.seek(offset);
+            
+            int len = binaryFile.read(  buffer.array(), 
+                                        buffer.position(), 
+                                        buffer.capacity());
+            
+            buffer.limit(len);
+            binaryFile.seek(p);
         } 
     }
 
@@ -197,7 +213,17 @@ public class DataResource implements IDataResource {
 
     @Override
     public void write(ByteBuffer buffer) throws IOException {
-        write(binaryFile.getFilePointer(), buffer);
+        if(!isValid()
+        ||  buffer == null) {
+            throw new IllegalStateException();
+        }
+        
+        if(mode == DataFormat.IOMode.BINARY) {
+            
+            binaryFile.write(buffer.array(), 
+                            buffer.position(), 
+                            buffer.limit());
+        } 
     }
 
     @Override
@@ -208,9 +234,14 @@ public class DataResource implements IDataResource {
         }
         
         if(mode == DataFormat.IOMode.BINARY) {
+            long p = binaryFile.getFilePointer();
+            binaryFile.seek(offset);
+            
             binaryFile.write(buffer.array(), 
-                            (int)offset, 
+                            buffer.position(), 
                             buffer.limit());
+            
+            binaryFile.seek(p);
         } 
     }
     
