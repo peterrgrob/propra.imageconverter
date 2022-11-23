@@ -27,6 +27,8 @@ public class DataFormat {
     
     // Datenoperation
     public enum Operation {
+        READ,
+        WRITE,
         ENCODE,
         DECODE,
         FILTER,

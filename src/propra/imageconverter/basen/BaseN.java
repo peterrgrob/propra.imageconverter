@@ -88,7 +88,8 @@ public class BaseN implements IDataTranscoder {
      * @param in
      * @param out
      */
-    public void decode(RandomAccessFile in, IDataCallback out) throws IOException {
+    public void decode( RandomAccessFile in, 
+                        IDataCallback out) throws IOException {
                 
         // Größe der binären Base-N Byteblöcke
         int blockLength = format.getBlockLength();
@@ -129,7 +130,9 @@ public class BaseN implements IDataTranscoder {
      * @param in
      * @param out
      */
-    public void encode(RandomAccessFile out, ByteBuffer in ) throws IOException {
+    public void encode( RandomAccessFile out, 
+                        ByteBuffer in, 
+                        boolean endBlock) throws IOException {
         
         // Index und Inkremente setzen
         int byteOffset = 0;

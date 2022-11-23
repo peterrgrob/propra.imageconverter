@@ -47,7 +47,8 @@ public class ImageTranscoder implements IDataTranscoder {
      */
     @Override
     public void encode( RandomAccessFile out, 
-                        ByteBuffer in) throws IOException {
+                        ByteBuffer in,
+                        boolean endBlock) throws IOException {
         
         // Eingabedaten filtern
         applyFilter(in);

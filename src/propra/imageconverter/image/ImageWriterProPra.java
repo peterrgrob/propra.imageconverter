@@ -20,9 +20,6 @@ public class ImageWriterProPra extends ImageWriter {
     public ImageWriterProPra(String file, DataFormat.IOMode mode) throws IOException {
         super(file, mode);
         fileHeaderSize = ImageReaderProPra.PROPRA_HEADER_SIZE;
-        checksumObj = new ChecksumPropra();
-        
-        this.writeColorFormat = new ColorFormat(0, 2, 1);
     }
     
     /**
@@ -39,10 +36,11 @@ public class ImageWriterProPra extends ImageWriter {
         super.writeHeader(srcHeader);
         
         // DataBuffer für Header erstellen
-        ByteBuffer byteBuffer = ByteBuffer.allocate(ImageReaderProPra.PROPRA_HEADER_SIZE);
+        ByteBuffer byteBuffer = ByteBuffer.allocate(fileHeaderSize);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         
         // ProPra spezifisches RBG Farbmapping setzen
+        ColorFormat writeColorFormat = new ColorFormat(0, 2, 1);
         header.colorFormat().setMapping(writeColorFormat.getMapping());
         
         // Headerfelder in ByteBuffer schreiben
@@ -69,7 +67,7 @@ public class ImageWriterProPra extends ImageWriter {
         }
         
         // In Stream schreiben
-        binaryWriter.seek(0);
-        write(byteBuffer,0 ,fileHeaderSize);
+        binaryFile.seek(0);
+        write(byteBuffer);
     }
 }

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import propra.imageconverter.checksum.Checksum;
 import propra.imageconverter.checksum.ChecksumPropra;
 import propra.imageconverter.data.DataFormat;
 
@@ -37,7 +38,6 @@ public class ImageReaderProPra extends ImageReader {
                              DataFormat.IOMode mode) throws IOException {
         super(file, mode);
         fileHeaderSize = PROPRA_HEADER_SIZE;   
-        checksumObj = new ChecksumPropra();
     }
     
     /**
@@ -46,7 +46,7 @@ public class ImageReaderProPra extends ImageReader {
      */
     @Override
     public ImageHeader readHeader() throws IOException {
-        if(binaryReader == null) {
+        if(binaryFile == null) {
             throw new IllegalArgumentException();
         }
         
@@ -55,7 +55,7 @@ public class ImageReaderProPra extends ImageReader {
         bytes.order(ByteOrder.LITTLE_ENDIAN);
         
         // Headerbytes von Stream lesen
-        read(bytes, 0, fileHeaderSize);
+        read(bytes);
         
         // Prüfe Formatkennung
         String version;
@@ -91,13 +91,13 @@ public class ImageReaderProPra extends ImageReader {
         
         // Prüfe ProPra Spezifikationen
         if( newHeader.isValid() == false 
-        ||  (dataLen != (binaryReader.length() - PROPRA_HEADER_SIZE))) {
+        ||  (dataLen != (binaryFile.length() - PROPRA_HEADER_SIZE))) {
             throw new UnsupportedOperationException("Ungültiges ProPra Dateiformat!");
         } else if(newHeader.colorFormat().encoding() == DataFormat.Encoding.NONE) {
             
             // Prüfungen für unkomprimierte Dateien 
             if(newHeader.imageSize() != dataLen
-            || newHeader.imageSize() != (binaryReader.length() - PROPRA_HEADER_SIZE)) {
+            || newHeader.imageSize() != (binaryFile.length() - PROPRA_HEADER_SIZE)) {
                 throw new UnsupportedOperationException("Ungültiges ProPra Dateiformat!");
             }
         }
@@ -106,15 +106,16 @@ public class ImageReaderProPra extends ImageReader {
         return header;
     }  
 
-    /**
+   /**
      * 
+     * @param checksum
      * @return 
      */
     @Override
-    public boolean validChecksum() {
-        if(checksumObj != null) {
-            return referenceChecksum == header.checksum();
+    public boolean checkChecksum(Checksum checksum) {
+       if(checksum != null) {
+            return referenceChecksum == checksum.getValue();
         }
-        return true;
+        return false;
     }   
 }

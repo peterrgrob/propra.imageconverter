@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataFormat.IOMode;
 import propra.imageconverter.data.DataWriter;
-import propra.imageconverter.data.IDataTranscoder;
 
 /**
  *
@@ -45,7 +44,8 @@ public class BaseNWriter extends DataWriter {
         
         // Daten kodieren
         encoder.encode( binaryWriter, 
-                        buffer);
+                        buffer,
+                        true);
 
         // Alphabet in Datei schreiben 
         if(format.getBaseEncoding() != BaseNFormat.BaseNEncoding.BASE_32) {

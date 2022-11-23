@@ -21,7 +21,6 @@ public class ImageWriterTGA extends ImageWriter {
     public ImageWriterTGA(String file, DataFormat.IOMode mode) throws IOException {
         super(file, mode);
         fileHeaderSize = ImageReaderTGA.TGA_HEADER_SIZE;
-        writeColorFormat = new ColorFormat(2, 1, 0);
     }
     
     /**
@@ -37,10 +36,11 @@ public class ImageWriterTGA extends ImageWriter {
         }
         
         super.writeHeader(srcHeader);
+        ColorFormat writeColorFormat = new ColorFormat(2, 1, 0);
         header.colorFormat().setMapping(writeColorFormat.getMapping());
                 
         // DataBuffer für Header erstellen
-        ByteBuffer byteBuffer = ByteBuffer.allocate(ImageReaderTGA.TGA_HEADER_SIZE);
+        ByteBuffer byteBuffer = ByteBuffer.allocate(fileHeaderSize);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
                 
         // Headerfelder in Buffer schreiben
@@ -73,8 +73,8 @@ public class ImageWriterTGA extends ImageWriter {
         }
         
         // In Stream schreiben
-        binaryWriter.seek(0);
-        write(byteBuffer, 0, fileHeaderSize);
+        binaryFile.seek(0);
+        write(byteBuffer);
     }
     
 }

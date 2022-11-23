@@ -11,7 +11,10 @@ import propra.imageconverter.data.IDataFilter;
  * @author pg
  */
 public class ImageTranscoderRLE extends ImageTranscoder {
-
+    
+    private byte[] writeRleColor = new byte[3];
+    private int writeColorCounter;
+    
     /**
      * 
      * @param colorFormat 
@@ -107,9 +110,9 @@ public class ImageTranscoderRLE extends ImageTranscoder {
      */
     @Override
     public void encode( RandomAccessFile out, 
-                        ByteBuffer in) throws IOException{
+                        ByteBuffer in,
+                        boolean endBlock) throws IOException{
 
-        byte[] color = new byte[3];
         int colorSize = 3;
         int rawCounter = 0;
            
@@ -117,19 +120,19 @@ public class ImageTranscoderRLE extends ImageTranscoder {
         while(in.position() < in.limit()) {
          
             // Anzahl gleicher Farben zählen
-            int rleCtr = countRleColor(in, in.limit());
-            if(rleCtr > 1) {
+            writeColorCounter = countRleColor(in, in.limit());
+            if(writeColorCounter > 1) {
                 
                 // RLE Block verarbeiten
                 // Farbwert speichern
-                in.get(color);
+                in.get(writeRleColor);
                 
                 // Paketkopf und Farbwert schreiben
-                out.write((byte)(127 + rleCtr));
-                out.write(color);
+                out.write((byte)(127 + writeColorCounter));
+                out.write(writeRleColor);
                 
                 // Gleiche Farben im Eingabepuffer überspringen
-                in.position(in.position() + (rleCtr - 1) * colorSize);
+                in.position(in.position() + (writeColorCounter - 1) * colorSize);
                 
             } else {
                 

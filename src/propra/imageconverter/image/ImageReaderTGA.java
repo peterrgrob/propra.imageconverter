@@ -51,7 +51,7 @@ public class ImageReaderTGA extends ImageReader {
         bytes.order(ByteOrder.LITTLE_ENDIAN);
        
         // Headerbytes von Stream einlesen
-        read(bytes, 0, fileHeaderSize);
+        read(bytes);
         
         // Headerfelder konvertieren
         ImageHeader newHeader = new ImageHeader();

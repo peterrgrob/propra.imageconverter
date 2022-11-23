@@ -19,7 +19,7 @@ public interface IDataTranscoder {
      * @param out
      * @return Ausgabepuffer
      */
-    public void encode(RandomAccessFile out, ByteBuffer in) throws IOException;
+    public void encode(RandomAccessFile out, ByteBuffer in, boolean endBlock) throws IOException;
     
     /*
      * @param out
