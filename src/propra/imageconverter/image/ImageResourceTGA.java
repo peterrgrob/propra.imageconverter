@@ -5,12 +5,12 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import propra.imageconverter.data.DataFormat;
 
-
 /**
- *
+ *  Schreibt TGA Header
+ * 
  * @author pg
  */
-public class ImageReaderTGA extends ImageReader {
+public class ImageResourceTGA extends ImageResource {  
 
     // Datei-Offsets der einzelnen Header-Felder
     static final int TGA_HEADER_SIZE = 18;
@@ -23,20 +23,19 @@ public class ImageReaderTGA extends ImageReader {
     static final int TGA_HEADER_OFFSET_ORIGIN = 17; 
     
     static final int TGA_HEADER_ENCODING_NONE = 2;     
-    static final int TGA_HEADER_ENCODING_RLE = 10;     
-
+    static final int TGA_HEADER_ENCODING_RLE = 10;    
+    
     /**
      *
      * @param file
      * @param mode
      * @throws java.io.IOException
      */
-    public ImageReaderTGA(  String file, 
-                            DataFormat.IOMode mode) throws IOException {
+    public ImageResourceTGA(String file, DataFormat.IOMode mode) throws IOException {
         super(file, mode);
-        fileHeaderSize = TGA_HEADER_SIZE;   
+        fileHeaderSize = TGA_HEADER_SIZE;
     }
-
+    
     /**
      * 
      * 
@@ -78,4 +77,59 @@ public class ImageReaderTGA extends ImageReader {
         header = newHeader;
         return header;
     }  
+    
+    /**
+     * Schreibt allgemeinen Header als TGA Header
+     * 
+     * @param srcHeader
+     * @throws java.io.IOException
+     */
+    @Override
+    public void writeHeader(ImageHeader srcHeader) throws IOException {
+        if(srcHeader.isValid() == false) {
+            throw new IllegalArgumentException();
+        }
+        
+        super.writeHeader(srcHeader);
+        ColorFormat writeColorFormat = new ColorFormat(2, 1, 0);
+        header.colorFormat().setMapping(writeColorFormat.getMapping());
+                
+        // DataBuffer für Header erstellen
+        ByteBuffer byteBuffer = ByteBuffer.allocate(fileHeaderSize);
+        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+                
+        // Headerfelder in Buffer schreiben
+        byteBuffer.put(TGA_HEADER_OFFSET_ENCODING, 
+                        (byte)2);
+        byteBuffer.putShort(TGA_HEADER_OFFSET_WIDTH, 
+                            (short)srcHeader.width());
+        byteBuffer.putShort(TGA_HEADER_OFFSET_HEIGHT, 
+                            (short)srcHeader.height());
+        byteBuffer.putShort(TGA_HEADER_OFFSET_Y0, 
+                            (short)srcHeader.height());
+        byteBuffer.put(TGA_HEADER_OFFSET_BPP, 
+                            (byte)(srcHeader.pixelSize() << 3));        
+        byteBuffer.put(TGA_HEADER_OFFSET_ORIGIN, 
+                            (byte)(1 << 5)); 
+        
+        // Kompression
+        switch(header.colorFormat().encoding()) {
+            case RLE -> {
+                byteBuffer.put(TGA_HEADER_OFFSET_ENCODING, 
+                                    (byte)TGA_HEADER_ENCODING_RLE);
+            }
+            case NONE -> {
+                byteBuffer.put(TGA_HEADER_OFFSET_ENCODING, 
+                                    (byte)TGA_HEADER_ENCODING_NONE);
+            }
+            default -> {
+                throw new IllegalArgumentException("Ungültige Kompression.");
+            }                   
+        }
+        
+        // In Stream schreiben
+        binaryFile.seek(0);
+        write(byteBuffer);
+    }
+    
 }

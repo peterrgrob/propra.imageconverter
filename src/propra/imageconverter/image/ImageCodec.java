@@ -12,7 +12,6 @@ import propra.imageconverter.data.DataFormat;
  */
 public class ImageCodec extends DataCodec {
     
-    
     private ImageResource image;
     
     /**
@@ -42,9 +41,15 @@ public class ImageCodec extends DataCodec {
         // Datenoperation
         super.processBlock(op, block);
         
-        if(image.getHeader().colorFormat().compareTo(ColorFormat.FORMAT_RGB) != 0) {
-            ColorFormat.convertColorBuffer( block.data, ColorFormat.FORMAT_RGB, 
-                                            block.data, image.getHeader().colorFormat());
+        // Farbkonvertierung
+        if(image.getHeader().colorFormat().compareTo(ColorFormat.FORMAT_RGB) != 0) {   
+            if(op == DataFormat.Operation.READ) {
+                ColorFormat.convertColorBuffer( block.data, image.getHeader().colorFormat(), 
+                                                    block.data, ColorFormat.FORMAT_RGB);
+            } else if(op == DataFormat.Operation.WRITE) {
+                ColorFormat.convertColorBuffer( block.data, ColorFormat.FORMAT_RGB, 
+                                                    block.data, image.getHeader().colorFormat());
+            }
         }
     }
 }

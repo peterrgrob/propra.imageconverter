@@ -1,6 +1,7 @@
 package propra.imageconverter.data;
 
 import java.nio.ByteBuffer;
+import propra.imageconverter.image.ColorFormat;
 
 /**
  *

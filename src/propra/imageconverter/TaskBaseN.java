@@ -4,11 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import propra.imageconverter.basen.BaseNFormat;
-import propra.imageconverter.basen.BaseNReader;
-import propra.imageconverter.basen.BaseNWriter;
 import propra.imageconverter.data.DataFormat.IOMode;
-import propra.imageconverter.data.DataReader;
-import propra.imageconverter.data.DataWriter;
 
 /**
  * Klasse implementiert BaseN Programmfunktionalität
@@ -18,15 +14,15 @@ import propra.imageconverter.data.DataWriter;
 public class TaskBaseN {
     
     // Ein- und Ausgabeobjekt 
-    private DataReader reader;
-    private DataWriter writer;
+    //private DataResource reader;
+    //private DataResource writer;
     
     /**
      * 
      */
     public TaskBaseN() {
-        reader = null;
-        writer = null;
+ /*       reader = null;
+        writer = null;*/
     }
     
     /**
@@ -75,13 +71,13 @@ public class TaskBaseN {
         System.out.println(outPath);
             
         // Reader/Writer erstellen
-        if(cmd.isBaseNDecode()) {
+        /*if(cmd.isBaseNDecode()) {
             reader = new BaseNReader(cmd.getOption(CmdLine.Options.INPUT_FILE), dataFormat);
             writer = new DataWriter(outPath, IOMode.BINARY);
         } else {
             reader = new DataReader(cmd.getOption(CmdLine.Options.INPUT_FILE), IOMode.BINARY);
             writer = new BaseNWriter(outPath, dataFormat);
-        }   
+        } */  
     }
     
     /**
@@ -89,8 +85,9 @@ public class TaskBaseN {
      * @return true, wenn IO gesetzt
      */
     public boolean isValid() {
-        return (    reader    != null
-                &&  writer   != null);
+      /*  return (    reader    != null
+                &&  writer   != null);*/
+      return true;
     }
     
     /**
@@ -113,7 +110,7 @@ public class TaskBaseN {
      * @throws java.io.IOException 
      */
     public void doTask() throws IOException {
-        if(!isValid()) {
+        /*if(!isValid()) {
             throw new IllegalArgumentException();
         }
 
@@ -123,6 +120,6 @@ public class TaskBaseN {
         
         // Datenübertragung
         reader.read(block);
-        writer.write(block);
+        writer.write(block);*/
     }
 }

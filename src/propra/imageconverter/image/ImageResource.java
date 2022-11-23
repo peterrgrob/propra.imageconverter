@@ -13,6 +13,7 @@ public class ImageResource extends DataResource {
     protected int fileHeaderSize;
     protected ImageTranscoder decoder;    
     protected ImageHeader header;
+    protected ColorFormat colorFormat;
 
     /**
      * 
@@ -23,6 +24,8 @@ public class ImageResource extends DataResource {
     public ImageResource(   String file, 
                             DataFormat.IOMode mode) throws IOException {
         super(file, mode);
+        
+        colorFormat = new ColorFormat();
     }
     
 
@@ -33,6 +36,15 @@ public class ImageResource extends DataResource {
      */
     public ImageHeader readHeader() throws IOException {
         return null;
+    }
+    
+    /**
+     * 
+     * @param srcHeader
+     * @throws IOException 
+     */
+    public void writeHeader(ImageHeader srcHeader) throws IOException {
+        this.header = srcHeader;
     }
     
     /**
