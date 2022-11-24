@@ -128,7 +128,11 @@ public class DataResource implements IDataResource {
         }
     }
     
-    
+    /**
+     * 
+     * @param pos
+     * @throws IOException 
+     */
     @Override
     public void position(long pos) throws IOException {
         checkState();
@@ -137,6 +141,11 @@ public class DataResource implements IDataResource {
         }
     }
 
+    /**
+     * 
+     * @return
+     * @throws IOException 
+     */
     @Override
     public long position() throws IOException {
         checkState();
@@ -146,6 +155,11 @@ public class DataResource implements IDataResource {
         return 0;
     }
 
+    /**
+     * 
+     * @return
+     * @throws IOException 
+     */
     @Override
     public long length() throws IOException {
         checkState();
@@ -155,6 +169,11 @@ public class DataResource implements IDataResource {
         return 0;
     }
 
+    /**
+     * 
+     * @param buffer
+     * @throws IOException 
+     */
     @Override
     public void read(ByteBuffer buffer) throws IOException {
         if(!isValid()
@@ -169,7 +188,13 @@ public class DataResource implements IDataResource {
             buffer.limit(len);
         } 
     }
-
+    
+    /**
+     * 
+     * @param offset
+     * @param buffer
+     * @throws IOException 
+     */
     @Override
     public void read(long offset, ByteBuffer buffer) throws IOException {
         if(!isValid()
@@ -190,6 +215,13 @@ public class DataResource implements IDataResource {
         } 
     }
 
+    /**
+     * 
+     * @param offset
+     * @param length
+     * @return
+     * @throws IOException 
+     */
     @Override
     public ByteBuffer read(long offset, int length) throws IOException {
         ByteBuffer nb = ByteBuffer.allocate(length);
@@ -197,7 +229,7 @@ public class DataResource implements IDataResource {
         return nb;
     }
     
-        /**
+    /**
      * 
      * @return
      * @throws IOException 
@@ -211,6 +243,11 @@ public class DataResource implements IDataResource {
         }
     }
 
+    /**
+     * 
+     * @param buffer
+     * @throws IOException 
+     */
     @Override
     public void write(ByteBuffer buffer) throws IOException {
         if(!isValid()
@@ -226,6 +263,12 @@ public class DataResource implements IDataResource {
         } 
     }
 
+    /**
+     * 
+     * @param offset
+     * @param buffer
+     * @throws IOException 
+     */
     @Override
     public void write(long offset, ByteBuffer buffer) throws IOException {
         if(!isValid()

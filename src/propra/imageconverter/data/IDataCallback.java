@@ -1,7 +1,6 @@
 package propra.imageconverter.data;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 
 /**
  *
@@ -10,7 +9,8 @@ import java.nio.ByteBuffer;
 public interface IDataCallback {
     /**
      * 
-     * @param data 
+     * @param caller
+     * @param block 
      */
-    public void dataCallback(ByteBuffer data) throws IOException;
+    public void send(IDataCodec caller, DataBlock block) throws IOException;
 }

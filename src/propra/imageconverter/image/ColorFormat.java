@@ -109,22 +109,6 @@ public class ColorFormat extends DataFormat
         return output;
     }
     
-    /**
-     *
-     * @return
-     */
-    public ImageTranscoder createCodec() {
-        switch(encoding) {
-            case NONE -> {
-                return new ImageTranscoder();
-            }
-            case RLE -> {
-                return new ImageTranscoderRLE();
-            }
-        }
-        return null;
-    }
-    
     /*
      *  Getter/Setter 
      */

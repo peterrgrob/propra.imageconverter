@@ -53,28 +53,42 @@ public class DataCodec implements IDataCodec {
      */
     @Override
     public void processBlock(   DataFormat.Operation op, 
-                                DataBlock block) throws IOException {
+                                DataBlock block,
+                                IDataCallback target) throws IOException {
         if(!isValid()
         ||  block == null) {
             throw new IllegalArgumentException();
         }
         
         if(op == DataFormat.Operation.READ) {
+            
             resource.read(dataBuffer);
+            
             block.data = dataBuffer;
             block.sourcePosition = resource.position();
             block.sourceLength = resource.length();
+            
             if(checksum != null) {
                 checksum.apply(dataBuffer);
             }
+            
+            if(target != null) {
+                target.send(this, block);
+            }
         } else if(op == DataFormat.Operation.WRITE) {
+            
             resource.write(block.data);
+            
             if(checksum != null) {
                 checksum.apply(block.data);
             }
         }
     }
 
+    /**
+     * 
+     * @return 
+     */
     @Override
     public boolean isDataAvailable() {
         if(resource != null) {
@@ -87,6 +101,11 @@ public class DataCodec implements IDataCodec {
         return false;
     }
 
+    /**
+     * 
+     * @param op
+     * @throws IOException 
+     */
     @Override
     public void end(DataFormat.Operation op) throws IOException {
         if(checksum != null) {

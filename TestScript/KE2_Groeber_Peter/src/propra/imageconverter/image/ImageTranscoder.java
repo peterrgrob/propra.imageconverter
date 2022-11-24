@@ -1,0 +1,117 @@
+package propra.imageconverter.image;
+
+import java.nio.ByteBuffer;
+import propra.imageconverter.data.IDataTranscoder;
+
+/**
+ *
+ * @author pg
+ */
+public abstract class ImageTranscoder implements IDataTranscoder {
+    
+    private ColorFormat inFormat;
+
+    /**
+     *
+     * @param inFormat
+     */
+    public void begin(ColorFormat inFormat) {
+        this.inFormat = inFormat;
+    }   
+
+    /**
+     *
+     */
+    @Override
+    public void end() {
+ 
+    }
+    
+    @Override
+    public ByteBuffer apply(  Operation op,
+                             ByteBuffer in,
+                             ByteBuffer out) {
+        if( in == null 
+        ||  out == null
+        ||  !isValid()) {
+            throw new IllegalArgumentException();
+        }
+        
+        // Operation delegieren
+        switch(op) {
+            case ENCODE -> {
+                return _encode(in, out);
+            }
+            case DECODE -> {   
+                return _decode(in, out);
+            }
+        }
+            
+        return out;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public boolean isValid() {
+        return true;
+    }
+    
+    /**
+     * 
+     * @param op
+     * @param buffer
+     * @return 
+     */
+    @Override
+    public int transcodedBufferLength(Operation op, ByteBuffer buffer) {
+        if(buffer != null) {
+            return buffer.limit();
+        }
+        return 0;
+    }
+    
+    /**
+     * Get the value of inFormat
+     *
+     * @return the value of inFormat
+     */
+    public ColorFormat getFormat() {
+        return inFormat;
+    }
+    
+    // Zu implementierende Untermethoden
+    protected abstract ByteBuffer _encode(ByteBuffer in, ByteBuffer out);
+    protected abstract ByteBuffer _decode(ByteBuffer in, ByteBuffer out);
+    
+    /**
+     *
+     * @param in
+     * @param out
+     * @return
+     */
+    protected long _pass(ByteBuffer in, ByteBuffer out) {
+        if(in.limit()> out.limit()) {
+            throw new IllegalArgumentException("Ungültige Blockgröße");
+        }
+        
+        // Daten kopieren
+        out.put(in);
+        
+        // Positionszeiger zurücksetzen
+        out.clear();
+        
+        // Anzahl der dekodierten Bytes setzen und zurückgeben
+        out.limit(in.limit());        
+        return in.limit();
+    }
+    
+    /**
+     *
+     */
+    @Override
+    public void begin() {
+
+    } 
+}

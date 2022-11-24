@@ -144,10 +144,9 @@ public class TaskBaseN {
                         
             DataBlock block = new DataBlock();
             block.data = ByteBuffer.allocate((int)baseNFile.length());
-            baseNFile.read(block.data);
             
             decoder.begin(DataFormat.Operation.DECODE);
-            decoder.processBlock(DataFormat.Operation.DECODE, block);
+            decoder.processBlock(DataFormat.Operation.DECODE, block, null);
             decoder.end(DataFormat.Operation.DECODE);
             
             binaryFile.write(block.data);

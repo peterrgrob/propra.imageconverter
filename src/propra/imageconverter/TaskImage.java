@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import propra.imageconverter.checksum.Checksum;
 import propra.imageconverter.checksum.ChecksumPropra;
 import propra.imageconverter.data.DataController;
+import propra.imageconverter.data.DataFormat;
 import propra.imageconverter.data.DataFormat.Encoding;
 import propra.imageconverter.data.DataFormat.IOMode;
 import propra.imageconverter.image.*;
@@ -94,14 +95,19 @@ public class TaskImage {
         // Bildkopf einlesen
         ImageHeader inHeader = new ImageHeader(inReader.readHeader());
         
+        ImageCodec inCodec = createImageCodec(  inHeader.colorFormat().encoding(), 
+                                                inReader, 
+                                                inChecksum);
+        ImageCodec outCodec = createImageCodec( outEncoding,
+                                                outWriter, 
+                                                outChecksum);
+        DataController controller = new DataController(inCodec, outCodec);
+        
         // Bildkompression setzen und Bildkopf in Ausgabedatei schreiben
         inHeader.colorFormat().encoding(outEncoding);
         outWriter.writeHeader(inHeader);
-        
-        ImageCodec inCodec = new ImageCodec(inReader, inChecksum);
-        ImageCodec outCodec = new ImageCodec(outWriter, outChecksum);
-        DataController controller = new DataController(inCodec, outCodec);
-        
+       
+        // Konvertieren
         controller.process();
         
         // Prüfsumme prüfen
@@ -196,6 +202,24 @@ public class TaskImage {
                 return new ImageResourceProPra(path, IOMode.BINARY);
             }
 
+        }
+        return null;
+    }
+    
+    /**
+     * 
+     * @param format 
+     */
+    private static ImageCodec createImageCodec( DataFormat.Encoding format,
+                                                ImageResource resource, 
+                                                Checksum checksum) {
+        switch(format) {
+            case NONE -> {
+                return new ImageCodec(resource, checksum);
+            }
+            case RLE -> {
+                return new ImageCodecRLE(resource, checksum);
+            }
         }
         return null;
     }

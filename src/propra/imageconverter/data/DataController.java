@@ -6,7 +6,8 @@ import java.io.IOException;
  *
  * @author pg
  */
-public class DataController implements IDataController {
+public class DataController implements  IDataController,
+                                        IDataCallback {
     
     /**
      * 
@@ -53,11 +54,22 @@ public class DataController implements IDataController {
         while(input.isDataAvailable()) {
             
             // Nächsten Block lesen und schreiben
-            input.processBlock(DataFormat.Operation.READ, dataBlock);
-            output.processBlock(DataFormat.Operation.WRITE, dataBlock);
+            input.processBlock(DataFormat.Operation.READ, dataBlock, this);
         }
         
         input.end(DataFormat.Operation.READ);
         output.end(DataFormat.Operation.WRITE);
     } 
+
+    /**
+     * 
+     * @param caller
+     * @param block 
+     */
+    public void send(IDataCodec caller, DataBlock block) throws IOException {
+        if(caller == input
+        && block != null) {
+            output.processBlock(DataFormat.Operation.WRITE, block, this);
+        }
+    }
 }

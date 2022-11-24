@@ -5,6 +5,7 @@ import propra.imageconverter.checksum.Checksum;
 import propra.imageconverter.data.DataBlock;
 import propra.imageconverter.data.DataCodec;
 import propra.imageconverter.data.DataFormat;
+import propra.imageconverter.data.IDataCallback;
 
 /**
  *
@@ -32,14 +33,14 @@ public class ImageCodec extends DataCodec {
      * @throws IOException 
      */
     @Override
-    public void processBlock(DataFormat.Operation op, DataBlock block) throws IOException {
+    public void processBlock(DataFormat.Operation op, DataBlock block, IDataCallback target) throws IOException {
         if(!isValid()
         ||  block == null) {
             throw new IllegalArgumentException();
         }
         
-        // Datenoperation
-        super.processBlock(op, block);
+        // Datenoperation 
+        super.processBlock(op, block, null);
         
         // Farbkonvertierung
         if(image.getHeader().colorFormat().compareTo(ColorFormat.FORMAT_RGB) != 0) {   
@@ -50,6 +51,10 @@ public class ImageCodec extends DataCodec {
                 ColorFormat.convertColorBuffer( block.data, ColorFormat.FORMAT_RGB, 
                                                     block.data, image.getHeader().colorFormat());
             }
+        }
+        
+        if(target != null) {
+            target.send(this, block);
         }
     }
 }

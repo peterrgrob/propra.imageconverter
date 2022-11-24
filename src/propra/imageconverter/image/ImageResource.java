@@ -10,8 +10,7 @@ import propra.imageconverter.data.DataResource;
  */
 public class ImageResource extends DataResource {
     
-    protected int fileHeaderSize;
-    protected ImageTranscoder decoder;    
+    protected int fileHeaderSize;   
     protected ImageHeader header;
     protected ColorFormat colorFormat;
 

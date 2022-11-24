@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataBlock;
 import propra.imageconverter.data.DataCodec;
 import propra.imageconverter.data.DataFormat;
+import propra.imageconverter.data.IDataCallback;
 import propra.imageconverter.data.IDataResource;
 
 /**
@@ -48,7 +49,8 @@ public class BaseNCodec extends DataCodec {
      */
     @Override
     public void processBlock(   DataFormat.Operation op, 
-                                DataBlock block) throws IOException {
+                                DataBlock block,
+                                IDataCallback target) throws IOException {
         if(!isValid()
         ||  block == null) {
             throw new IllegalArgumentException();
@@ -125,6 +127,8 @@ public class BaseNCodec extends DataCodec {
             
             charCtr += charCount;
         }
+        
+        out.flip();
     }
     
     /**
