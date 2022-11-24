@@ -10,7 +10,7 @@ import propra.imageconverter.checksum.Checksum;
  */
 public class DataCodec implements IDataCodec {
 
-    protected final int DEFAULT_BLOCK_SIZE = 4096 * 32 * 3;
+    protected final int DEFAULT_BLOCK_SIZE = 4096 * 1 * 3;
     protected ByteBuffer dataBuffer;
     protected IDataResource resource;
     protected Checksum checksum;
@@ -119,5 +119,20 @@ public class DataCodec implements IDataCodec {
      */
     public boolean isValid() {
         return resource != null;
+    }
+    
+    /**
+     * 
+     * @param target
+     * @param block 
+     */
+    protected void sendData(IDataCallback target, DataBlock block) throws IOException {
+        
+        block.sourceLength = resource.length();
+        block.sourcePosition = resource.position();
+                    
+        block.data.flip();
+        target.send(this, block);
+        block.data.clear();
     }
 }
