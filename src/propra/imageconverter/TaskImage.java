@@ -86,7 +86,7 @@ public class TaskImage {
      * 
      * @throws IOException
      */
-    public void convert() throws IOException {
+    public void doTask() throws IOException {
         if(!isValid()) {
             throw new IllegalStateException();
         }

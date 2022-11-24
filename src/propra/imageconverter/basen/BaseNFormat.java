@@ -144,6 +144,14 @@ public class BaseNFormat extends DataFormat {
     }
     
     /**
+     * 
+     * @return 
+     */
+    public boolean isValidAlphabet() {
+        return alphabet.length() != 0;
+    }
+            
+    /**
      *
      * @return
      */

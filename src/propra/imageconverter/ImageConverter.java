@@ -78,7 +78,7 @@ public class ImageConverter {
         
         // Task ausführen
         TaskImage op = new TaskImage(cmdLine);
-        op.convert();
+        op.doTask();
         
         System.out.println(op.toString());
     }   

@@ -1,7 +1,6 @@
 package propra.imageconverter.basen;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataFormat.IOMode;
 import propra.imageconverter.data.DataResource;
 
@@ -11,7 +10,6 @@ import propra.imageconverter.data.DataResource;
  */
 public class BaseNResource extends DataResource {
     
-    private final BaseN decoder;
     private final BaseNFormat format;
     
     /**
@@ -20,65 +18,48 @@ public class BaseNResource extends DataResource {
      * @param format
      * @throws IOException 
      */
-    public BaseNResource(String file, BaseNFormat format) throws IOException {
+    public BaseNResource(   String file, 
+                            BaseNFormat format) throws IOException {
         super(file, IOMode.BINARY);
+        
         this.format = format;
-        decoder = new BaseN(this.format);
+        if(format == null) {
+            format = new BaseNFormat(); 
+        }
     }
     
     /**
-     *
-     * @param buffer
-     * @return
-     * @throws IOException
+     * Alphabet aus Datei einlesen und DatenFormat ableiten
+     * @return Alphabet als String
+     * @throws java.io.IOException
      */
-    public void read(ByteBuffer buffer) throws IOException {
-        if( !isValid()
-        ||  buffer == null) {
-            throw new IllegalStateException();
-        }
-            
-        // Alphabet vorhanden?
-        if(decoder.dataFormat().getAlphabet().length() == 0) {
-            
-            // Alphabet aus Datei einlesen und DatenFormat ableiten
-            String alphabet = binaryFile.readLine();
-            decoder.dataFormat().setEncoding(alphabet);
-        }
-
-        // In Ausgabe dekodieren
-        //decoder.decode( binaryFile, 
-        //                buffer);
-
+    public String readAlphabet() throws IOException {
+        String alphabet = binaryFile.readLine();
+        format.setEncoding(alphabet);
+        return alphabet;
     }
     
     /**
-     *
-     * @param buffer
-     * @return
-     * @throws IOException
+     * Alphabet in Datei schreiben
+     * @param alphabet
+     * @throws java.io.IOException
      */
-    @Override
-    public void write(ByteBuffer buffer) throws IOException {
+    public void writeAlphabet(String alphabet) throws IOException {
         if(!isValid()) {
-            throw new IllegalStateException();
+            throw new IllegalArgumentException();
         }
         
-        // Puffer erstellen
-        /*int len = encoder.transcodedBufferLength(IDataTranscoder.Operation.ENCODE, buffer);
-        ByteBuffer encodeBuffer = ByteBuffer.allocate(len);*/
-        
-        // Daten kodieren
-        decoder.encode( binaryFile, 
-                        buffer,
-                        true);
-
         // Alphabet in Datei schreiben 
         if(format.getBaseEncoding() != BaseNFormat.BaseNEncoding.BASE_32) {
-            txtWriter.write(decoder.dataFormat().getAlphabet() + "\n");
+            txtWriter.write(alphabet + "\n");
         }
-
-        // Zeichen in Datei schreiben
-        //writeBinaryToTextFile(encodeBuffer);
+    }
+    
+    /**
+     * 
+     * @return BaseNFormat
+     */
+    public BaseNFormat getFormat() {
+        return format;
     }
 }

@@ -3,8 +3,14 @@ package propra.imageconverter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import propra.imageconverter.basen.BaseNCodec;
 import propra.imageconverter.basen.BaseNFormat;
+import propra.imageconverter.basen.BaseNResource;
+import propra.imageconverter.data.DataBlock;
+import propra.imageconverter.data.DataCodec;
+import propra.imageconverter.data.DataFormat;
 import propra.imageconverter.data.DataFormat.IOMode;
+import propra.imageconverter.data.DataResource;
 
 /**
  * Klasse implementiert BaseN Programmfunktionalität
@@ -13,16 +19,20 @@ import propra.imageconverter.data.DataFormat.IOMode;
  */
 public class TaskBaseN {
     
+    // Kommandozeile
+    private final CmdLine cmdLine;
+    
     // Ein- und Ausgabeobjekt 
-    //private DataResource reader;
-    //private DataResource writer;
+    private BaseNResource baseNFile;
+    private DataResource binaryFile;
     
     /**
      * 
      */
     public TaskBaseN() {
- /*       reader = null;
-        writer = null;*/
+        cmdLine = null;
+        baseNFile = null;
+        binaryFile = null;
     }
     
     /**
@@ -35,6 +45,8 @@ public class TaskBaseN {
         if(cmd == null) {
             throw new IllegalArgumentException();
         }
+        
+        this.cmdLine = cmd;
         
         // Ausgabedatei Pfad ableiten
         String outPath = cmd.getOption(CmdLine.Options.INPUT_FILE);      
@@ -69,15 +81,19 @@ public class TaskBaseN {
         }          
 
         System.out.println(outPath);
-            
-        // Reader/Writer erstellen
-        /*if(cmd.isBaseNDecode()) {
-            reader = new BaseNReader(cmd.getOption(CmdLine.Options.INPUT_FILE), dataFormat);
-            writer = new DataWriter(outPath, IOMode.BINARY);
+        
+        // Resourcenobjekte erstellen
+        if(cmd.isBaseNDecode()) {
+            baseNFile = new BaseNResource(  cmd.getOption(CmdLine.Options.INPUT_FILE), 
+                                            dataFormat);
+            binaryFile = new DataResource(  outPath, 
+                                            IOMode.BINARY);
         } else {
-            reader = new DataReader(cmd.getOption(CmdLine.Options.INPUT_FILE), IOMode.BINARY);
-            writer = new BaseNWriter(outPath, dataFormat);
-        } */  
+            baseNFile = new BaseNResource(  outPath, 
+                                            dataFormat);
+            binaryFile = new DataResource(  cmd.getOption(CmdLine.Options.INPUT_FILE), 
+                                            IOMode.BINARY);
+        }  
     }
     
     /**
@@ -110,16 +126,34 @@ public class TaskBaseN {
      * @throws java.io.IOException 
      */
     public void doTask() throws IOException {
-        /*if(!isValid()) {
-            throw new IllegalArgumentException();
+        if(!isValid()) {
+            throw new IllegalStateException();
         }
-
-        // Datenblock für blockweise Übertragung erstellen
-        ByteBuffer block = ByteBuffer.allocate((int)reader.getSize());
-        block.limit((int)reader.getSize());
         
-        // Datenübertragung
-        reader.read(block);
-        writer.write(block);*/
+        if(cmdLine.isBaseNDecode()) {
+            
+            // Alphabet laden?
+            if(!baseNFile.getFormat().isValidAlphabet()) {
+                baseNFile.getFormat().setEncoding(baseNFile.readAlphabet());
+            }
+
+            
+            BaseNCodec decoder = new BaseNCodec(baseNFile, 
+                                                baseNFile.getFormat());
+            DataCodec encoder = new DataCodec(binaryFile, null);
+                        
+            DataBlock block = new DataBlock();
+            block.data = ByteBuffer.allocate((int)baseNFile.length());
+            baseNFile.read(block.data);
+            
+            decoder.begin(DataFormat.Operation.DECODE);
+            decoder.processBlock(DataFormat.Operation.DECODE, block);
+            decoder.end(DataFormat.Operation.DECODE);
+            
+            binaryFile.write(block.data);
+        }
+        
+        baseNFile.close();
+        binaryFile.close();
     }
 }

@@ -10,10 +10,10 @@ import propra.imageconverter.checksum.Checksum;
  */
 public class DataCodec implements IDataCodec {
 
-    private final int DEFAULT_BLOCK_SIZE = 4096 * 32 * 3;
-    ByteBuffer dataBuffer;
-    IDataResource resource;
-    Checksum checksum;
+    protected final int DEFAULT_BLOCK_SIZE = 4096 * 32 * 3;
+    protected ByteBuffer dataBuffer;
+    protected IDataResource resource;
+    protected Checksum checksum;
     
     /**
      * 
@@ -45,8 +45,15 @@ public class DataCodec implements IDataCodec {
         }
     }
 
+    /**
+     * 
+     * @param op
+     * @param block
+     * @throws IOException 
+     */
     @Override
-    public void processBlock(DataFormat.Operation op, DataBlock block) throws IOException {
+    public void processBlock(   DataFormat.Operation op, 
+                                DataBlock block) throws IOException {
         if(!isValid()
         ||  block == null) {
             throw new IllegalArgumentException();

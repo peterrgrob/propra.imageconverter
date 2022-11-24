@@ -1,12 +1,11 @@
 package propra.imageconverter.basen;
 
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import propra.imageconverter.data.DataBlock;
+import propra.imageconverter.data.DataCodec;
 import propra.imageconverter.data.DataFormat;
-import propra.imageconverter.data.IDataCallback;
-import propra.imageconverter.data.IDataFilter;
-import propra.imageconverter.data.IDataTranscoder;
+import propra.imageconverter.data.IDataResource;
 
 /**
  * Klasse für allgemeine Base-N Kodierung, die Parametrisierung erfolgt
@@ -14,7 +13,7 @@ import propra.imageconverter.data.IDataTranscoder;
  *  
  * @author pg
  */
-public class BaseN implements IDataTranscoder {
+public class BaseNCodec extends DataCodec {
     
     // Standard Base32 Alphabet
     public static String BASE_32_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUV";
@@ -25,78 +24,81 @@ public class BaseN implements IDataTranscoder {
     
     /**
      *
+     * @param resource
      * @param format
      */
-    public BaseN(BaseNFormat format) {
+    public BaseNCodec(  IDataResource resource,
+                        BaseNFormat format) {
+        super(resource, null);
         this.format = format;
-    }
-    
-    /**
-     *
-     */
-    @Override
-    public void begin(IDataFilter dataFilter) {
-
-    }
-
-    /**
-     *
-     */
-    @Override
-    public void end() {
     }
 
     /**
      * @return
      */
     public boolean isValid() {
-        return true;
+        return format != null;
     }
     
     /**
+     * 
      * @param op
-     * @param buffer
-     * @return Gibt die vorraussichtliche Datenmenge einer Operation zurück
+     * @param block
+     * @throws IOException 
      */
-    /*@Override
-    public int transcodedBufferLength(Operation op, ByteBuffer buffer) {
+    @Override
+    public void processBlock(   DataFormat.Operation op, 
+                                DataBlock block) throws IOException {
+        if(!isValid()
+        ||  block == null) {
+            throw new IllegalArgumentException();
+        }
+        
+        if(op == DataFormat.Operation.DECODE) {
+            decode(block);
+        } else if(op == DataFormat.Operation.ENCODE) {
+            encode(block);
+        }
+    }
+    
+    /**
+     * @param buffer
+     * @return Gibt die Datenmenge nach Kodierung zurück
+     */
+    public int encodedBufferLength(ByteBuffer buffer) {
         if( buffer == null 
         ||  !isValid()) {
             throw new IllegalArgumentException();
         }
         
-        if(op == Operation.ENCODE) {
-            
-            int totalBits = buffer.limit() << 3;
-            int len = totalBits / format.getBitCount();
-            
-            // Aufzufüllende Bits berücksichtigen
-            if(totalBits % format.getBitCount() != 0) {
-                len++;
-            }
-            
-            return len;
-        } else {
-            return buffer.limit();
+        int totalBits = buffer.limit() << 3;
+        int len = totalBits / format.getBitCount();
+
+        // Aufzufüllende Bits berücksichtigen
+        if(totalBits % format.getBitCount() != 0) {
+            len++;
         }
-            
-    }*/
+
+        return len;
+    }
     
     /**
-     * Dekodiert BaseN kodierte Daten
+     * Dekodiert BaseNCodec kodierte Daten
      * 
-     * @param in
-     * @param out
+     * @param block
+     * @throws java.io.IOException
      */
-    public void decode( RandomAccessFile in, 
-                        IDataCallback out) throws IOException {
+    public void decode(DataBlock block) throws IOException {
                 
         // Größe der binären Base-N Byteblöcke
         int blockLength = format.getBlockLength();
         
-        ByteBuffer inData = ByteBuffer.allocate((int)in.length());
+        ByteBuffer out = block.data;
+        ByteBuffer inData = ByteBuffer.allocate(encodedBufferLength(out));
         ByteBuffer tData = ByteBuffer.allocate(blockLength);
-        in.read(inData.array());
+        
+        // Daten einlesen
+        resource.read(inData);
         
         int charCtr = 0;
         
@@ -118,7 +120,7 @@ public class BaseN implements IDataTranscoder {
                             tData);
             
             tData.flip();
-            out.dataCallback(tData);
+            out.put(tData);
             tData.clear();
             
             charCtr += charCount;
@@ -126,13 +128,12 @@ public class BaseN implements IDataTranscoder {
     }
     
     /**
-     * Kodiert Binärdaten in BaseN
+     * Kodiert Binärdaten in BaseNCodec
      * @param in
-     * @param out
      */
-    public void encode( RandomAccessFile out, 
-                        ByteBuffer in, 
-                        boolean endBlock) throws IOException {
+    public void encode( DataBlock block) throws IOException {
+        
+        ByteBuffer in = block.data;
         
         // Index und Inkremente setzen
         int byteOffset = 0;
@@ -164,9 +165,7 @@ public class BaseN implements IDataTranscoder {
                         charBuffer);
 
             // In Ausgabe kopieren
-            out.write(charBuffer.array(), 
-                    0, 
-                    charBuffer.limit());
+            resource.write(charBuffer);
 
             byteOffset += byteCount;
         }

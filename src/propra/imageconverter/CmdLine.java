@@ -1,5 +1,5 @@
 package propra.imageconverter;
-import propra.imageconverter.basen.BaseN;
+import propra.imageconverter.basen.BaseNCodec;
 import java.util.HashMap;
 import propra.imageconverter.basen.BaseNFormat;
 import propra.imageconverter.image.ColorFormat;
@@ -121,7 +121,7 @@ import propra.imageconverter.image.ColorFormat;
         if( options.containsKey(Options.ENCODE_BASE_32)
         ||  options.containsKey(Options.DECODE_BASE_32)) {
             
-            alphabet = BaseN.BASE_32_ALPHABET;
+            alphabet = BaseNCodec.BASE_32_ALPHABET;
             
         } else if(  options.containsKey(Options.DECODE_BASE_N)) {
             
@@ -155,7 +155,7 @@ import propra.imageconverter.image.ColorFormat;
     }
     
     /**
-     * @return true, wenn BaseN&Base32 Dekodierung
+     * @return true, wenn BaseNCodec&Base32 Dekodierung
      */
     public boolean isBaseNDecode() {
         return (options.containsKey(Options.DECODE_BASE_32)
@@ -163,7 +163,7 @@ import propra.imageconverter.image.ColorFormat;
     }
     
     /**
-     * @return true, wenn BaseN Verarbeitung
+     * @return true, wenn BaseNCodec Verarbeitung
      */
     public boolean isBaseN() {
         return (options.containsKey(Options.ENCODE_BASE_N)
