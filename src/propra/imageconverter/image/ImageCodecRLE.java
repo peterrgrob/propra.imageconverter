@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 import propra.imageconverter.checksum.Checksum;
 import propra.imageconverter.data.DataBlock;
 import propra.imageconverter.data.DataFormat;
-import propra.imageconverter.data.IDataCallback;
+import propra.imageconverter.data.IDataTarget;
 
 /**
  *
@@ -32,36 +32,18 @@ public class ImageCodecRLE extends ImageCodec {
     
     /**
      * 
-     * @param op
-     * @param block
-     * @throws IOException 
-     */
-    @Override
-    public void processBlock(   DataFormat.Operation op, 
-                                DataBlock block,
-                                IDataCallback target) throws IOException {
-        if(!isValid()
-        ||  block == null) {
-            throw new IllegalArgumentException();
-        }
-        
-        switch(op) {
-            case READ -> {
-                decode(block, target);
-            }
-            case WRITE -> {
-                encode(block, target);
-            }
-        }
-    }
-    
-    /**
-     * 
      * @param outBlock
      * @param target
      * @throws java.io.IOException
      */
-    public void decode( DataBlock outBlock, IDataCallback target) throws IOException {
+    public void decode( DataBlock outBlock, IDataTarget target) throws IOException {
+        
+        if(!isValid()
+        ||  outBlock == null
+        ||  target == null) {
+            throw new IllegalArgumentException();
+        }
+        
         
         ByteBuffer readBlock = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
         
@@ -102,7 +84,7 @@ public class ImageCodecRLE extends ImageCodec {
 
                 // Wenn gefüllt, Datenblock zum Empfänger senden
                 if( dataOut.position() + currentBytes > dataOut.capacity()) {
-                    sendData(target, outBlock);
+                    pushDataToTarget(target, outBlock);
                 }
 
                 // RLE oder RAW Paket?
@@ -140,13 +122,17 @@ public class ImageCodecRLE extends ImageCodec {
         if(resource.position() == resource.length()) {
             outBlock.lastBlock = true;
         }
-        sendData(target, outBlock);
+        pushDataToTarget(target, outBlock);
     }
     /**
      * 
      */
-    public void encode( DataBlock block, IDataCallback target) throws IOException{
-
+    public void encode( DataBlock block) throws IOException{
+        
+        if(!isValid()
+        ||  block == null) {
+            throw new IllegalArgumentException();
+        }
         int colorSize = 3;
         
         ByteBuffer rleLine = ByteBuffer.allocate(192*3);

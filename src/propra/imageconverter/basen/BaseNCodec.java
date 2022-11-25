@@ -5,8 +5,8 @@ import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataBlock;
 import propra.imageconverter.data.DataCodec;
 import propra.imageconverter.data.DataFormat;
-import propra.imageconverter.data.IDataCallback;
 import propra.imageconverter.data.IDataResource;
+import propra.imageconverter.data.IDataTarget;
 
 /**
  * Klasse für allgemeine Base-N Kodierung, die Parametrisierung erfolgt
@@ -42,28 +42,6 @@ public class BaseNCodec extends DataCodec {
     }
     
     /**
-     * 
-     * @param op
-     * @param block
-     * @throws IOException 
-     */
-    @Override
-    public void processBlock(   DataFormat.Operation op, 
-                                DataBlock block,
-                                IDataCallback target) throws IOException {
-        if(!isValid()
-        ||  block == null) {
-            throw new IllegalArgumentException();
-        }
-        
-        if(op == DataFormat.Operation.DECODE) {
-            decode(block);
-        } else if(op == DataFormat.Operation.ENCODE) {
-            encode(block);
-        }
-    }
-    
-    /**
      * @param buffer
      * @return Gibt die Datenmenge nach Kodierung zurück
      */
@@ -90,8 +68,14 @@ public class BaseNCodec extends DataCodec {
      * @param block
      * @throws java.io.IOException
      */
-    public void decode(DataBlock block) throws IOException {
-                
+    public void decode( DataBlock block,
+                        IDataTarget target) throws IOException {
+        if(!isValid()
+        ||  block == null
+        ||  target == null) {
+            throw new IllegalArgumentException();
+        }   
+        
         // Größe der binären Base-N Byteblöcke
         int blockLength = format.getBlockLength();
         
@@ -136,6 +120,10 @@ public class BaseNCodec extends DataCodec {
      * @param in
      */
     public void encode( DataBlock block) throws IOException {
+        if(!isValid()
+        ||  block == null) {
+            throw new IllegalArgumentException();
+        }   
         
         ByteBuffer in = block.data;
         

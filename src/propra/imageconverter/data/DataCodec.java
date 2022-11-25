@@ -31,12 +31,16 @@ public class DataCodec implements IDataCodec {
      * @param resource
      * @param checksum 
      */
-    @Override
     public void setup(IDataResource resource, Checksum checksum) {
         this.checksum = checksum;
         this.resource = resource;
     }
 
+    /**
+     * 
+     * @param op
+     * @throws IOException 
+     */
     @Override
     public void begin(DataFormat.Operation op) throws IOException {  
         dataBuffer = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
@@ -52,38 +56,47 @@ public class DataCodec implements IDataCodec {
      * @throws IOException 
      */
     @Override
-    public void processBlock(   DataFormat.Operation op, 
-                                DataBlock block,
-                                IDataCallback target) throws IOException {
+    public void encode(DataBlock block) throws IOException {
         if(!isValid()
         ||  block == null) {
             throw new IllegalArgumentException();
         }
         
-        if(op == DataFormat.Operation.READ) {
+        resource.write(block.data);
             
-            resource.read(dataBuffer);
-            
-            block.data = dataBuffer;
-            block.sourcePosition = resource.position();
-            block.sourceLength = resource.length();
-            
-            if(checksum != null) {
-                checksum.apply(dataBuffer);
-            }
-            
-            if(target != null) {
-                target.send(this, block);
-            }
-        } else if(op == DataFormat.Operation.WRITE) {
-            
-            resource.write(block.data);
-            
-            if(checksum != null) {
-                checksum.apply(block.data);
-            }
+        if(checksum != null) {
+            checksum.apply(block.data);
         }
     }
+    
+    /**
+     * 
+     * @param block
+     * @param target
+     * @throws IOException 
+     */
+    public void decode( DataBlock block,
+                        IDataTarget target) throws IOException {
+        if(!isValid()
+        ||  block == null) {
+            throw new IllegalArgumentException();
+        }
+        
+        resource.read(dataBuffer);
+
+        block.data = dataBuffer;
+        block.sourcePosition = resource.position();
+        block.sourceLength = resource.length();
+
+        if(checksum != null) {
+            checksum.apply(dataBuffer);
+        }
+
+        if(target != null) {
+            pushDataToTarget(target, block);
+        }
+    }        
+            
 
     /**
      * 
@@ -107,7 +120,7 @@ public class DataCodec implements IDataCodec {
      * @throws IOException 
      */
     @Override
-    public void end(DataFormat.Operation op) throws IOException {
+    public void end() throws IOException {
         if(checksum != null) {
             checksum.endFilter();
         }
@@ -126,13 +139,13 @@ public class DataCodec implements IDataCodec {
      * @param target
      * @param block 
      */
-    protected void sendData(IDataCallback target, DataBlock block) throws IOException {
+    protected void pushDataToTarget(IDataTarget target, DataBlock block) throws IOException {
         
         block.sourceLength = resource.length();
         block.sourcePosition = resource.position();
                     
         block.data.flip();
-        target.send(this, block);
+        target.push(this, block);
         block.data.clear();
     }
 }

@@ -6,11 +6,11 @@ import java.io.IOException;
  *
  * @author pg
  */
-public interface IDataCallback {
+public interface IDataTarget {
     /**
      * 
      * @param caller
      * @param block 
      */
-    public void send(IDataCodec caller, DataBlock block) throws IOException;
+    public void push(IDataCodec caller, DataBlock block) throws IOException;
 }
