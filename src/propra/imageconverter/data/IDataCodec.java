@@ -7,9 +7,38 @@ import java.io.IOException;
  * @author pg
  */
 public interface IDataCodec {
+    /**
+     * 
+     * @param op
+     * @throws IOException 
+     */
     public void begin(DataFormat.Operation op) throws IOException;
+    
+    /**
+     * 
+     * @param data
+     * @throws IOException 
+     */
     public void encode(DataBlock data) throws IOException;
-    public void decode(DataBlock data, IDataTarget target) throws IOException;   
+    
+    /**
+     * 
+     * @param data
+     * @param target
+     * @throws IOException 
+     */
+    public void decode(DataBlock data, IDataTarget target) throws IOException;
+    
+    /**
+     * 
+     * @return
+     * @throws IOException 
+     */
     public boolean isDataAvailable() throws IOException;
+    
+    /**
+     * 
+     * @throws IOException 
+     */
     public void end() throws IOException;
 }

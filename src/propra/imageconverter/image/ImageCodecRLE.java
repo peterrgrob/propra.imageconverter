@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import propra.imageconverter.checksum.Checksum;
 import propra.imageconverter.data.DataBlock;
-import propra.imageconverter.data.DataFormat;
 import propra.imageconverter.data.IDataTarget;
 
 /**
@@ -12,13 +11,9 @@ import propra.imageconverter.data.IDataTarget;
  * @author pg
  */
 public class ImageCodecRLE extends ImageCodec {
-    
-    private byte[] writeRleColor = new byte[3];
-    private byte[] readRleColor = new byte[3];
-    private int readColorCounter;
-    private int readPacketHeader;
-    private ByteBuffer writeRleBuffer = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
-    private ByteBuffer tmpRleBuffer = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE * 2);
+
+    private ByteBuffer writeRleBuffer;
+    private ByteBuffer tmpRleBuffer;
 
     /**
      * 
@@ -28,6 +23,9 @@ public class ImageCodecRLE extends ImageCodec {
     public ImageCodecRLE(   ImageResource resource, 
                             Checksum checksum) {
         super(resource, checksum);
+        
+        writeRleBuffer = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
+        tmpRleBuffer = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE * 2);
     }
     
     /**
@@ -44,43 +42,46 @@ public class ImageCodecRLE extends ImageCodec {
             throw new IllegalArgumentException();
         }
         
+        byte[] readRleColor = new byte[3];
+        int readColorCounter = 0;
+        int readPacketHeader = 0;
         
-        ByteBuffer readBlock = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
+        // Temporäre Variablen zur Performanceoptimierung
+        int inOffset = (int)resource.position();
+        int inLength = (int)resource.length();
+        int outOffset = 0;
+        byte r,g,b;
+    
+        ByteBuffer readBlock = tmpRleBuffer;
         
         if(outBlock.data == null) {
             outBlock.data = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
         }
         
         ByteBuffer dataOut = outBlock.data;
+        byte[] outBytes = dataOut.array();
         
         // Blockweise Daten einlesen und dekodieren bis Ausgabeblock gefüllt
-        while(resource.position() < resource.length()) {
+        while( inOffset < inLength ) {
             
             // Blockgröße anpassen gegen Ende
-            if(resource.position() + readBlock.capacity() > resource.length()) {
-                readBlock.limit(readBlock.capacity() - (int)((resource.position() + readBlock.capacity()) - resource.length()));
+            if(inOffset + readBlock.capacity() > inLength) {
+                readBlock.limit(readBlock.capacity() - ((inOffset + readBlock.capacity()) - inLength));
             }
             
             // Block lesen
-            resource.read(readBlock);
-
+            int len = resource.read(readBlock);
+            inOffset += len;
+            
             // Block gemäß RLE verarbeiten
             while(readBlock.remaining() != 0) {
 
-                if(readColorCounter == 0) {
-                    // Paketkopf und Wiederholungen einlesen
-                    readPacketHeader =  readBlock.get() & 0xFF;
-                    readColorCounter = getRepetitionCount(readPacketHeader);
-                }
+                // Paketkopf und Wiederholungen einlesen
+                readPacketHeader =  readBlock.get() & 0xFF;
+                readColorCounter = getRepetitionCount(readPacketHeader);
                 
                 // Anzahl der zu extrahierenden Bytes
                 int currentBytes = readColorCounter * 3;
-
-                // Neuen Leseblock beginnen?
-                if(readBlock.remaining() < currentBytes) {
-                    resource.position(resource.position() - readBlock.remaining());
-                    break;
-                } 
 
                 // Wenn gefüllt, Datenblock zum Empfänger senden
                 if( dataOut.position() + currentBytes > dataOut.capacity()) {
@@ -89,15 +90,37 @@ public class ImageCodecRLE extends ImageCodec {
 
                 // RLE oder RAW Paket?
                 if(isRlePacket(readPacketHeader)) {
-
+                    
+                    // Neuen Leseblock beginnen?
+                    if(readBlock.remaining() < 3) {
+                        inOffset = inOffset - readBlock.remaining() - 1;
+                        resource.position(inOffset);
+                        break;
+                    }
+                    
                     // Farbwert auslesen
                     readBlock.get(readRleColor);
-
+                    
                     // Farbwert in Ausgabebuffer schreiben
+                    r = readRleColor[0];
+                    g = readRleColor[1];
+                    b = readRleColor[2];
+
+                    outOffset = dataOut.position();
                     for(int i=0;i<readColorCounter;i++) {
-                        dataOut.put(readRleColor);
+                        outBytes[outOffset++] = r;
+                        outBytes[outOffset++] = g;
+                        outBytes[outOffset++] = b; 
                     }
+                    dataOut.position(outOffset);
                 } else {
+                    
+                    // Neuen Leseblock beginnen?
+                    if(readBlock.remaining() < currentBytes) {
+                        inOffset = inOffset - readBlock.remaining() - 1;
+                        resource.position(inOffset);
+                        break;
+                    } 
 
                     // RAW Farben übertragen
                     dataOut.put(readBlock.array(), 
@@ -105,8 +128,6 @@ public class ImageCodecRLE extends ImageCodec {
                                 currentBytes);
                     readBlock.position(readBlock.position() + currentBytes);
                 }
-                
-                readColorCounter = 0;
             }
 
             // Eingabedaten filtern
@@ -133,9 +154,13 @@ public class ImageCodecRLE extends ImageCodec {
         ||  block == null) {
             throw new IllegalArgumentException();
         }
+        
         int colorSize = 3;
+        byte[] writeRleColor = new byte[3];
         
         ByteBuffer rleLine = ByteBuffer.allocate(192*3);
+        ByteBuffer in = tmpRleBuffer;
+                
         tmpRleBuffer.clear();
         
         // Gepufferter Block vorhanden?
@@ -146,7 +171,10 @@ public class ImageCodecRLE extends ImageCodec {
         }
         tmpRleBuffer.put(block.data);
         tmpRleBuffer.flip();
-        ByteBuffer in = tmpRleBuffer;
+        
+        if(block.lastBlock) {
+            block.lastBlock = true;
+        }
         
         // Über Bytes iterieren und gemäß RLE verarbeiten
         while(in.position() < in.limit()) {
@@ -160,6 +188,10 @@ public class ImageCodecRLE extends ImageCodec {
                 return;
                 
             } else if(writeColorCounter > 1 ) {
+                
+                if(writeColorCounter == -1) {
+                    writeColorCounter = in.remaining() / 3;
+                }
                 
                 in.get(writeRleColor);
                 
@@ -181,25 +213,28 @@ public class ImageCodecRLE extends ImageCodec {
                 int writeRawCounter = countDifferentColors(in);
                 if( writeRawCounter == -1
                 &&  !block.lastBlock) {
+                    
                     writeRleBuffer.put(0, in, in.position(), in.remaining());
                     writeRleBuffer.position(in.remaining());
                     return;
+                    
                 } else {
+                    
                     if(writeRawCounter == -1) {
                         writeRawCounter = in.remaining() / 3;
                     }
+                    
                     // Line speichern
                     rleLine.put((byte)(writeRawCounter - 1));
-                    try{
                     rleLine.put(in.array(), in.position(), writeRawCounter * 3);
+                    
                     in.position(in.position() + writeRawCounter * 3);
+                    
                     rleLine.flip();
                     resource.write(rleLine); 
                     rleLine.clear();
-                    writeRawCounter = 0;}
-                    catch(Exception e) {
-                        return;
-                    }
+                    
+                    writeRawCounter = 0;
                 }
             }
         }
@@ -239,60 +274,52 @@ public class ImageCodecRLE extends ImageCodec {
         byte[] array = data.array();
         int baseOffset = data.position();
         int runningOffset = baseOffset + 3;
-        int counter = 1;
+        int counter = -1;
 
-        if(runningOffset == data.limit()) {
-            return -1;
+        if(runningOffset < data.limit()) {
+            counter = 1;
+
+            while ( compareColor(array, baseOffset, runningOffset)
+            &&      counter < 127) {
+                // Zähler max, oder Ende erreicht?
+                if(runningOffset == data.limit() - 3) {
+                    return -1;
+                }
+                
+                counter++;
+                runningOffset += 3;         
+            }
         }
         
-        // Zählen solange Farben gleich sind
-        while (compareColor(array, baseOffset, runningOffset)) {
-
-            counter++;
-            runningOffset += 3;
-
-            // Zähler max, oder Ende erreicht?
-            if(runningOffset == data.limit()) {
-             return -1;
-            }
-            if( counter > 127) {
-                break;
-            }
-        }
-
         return counter;
     }
     
-        /**
+    /**
      * 
      * @param data
      * @return 
      */
     private int countDifferentColors(ByteBuffer data) {
+        
         byte[] src = data.array();
-        int baseOffset = data.position();
-        int runningOffset = baseOffset + 3;
-        int counter = 1;
+        int offset = data.position();
+        int counter = -1;
         
-        if(runningOffset == data.limit()) {
-            return -1;
-        }
-        try {
-        // Zählen solange Farben ungleich sind
-        while (!compareColor(src, runningOffset, runningOffset + 3)
-            && counter < 128) {
-
-            if(runningOffset == data.limit() - 3) {
-                return -1;
-            }
+        if(offset < data.limit()) {
+            counter = 1;
             
-            counter++;
-            runningOffset += 3;
+            while (!compareColor(src, offset, offset + 3)
+                && counter < 128) {
+
+                if(offset == data.limit() - 3) {
+                    return -1;
+                }
+
+                counter++;
+                offset += 3;
+            }
         }
-        }catch(Exception e) {
-            return 0;
-        }
-        
+
         return counter;
     }
    

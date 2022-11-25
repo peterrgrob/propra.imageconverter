@@ -12,6 +12,7 @@ import propra.imageconverter.data.DataFormat;
  */
 public class ImageResourceProPra extends ImageResource {
        
+    // Offsets der Headerdaten in der Datei */
     static final String PROPRA_VERSION = "ProPraWiSe22";
     static final int PROPRA_HEADER_SIZE = 30;
     static final int PROPRA_HEADER_OFFSET_ENCODING = 12;
@@ -24,6 +25,7 @@ public class ImageResourceProPra extends ImageResource {
     static final int PROPRA_HEADER_ENCODING_NONE = 0;     
     static final int PROPRA_HEADER_ENCODING_RLE = 1;   
     
+    // In der Datei gespeicherte Prüfsumme 
     int referenceChecksum;
     
     /**
@@ -147,6 +149,7 @@ public class ImageResourceProPra extends ImageResource {
         
         // In Stream schreiben
         binaryFile.seek(0);
+        byteBuffer.clear();
         write(byteBuffer);
     }
 }

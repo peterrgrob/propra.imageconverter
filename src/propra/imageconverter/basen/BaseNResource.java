@@ -10,6 +10,7 @@ import propra.imageconverter.data.DataResource;
  */
 public class BaseNResource extends DataResource {
     
+    // BaseN Kodierung
     private final BaseNFormat format;
     
     /**

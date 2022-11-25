@@ -12,10 +12,12 @@ public class BaseNFormat extends DataFormat {
     // Alphabettabellen, aus Performancegründen keine Hashmap
     private String alphabet = new String();
     private byte[] alphabetMap = new byte[256];
+    
+    // Verwendete BaseN Kodierung
     private BaseNEncoding baseEncoding;
     
-        /* 
-     * Verwendete Kodierung der Daten mit parametrisierten
+    /* 
+     * Kodierungstypen der Daten mit parametrisierten
      * Einstellungen für die Base-N Kodierung, dabei ist die Blocklänge
      * immer ein vielfaches von 8 Bit und dem Bitcount der Base-N Kodierung
      */

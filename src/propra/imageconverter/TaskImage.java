@@ -7,10 +7,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import propra.imageconverter.checksum.Checksum;
 import propra.imageconverter.checksum.ChecksumPropra;
-import propra.imageconverter.data.DataController;
+import propra.imageconverter.data.DataBlock;
 import propra.imageconverter.data.DataFormat;
 import propra.imageconverter.data.DataFormat.Encoding;
 import propra.imageconverter.data.DataFormat.IOMode;
+import propra.imageconverter.data.IDataCodec;
+import propra.imageconverter.data.IDataTarget;
 import propra.imageconverter.image.*;
 
 /**
@@ -18,15 +20,19 @@ import propra.imageconverter.image.*;
  * 
  * @author pg
  */
-public class TaskImage {
+public class TaskImage implements IDataTarget{
     
     // IO Objekte
     private ImageResource inReader;
     private ImageResource outWriter;
+    IDataCodec inCodec;
+    IDataCodec outCodec;
+    
+    // Prüfsummenobjekte
     private Checksum inChecksum;
     private Checksum outChecksum;  
     
-    // Kodierung des Ausgbaebildes
+    // Kodierung des Ausgabebildes
     private ColorFormat.Encoding outEncoding = ColorFormat.Encoding.NONE;
     
     /**
@@ -95,20 +101,27 @@ public class TaskImage {
         // Bildkopf einlesen
         ImageHeader inHeader = new ImageHeader(inReader.readHeader());
         
-        ImageCodec inCodec = createImageCodec(  inHeader.colorFormat().encoding(), 
-                                                inReader, 
-                                                inChecksum);
-        ImageCodec outCodec = createImageCodec( outEncoding,
-                                                outWriter, 
-                                                outChecksum);
-        DataController controller = new DataController(inCodec, outCodec);
+        inCodec = createImageCodec(  inHeader.colorFormat().encoding(), 
+                                    inReader, 
+                                    inChecksum);
+        outCodec = createImageCodec( outEncoding,
+                                    outWriter, 
+                                    outChecksum);
         
         // Bildkompression setzen und Bildkopf in Ausgabedatei schreiben
         inHeader.colorFormat().encoding(outEncoding);
         outWriter.writeHeader(inHeader);
        
-        // Konvertieren
-        controller.process();
+        DataBlock dataBlock = new DataBlock();
+        
+        inCodec.begin(DataFormat.Operation.READ);
+        outCodec.begin(DataFormat.Operation.WRITE);
+        
+        // Bilder konvertieren
+        inCodec.decode(dataBlock, this);
+        
+        inCodec.end();
+        outCodec.end();
         
         // Prüfsumme prüfen
         isChecksumValid();
@@ -123,6 +136,20 @@ public class TaskImage {
         outWriter.close();
     }
     
+    /**
+     * 
+     * @param caller
+     * @param block
+     * @throws IOException 
+     */
+    @Override
+    public void push(IDataCodec caller, DataBlock block) throws IOException {
+        if(caller == inCodec
+        && block != null
+        && outCodec != null) {
+            outCodec.encode(block);
+        }
+    }
     
     /**
      * @throws java.io.IOException

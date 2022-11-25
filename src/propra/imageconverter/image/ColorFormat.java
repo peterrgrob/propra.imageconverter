@@ -19,6 +19,7 @@ public class ColorFormat extends DataFormat
     public static final int GREEN = 1;
     public static final int RED = 2;
     
+    // Standard RGB Format
     public static final ColorFormat FORMAT_RGB = new ColorFormat(RED, GREEN, BLUE);
     
     // Bildet Indizes der Farkomponenten ab
@@ -31,18 +32,14 @@ public class ColorFormat extends DataFormat
         /*
          * Standard RGB Farben (Little Endian)
          */
-        setMapping(RED, 2);
-        setMapping(GREEN,1);
-        setMapping(BLUE, 0);
+        setMapping(2,1,0);
     }
     
     /**
      * 
      */
     public ColorFormat(int r, int g, int b) {
-        setMapping(RED, r);
-        setMapping(GREEN,g);
-        setMapping(BLUE, b);
+        setMapping(r, g, b);
     }
     
     /**
@@ -51,9 +48,7 @@ public class ColorFormat extends DataFormat
      */
     public ColorFormat(ColorFormat src) {
         super(src);
-        setMapping(RED,src.getMapping(RED));
-        setMapping(GREEN,src.getMapping(GREEN));
-        setMapping(BLUE,src.getMapping(BLUE));
+        setMapping(src.mapping);
     }
     
     /**
@@ -112,6 +107,12 @@ public class ColorFormat extends DataFormat
     /*
      *  Getter/Setter 
      */
+    public void setMapping(int r, int g, int b) {
+        setMapping(RED, r);
+        setMapping(GREEN,g);
+        setMapping(BLUE, b);
+    }
+    
     public void setMapping(int id, int newId) {
         mapping[id] = newId;
     }

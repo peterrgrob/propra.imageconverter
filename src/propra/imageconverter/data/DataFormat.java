@@ -11,7 +11,7 @@ public class DataFormat {
     
     protected Encoding encoding = Encoding.NONE;
     
-    // Kodierung der Daten
+    // Kodierungstypen der Daten
     public enum Encoding {
         NONE,
         RLE,
@@ -39,7 +39,6 @@ public class DataFormat {
      *
      */
     public DataFormat() {
-        
     }
     
     /**
@@ -47,7 +46,7 @@ public class DataFormat {
      * @param encoding
      */
     public DataFormat(Encoding encoding) {
-        encoding(encoding);
+        this.encoding(encoding);
     } 
     
     /**
@@ -148,7 +147,7 @@ public class DataFormat {
         }
     }
     
-        /**
+    /**
      *
      * @param buffer
      * @param len

@@ -22,6 +22,7 @@ public class ImageResourceTGA extends ImageResource {
     static final int TGA_HEADER_OFFSET_BPP = 16;
     static final int TGA_HEADER_OFFSET_ORIGIN = 17; 
     
+    // Kodierungungen
     static final int TGA_HEADER_ENCODING_NONE = 2;     
     static final int TGA_HEADER_ENCODING_RLE = 10;    
     

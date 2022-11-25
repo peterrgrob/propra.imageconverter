@@ -7,8 +7,10 @@ import java.nio.ByteBuffer;
  * @author pg
  */
 public class DataBlock {
+    
+    // Enthaltene Daten im Block
     public ByteBuffer data;
-    public long sourcePosition;
-    public long sourceLength;
+    
+    // true, wenn letzter Block der Operation
     public boolean lastBlock;
 }

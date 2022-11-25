@@ -29,50 +29,29 @@ public class DataResource implements IDataResource {
      * @param mode 
      * @throws java.io.IOException 
      */
-    public DataResource(String file, DataFormat.IOMode mode) throws IOException {
+    public DataResource(String file, 
+                        DataFormat.IOMode mode) throws IOException {
         this.mode = mode;
+        
+        File fileObj = createFileAndDirectory(file); 
         if(mode == DataFormat.IOMode.BINARY) {
-            binaryFile = createBinaryFile(file);
+            binaryFile = new RandomAccessFile(fileObj, "rw");
         } else {
-            txtWriter = createTextWriter(file);
+            txtWriter = new BufferedWriter(new FileWriter(fileObj));
         }
     }
     
     /**
-     * 
-     * @param filePath
-     * @return
-     * @throws IOException 
-     */
-    private static BufferedWriter createTextWriter(String filePath) throws IOException {
-        File fileObj = createFileAndDirectory(filePath);
-        return new BufferedWriter(new FileWriter(fileObj)); 
-    }
-    
-    /**
-     * 
-     * @param filePath
-     * @return
-     * @throws IOException 
-     */
-    private static RandomAccessFile createBinaryFile(String filePath) throws IOException {
-        File fileObj = createFileAndDirectory(filePath);
-        return new RandomAccessFile(fileObj, "rw");
-    }
-    
-        /**
-     * 
+     * Verzeichnisse und Dateil erstellen, falls nötig
      * @param filePath
      * @return
      * @throws IOException 
      */
     private static File createFileAndDirectory(String filePath) throws IOException {
-        
-        // Verzeichnisse erstellen, falls nötig
+     
         Path outDirs = Paths.get(filePath);
         Files.createDirectories(outDirs.getParent());
         
-        // Ausgabedatei erstellen
         File file = new File(filePath);
         if(!file.exists()) {
             file.createNewFile();
@@ -121,15 +100,6 @@ public class DataResource implements IDataResource {
     
     /**
      * 
-     */
-    protected void checkState() {
-        if(!isValid()) {
-            throw new IllegalArgumentException("Ungültiger Zustand!");
-        }
-    }
-    
-    /**
-     * 
      * @param pos
      * @throws IOException 
      */
@@ -172,37 +142,35 @@ public class DataResource implements IDataResource {
     /**
      * 
      * @param buffer
+     * @return 
      * @throws IOException 
      */
     @Override
-    public void read(ByteBuffer buffer) throws IOException {
-        if(!isValid()
-        ||  buffer == null) {
-            throw new IllegalStateException();
-        }
-        
-        if(mode == DataFormat.IOMode.BINARY) {
+    public int read(ByteBuffer buffer) throws IOException {     
+        checkState();
+        if(mode == DataFormat.IOMode.BINARY
+        && buffer != null) {
             int len = binaryFile.read(  buffer.array(), 
                                         buffer.position(), 
                                         buffer.capacity());
             buffer.limit(len);
+            return len;
         } 
+        return 0;
     }
     
     /**
      * 
      * @param offset
      * @param buffer
+     * @return 
      * @throws IOException 
      */
     @Override
-    public void read(long offset, ByteBuffer buffer) throws IOException {
-        if(!isValid()
-        ||  buffer == null) {
-            throw new IllegalStateException();
-        }
-        
-        if(mode == DataFormat.IOMode.BINARY) {
+    public int read(long offset, ByteBuffer buffer) throws IOException {
+        checkState();
+        if(mode == DataFormat.IOMode.BINARY
+        && buffer != null) {
             long p = binaryFile.getFilePointer();
             binaryFile.seek(offset);
             
@@ -212,7 +180,9 @@ public class DataResource implements IDataResource {
             
             buffer.limit(len);
             binaryFile.seek(p);
+            return len;
         } 
+        return 0;
     }
 
     /**
@@ -224,6 +194,7 @@ public class DataResource implements IDataResource {
      */
     @Override
     public ByteBuffer read(long offset, int length) throws IOException {
+        checkState();
         ByteBuffer nb = ByteBuffer.allocate(length);
         read(offset, nb);
         return nb;
@@ -236,6 +207,7 @@ public class DataResource implements IDataResource {
      */
     @Override
     public String readLine() throws IOException {
+        checkState();
         if(mode == DataFormat.IOMode.BINARY) {
             return binaryFile.readLine();
         } else {
@@ -250,13 +222,9 @@ public class DataResource implements IDataResource {
      */
     @Override
     public void write(ByteBuffer buffer) throws IOException {
-        if(!isValid()
-        ||  buffer == null) {
-            throw new IllegalStateException();
-        }
-        
-        if(mode == DataFormat.IOMode.BINARY) {
-            
+        checkState();
+        if(mode == DataFormat.IOMode.BINARY
+        && buffer != null) {
             binaryFile.write(buffer.array(), 
                             buffer.position(), 
                             buffer.limit());
@@ -271,12 +239,9 @@ public class DataResource implements IDataResource {
      */
     @Override
     public void write(long offset, ByteBuffer buffer) throws IOException {
-        if(!isValid()
-        ||  buffer == null) {
-            throw new IllegalStateException();
-        }
-        
-        if(mode == DataFormat.IOMode.BINARY) {
+        checkState();
+        if(mode == DataFormat.IOMode.BINARY
+        && buffer != null) {
             long p = binaryFile.getFilePointer();
             binaryFile.seek(offset);
             
@@ -306,4 +271,13 @@ public class DataResource implements IDataResource {
         // Schreiben erzwingen
         txtWriter.flush();
     }*/
+    
+    /**
+     * 
+     */
+    protected void checkState() {
+        if(!isValid()) {
+            throw new IllegalArgumentException("Ungültige Resource!");
+        }
+    }
 }

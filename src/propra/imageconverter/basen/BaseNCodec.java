@@ -42,27 +42,6 @@ public class BaseNCodec extends DataCodec {
     }
     
     /**
-     * @param buffer
-     * @return Gibt die Datenmenge nach Kodierung zurück
-     */
-    public int encodedBufferLength(ByteBuffer buffer) {
-        if( buffer == null 
-        ||  !isValid()) {
-            throw new IllegalArgumentException();
-        }
-        
-        int totalBits = buffer.limit() << 3;
-        int len = totalBits / format.getBitCount();
-
-        // Aufzufüllende Bits berücksichtigen
-        if(totalBits % format.getBitCount() != 0) {
-            len++;
-        }
-
-        return len;
-    }
-    
-    /**
      * Dekodiert BaseNCodec kodierte Daten
      * 
      * @param block
@@ -71,8 +50,7 @@ public class BaseNCodec extends DataCodec {
     public void decode( DataBlock block,
                         IDataTarget target) throws IOException {
         if(!isValid()
-        ||  block == null
-        ||  target == null) {
+        ||  block == null) {
             throw new IllegalArgumentException();
         }   
         
@@ -258,6 +236,27 @@ public class BaseNCodec extends DataCodec {
         // Puffer aktualisieren
         out.rewind();
         out.limit(characterCount);
+    }
+    
+    /**
+     * @param buffer
+     * @return Gibt die Datenmenge nach Kodierung zurück
+     */
+    public int encodedBufferLength(ByteBuffer buffer) {
+        if( buffer == null 
+        ||  !isValid()) {
+            throw new IllegalArgumentException();
+        }
+        
+        int totalBits = buffer.limit() << 3;
+        int len = totalBits / format.getBitCount();
+
+        // Aufzufüllende Bits berücksichtigen
+        if(totalBits % format.getBitCount() != 0) {
+            len++;
+        }
+
+        return len;
     }
     
     /**

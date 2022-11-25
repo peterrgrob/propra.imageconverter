@@ -10,9 +10,16 @@ import propra.imageconverter.checksum.Checksum;
  */
 public class DataCodec implements IDataCodec {
 
-    protected final int DEFAULT_BLOCK_SIZE = 4096 * 1 * 3;
-    protected ByteBuffer dataBuffer;
+    // Standardblockgröße, vielfaches der Pixelgröße
+    protected final int DEFAULT_BLOCK_SIZE = 4096 * 32 * 3;
+    
+    // Temporärer Lesepuffer
+    protected ByteBuffer readBuffer;
+    
+    // Zugeordnete Resource
     protected IDataResource resource;
+    
+    // Prüfsummenobjekt
     protected Checksum checksum;
     
     /**
@@ -43,7 +50,7 @@ public class DataCodec implements IDataCodec {
      */
     @Override
     public void begin(DataFormat.Operation op) throws IOException {  
-        dataBuffer = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
+        readBuffer = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
         if(checksum != null) {
             checksum.beginFilter();
         }
@@ -51,7 +58,6 @@ public class DataCodec implements IDataCodec {
 
     /**
      * 
-     * @param op
      * @param block
      * @throws IOException 
      */
@@ -75,6 +81,7 @@ public class DataCodec implements IDataCodec {
      * @param target
      * @throws IOException 
      */
+    @Override
     public void decode( DataBlock block,
                         IDataTarget target) throws IOException {
         if(!isValid()
@@ -82,14 +89,16 @@ public class DataCodec implements IDataCodec {
             throw new IllegalArgumentException();
         }
         
-        resource.read(dataBuffer);
+        readBuffer.clear();
+        resource.read(readBuffer);
 
-        block.data = dataBuffer;
-        block.sourcePosition = resource.position();
-        block.sourceLength = resource.length();
-
+        block.data = readBuffer;
+        if(resource.position() == resource.length()) {
+            block.lastBlock = true;
+        }
+        
         if(checksum != null) {
-            checksum.apply(dataBuffer);
+            checksum.apply(readBuffer);
         }
 
         if(target != null) {
@@ -101,22 +110,18 @@ public class DataCodec implements IDataCodec {
     /**
      * 
      * @return 
+     * @throws java.io.IOException 
      */
     @Override
-    public boolean isDataAvailable() {
+    public boolean isDataAvailable() throws IOException {
         if(resource != null) {
-            try {
-                return (resource.length() - resource.position() > 0);
-            } catch (IOException ex) {
-                throw new IllegalStateException();
-            }
+            return (resource.length() - resource.position() > 0);
         }
         return false;
     }
 
     /**
      * 
-     * @param op
      * @throws IOException 
      */
     @Override
@@ -138,12 +143,10 @@ public class DataCodec implements IDataCodec {
      * 
      * @param target
      * @param block 
+     * @throws java.io.IOException 
      */
-    protected void pushDataToTarget(IDataTarget target, DataBlock block) throws IOException {
-        
-        block.sourceLength = resource.length();
-        block.sourcePosition = resource.position();
-                    
+    protected void pushDataToTarget(IDataTarget target, 
+                                    DataBlock block) throws IOException {            
         block.data.flip();
         target.push(this, block);
         block.data.clear();

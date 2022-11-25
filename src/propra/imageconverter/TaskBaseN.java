@@ -19,7 +19,7 @@ import propra.imageconverter.data.DataResource;
  */
 public class TaskBaseN {
     
-    // Kommandozeile
+    // Kommandozeilenobjekt
     private final CmdLine cmdLine;
     
     // Ein- und Ausgabeobjekt 
