@@ -31,13 +31,6 @@ public interface IDataCodec extends IDataListener {
     
     /**
      * 
-     * @return
-     * @throws IOException 
-     */
-    public boolean isDataAvailable() throws IOException;
-    
-    /**
-     * 
      * @throws IOException 
      */
     public void end() throws IOException;

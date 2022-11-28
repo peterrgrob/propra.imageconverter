@@ -27,11 +27,10 @@ public class ImageResourceProPra extends ImageResource {
     
     /**
      *
-     * @param file
-     * @param mode
-     * @throws java.io.IOException
+     * 
      */
     public ImageResourceProPra(String file, DataFormat.IOMode mode) throws IOException {
+        
         super(file, mode);
         fileHeaderSize = PROPRA_HEADER_SIZE;
         colorFormat = new ColorFormat(0, 2, 1);
@@ -39,7 +38,7 @@ public class ImageResourceProPra extends ImageResource {
     
     /**
      * 
-     * @throws java.io.IOException
+     * 
      */
     @Override
     public ImageMeta readHeader() throws IOException {
@@ -104,7 +103,6 @@ public class ImageResourceProPra extends ImageResource {
     /**
      * Schreibt allgemeinen Header als ProPra Header
      * 
-     * @param srcHeader
      */
     @Override
     public void writeHeader(ImageMeta srcHeader) throws IOException {

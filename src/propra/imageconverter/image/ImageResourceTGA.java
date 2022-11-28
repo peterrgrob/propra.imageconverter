@@ -28,9 +28,7 @@ public class ImageResourceTGA extends ImageResource {
     
     /**
      *
-     * @param file
-     * @param mode
-     * @throws java.io.IOException
+     * 
      */
     public ImageResourceTGA(String file, DataFormat.IOMode mode) throws IOException {
         super(file, mode);
@@ -40,8 +38,6 @@ public class ImageResourceTGA extends ImageResource {
     /**
      * 
      * 
-     * @return 
-     * @throws java.io.IOException
      */
     @Override
     public ImageMeta readHeader() throws IOException {
@@ -82,8 +78,6 @@ public class ImageResourceTGA extends ImageResource {
     /**
      * Schreibt allgemeinen Header als TGA Header
      * 
-     * @param srcHeader
-     * @throws java.io.IOException
      */
     @Override
     public void writeHeader(ImageMeta srcHeader) throws IOException {
@@ -132,5 +126,4 @@ public class ImageResourceTGA extends ImageResource {
         binaryFile.seek(0);
         write(byteBuffer);
     }
-    
 }

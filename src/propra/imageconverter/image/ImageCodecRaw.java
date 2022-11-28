@@ -8,7 +8,7 @@ import propra.imageconverter.data.IDataListener;
 
 /**
  *
- * @author pg
+ * 
  */
 public class ImageCodecRaw extends DataCodecRaw {
     
@@ -17,24 +17,19 @@ public class ImageCodecRaw extends DataCodecRaw {
     
     /**
      * 
-     * @param resource
-     * @param checksum 
      */
     public ImageCodecRaw(   ImageResource resource, 
                             Checksum checksum) {
         super(resource, checksum);
-        
         image = resource;
     }
     
     /**
      * 
-     * @param block
-     * @throws IOException 
      */
     @Override
     public void decode( DataBlock block, 
-                        IDataListener target) throws IOException {
+                        IDataListener listener) throws IOException {
         if(!isValid()
         ||  block == null) {
             throw new IllegalArgumentException();
@@ -45,10 +40,10 @@ public class ImageCodecRaw extends DataCodecRaw {
          */
         while(resource.position() < resource.length()) {
             
-            // Datenoperation 
+            // Block dekodieren 
             super.decode(block, null);
 
-            // Farbkonvertierung
+            // Pixelformat ggfs. konvertieren
             if(image.getHeader().colorFormat().compareTo(ColorFormat.FORMAT_RGB) != 0) {  
                 ColorFormat.convertColorBuffer( block.data, 
                                 image.getHeader().colorFormat(), 
@@ -56,16 +51,17 @@ public class ImageCodecRaw extends DataCodecRaw {
                                 ColorFormat.FORMAT_RGB);
             }
 
-            if(target != null) {
-                target.onData(Event.DATA_BLOCK_DECODED, this, block);
+            // Daten an Listener senden
+            if(listener != null) {
+                listener.onData(Event.DATA_BLOCK_DECODED, 
+                                this, 
+                                block);
             }
         }
     }
 
     /**
      * 
-     * @param block
-     * @throws IOException 
      */
     @Override
     public void encode(DataBlock block) throws IOException {
@@ -82,13 +78,12 @@ public class ImageCodecRaw extends DataCodecRaw {
                                             image.getHeader().colorFormat());
         }
         
-        // Datenoperaion
+        // Block in Resource kodieren
         super.encode(block);
     }
     
     /**
      * 
-     * @throws IOException 
      */
     @Override
     public void end() throws IOException {

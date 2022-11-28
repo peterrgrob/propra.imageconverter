@@ -184,7 +184,7 @@ public class ImageOperation implements IDataListener {
             stateString = stateString.concat(" --> " + outEncoding.toString());            
             
             if(inChecksum != null) {
-                stateString = stateString.concat("\nEingabe Prüfsumme OK: "+String.format("0x%08X", (int)inChecksum.getValue()));
+                stateString = stateString.concat("\nEingabe Prüfsumme (Ok): "+String.format("0x%08X", (int)inChecksum.getValue()));
             }
             
             if(outChecksum != null) {

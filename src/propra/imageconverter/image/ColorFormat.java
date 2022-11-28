@@ -9,7 +9,6 @@ import propra.imageconverter.data.DataFormat;
  *  Die Reihenfolge der Komponenten ist durch ein Mapping 
  *  konfigurierbar, die Standardreihenfolge ist Little-Endian.
  * 
- * @author pg
  */
 public class ColorFormat extends DataFormat 
                         implements Comparable<ColorFormat> {
@@ -44,7 +43,6 @@ public class ColorFormat extends DataFormat
     
     /**
      * 
-     * @param src
      */
     public ColorFormat(ColorFormat src) {
         super(src);
@@ -53,8 +51,6 @@ public class ColorFormat extends DataFormat
     
     /**
      *
-     * @param o
-     * @return
      */
     @Override
     public int compareTo(ColorFormat o) {
@@ -66,7 +62,7 @@ public class ColorFormat extends DataFormat
         return -1;
     }
       
-    /*
+    /**
      * 
      */
     public static ByteBuffer convertColorBuffer(ByteBuffer input, ColorFormat srcFormat,
@@ -129,7 +125,7 @@ public class ColorFormat extends DataFormat
             &&  array[offset0 + 2] == array[offset1 + 2]);
     }
     
-    /*
+    /**
      *  Getter/Setter 
      */
     public void setMapping(int r, int g, int b) {

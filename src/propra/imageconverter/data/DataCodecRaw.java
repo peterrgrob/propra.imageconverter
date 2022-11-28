@@ -55,16 +55,16 @@ public class DataCodecRaw implements IDataCodec {
      */
     @Override
     public void encode(DataBlock block) throws IOException {
-        if(!isValid()
+        if(!isValid() 
         ||  block == null) {
             throw new IllegalArgumentException();
         }
+        
         // Datenblock in Resource schreiben
         resource.write(block.data);
         
-        // Listener benachrichtigen
-        block.data.rewind();
-        this.onData(Event.DATA_IO_WRITE, this, block);
+        // Gelesene Daten filtern
+        dispatchEvent(Event.DATA_IO_WRITE, this, block);
     }
     
     /*
@@ -74,13 +74,12 @@ public class DataCodecRaw implements IDataCodec {
     public void decode( DataBlock block,
                         IDataListener target) throws IOException {
         if(!isValid()
-        ||  block == null) {
+        || block == null) {
             throw new IllegalArgumentException();
         }
         
         // Datenblock von Resource lesen 
-        readBuffer.clear();
-        resource.read(readBuffer);
+        resource.read(readBuffer.clear());
         block.data = readBuffer;
         
         // Letzter Block der Operation?
@@ -88,23 +87,10 @@ public class DataCodecRaw implements IDataCodec {
             block.lastBlock = true;
         }
         
-        // Daten zu den Listener senden
-        onData(Event.DATA_IO_READ, this, block);
-        readBuffer.rewind();
-        sendEvent(Event.DATA_BLOCK_DECODED, target, block);
+        // Gelesene Daten zu den Listener senden
+        dispatchEvent(Event.DATA_IO_READ, this, block);
+        dispatchEvent(Event.DATA_BLOCK_DECODED, target, block);
     }        
-            
-
-    /*
-     * 
-     */
-    @Override
-    public boolean isDataAvailable() throws IOException {
-        if(resource != null) {
-            return (resource.length() - resource.position() > 0);
-        }
-        return false;
-    }
 
     /*
      * 
@@ -126,9 +112,9 @@ public class DataCodecRaw implements IDataCodec {
     /*
      *
      */
-    protected void sendEvent(   Event event,
-                                IDataListener listener, 
-                                DataBlock block) throws IOException {            
+    protected void dispatchEvent(   Event event,
+                                    IDataListener listener, 
+                                    DataBlock block) throws IOException {            
         if(listener != null) {
             listener.onData(event,this, block);
         }

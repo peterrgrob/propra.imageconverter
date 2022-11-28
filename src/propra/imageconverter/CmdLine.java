@@ -38,7 +38,6 @@ import propra.imageconverter.image.ColorFormat;
    
     /**
      * 
-     * @param args 
      */
     public CmdLine(String[] args) {
         this.options = new HashMap<>();

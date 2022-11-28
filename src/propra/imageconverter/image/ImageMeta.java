@@ -4,7 +4,6 @@ package propra.imageconverter.image;
 /**
  * Klasse für einen allgemeinen Bildkopf
  * 
- * @author pg
  */
 public class ImageMeta {
     
