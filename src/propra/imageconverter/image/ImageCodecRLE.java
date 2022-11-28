@@ -160,12 +160,12 @@ public class ImageCodecRLE extends ImageCodecRaw {
         
         /**
          * Lokale Variablen
-         */
-        int colorCtr;
-        boolean boundary;        
+         */     
         byte[] writeRleColor = new byte[3];
         ByteBuffer rleBlock = ByteBuffer.allocate(192*3);
         ByteBuffer inBuffer;
+        int colorCtr;
+        boolean boundary;   
 
         // Farbkonvertierung
         if(image.getHeader().colorFormat().compareTo(ColorFormat.FORMAT_RGB) != 0) {   
@@ -176,18 +176,9 @@ public class ImageCodecRLE extends ImageCodecRaw {
         }
         
         /*
-         *  Wenn gepufferte Daten aus vorherigem Block vorhanden sind,
-         *  den neuen Block an diese Anhängen
+         *  Eingabedaten mit gepufferten Daten zusammenführen
          */
-        if(isBufferedData) {
-            bufferedData.put(block.data);
-            bufferedData.flip();
-            isBufferedData = false;
-            inBuffer = bufferedData;
-        } else {
-            inBuffer = block.data;
-        }
-        
+        inBuffer = getDataToEncode(block.data);
         int dataLimit = inBuffer.limit();
         
         // Über Bytes iterieren und gemäß RLE verarbeiten
@@ -199,16 +190,8 @@ public class ImageCodecRLE extends ImageCodecRaw {
              */
             boundary = inBuffer.position() + (127 * 3) >= dataLimit;
             if(boundary && !block.lastBlock) {
-                if(inBuffer == bufferedData) {
-                    bufferedData.compact();
-                } else {
-                    bufferedData.clear();
-                    bufferedData.put(0, 
-                                        inBuffer, 
-                                        inBuffer.position(), 
-                                        inBuffer.remaining());
-                    bufferedData.position(inBuffer.remaining());
-                }
+                
+                bufferInputData(inBuffer);
                 isBufferedData = true;
                 return; 
             }
@@ -327,5 +310,39 @@ public class ImageCodecRLE extends ImageCodecRaw {
         outBuffer.limit(outOffset);
         
         return rawCounter;
+    }
+    
+    /**
+     *  Puffert zu kodierende Daten bis zum nächsten Block
+     */
+    private void bufferInputData(ByteBuffer inBuffer) {
+        
+        if(inBuffer == bufferedData) {
+            bufferedData.compact();
+        } else {
+            bufferedData.clear();
+            bufferedData.put(0, 
+                            inBuffer, 
+                            inBuffer.position(), 
+                            inBuffer.remaining());
+            bufferedData.position(inBuffer.remaining());
+        }
+    }
+    
+    /**
+     *  Wenn gepufferte Daten aus vorherigem Block vorhanden sind,
+     *  den neuen Block an diesen Anhängen und passenden ByteBuffer 
+     *  zurückgeben
+     */
+    private ByteBuffer getDataToEncode(ByteBuffer data) {
+        
+        if(isBufferedData) {
+            bufferedData.put(data);
+            bufferedData.flip();
+            isBufferedData = false;
+            return bufferedData;
+        } 
+        
+        return data;
     }
 }
