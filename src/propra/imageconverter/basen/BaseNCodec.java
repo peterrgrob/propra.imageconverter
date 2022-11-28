@@ -12,14 +12,10 @@ import propra.imageconverter.data.IDataListener;
  * Klasse für allgemeine Base-N Kodierung, die Parametrisierung erfolgt
  * über das per Konstruktor übergebene DataFormat Objekt. 
  *  
- * @author pg
  */
 public class BaseNCodec extends DataCodecRaw {
     
-    // Standard Base32 Alphabet
-    public static String BASE_32_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUV";
-    
-    // Datenformat 
+    // BaseN Kodierung 
     private final BaseNFormat format;
     
     
@@ -35,8 +31,9 @@ public class BaseNCodec extends DataCodecRaw {
     }
 
     /**
-     * @return
+     * 
      */
+    @Override
     public boolean isValid() {
         return format != null;
     }
@@ -44,9 +41,8 @@ public class BaseNCodec extends DataCodecRaw {
     /**
      * Dekodiert BaseNCodec kodierte Daten
      * 
-     * @param block
-     * @throws java.io.IOException
      */
+    @Override
     public void decode( DataBlock block,
                         IDataListener target) throws IOException {
         if(!isValid()
@@ -89,55 +85,60 @@ public class BaseNCodec extends DataCodecRaw {
             
             charCtr += charCount;
         }
-        
-        out.flip();
+                
+        //  Daten an Listener senden
+        dispatchEvent(  Event.DATA_BLOCK_DECODED, 
+                        target, 
+                        new DataBlock(out.flip(),false));
     }
     
     /**
      * Kodiert Binärdaten in BaseNCodec
-     * @param in
      */
-    public void decode( DataBlock block) throws IOException {
+    @Override
+    public void encode( DataBlock block) throws IOException {
         if(!isValid()
         ||  block == null) {
             throw new IllegalArgumentException();
         }   
         
-        ByteBuffer in = block.data;
-        
-        // Index und Inkremente setzen
-        int byteOffset = 0;
-        int blockLength = format.getBlockLength();
-        int totalBits = in.limit() << 3;
-
+        ByteBuffer inBuffer = block.data;
         ByteBuffer charBuffer = ByteBuffer.allocate(8);         
 
         // Anzahl der Ausgabezeichen ermitteln
-        int totalCharacterCount = totalBits / format.getBitCount();
-        if(totalBits % format.getBitCount() != 0) {
-            totalCharacterCount++;
+        int inBitCount = inBuffer.limit() << 3;
+        int characterCount = inBitCount / format.getBitCount();
+        int blockLength = format.getBlockLength();
+        
+        // Bei einem Rest benötigen wir ein Zeichen mehr
+        if(inBitCount % format.getBitCount() != 0) {
+            characterCount++;
         }
 
-        // Über Bitblöcke iterieren und kodieren
-        while(byteOffset < in.limit()) {
+        /*
+         * Über Bitblöcke iterieren und in Zeichen kodieren
+         */ 
+        int inOffset = 0;
+        while(inOffset < inBuffer.limit()) {
             
+            // Anzahl der Bytes per Kodierungsblock
             int byteCount = blockLength;
                     
             // Endblock?
-            if(byteOffset + blockLength > in.limit()) {
-                byteCount = in.limit() - byteOffset;
+            if(inOffset + blockLength > inBuffer.limit()) {
+                byteCount = inBuffer.limit() - inOffset;
             }
             
             // Bitblöcke in Zeichen umwandeln
-            encodeBits( in, 
-                        byteOffset, 
+            encodeBits(inBuffer, 
+                        inOffset, 
                         byteCount, 
                         charBuffer);
 
-            // In Ausgabe kopieren
+            // Kodierte Zeichen in Resource schreiben
             resource.write(charBuffer);
 
-            byteOffset += byteCount;
+            inOffset += byteCount;
         }
     }
     
@@ -154,38 +155,41 @@ public class BaseNCodec extends DataCodecRaw {
                                     int inLength, 
                                     ByteBuffer out) {
         
-        long value = 0;
-        int bitCount = 0;
-        
         byte[] bytes = in.array();
         byte[] alphabetMap = format.getAlphabetMap();
         int bitLength = format.getBitCount();
+        long decodedValue = 0;
+        int bitCount = 0;
+        int c;
         
-        // Zeichen iterieren und Dekodieren
+        // Zeichen iterieren und in Bitblock Dekodieren
         for(int i=0; i<inLength; i++) {
             
             // Bitpakete nach links schieben
-            value <<= bitLength; 
+            decodedValue <<= bitLength; 
             
-            // Eingabezeichen mit Alphabet-Map dekodieren
-            // und zum Wert aufaddieren
-            int v = bytes[i + inOffset];
-            value += (byte)alphabetMap[(byte)v];
+            /*  
+             *  Eingabezeichen mit Alphabet-Map dekodieren
+             *  und zum Wert aufaddieren 
+             */
+            c = bytes[i + inOffset] & 0xFF;
+            decodedValue += (byte)alphabetMap[(byte)c];
             
             bitCount += bitLength;
         }
         
-        // Endpaket?
-        int modulo = (inLength * bitLength) % 8;
-        if( modulo != 0) {
-            // Überschüssige Bits wieder verwerfen 
-            value >>= modulo;
-            bitCount -= modulo;
+        /*
+         * Am Ende der Daten müssen ggfs. aufgefüllte Bits verworfen werden
+         */
+        int mod = (inLength * bitLength) % 8;
+        if( mod != 0) {
+            decodedValue >>= mod;
+            bitCount -= mod;
         }
         
-        // Bitblöcke in den Ausgabepuffer schreiben
+        // Bits in den Ausgabepuffer schreiben
         int byteCount = bitCount >> 3;
-        out.put(DataFormat.longToBytes(value, byteCount), 
+        out.put(DataFormat.longToBytes(decodedValue, byteCount), 
                 0, 
                 byteCount);
         

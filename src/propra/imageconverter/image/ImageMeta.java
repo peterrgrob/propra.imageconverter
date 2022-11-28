@@ -7,7 +7,7 @@ package propra.imageconverter.image;
  */
 public class ImageMeta {
     
-    // Attribute
+    // Bildattribute
     private int width;
     private int height;
     private int pixelSize;   

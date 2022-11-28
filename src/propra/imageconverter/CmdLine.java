@@ -120,7 +120,7 @@ import propra.imageconverter.image.ColorFormat;
         if( options.containsKey(Options.ENCODE_BASE_32)
         ||  options.containsKey(Options.DECODE_BASE_32)) {
             
-            alphabet = BaseNCodec.BASE_32_ALPHABET;
+            alphabet = BaseNFormat.BASE_32_ALPHABET;
             
         } else if(  options.containsKey(Options.DECODE_BASE_N)) {
             

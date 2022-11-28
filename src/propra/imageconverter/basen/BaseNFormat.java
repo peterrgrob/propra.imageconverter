@@ -16,10 +16,14 @@ public class BaseNFormat extends DataFormat {
     // Verwendete BaseN Kodierung
     private BaseNEncoding baseEncoding;
     
+    // Standard Base32 Alphabet
+    public static String BASE_32_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUV";
+    
     /* 
-     * Kodierungstypen der Daten mit parametrisierten
-     * Einstellungen für die Base-N Kodierung, dabei ist die Blocklänge
-     * immer ein vielfaches von 8 Bit und dem Bitcount der Base-N Kodierung
+     *  Kodierungstypen der Daten mit parametrisierten
+     *  Einstellungen für die Base-N Kodierung, dabei ist die Blocklänge
+     *  immer ein gemeinsames vielfaches von 8 Bit und dem Bitcount der 
+     *  Base-N Kodierung.
      */
     public enum BaseNEncoding {
         NONE(0,0, 0),
@@ -35,9 +39,9 @@ public class BaseNFormat extends DataFormat {
         private final int charLength;
         private final int bitCount;
         
-        private BaseNEncoding(   int bitCount, 
-                            int blockLength, 
-                            int charLength) {
+        private BaseNEncoding(  int bitCount, 
+                                int blockLength, 
+                                int charLength) {
             this.blockLength = blockLength; 
             this.bitCount = bitCount;
             this.charLength = charLength;
@@ -66,7 +70,7 @@ public class BaseNFormat extends DataFormat {
      */
     public BaseNFormat(BaseNFormat src) {
         super(src);
-        this.alphabet = new String(src.alphabet);
+        this.alphabet = src.alphabet;
         System.arraycopy(src.alphabetMap , 0, 
                         this.alphabetMap, 0, 256);
         this.baseEncoding = src.baseEncoding;
@@ -84,7 +88,7 @@ public class BaseNFormat extends DataFormat {
         if(alphabet.length() > 0) {
             
             // Alphabet setzen und Mappingarray erstellen
-            this.alphabet = new String(alphabet);
+            this.alphabet = alphabet;
             for(int i=0; i<alphabet.length(); i++) {
                 alphabetMap[alphabet.getBytes()[i]] = (byte)i;
             }

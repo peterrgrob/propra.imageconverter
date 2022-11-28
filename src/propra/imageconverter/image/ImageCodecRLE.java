@@ -41,16 +41,16 @@ public class ImageCodecRLE extends ImageCodecRaw {
         int inOffset = (int)resource.position();
         int inLength = (int)resource.length();
         byte[] inRleColor = new byte[3];
-        int inColorCounter = 0;
-        int inPacketHeader = 0;
-        int nextBytes = 0;
+        int inColorCounter;
+        int inPacketHeader;
+        int outNextBytes;
     
         // Puffer vorbereiten
-        ByteBuffer inBuffer = bufferedData;
         if(outBlock.data == null) {
             outBlock.data = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
         }
         ByteBuffer outBuffer = outBlock.data;
+        ByteBuffer inBuffer = bufferedData;
         byte[] outBytes = outBuffer.array();
         
         /**
@@ -59,27 +59,27 @@ public class ImageCodecRLE extends ImageCodecRaw {
          */
         while( inOffset < inLength ) {
             
-            // Blockgröße anpassen am Ende der Datei
+            // Blockgröße verkleinern am Ende der Datei
             if(inOffset + inBuffer.capacity() > inLength) {
                 inBuffer.limit(inBuffer.capacity() - ((inOffset + inBuffer.capacity()) - inLength));
             }
             
-            // Block lesen
+            // Block von Resource lesen
             int inLen = resource.read(inBuffer);
             inOffset += inLen;
             
             /**
-             * Rle Daten dekodieren
+             * Rle Block dekodieren
              */
             while(inBuffer.remaining() != 0) {
 
-                // Paketkopf und Wiederholungen einlesen
+                // Paketkopf und Wiederholungen dekodieren
                 inPacketHeader =  inBuffer.get() & 0xFF;
                 inColorCounter = (inPacketHeader & 127) + 1;
-                nextBytes = inColorCounter * 3;
+                outNextBytes = inColorCounter * 3;
 
                 // Wenn gefüllt, Datenblock zum Empfänger senden
-                if( outBuffer.position() + nextBytes > outBuffer.capacity()) {
+                if( outBuffer.position() + outNextBytes > outBuffer.capacity()) {
                     
                     outBuffer.flip();
                     dispatchEvent(  Event.DATA_BLOCK_DECODED, 
@@ -87,19 +87,22 @@ public class ImageCodecRLE extends ImageCodecRaw {
                                     outBlock);
                     outBuffer.clear();
                 }
-
-                // RLE oder RAW Paket?
-                if(inPacketHeader > 127) {
-                    
-                    // Neuen Leseblock beginnen?
-                    if(inBuffer.remaining() < 3) {
+                
+                /**
+                 *  Wenn nicht mehr genügend Daten im Block vorhanden sind,
+                 *  Eingabeposition zurückschieben und neuen Block einlesen
+                 */
+                if((inPacketHeader > 127 && inBuffer.remaining() < 3)
+                || (inPacketHeader <= 127 && inBuffer.remaining() < outNextBytes)) {
                         
                         inOffset = inOffset - inBuffer.remaining() - 1;
                         inBuffer.position(inBuffer.position() - 1);
-                        resource.position(inOffset);
-                        
+                        resource.position(inOffset); 
                         break;
-                    }
+                }
+                
+                // RLE oder RAW Paket?
+                if(inPacketHeader > 127) {
                     
                     // Farbwert auslesen und auffüllen
                     inBuffer.get(inRleColor);
@@ -110,22 +113,12 @@ public class ImageCodecRLE extends ImageCodecRaw {
                     outBuffer.position(o);
                     
                 } else {
-                    
-                    // Neuen Leseblock beginnen?
-                    if(inBuffer.remaining() < nextBytes) {
-                        
-                        inOffset = inOffset - inBuffer.remaining() - 1;
-                        inBuffer.position(inBuffer.position() - 1);
-                        resource.position(inOffset);
-                        
-                        break;
-                    } 
 
                     // RAW Farben übertragen
                     outBuffer.put(inBuffer.array(), 
                                 inBuffer.position(), 
-                                nextBytes);
-                    inBuffer.position(inBuffer.position() + nextBytes);
+                                outNextBytes);
+                    inBuffer.position(inBuffer.position() + outNextBytes);
                 }
             }
             
@@ -136,11 +129,15 @@ public class ImageCodecRLE extends ImageCodecRaw {
             inBuffer.clear();
         } 
         
+
+        /**
+         *  Letzten Block der Operation kennzeichnen und Restdaten
+         *  übertragen
+         */
         if(resource.position() == resource.length()) {
             outBlock.lastBlock = true;
         }
         
-        // Restdaten übertragen
         outBlock.data.flip();
         dispatchEvent(  Event.DATA_BLOCK_DECODED, 
                         target, 
@@ -158,14 +155,7 @@ public class ImageCodecRLE extends ImageCodecRaw {
             throw new IllegalArgumentException();
         }
         
-        /**
-         * Lokale Variablen
-         */     
-        byte[] writeRleColor = new byte[3];
         ByteBuffer rleBlock = ByteBuffer.allocate(192*3);
-        ByteBuffer inBuffer;
-        int colorCtr;
-        boolean boundary;   
 
         // Farbkonvertierung
         if(image.getHeader().colorFormat().compareTo(ColorFormat.FORMAT_RGB) != 0) {   
@@ -178,7 +168,7 @@ public class ImageCodecRLE extends ImageCodecRaw {
         /*
          *  Eingabedaten mit gepufferten Daten zusammenführen
          */
-        inBuffer = getDataToEncode(block.data);
+        ByteBuffer inBuffer = getDataToEncode(block.data);
         int dataLimit = inBuffer.limit();
         
         // Über Bytes iterieren und gemäß RLE verarbeiten
@@ -188,7 +178,7 @@ public class ImageCodecRLE extends ImageCodecRaw {
              *  Wenn Blockgrenze erreichbar, Restdaten puffern für nächsten Block
              *  wenn es sich nicht um den letzten Block handelt.
              */
-            boundary = inBuffer.position() + (127 * 3) >= dataLimit;
+            boolean boundary = inBuffer.position() + (127 * 3) >= dataLimit;
             if(boundary && !block.lastBlock) {
                 
                 bufferInputData(inBuffer);
@@ -199,7 +189,7 @@ public class ImageCodecRLE extends ImageCodecRaw {
             /*
              *  Kodierung
              */
-            colorCtr = countRleColor(inBuffer);
+            int colorCtr = countRleColor(inBuffer);
             if(colorCtr > 1 ) {
                 
                 /**

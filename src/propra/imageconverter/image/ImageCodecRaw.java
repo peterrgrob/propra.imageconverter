@@ -12,7 +12,7 @@ import propra.imageconverter.data.IDataListener;
  */
 public class ImageCodecRaw extends DataCodecRaw {
     
-    /* Zugeordnete Resource zur Ein-, oder Ausgabe der Daten */
+    // Zugeordnete Resource zur Ein-, oder Ausgabe der Daten 
     protected ImageResource image;
     
     /**
@@ -36,7 +36,7 @@ public class ImageCodecRaw extends DataCodecRaw {
         }
         
         /*
-         * Lädt, konvertiert und sendet Pixelblöcke an das Ziel  
+         * Lädt, konvertiert und sendet Pixelblöcke an Listener  
          */
         while(resource.position() < resource.length()) {
             

@@ -6,18 +6,14 @@ import propra.imageconverter.data.DataResource;
 
 /**
  *
- * @author pg
  */
 public class BaseNResource extends DataResource {
     
-    // BaseN Kodierung
+    // BaseN Kodierungsformat
     private final BaseNFormat format;
     
     /**
      * 
-     * @param file
-     * @param format
-     * @throws IOException 
      */
     public BaseNResource(   String file, 
                             BaseNFormat format) throws IOException {
@@ -31,8 +27,6 @@ public class BaseNResource extends DataResource {
     
     /**
      * Alphabet aus Datei einlesen und DatenFormat ableiten
-     * @return Alphabet als String
-     * @throws java.io.IOException
      */
     public String readAlphabet() throws IOException {
         String alphabet = binaryFile.readLine();
@@ -42,8 +36,6 @@ public class BaseNResource extends DataResource {
     
     /**
      * Alphabet in Datei schreiben
-     * @param alphabet
-     * @throws java.io.IOException
      */
     public void writeAlphabet(String alphabet) throws IOException {
         if(!isValid()) {

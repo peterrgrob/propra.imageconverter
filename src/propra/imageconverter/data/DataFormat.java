@@ -83,18 +83,20 @@ public class DataFormat {
         return (encoding == Encoding.RLE);
     }
     
-    /*
-     * Prüft ob ein bestimmtes Bit gesetzt ist.
-     * 
+    /**
+     * Prüft ob ein Bit gesetzt ist
      */
-    public static boolean checkBit(byte value, byte bit) {
+    public static boolean checkBit( byte value, 
+                                    byte bit) {
         return ((value >> bit) & 1) == 0;
     }
     
     /**
-     * 
+     * Konvertiert Byte Array in einen Long Wert 
      */
-    public static long bytesToLong(byte[] bytes, int offset, int len) {
+    public static long bytesToLong( byte[] bytes, 
+                                    int offset, 
+                                    int len) {
         long value = 0;
         for(int i=0; i<len; i++) {
             value <<= 8;
@@ -104,12 +106,13 @@ public class DataFormat {
     }
     
     /**
-     * 
+     * Konvertiert Bytes eines long Wertes zu einem Byte Array
      */
-    static public byte[] longToBytes(long value, int len) {
-        byte[] nb = new byte[len];
-        for(int i=0; i<len;i++) {
-            nb[len - i - 1] = (byte)(value & 0xFF);
+    static public byte[] longToBytes(   long value, 
+                                        int byteCount) {
+        byte[] nb = new byte[byteCount];
+        for(int i=0; i<byteCount;i++) {
+            nb[byteCount - i - 1] = (byte)(value & 0xFF);
             value >>= 8;
         }
         return nb;
@@ -133,7 +136,8 @@ public class DataFormat {
     /**
      *
      */
-    public static String getStringFromByteBuffer(ByteBuffer buffer, int len) throws UnsupportedEncodingException {
+    public static String getStringFromByteBuffer(   ByteBuffer buffer, 
+                                                    int len) throws UnsupportedEncodingException {
         if (len <= 0 
         ||  buffer == null) {
             throw new IllegalArgumentException();
