@@ -18,7 +18,8 @@ import propra.imageconverter.data.IDataListener;
  * 
  * @author pg
  */
-public class ImageOperation implements IDataListener {
+public class ImageOperation implements  IDataListener,
+                                        AutoCloseable{
     
     // IO Objekte
     private ImageResource inReader;
@@ -231,5 +232,19 @@ public class ImageOperation implements IDataListener {
             }
         }
         return null;
+    }
+
+    /**
+     * Schließt geöffnete Resourcen, wird automatisch bei Verwendung mit 
+     * try-with-resources aufgerufen
+     */
+    @Override
+    public void close() throws Exception {
+         if(inReader != null) {
+            inReader.close();
+        }
+        if(outWriter != null) {
+            outWriter.close();            
+        }
     }
 }

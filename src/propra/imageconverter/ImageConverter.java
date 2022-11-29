@@ -71,7 +71,8 @@ public class ImageConverter {
      * @throws IOException
      */
     public void run() throws    FileNotFoundException,
-                                IOException{
+                                IOException,
+                                Exception{
         if(cmdLine.isBaseTask()) {
             doBaseNTask();
         } else {
@@ -85,16 +86,18 @@ public class ImageConverter {
      * @throws java.io.FileNotFoundException 
      */
     public void doImageTask() throws    FileNotFoundException, 
-                                        IOException {      
+                                        IOException,      
+                                        Exception {      
         // Ein- und Ausgabedateipfad auf der Konsole ausgeben
         printMessage("Dateien:");
         printMessage(cmdLine.getOption(Options.INPUT_FILE));
         printMessage(cmdLine.getOption(Options.OUTPUT_FILE));
         
-        ImageOperation op = new ImageOperation(cmdLine);
-        op.run();
+        try(ImageOperation op = new ImageOperation(cmdLine)) {
+            op.run();
         
-        printMessage(op.toString());
+            printMessage(op.toString());
+        }
     }   
     
     /**
@@ -103,17 +106,19 @@ public class ImageConverter {
      * @throws IOException 
      */
     public void doBaseNTask() throws    FileNotFoundException, 
-                                        IOException {    
+                                        IOException,    
+                                        Exception {    
         // Eingabedateipfad auf der Konsole ausgeben
         printMessage("Eingabedatei:");
         printMessage(cmdLine.getOption(CmdLine.Options.INPUT_FILE));
         
         // BaseN Kodierung ausführen
-        BaseNOperation op = new BaseNOperation(cmdLine);
-        op.run();   
-        
-        // Info ausgeben
-        printMessage(op.toString());
+        try(BaseNOperation op = new BaseNOperation(cmdLine)) {   
+            op.run();  
+            
+            // Info ausgeben
+            printMessage(op.toString());
+        }
     } 
     
     /**

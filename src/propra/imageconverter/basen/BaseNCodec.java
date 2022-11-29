@@ -144,11 +144,6 @@ public class BaseNCodec extends DataCodecRaw {
     
     /**
      * 
-     * @param in
-     * @param inOffset
-     * @param inLength
-     * @param out
-     * @return 
      */
     private int decodeCharacters(   ByteBuffer in, 
                                     int inOffset, 
@@ -198,8 +193,6 @@ public class BaseNCodec extends DataCodecRaw {
     
     /**
      *
-     * @param data
-     * @param bitLen
      */
     private void encodeBits(ByteBuffer in, 
                             int inOffset, 
@@ -243,8 +236,6 @@ public class BaseNCodec extends DataCodecRaw {
     }
     
     /**
-     * @param buffer
-     * @return Gibt die Datenmenge nach Kodierung zurück
      */
     public int encodedBufferLength(ByteBuffer buffer) {
         if( buffer == null 
