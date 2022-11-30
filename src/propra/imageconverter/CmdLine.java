@@ -101,12 +101,12 @@ import propra.imageconverter.image.ColorFormat;
      * @param path
      * @return Extrahiert Dateiendung
      */
-    private String getExtension(String path) {
+    static private String getExtension(String path) {
         String[] components = path.split("\\.");
         if(components.length < 2) {
             return "";
         }
-        return components[components.length-1].toLowerCase();
+        return components[components.length - 1].toLowerCase();
     } 
     
     /**

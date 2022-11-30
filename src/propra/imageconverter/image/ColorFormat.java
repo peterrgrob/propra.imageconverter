@@ -2,6 +2,7 @@ package propra.imageconverter.image;
 
 import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataFormat;
+import propra.imageconverter.data.IDataCodec;
 
 /**
  * 

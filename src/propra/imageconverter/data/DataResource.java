@@ -17,7 +17,8 @@ import java.nio.file.Paths;
  *
  * @author pg
  */
-public class DataResource implements IDataResource {
+public class DataResource implements IDataResource,
+                                     AutoCloseable {
     
     protected final DataFormat.IOMode mode;
     protected RandomAccessFile binaryFile;
@@ -65,7 +66,6 @@ public class DataResource implements IDataResource {
 
     /**
      *
-     * @throws IOException
      */
     @Override
     public void close() throws IOException {

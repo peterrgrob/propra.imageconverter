@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import propra.imageconverter.checksum.ChecksumPropra;
 import propra.imageconverter.data.DataFormat;
 
 /**
@@ -34,6 +35,7 @@ public class ImageResourceProPra extends ImageResource {
         super(file, mode);
         fileHeaderSize = PROPRA_HEADER_SIZE;
         colorFormat = new ColorFormat(0, 2, 1);
+        checksum = new ChecksumPropra();
     }
     
     /**
@@ -76,10 +78,16 @@ public class ImageResourceProPra extends ImageResource {
         // RBG Farbmapping setzen
         newHeader.colorFormat(colorFormat);
         
-        // Kompression prüfen
+        // Kompression initialisieren
         switch (bytes.get(PROPRA_HEADER_OFFSET_ENCODING)) {
-            case PROPRA_HEADER_ENCODING_RLE -> newHeader.colorFormat().encoding(DataFormat.Encoding.RLE);
-            case PROPRA_HEADER_ENCODING_NONE -> newHeader.colorFormat().encoding(DataFormat.Encoding.NONE);
+            case PROPRA_HEADER_ENCODING_RLE -> {
+                inCodec = new ImageCodecRLE(this, checksum);
+                newHeader.colorFormat().encoding(DataFormat.Encoding.RLE);
+            }
+            case PROPRA_HEADER_ENCODING_NONE -> {
+                inCodec = new ImageCodecRaw(this, checksum);
+                newHeader.colorFormat().encoding(DataFormat.Encoding.NONE);
+            }
             default -> throw new UnsupportedOperationException("Nicht unterstützte Kompression!");
         }
         

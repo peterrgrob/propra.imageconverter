@@ -1,5 +1,7 @@
 package propra.imageconverter.image;
 
+import propra.imageconverter.data.IDataCodec;
+
 
 /**
  * Klasse für einen allgemeinen Bildkopf

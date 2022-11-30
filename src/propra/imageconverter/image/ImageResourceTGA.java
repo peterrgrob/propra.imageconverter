@@ -55,11 +55,17 @@ public class ImageResourceTGA extends ImageResource {
         newHeader.height(bytes.getShort(TGA_HEADER_OFFSET_HEIGHT));
         newHeader.pixelSize(bytes.get(TGA_HEADER_OFFSET_BPP) >> 3); 
         
-        // Kompression prüfen
+        // Kompression
         byte compression = bytes.get(TGA_HEADER_OFFSET_ENCODING);
         switch (compression) {
-            case TGA_HEADER_ENCODING_RLE -> newHeader.colorFormat().encoding(DataFormat.Encoding.RLE);
-            case TGA_HEADER_ENCODING_NONE -> newHeader.colorFormat().encoding(DataFormat.Encoding.NONE);
+            case TGA_HEADER_ENCODING_RLE -> {
+                inCodec = new ImageCodecRLE(this, checksum);
+                newHeader.colorFormat().encoding(DataFormat.Encoding.RLE);
+            }
+            case TGA_HEADER_ENCODING_NONE -> {
+                inCodec = new ImageCodecRaw(this, checksum);
+                newHeader.colorFormat().encoding(DataFormat.Encoding.NONE);
+            }
             default -> throw new UnsupportedOperationException("Nicht unterstützte TGA Kompression!");
         }
         

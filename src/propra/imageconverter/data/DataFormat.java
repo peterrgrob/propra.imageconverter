@@ -58,8 +58,9 @@ public class DataFormat {
     /**
      * 
      */
-    public void encoding(Encoding encoding) {
+    public DataFormat encoding(Encoding encoding) {
         this.encoding = encoding;
+        return this;
     }
     
     /**
