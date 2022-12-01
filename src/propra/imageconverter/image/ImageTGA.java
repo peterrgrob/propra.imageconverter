@@ -10,7 +10,7 @@ import propra.imageconverter.data.DataFormat;
  * 
  * @author pg
  */
-public class ImageResourceTGA extends ImageResource {  
+public class ImageTGA extends Image {  
 
     // Datei-Offsets der einzelnen Header-Felder
     static final int TGA_HEADER_SIZE = 18;
@@ -30,7 +30,7 @@ public class ImageResourceTGA extends ImageResource {
      *
      * 
      */
-    public ImageResourceTGA(String file, DataFormat.IOMode mode) throws IOException {
+    public ImageTGA(String file, DataFormat.IOMode mode) throws IOException {
         super(file, mode);
         fileHeaderSize = TGA_HEADER_SIZE;
     }
@@ -59,11 +59,11 @@ public class ImageResourceTGA extends ImageResource {
         byte compression = bytes.get(TGA_HEADER_OFFSET_ENCODING);
         switch (compression) {
             case TGA_HEADER_ENCODING_RLE -> {
-                inCodec = new ImageCodecRLE(this, checksum);
+                inCodec = new ImageCodecRLE(this);
                 newHeader.colorFormat().encoding(DataFormat.Encoding.RLE);
             }
             case TGA_HEADER_ENCODING_NONE -> {
-                inCodec = new ImageCodecRaw(this, checksum);
+                inCodec = new ImageCodecRaw(this);
                 newHeader.colorFormat().encoding(DataFormat.Encoding.NONE);
             }
             default -> throw new UnsupportedOperationException("Nicht unterstützte TGA Kompression!");

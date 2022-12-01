@@ -7,6 +7,7 @@ import propra.imageconverter.data.DataCodecRaw;
 import propra.imageconverter.data.DataFormat;
 import propra.imageconverter.data.IDataResource;
 import propra.imageconverter.data.IDataListener;
+import propra.imageconverter.data.IDataListener.Event;
 
 /**
  * Klasse für allgemeine Base-N Kodierung, die Parametrisierung erfolgt
@@ -26,7 +27,7 @@ public class BaseNCodec extends DataCodecRaw {
      */
     public BaseNCodec(  IDataResource resource,
                         BaseNFormat format) {
-        super(resource, null);
+        super(resource);
         this.format = format;
     }
 
@@ -96,7 +97,8 @@ public class BaseNCodec extends DataCodecRaw {
      * Kodiert Binärdaten in BaseNCodec
      */
     @Override
-    public void encode( DataBlock block) throws IOException {
+    public void encode( DataBlock block,
+                        IDataListener target) throws IOException {
         if(!isValid()
         ||  block == null) {
             throw new IllegalArgumentException();

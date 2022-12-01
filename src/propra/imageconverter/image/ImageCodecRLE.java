@@ -2,9 +2,9 @@ package propra.imageconverter.image;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import propra.imageconverter.checksum.Checksum;
 import propra.imageconverter.data.DataBlock;
 import propra.imageconverter.data.IDataListener;
+import propra.imageconverter.data.IDataListener.Event;
 
 /**
  *
@@ -18,9 +18,8 @@ public class ImageCodecRLE extends ImageCodecRaw {
     /*
      * 
      */
-    public ImageCodecRLE(   ImageResource resource, 
-                            Checksum checksum) {
-        super(resource, checksum);
+    public ImageCodecRLE(Image resource) {
+        super(resource);
         
         bufferedData = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE * 2);
     }
@@ -124,7 +123,7 @@ public class ImageCodecRLE extends ImageCodecRaw {
             
             // Eingabedaten filtern
             dispatchEvent(Event.DATA_IO_READ, 
-                            this, 
+                            target, 
                             new DataBlock(inBuffer.flip(),false));
             inBuffer.clear();
         } 
@@ -149,7 +148,8 @@ public class ImageCodecRLE extends ImageCodecRaw {
      *  Kodiert Pixelblock als RLE
      */
     @Override
-    public void encode( DataBlock block) throws IOException{ 
+    public void encode( DataBlock block,
+                        IDataListener listener) throws IOException{ 
         if(!isValid()
         ||  block == null) {
             throw new IllegalArgumentException();
@@ -195,23 +195,23 @@ public class ImageCodecRLE extends ImageCodecRaw {
                 /**
                  * Rle Pixel kodieren
                  */
-                encodeRleData(inBuffer, rleBlock, colorCtr);
-                
-                // In Resource schreiben
-                resource.writeBuffered(rleBlock.flip());
-                rleBlock.clear();
-                
+                encodeRleData(inBuffer, rleBlock, colorCtr);   
             } else {
                 
                /*
                 * Raw Pixel kopieren und Paketkopf schreiben
                 */
                 encodeRawData(inBuffer, rleBlock);
-
-                // In Resource schreiben
-                resource.writeBuffered(rleBlock); 
-                rleBlock.clear();
             }
+            
+            
+            dispatchEvent(  Event.DATA_IO_WRITE, 
+                            listener, 
+                            new DataBlock(rleBlock, false));
+            
+            // In Resource schreiben
+            resource.writeBuffered(rleBlock);
+            rleBlock.clear();
         }
         
         resource.flush();
@@ -259,6 +259,7 @@ public class ImageCodecRLE extends ImageCodecRaw {
         inBuffer.get(color);
         outBuffer.put((byte)(128 + rleCount - 1));
         outBuffer.put(color);
+        outBuffer.flip();
 
         // Gleiche Farben im Eingabepuffer überspringen
         inBuffer.position(inBuffer.position() + (rleCount - 1) * 3);

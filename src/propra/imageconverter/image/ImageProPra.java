@@ -11,7 +11,7 @@ import propra.imageconverter.data.DataFormat;
  * Schreibt ProPra Header
  * @author pg
  */
-public class ImageResourceProPra extends ImageResource {
+public class ImageProPra extends Image {
        
     // Offsets der Headerdaten in der Datei */
     static final String PROPRA_VERSION = "ProPraWiSe22";
@@ -30,7 +30,7 @@ public class ImageResourceProPra extends ImageResource {
      *
      * 
      */
-    public ImageResourceProPra(String file, DataFormat.IOMode mode) throws IOException {
+    public ImageProPra(String file, DataFormat.IOMode mode) throws IOException {
         
         super(file, mode);
         fileHeaderSize = PROPRA_HEADER_SIZE;
@@ -81,11 +81,11 @@ public class ImageResourceProPra extends ImageResource {
         // Kompression initialisieren
         switch (bytes.get(PROPRA_HEADER_OFFSET_ENCODING)) {
             case PROPRA_HEADER_ENCODING_RLE -> {
-                inCodec = new ImageCodecRLE(this, checksum);
+                inCodec = new ImageCodecRLE(this);
                 newHeader.colorFormat().encoding(DataFormat.Encoding.RLE);
             }
             case PROPRA_HEADER_ENCODING_NONE -> {
-                inCodec = new ImageCodecRaw(this, checksum);
+                inCodec = new ImageCodecRaw(this);
                 newHeader.colorFormat().encoding(DataFormat.Encoding.NONE);
             }
             default -> throw new UnsupportedOperationException("Nicht unterstützte Kompression!");

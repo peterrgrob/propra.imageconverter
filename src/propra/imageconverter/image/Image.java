@@ -3,32 +3,31 @@ package propra.imageconverter.image;
 import java.io.IOException;
 import propra.imageconverter.checksum.Checksum;
 import propra.imageconverter.data.DataBlock;
-import propra.imageconverter.data.DataFormat;
 import propra.imageconverter.data.DataFormat.Encoding;
 import propra.imageconverter.data.DataFormat.IOMode;
+import propra.imageconverter.data.DataFormat.Operation;
 import propra.imageconverter.data.DataResource;
 import propra.imageconverter.data.IDataCodec;
+import propra.imageconverter.data.IDataListener;
 
 /**
  *
  * @author pg
  */
-public abstract class ImageResource extends DataResource {
+public abstract class Image extends DataResource implements IDataListener {
     
     protected int fileHeaderSize;   
     protected ImageMeta header;
     protected ColorFormat colorFormat;
     protected IDataCodec inCodec;
     protected Checksum checksum;
+    protected Image transcodedImage;
 
     /**
      * 
-     * @param file
-     * @param mode
-     * @throws IOException 
      */
-    public ImageResource(   String file, 
-                            DataFormat.IOMode mode) throws IOException {
+    public Image(   String file, 
+                    IOMode mode) throws IOException {
         super(file, mode);
         colorFormat = new ColorFormat();
     }
@@ -84,8 +83,6 @@ public abstract class ImageResource extends DataResource {
     
     /**
      * 
-     * @param srcHeader
-     * @throws IOException 
      */
     public void writeHeader(ImageMeta srcHeader) throws IOException {
         setHeader(srcHeader);
@@ -97,10 +94,12 @@ public abstract class ImageResource extends DataResource {
     private IDataCodec createImageCodec(ImageMeta header) {
         if(header != null) {
             switch(header.colorFormat().encoding()) {
-                case NONE:
-                    return new ImageCodecRaw(this, null);
-                case RLE:
-                    return new ImageCodecRLE(this, null);
+                case NONE -> {
+                    return new ImageCodecRaw(this);
+                }
+                case RLE -> {
+                    return new ImageCodecRLE(this);
+                }
 
             }
         }
@@ -110,13 +109,13 @@ public abstract class ImageResource extends DataResource {
     /**
      *  Erstellt ein ImageResource Objekt basierend auf Dateipfad
      */
-    private static ImageResource createImageResource(String path, String ext) throws IOException {
+    private static Image createImageResource(String path, String ext) throws IOException {
         switch(ext) {
             case "tga" -> {
-                return new ImageResourceTGA(path, IOMode.BINARY);
+                return new ImageTGA(path, IOMode.BINARY);
             }
             case "propra" -> {
-                return new ImageResourceProPra(path, IOMode.BINARY);
+                return new ImageProPra(path, IOMode.BINARY);
             }
 
         }
@@ -126,38 +125,77 @@ public abstract class ImageResource extends DataResource {
     /**
      * 
      */
-    public ImageResource transcode( String outFile, 
+    public Image transcode( String outFile, 
                                     String ext, 
                                     Encoding outEncoding) throws IOException {
         if(outFile == null) {
             throw new IllegalArgumentException();
         }
         
-        ImageResource outImage = createImageResource(outFile, ext);
-        if(outImage == null) {
+        transcodedImage = createImageResource(outFile, ext);
+        if(transcodedImage == null) {
             return null;
-        }
+        }        
+        Checksum transcodedChecksum = transcodedImage.getChecksum();
         
         readHeader();
         
         ImageMeta outHeader = new ImageMeta(header);
         outHeader.colorFormat().encoding(outEncoding);    
-        outImage.writeHeader(outHeader);
+        transcodedImage.writeHeader(outHeader);
        
         // Bilddaten verarbeiten
         DataBlock dataBlock = new DataBlock();
-        inCodec.begin(DataFormat.Operation.READ);
-        outImage.getCodec().begin(DataFormat.Operation.WRITE);
-        inCodec.decode(dataBlock, outImage.getCodec());
-        inCodec.end();
-        outImage.getCodec().end();
         
-        // Falls nötig Header aktualisieren
-        if( outImage.getChecksum() != null
-        ||  outImage.getHeader().colorFormat().encoding() == DataFormat.Encoding.RLE) {
-            outImage.writeHeader(outImage.getHeader());
+        // Transcoding vorbereiten
+        if(checksum != null) {
+            checksum.begin();
+        }
+        if(transcodedChecksum != null) {
+            transcodedChecksum.begin();
+        }
+        inCodec.begin(Operation.READ);
+        transcodedImage.getCodec().begin(Operation.WRITE);
+        
+        // Dekodierung starten
+        inCodec.decode(dataBlock, this);
+        
+        // Transcoding abschließen
+        inCodec.end();
+        transcodedImage.getCodec().end();
+        if(checksum != null) {
+            checksum.end();
+        }
+        if(transcodedChecksum != null) {
+            transcodedChecksum.end();
         }
         
-        return outImage;
+        // Falls nötig Header aktualisieren
+        if( transcodedChecksum != null
+        ||  transcodedImage.getHeader().colorFormat().encoding() == Encoding.RLE) {
+            transcodedImage.writeHeader(transcodedImage.getHeader());
+        }
+        
+        return transcodedImage;
+    }
+
+    /**
+     * 
+     */
+    @Override
+    public void onData( Event event, 
+                        IDataCodec caller, 
+                        DataBlock block) throws IOException {
+        switch(event) {
+            case DATA_BLOCK_DECODED -> {
+                transcodedImage.getCodec().encode(  block, 
+                                                    transcodedImage);
+            }
+            case DATA_IO_READ, DATA_IO_WRITE  -> {
+                if(checksum != null) {
+                    checksum.update(block.data);
+                }
+            }
+        }
     }
 }

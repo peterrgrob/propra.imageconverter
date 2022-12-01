@@ -2,7 +2,7 @@ package propra.imageconverter.data;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import propra.imageconverter.checksum.Checksum;
+import propra.imageconverter.data.IDataListener.Event;
 
 /**
  *
@@ -18,24 +18,17 @@ public class DataCodecRaw implements IDataCodec {
     // Zugeordnete Resource
     protected IDataResource resource;
     
-    // Prüfsummenobjekt
-    protected Checksum checksum;
-    
     /*
      * 
      */
-    public DataCodecRaw(IDataResource resource,
-                        Checksum checksum) {
-        this.checksum = checksum;
+    public DataCodecRaw(IDataResource resource) {
         this.resource = resource;
     }
     
     /*
      * 
      */
-    public void setup(  IDataResource resource, 
-                        Checksum checksum) {
-        this.checksum = checksum;
+    public void setup(  IDataResource resource) {
         this.resource = resource;
     }
 
@@ -45,16 +38,14 @@ public class DataCodecRaw implements IDataCodec {
     @Override
     public void begin(DataFormat.Operation op) throws IOException {  
         readBuffer = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
-        if(checksum != null) {
-            checksum.beginFilter();
-        }
     }
 
     /*
      * 
      */
     @Override
-    public void encode(DataBlock block) throws IOException {
+    public void encode( DataBlock block, 
+                        IDataListener listener) throws IOException {
         if(!isValid() 
         ||  block == null) {
             throw new IllegalArgumentException();
@@ -64,7 +55,7 @@ public class DataCodecRaw implements IDataCodec {
         resource.write(block.data);
         
         // Gelesene Daten filtern
-        dispatchEvent(Event.DATA_IO_WRITE, this, block);
+        dispatchEvent(Event.DATA_IO_WRITE, listener, block);
     }
     
     /*
@@ -87,9 +78,8 @@ public class DataCodecRaw implements IDataCodec {
             block.lastBlock = true;
         }
         
-        // Gelesene Daten zu den Listener senden
-        dispatchEvent(Event.DATA_IO_READ, this, block);
-        dispatchEvent(Event.DATA_BLOCK_DECODED, target, block);
+        // Gelesene Daten filtern
+        dispatchEvent(Event.DATA_IO_READ, target, block);
     }        
 
     /*
@@ -97,9 +87,6 @@ public class DataCodecRaw implements IDataCodec {
      */
     @Override
     public void end() throws IOException {
-        if(checksum != null) {
-            checksum.endFilter();
-        }
     }
     
     /*
@@ -117,23 +104,6 @@ public class DataCodecRaw implements IDataCodec {
                                     DataBlock block) throws IOException {            
         if(listener != null) {
             listener.onData(event,this, block);
-        }
-    }
-    
-    /*
-     *
-     */
-    @Override
-    public void onData( Event event,
-                        IDataCodec caller, 
-                        DataBlock block) throws IOException     {
-        if(event == Event.DATA_BLOCK_DECODED) {
-            encode(block);
-        } else if(  event == Event.DATA_IO_READ
-                ||  event == Event.DATA_IO_WRITE) {
-            if(checksum != null) {
-                checksum.apply(block.data);
-            }
         }
     }
 }

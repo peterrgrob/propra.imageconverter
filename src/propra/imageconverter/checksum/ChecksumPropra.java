@@ -18,7 +18,7 @@ public class ChecksumPropra extends Checksum {
      * 
      */
     @Override
-    public void beginFilter() {
+    public void begin() {
         currAi = 0;
         currBi = 1;
         currIndex = 0;
@@ -30,7 +30,7 @@ public class ChecksumPropra extends Checksum {
      * @param buffer
      */
     @Override
-    public ByteBuffer apply(ByteBuffer buffer) {
+    public ByteBuffer update(ByteBuffer buffer) {
         if (buffer == null) {
             throw new IllegalArgumentException();
         }
@@ -51,7 +51,7 @@ public class ChecksumPropra extends Checksum {
      *
      */
     @Override
-    public void endFilter() {
+    public void end() {
         value = (currAi << 16) + currBi;
     }
 

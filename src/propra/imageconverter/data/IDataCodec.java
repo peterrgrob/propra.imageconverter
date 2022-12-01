@@ -6,7 +6,7 @@ import java.io.IOException;
  *
  * @author pg
  */
-public interface IDataCodec extends IDataListener {
+public interface IDataCodec {
     /**
      * 
      * @param op
@@ -19,7 +19,7 @@ public interface IDataCodec extends IDataListener {
      * @param data
      * @throws IOException 
      */
-    public void encode(DataBlock data) throws IOException;
+    public void encode(DataBlock data, IDataListener listener) throws IOException;
     
     /**
      * 
@@ -27,7 +27,7 @@ public interface IDataCodec extends IDataListener {
      * @param target
      * @throws IOException 
      */
-    public void decode(DataBlock data, IDataListener target) throws IOException;
+    public void decode(DataBlock data, IDataListener listener) throws IOException;
     
     /**
      * 

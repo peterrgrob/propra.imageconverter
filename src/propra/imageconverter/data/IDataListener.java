@@ -12,6 +12,7 @@ public interface IDataListener {
         DATA_IO_READ,
         DATA_IO_WRITE,
         DATA_BLOCK_DECODED,
+        DATA_BLOCK_ENCODED,
     }
     
     public void onData( Event event, 

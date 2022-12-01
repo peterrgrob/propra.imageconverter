@@ -14,8 +14,8 @@ import propra.imageconverter.image.*;
 public class ImageOperation implements AutoCloseable{
     
     private CmdLine cmd;
-    private ImageResource inImage;
-    private ImageResource outImage;
+    private Image inImage;
+    private Image outImage;
     
     // Kodierung des Ausgabebildes
     private ColorFormat.Encoding outEncoding = ColorFormat.Encoding.NONE;
@@ -62,21 +62,14 @@ public class ImageOperation implements AutoCloseable{
         outImage = inImage.transcode(outPath, outExt, outEncoding);
         
         // Prüfsumme prüfen
-        /*if(inChecksum != null) {
-            if(inChecksum.getValue() != inReader.getHeader().checksum()) {
+        if(inImage.getChecksum() != null) {
+            if(inImage.getChecksum().getValue() != inImage.getHeader().checksum()) {
                 throw new IOException(  "Prüfsumme " 
-                                        + String.format("0x%08X", (int)inChecksum.getValue()) 
+                                        + String.format("0x%08X", (int)inImage.getChecksum().getValue()) 
                                         + " ungleich " 
-                                        + String.format("0x%08X", (int)inReader.getHeader().checksum()));
+                                        + String.format("0x%08X", (int)inImage.getHeader().checksum()));
             }
-        }*/
-    }
-    
-    /**
-     * @throws java.io.IOException
-     */
-    public void isChecksumValid() throws IOException {
-
+        }
     }
     
     /**
@@ -86,22 +79,24 @@ public class ImageOperation implements AutoCloseable{
     public String toString() {
         String stateString = "";
 
-        /*if(isValid()) {
-            ImageMeta header = inReader.getHeader();
+        if(inImage != null) {
+            ImageMeta header = inImage.getHeader();
             stateString = "\nBildinfo: " + header.width();
             stateString = stateString.concat("x" + header.height());
             stateString = stateString.concat("x" + header.pixelSize());
             stateString = stateString.concat("\nKompression: " + header.colorFormat().encoding().toString());
             stateString = stateString.concat(" --> " + outEncoding.toString());            
             
-            if(inChecksum != null) {
-                stateString = stateString.concat("\nEingabe Prüfsumme (Ok): "+String.format("0x%08X", (int)inChecksum.getValue()));
+            if(inImage.getChecksum() != null) {
+                stateString = stateString.concat(   "\nEingabe Prüfsumme (Ok): "+String.format("0x%08X", 
+                                                    (int)inImage.getChecksum().getValue()));
             }
             
-            if(outChecksum != null) {
-                stateString = stateString.concat("\nAusgabe Prüfsumme: "+String.format("0x%08X", (int)outChecksum.getValue()));
+            if(outImage.getChecksum() != null) {
+                stateString = stateString.concat(   "\nAusgabe Prüfsumme: "+String.format("0x%08X", 
+                                                    (int)outImage.getChecksum().getValue()));
             }
-        }*/
+        }
         
         return stateString;
     }
@@ -113,13 +108,13 @@ public class ImageOperation implements AutoCloseable{
      * @param streamLen
      * @return
      */
-    private static ImageResource createImageResource(String path, String ext) throws IOException {
+    private static Image createImageResource(String path, String ext) throws IOException {
         switch(ext) {
             case "tga" -> {
-                return new ImageResourceTGA(path, IOMode.BINARY);
+                return new ImageTGA(path, IOMode.BINARY);
             }
             case "propra" -> {
-                return new ImageResourceProPra(path, IOMode.BINARY);
+                return new ImageProPra(path, IOMode.BINARY);
             }
 
         }
