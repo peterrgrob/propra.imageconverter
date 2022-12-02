@@ -13,12 +13,12 @@ import propra.imageconverter.data.IDataListener.Event;
 public class ImageCodecRaw extends DataCodecRaw {
     
     // Zugeordnete Resource zur Ein-, oder Ausgabe der Daten 
-    protected Image image;
+    protected ImageResource image;
     
     /**
      * 
      */
-    public ImageCodecRaw(   Image resource) {
+    public ImageCodecRaw(   ImageResource resource) {
         super(resource);
         image = resource;
     }

@@ -25,7 +25,6 @@ public class ImageMeta {
 
     /**
      *
-     * @param src
      */
     public ImageMeta(ImageMeta src) {
         if (src == null) {
@@ -41,7 +40,6 @@ public class ImageMeta {
     
     /**
      * 
-     * @return true, wenn zulässiger Bildkopf vorliegt.
      */
     public boolean isValid() {
         return (    width > 0 

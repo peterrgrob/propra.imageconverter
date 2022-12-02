@@ -10,7 +10,7 @@ import propra.imageconverter.data.DataFormat;
  * 
  * @author pg
  */
-public class ImageTGA extends Image {  
+public class ImageResourceTGA extends ImageResource {  
 
     // Datei-Offsets der einzelnen Header-Felder
     static final int TGA_HEADER_SIZE = 18;
@@ -30,7 +30,7 @@ public class ImageTGA extends Image {
      *
      * 
      */
-    public ImageTGA(String file, DataFormat.IOMode mode) throws IOException {
+    public ImageResourceTGA(String file, DataFormat.IOMode mode) throws IOException {
         super(file, mode);
         fileHeaderSize = TGA_HEADER_SIZE;
     }

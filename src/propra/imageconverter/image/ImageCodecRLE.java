@@ -18,7 +18,7 @@ public class ImageCodecRLE extends ImageCodecRaw {
     /*
      * 
      */
-    public ImageCodecRLE(Image resource) {
+    public ImageCodecRLE(ImageResource resource) {
         super(resource);
         
         bufferedData = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE * 2);

@@ -28,9 +28,6 @@ public class DataResource implements IDataResource,
 
     /**
      * 
-     * @param file
-     * @param mode 
-     * @throws java.io.IOException 
      */
     public DataResource(String file, 
                         DataFormat.IOMode mode) throws IOException {
@@ -47,9 +44,6 @@ public class DataResource implements IDataResource,
     
     /**
      * Verzeichnisse und Dateil erstellen, falls nötig
-     * @param filePath
-     * @return
-     * @throws IOException 
      */
     public static File createFileAndDirectory(String filePath) throws IOException {
      
@@ -96,8 +90,6 @@ public class DataResource implements IDataResource,
     
     /**
      * 
-     * @param pos
-     * @throws IOException 
      */
     @Override
     public void position(long pos) throws IOException {
@@ -109,8 +101,6 @@ public class DataResource implements IDataResource,
 
     /**
      * 
-     * @return
-     * @throws IOException 
      */
     @Override
     public long position() throws IOException {
@@ -123,8 +113,6 @@ public class DataResource implements IDataResource,
 
     /**
      * 
-     * @return
-     * @throws IOException 
      */
     @Override
     public long length() throws IOException {
@@ -137,9 +125,6 @@ public class DataResource implements IDataResource,
 
     /**
      * 
-     * @param buffer
-     * @return 
-     * @throws IOException 
      */
     @Override
     public int read(ByteBuffer buffer) throws IOException {     
@@ -157,10 +142,6 @@ public class DataResource implements IDataResource,
     
     /**
      * 
-     * @param offset
-     * @param buffer
-     * @return 
-     * @throws IOException 
      */
     @Override
     public int read(long offset, ByteBuffer buffer) throws IOException {
@@ -183,10 +164,6 @@ public class DataResource implements IDataResource,
 
     /**
      * 
-     * @param offset
-     * @param length
-     * @return
-     * @throws IOException 
      */
     @Override
     public ByteBuffer read(long offset, int length) throws IOException {
@@ -198,8 +175,6 @@ public class DataResource implements IDataResource,
     
     /**
      * 
-     * @return
-     * @throws IOException 
      */
     @Override
     public String readLine() throws IOException {
@@ -213,8 +188,6 @@ public class DataResource implements IDataResource,
 
     /**
      * 
-     * @param buffer
-     * @throws IOException 
      */
     @Override
     public void write(ByteBuffer buffer) throws IOException {
@@ -229,9 +202,6 @@ public class DataResource implements IDataResource,
 
     /**
      * 
-     * @param offset
-     * @param buffer
-     * @throws IOException 
      */
     @Override
     public void write(long offset, ByteBuffer buffer) throws IOException {
@@ -251,8 +221,6 @@ public class DataResource implements IDataResource,
     
     /**
      * 
-     * @param buffer
-     * @throws IOException 
      */
     @Override
     public void writeBuffered(ByteBuffer buffer) throws IOException {
@@ -268,7 +236,6 @@ public class DataResource implements IDataResource,
     
     /**
      * 
-     * @throws IOException
      */
     @Override
     public void flush() throws IOException {

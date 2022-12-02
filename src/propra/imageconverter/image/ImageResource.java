@@ -14,19 +14,19 @@ import propra.imageconverter.data.IDataListener;
  *
  * @author pg
  */
-public abstract class Image extends DataResource implements IDataListener {
+public abstract class ImageResource extends DataResource implements IDataListener {
     
     protected int fileHeaderSize;   
     protected ImageMeta header;
     protected ColorFormat colorFormat;
     protected IDataCodec inCodec;
     protected Checksum checksum;
-    protected Image transcodedImage;
+    protected ImageResource transcodedImage;
 
     /**
      * 
      */
-    public Image(   String file, 
+    public ImageResource(   String file, 
                     IOMode mode) throws IOException {
         super(file, mode);
         colorFormat = new ColorFormat();
@@ -109,13 +109,13 @@ public abstract class Image extends DataResource implements IDataListener {
     /**
      *  Erstellt ein ImageResource Objekt basierend auf Dateipfad
      */
-    private static Image createImageResource(String path, String ext) throws IOException {
+    private static ImageResource createImageResource(String path, String ext) throws IOException {
         switch(ext) {
             case "tga" -> {
-                return new ImageTGA(path, IOMode.BINARY);
+                return new ImageResourceTGA(path, IOMode.BINARY);
             }
             case "propra" -> {
-                return new ImageProPra(path, IOMode.BINARY);
+                return new ImageResourceProPra(path, IOMode.BINARY);
             }
 
         }
@@ -125,7 +125,7 @@ public abstract class Image extends DataResource implements IDataListener {
     /**
      * 
      */
-    public Image transcode( String outFile, 
+    public ImageResource transcode( String outFile, 
                                     String ext, 
                                     Encoding outEncoding) throws IOException {
         if(outFile == null) {

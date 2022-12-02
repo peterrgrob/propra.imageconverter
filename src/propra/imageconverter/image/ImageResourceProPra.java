@@ -11,7 +11,7 @@ import propra.imageconverter.data.DataFormat;
  * Schreibt ProPra Header
  * @author pg
  */
-public class ImageProPra extends Image {
+public class ImageResourceProPra extends ImageResource {
        
     // Offsets der Headerdaten in der Datei */
     static final String PROPRA_VERSION = "ProPraWiSe22";
@@ -30,7 +30,7 @@ public class ImageProPra extends Image {
      *
      * 
      */
-    public ImageProPra(String file, DataFormat.IOMode mode) throws IOException {
+    public ImageResourceProPra(String file, DataFormat.IOMode mode) throws IOException {
         
         super(file, mode);
         fileHeaderSize = PROPRA_HEADER_SIZE;

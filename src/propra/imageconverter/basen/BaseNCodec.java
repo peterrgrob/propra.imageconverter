@@ -3,11 +3,16 @@ package propra.imageconverter.basen;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataBlock;
+import propra.imageconverter.data.DataBlock;
 import propra.imageconverter.data.DataCodecRaw;
+import propra.imageconverter.data.DataCodecRaw;
+import propra.imageconverter.data.DataFormat;
 import propra.imageconverter.data.DataFormat;
 import propra.imageconverter.data.IDataResource;
 import propra.imageconverter.data.IDataListener;
+import propra.imageconverter.data.IDataListener;
 import propra.imageconverter.data.IDataListener.Event;
+import propra.imageconverter.data.IDataResource;
 
 /**
  * Klasse für allgemeine Base-N Kodierung, die Parametrisierung erfolgt

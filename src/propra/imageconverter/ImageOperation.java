@@ -14,8 +14,8 @@ import propra.imageconverter.image.*;
 public class ImageOperation implements AutoCloseable{
     
     private CmdLine cmd;
-    private Image inImage;
-    private Image outImage;
+    private ImageResource inImage;
+    private ImageResource outImage;
     
     // Kodierung des Ausgabebildes
     private ColorFormat.Encoding outEncoding = ColorFormat.Encoding.NONE;
@@ -108,13 +108,13 @@ public class ImageOperation implements AutoCloseable{
      * @param streamLen
      * @return
      */
-    private static Image createImageResource(String path, String ext) throws IOException {
+    private static ImageResource createImageResource(String path, String ext) throws IOException {
         switch(ext) {
             case "tga" -> {
-                return new ImageTGA(path, IOMode.BINARY);
+                return new ImageResourceTGA(path, IOMode.BINARY);
             }
             case "propra" -> {
-                return new ImageProPra(path, IOMode.BINARY);
+                return new ImageResourceProPra(path, IOMode.BINARY);
             }
 
         }
