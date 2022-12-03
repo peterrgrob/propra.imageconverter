@@ -1,6 +1,9 @@
 package propra.imageconverter.image.huffman;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.Collections;
+import java.util.PriorityQueue;
 
 /**
  *  Implementiert einen binären Baum zur Verwaltung der Huffmanncodes 
@@ -22,11 +25,96 @@ public class HuffmanTree <Symbol> {
         /*
          *  Symbol und seine Häufigkeit   
          */
-        Symbol symbol;
-        int frequency;
+        private SymbolTupel symbol;
+        
+        /*
+         *  Codewort des Knotens  
+         */
+        BitSet code;
+        
+        /**
+         *  Konstruktoren
+         */
+        public Node(SymbolTupel s) {
+            this.symbol = s;
+        }
+        
+        public Node(SymbolTupel s,
+                    Node leftNode,
+                    Node rightNode) {
+            this.symbol = s;
+            this.leftNode = leftNode;
+            this.rightNode = rightNode;
+        }
+        
+        /**
+         *  Codes rekursiv berechnen
+         */
+        public void buildCode(BitSet c, int level) {
+            code = c;
+            
+            if(leftNode != null 
+            && rightNode != null) {
+                //  Linker Teilbaum 
+                buildCode((BitSet)c.clone(), level + 1);
+                
+                //  Rechter Teilbaum
+                BitSet nb = (BitSet)c.clone();
+                nb.set(level);
+                buildCode(nb, level + 1);
+            }
+        }
+        
+        /**
+         * Getter/Setter
+         */
+        public int getFrequency() {
+            return symbol.getFrequency();
+        }
+        
+        public BitSet getCode() {
+            return code;
+        }
+        
+        public void SetParent(Node p) {
+            parentNode = p;
+        }
+    }
+    
+    /**
+     *  Implementiert Tupel aus Symbol und Zähler
+     */
+    public class SymbolTupel<Symbol> implements Comparable<SymbolTupel> {
 
-        public Node() {
+        /**
+         *  Symbol und seine Häufigkeit
+         */
+        private Symbol symbol;
+        private int frequency;
 
+        /**
+         *  Konstruktor
+         */
+        public SymbolTupel( Symbol symbol, 
+                            int frequency) {
+            this.symbol = symbol;
+            this.frequency = frequency;
+        }
+        
+        /**
+         *  Vergleicht zwei Symbole anhand ihrer Häufigkeit, benötigt für die 
+         *  Sortierung nach Häufigkeit
+         */
+        @Override
+        public int compareTo(SymbolTupel o) {
+            return frequency - o.frequency;
+        }
+        
+        /**
+         * Getter
+         */
+        public int getFrequency() {
+            return frequency;
         }
     }
     
@@ -42,10 +130,40 @@ public class HuffmanTree <Symbol> {
         
     }
     
-    /**
+    /*
      *  Erstellt einen Huffmantree aus den Eingabesymbolen und Häufigkeiten
+     *  durch Verwendung einer PriorityQueue
      */
-    public void build(Map<Symbol, Integer> symbols) {
+    public void build(ArrayList<SymbolTupel> symbols) {
+        PriorityQueue<Node> q = new PriorityQueue<>();
         
+        // Symbole nach Häufigkeit sortieren und in Queue einfügen
+        Collections.sort(symbols);
+        symbols.forEach(s -> q.add(new Node(s)));
+        
+        /*
+         *  Baum iterativ konstruieren bis nur noch ein Knoten (Wurzel) in der 
+         *  Queue enthalten ist.
+         */
+        while(q.size() > 1) {
+                    
+            /*
+             *  Zwei häufigste Knoten zu einem Knoten verbinden
+             *  und an das Ende der Queue einfügen
+             */
+            Node left = q.remove();
+            Node right = q.remove();
+            Node parentNode = new Node(new SymbolTupel<>(  null, 
+                                                            left.getFrequency() + right.getFrequency()),
+                                                            left,
+                                                            right);
+            
+            left.SetParent(parentNode);
+            right.SetParent(parentNode);         
+            q.add(parentNode);
+        }
+        
+        // Wurzel speichern
+        rootNode = q.remove();
     }
 }
