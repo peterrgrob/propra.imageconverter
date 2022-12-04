@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.PriorityQueue;
 
 /**
- *  Implementiert einen binären Baum zur Verwaltung der Huffmanncodes 
+ *  Implementiert einen binären Baum zur Erstellung der Huffmancodes 
  *  und Symbole
  */
 public class HuffmanTree <Symbol> {
