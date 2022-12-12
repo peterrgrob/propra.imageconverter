@@ -2,7 +2,6 @@ package propra.imageconverter.image.huffman;
 
 import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.Collections;
 import java.util.PriorityQueue;
 
 /**
@@ -88,6 +87,26 @@ public class HuffmanTree <Symbol> {
         public void SetParent(Node p) {
             parentNode = p;
         }
+        
+        /**
+         *  Kodiert einen Baum nach Konstruktionvorschrift der ProPra 
+         *  Spezifikation in einen String
+         */
+        public String serializeNode(String code) {
+            if(leftNode == null 
+            && rightNode == null) {
+                return "1" + symbol.toString();
+            } else {
+                code += "0";
+                if(leftNode != null) {
+                    code += leftNode.serializeNode("");
+                }
+                if(rightNode != null) {
+                   code += rightNode.serializeNode("");
+                }                
+            }
+            return code;
+        }
     }
     
     /**
@@ -116,7 +135,7 @@ public class HuffmanTree <Symbol> {
          */
         @Override
         public int compareTo(SymbolTupel o) {
-            return o.frequency - frequency;
+            return frequency - o.frequency;
         }
         
         /**
@@ -124,6 +143,14 @@ public class HuffmanTree <Symbol> {
          */
         public int getFrequency() {
             return frequency;
+        }
+        
+        /**
+         * 
+         */
+        @Override
+        public String toString() {
+            return "[" + symbol.toString() + "]";
         }
     }
     
@@ -173,5 +200,16 @@ public class HuffmanTree <Symbol> {
         
         // Wurzel speichern
         rootNode = q.remove();
+        serializeCodes();
+    }
+    
+    /**
+     * 
+     */
+    public String serializeCodes() {
+        if(rootNode != null) {
+            System.out.print(rootNode.serializeNode(""));
+        }
+        return "";
     }
 }
