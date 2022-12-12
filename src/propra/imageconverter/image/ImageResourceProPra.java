@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import propra.imageconverter.checksum.ChecksumPropra;
 import propra.imageconverter.data.DataFormat;
+import propra.imageconverter.image.huffman.HuffmanCodec;
 
 /**
  * Schreibt ProPra Header
@@ -25,6 +26,7 @@ public class ImageResourceProPra extends ImageResource {
     
     static final int PROPRA_HEADER_ENCODING_NONE = 0;     
     static final int PROPRA_HEADER_ENCODING_RLE = 1;   
+    static final int PROPRA_HEADER_ENCODING_HUFFMAN = 2;  
     
     /**
      *
@@ -80,6 +82,10 @@ public class ImageResourceProPra extends ImageResource {
         
         // Kompression initialisieren
         switch (bytes.get(PROPRA_HEADER_OFFSET_ENCODING)) {
+            case PROPRA_HEADER_ENCODING_HUFFMAN -> {
+                inCodec = new HuffmanCodec(this);
+                newHeader.colorFormat().encoding(DataFormat.Encoding.HUFFMAN);
+            }
             case PROPRA_HEADER_ENCODING_RLE -> {
                 inCodec = new ImageCodecRLE(this);
                 newHeader.colorFormat().encoding(DataFormat.Encoding.RLE);
@@ -137,6 +143,10 @@ public class ImageResourceProPra extends ImageResource {
         
         // Kompression 
         switch(header.colorFormat().encoding()) {
+            case HUFFMAN -> {
+                byteBuffer.put(PROPRA_HEADER_OFFSET_ENCODING, (byte)PROPRA_HEADER_ENCODING_HUFFMAN);
+                byteBuffer.putLong(PROPRA_HEADER_OFFSET_DATALEN,srcHeader.encodedSize());
+            }
             case RLE -> {
                 byteBuffer.put(PROPRA_HEADER_OFFSET_ENCODING, (byte)PROPRA_HEADER_ENCODING_RLE);
                 byteBuffer.putLong(PROPRA_HEADER_OFFSET_DATALEN,srcHeader.encodedSize());
