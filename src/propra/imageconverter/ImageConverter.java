@@ -10,8 +10,9 @@ import propra.imageconverter.CmdLine.Options;
  *  Einstiegsklasse für ImageConverter 
  * 
  *  Änderungen zu KE2
- *  - Änderung der Klassenstruktur im Hinblick auf Verarbeitung großer Dateien.
- *  - JavaDoc entfernt, da ich nicht genug Zeit habe es konsequent zu nutzen.
+ *  -   Meine Abgabe für KE2 hat die Verarbeitung großer Dateien in Bezug auf RLE nicht 
+ *      unterstützt. Dazu habe ich jetzt nochmal grundlegende Änderungen bei der Klassenstruktur 
+ *      vorgenommen. Hier eine Übersicht über die Struktur:
  * 
  */
 public class ImageConverter {

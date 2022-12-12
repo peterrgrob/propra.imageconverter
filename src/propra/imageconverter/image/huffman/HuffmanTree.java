@@ -14,7 +14,7 @@ public class HuffmanTree <Symbol> {
     /**
      *  Klasse implementiert einen Knoten des Baumes
      */    
-    private class Node<Symbol> {
+    private static class Node<Symbol> implements Comparable<Node>{
         /**
          *  Knoten
          */ 
@@ -66,6 +66,15 @@ public class HuffmanTree <Symbol> {
         }
         
         /**
+         *  Vergleicht zwei Knoten anhand ihrer Symbolhäufigkeit, benötigt für die 
+         *  Sortierung nach Häufigkeit
+         */
+        @Override
+        public int compareTo(Node o) {
+            return symbol.compareTo(o.symbol);
+        }
+        
+        /**
          * Getter/Setter
          */
         public int getFrequency() {
@@ -84,7 +93,7 @@ public class HuffmanTree <Symbol> {
     /**
      *  Implementiert Tupel aus Symbol und Zähler
      */
-    public class SymbolTupel<Symbol> implements Comparable<SymbolTupel> {
+    public static class SymbolTupel<Symbol> implements Comparable<SymbolTupel> {
 
         /**
          *  Symbol und seine Häufigkeit
@@ -107,7 +116,7 @@ public class HuffmanTree <Symbol> {
          */
         @Override
         public int compareTo(SymbolTupel o) {
-            return frequency - o.frequency;
+            return o.frequency - frequency;
         }
         
         /**
@@ -138,7 +147,6 @@ public class HuffmanTree <Symbol> {
         PriorityQueue<Node> q = new PriorityQueue<>();
         
         // Symbole nach Häufigkeit sortieren und in Queue einfügen
-        Collections.sort(symbols);
         symbols.forEach(s -> q.add(new Node(s)));
         
         /*

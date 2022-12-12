@@ -15,7 +15,8 @@ public class DataFormat {
     public enum Encoding {
         NONE,
         RLE,
-        BASEN;
+        BASEN,
+        HUFFMAN;
     }
 
     
@@ -31,7 +32,7 @@ public class DataFormat {
         WRITE,
         ENCODE,
         DECODE,
-        FILTER,
+        ANALYZE,
         NONE;
     }
 

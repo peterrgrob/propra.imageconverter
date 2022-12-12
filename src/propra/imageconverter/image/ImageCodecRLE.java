@@ -336,4 +336,6 @@ public class ImageCodecRLE extends ImageCodecRaw {
         
         return data;
     }
+    
+
 }

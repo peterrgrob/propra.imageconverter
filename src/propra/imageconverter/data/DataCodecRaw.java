@@ -2,6 +2,7 @@ package propra.imageconverter.data;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import propra.imageconverter.data.DataFormat.Operation;
 import propra.imageconverter.data.IDataListener.Event;
 
 /**
@@ -10,13 +11,16 @@ import propra.imageconverter.data.IDataListener.Event;
 public class DataCodecRaw implements IDataCodec {
 
     // Standardblockgröße, muss vielfaches der Pixelgröße sein
-    protected final int DEFAULT_BLOCK_SIZE = 4096 * 16 * 3;
+    public static final int DEFAULT_BLOCK_SIZE = 4096 * 16 * 3;
     
     // Temporärer Lesepuffer
     protected ByteBuffer readBuffer;
     
     // Zugeordnete Resource
     protected IDataResource resource;
+    
+    // Aktuelle Operation
+    protected DataFormat.Operation operation;
     
     /*
      * 
@@ -37,7 +41,16 @@ public class DataCodecRaw implements IDataCodec {
      */
     @Override
     public void begin(DataFormat.Operation op) throws IOException {  
+        operation = op;
         readBuffer = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
+    }
+    
+    /**
+     * 
+     */
+    @Override
+    public void analyze(DataBlock data) {
+        
     }
 
     /*
@@ -87,6 +100,7 @@ public class DataCodecRaw implements IDataCodec {
      */
     @Override
     public void end() throws IOException {
+        operation = Operation.NONE;
     }
     
     /*
@@ -105,5 +119,13 @@ public class DataCodecRaw implements IDataCodec {
         if(listener != null) {
             listener.onData(event,this, block);
         }
+    }
+    
+    /**
+     * 
+     */
+    @Override
+    public boolean analyzeNecessary(DataFormat.Operation op) {
+        return false;
     }
 }

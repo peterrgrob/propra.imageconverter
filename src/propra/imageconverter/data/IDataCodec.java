@@ -9,29 +9,31 @@ import java.io.IOException;
 public interface IDataCodec {
     /**
      * 
-     * @param op
-     * @throws IOException 
      */
     public void begin(DataFormat.Operation op) throws IOException;
     
     /**
      * 
-     * @param data
-     * @throws IOException 
+     */
+    public boolean analyzeNecessary(DataFormat.Operation op);
+    
+    /**
+     * 
+     */
+    public void analyze(DataBlock data);
+            
+    /**
+     * 
      */
     public void encode(DataBlock data, IDataListener listener) throws IOException;
     
     /**
      * 
-     * @param data
-     * @param target
-     * @throws IOException 
      */
     public void decode(DataBlock data, IDataListener listener) throws IOException;
     
     /**
      * 
-     * @throws IOException 
      */
     public void end() throws IOException;
 }

@@ -22,8 +22,22 @@ public class DataBlock {
     /**
      * 
      */
+    public DataBlock(int size) {
+        data = ByteBuffer.allocate(size);
+    }
+    
+    /**
+     * 
+     */
     public DataBlock(ByteBuffer data, boolean lastBlock) {
         this.data = data;
         this.lastBlock = lastBlock;
+    }
+    
+    /**
+     * 
+     */
+    public byte[] array() {
+        return data.array();
     }
 }

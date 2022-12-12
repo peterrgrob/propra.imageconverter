@@ -1,5 +1,4 @@
 package propra.imageconverter;
-import propra.imageconverter.basen.BaseNCodec;
 import java.util.HashMap;
 import propra.imageconverter.basen.BaseNFormat;
 import propra.imageconverter.image.ColorFormat;
@@ -80,8 +79,13 @@ import propra.imageconverter.image.ColorFormat;
     public ColorFormat.Encoding getColorEncoding() {
         String enc = getOption(Options.COMPRESSION);
         if(enc != null) {
-            if(enc.compareTo("rle") == 0) {
-                return ColorFormat.Encoding.RLE;
+            switch(enc) {
+                case "rle" -> {
+                    return ColorFormat.Encoding.RLE;
+                }
+                case "huffman" -> {
+                    return ColorFormat.Encoding.HUFFMAN;
+                }
             }
         }
         return ColorFormat.Encoding.NONE;

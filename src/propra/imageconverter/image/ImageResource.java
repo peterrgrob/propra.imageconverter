@@ -3,12 +3,14 @@ package propra.imageconverter.image;
 import java.io.IOException;
 import propra.imageconverter.checksum.Checksum;
 import propra.imageconverter.data.DataBlock;
+import propra.imageconverter.data.DataCodecRaw;
 import propra.imageconverter.data.DataFormat.Encoding;
 import propra.imageconverter.data.DataFormat.IOMode;
 import propra.imageconverter.data.DataFormat.Operation;
 import propra.imageconverter.data.DataResource;
 import propra.imageconverter.data.IDataCodec;
 import propra.imageconverter.data.IDataListener;
+import propra.imageconverter.image.huffman.HuffmanCodec;
 
 /**
  *
@@ -100,7 +102,9 @@ public abstract class ImageResource extends DataResource implements IDataListene
                 case RLE -> {
                     return new ImageCodecRLE(this);
                 }
-
+                case HUFFMAN -> {
+                    return new HuffmanCodec(this);
+                }
             }
         }
         return null;
@@ -154,6 +158,10 @@ public abstract class ImageResource extends DataResource implements IDataListene
         if(transcodedChecksum != null) {
             transcodedChecksum.begin();
         }
+        
+        // Bild analysieren
+        analyze();
+        
         inCodec.begin(Operation.READ);
         transcodedImage.getCodec().begin(Operation.WRITE);
         
@@ -179,6 +187,28 @@ public abstract class ImageResource extends DataResource implements IDataListene
         return transcodedImage;
     }
 
+    /**
+     *  Bild in Blöcken durch Codecs analysieren
+     */
+    private void analyze() throws IOException {
+        if( inCodec.analyzeNecessary(Operation.ENCODE)
+        ||  transcodedImage.getCodec().analyzeNecessary(Operation.ENCODE)) {
+            inCodec.begin(Operation.ANALYZE);
+            transcodedImage.getCodec().begin(Operation.ANALYZE);
+
+            DataBlock dataBlock = new DataBlock(DataCodecRaw.DEFAULT_BLOCK_SIZE);
+
+            while(position() < length()) {
+                read(dataBlock.data);
+                inCodec.analyze(dataBlock);
+                transcodedImage.getCodec().analyze(dataBlock);
+            }
+
+            inCodec.end();
+            transcodedImage.getCodec().end();
+        }
+    }
+    
     /**
      * 
      */
