@@ -28,11 +28,10 @@ public class DataFormat {
     
     // Datenoperation
     public enum Operation {
-        READ,
-        WRITE,
         ENCODE,
         DECODE,
-        ANALYZE,
+        ANALYZE_ENCODER,
+        ANALYZE_DECODER,
         NONE;
     }
 

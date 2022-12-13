@@ -1,23 +1,25 @@
-package propra.imageconverter.image.huffman;
+package propra.imageconverter.image;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.PriorityQueue;
+import propra.imageconverter.data.BitResource;
 
 /**
- *  Implementiert einen binären Baum zur Erstellung der Huffmancodes 
+ *  Implementiert einen binären Baum zur Erstellung und Abbildung der Huffmancodes 
  *  und Symbole
  */
-public class HuffmanTree <Symbol> {
+public class HuffmanTree {
 
     /**
-     *  Klasse implementiert einen Knoten des Baumes
+     *  Klasse implementiert einen Knoten des Huffman Baumes
      */    
-    private static class Node<Symbol> implements Comparable<Node>{
+    private static class Node implements Comparable<Node>{
+        
         /**
          *  Knoten
          */ 
-        private Node parentNode;
         private Node leftNode;
         private Node rightNode;
 
@@ -34,6 +36,9 @@ public class HuffmanTree <Symbol> {
         /**
          *  Konstruktoren
          */
+        public Node() {
+        }
+        
         public Node(SymbolTupel s) {
             this.symbol = s;
         }
@@ -47,20 +52,41 @@ public class HuffmanTree <Symbol> {
         }
         
         /**
-         *  Codes rekursiv berechnen
+         *  Berechnet rekursiv die Codes je Symbol nach Erstellung des Baumes
          */
         public void buildCode(BitSet c, int level) {
+            // Code speichern
             code = c;
             
+            // Innerer Knoten?
             if(leftNode != null 
             && rightNode != null) {
-                //  Linker Teilbaum 
+                //  Linken Teilbaum besuchen
                 buildCode((BitSet)c.clone(), level + 1);
                 
-                //  Rechter Teilbaum
+                //  Rechten Teilbaum besuchen
                 BitSet nb = (BitSet)c.clone();
                 nb.set(level);
                 buildCode(nb, level + 1);
+            }
+        }
+        
+        /**
+         *  Baum aus der ProPra Kodierung rekursiv wiederherstellen
+         */
+        public void buildFromResource(BitResource resource) throws IOException {
+            /*
+             * Nächstes Bit gibt an um welchen Knotentyp es sich handelt
+             */
+            if(resource.readBit() == 0) {
+               // Innerer Knoten, daher mit Pre-Order Durchlauf fortfahren
+               leftNode = new Node();
+               leftNode.buildFromResource(resource);
+               rightNode = new Node();
+               rightNode.buildFromResource(resource); 
+            } else {
+               // Blatt erreicht, daher Symbol für das Blatt einlesen
+               symbol = new SymbolTupel(resource.readByte(), 0);
             }
         }
         
@@ -84,46 +110,43 @@ public class HuffmanTree <Symbol> {
             return code;
         }
         
-        public void SetParent(Node p) {
-            parentNode = p;
-        }
-        
         /**
          *  Kodiert einen Baum nach Konstruktionvorschrift der ProPra 
          *  Spezifikation in einen String
          */
-        public String serializeNode(String code) {
+        @Override
+        public String toString() {
             if(leftNode == null 
             && rightNode == null) {
                 return "1" + symbol.toString();
             } else {
-                code += "0";
+                String code = "0";
                 if(leftNode != null) {
-                    code += leftNode.serializeNode("");
+                    code += leftNode.toString();
                 }
                 if(rightNode != null) {
-                   code += rightNode.serializeNode("");
-                }                
+                   code += rightNode.toString();
+                }    
+                return code;
             }
-            return code;
         }
     }
     
     /**
      *  Implementiert Tupel aus Symbol und Zähler
      */
-    public static class SymbolTupel<Symbol> implements Comparable<SymbolTupel> {
+    public static class SymbolTupel implements Comparable<SymbolTupel> {
 
         /**
          *  Symbol und seine Häufigkeit
          */
-        private Symbol symbol;
+        private byte symbol;
         private int frequency;
 
         /**
          *  Konstruktor
          */
-        public SymbolTupel( Symbol symbol, 
+        public SymbolTupel( byte symbol, 
                             int frequency) {
             this.symbol = symbol;
             this.frequency = frequency;
@@ -150,7 +173,7 @@ public class HuffmanTree <Symbol> {
          */
         @Override
         public String toString() {
-            return "[" + symbol.toString() + "]";
+            return "[" + symbol + "]";
         }
     }
     
@@ -163,14 +186,26 @@ public class HuffmanTree <Symbol> {
      * 
      */
     public HuffmanTree() {
+    }
+    
+    /**
+     *  Rekonstruiert rekursiv einen Huffmantree aus der Resource nach 
+     *  Propra-Konstruktionsvorschrift aus einem Code mit Preorder-Durchlauf
+     */
+    public void buildFromResource(BitResource resource) throws IOException {
+        if(resource == null) {
+            throw new IllegalArgumentException();
+        }
         
+        rootNode = new Node(new SymbolTupel((byte)0, 0));
+        rootNode.buildFromResource(resource);
     }
     
     /*
      *  Erstellt einen Huffmantree aus den Eingabesymbolen und Häufigkeiten
      *  durch Verwendung einer PriorityQueue
      */
-    public void build(ArrayList<SymbolTupel> symbols) {
+    public void buildFromHistogram(ArrayList<SymbolTupel> symbols) {
         PriorityQueue<Node> q = new PriorityQueue<>();
         
         // Symbole nach Häufigkeit sortieren und in Queue einfügen
@@ -188,27 +223,26 @@ public class HuffmanTree <Symbol> {
              */
             Node left = q.remove();
             Node right = q.remove();
-            Node parentNode = new Node(new SymbolTupel<>(  null, 
-                                                            left.getFrequency() + right.getFrequency()),
-                                                            left,
-                                                            right);
-            
-            left.SetParent(parentNode);
-            right.SetParent(parentNode);         
+            Node parentNode = new Node(new SymbolTupel((byte)0, 
+                                                        left.getFrequency() + right.getFrequency()),
+                                                        left,
+                                                        right);
+                    
             q.add(parentNode);
         }
         
         // Wurzel speichern
         rootNode = q.remove();
-        serializeCodes();
+        System.out.print(toString());
     }
     
     /**
      * 
      */
-    public String serializeCodes() {
+    @Override
+    public String toString() {
         if(rootNode != null) {
-            System.out.print(rootNode.serializeNode(""));
+            return rootNode.toString();
         }
         return "";
     }

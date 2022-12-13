@@ -10,7 +10,6 @@ import propra.imageconverter.data.DataFormat.Operation;
 import propra.imageconverter.data.DataResource;
 import propra.imageconverter.data.IDataCodec;
 import propra.imageconverter.data.IDataListener;
-import propra.imageconverter.image.huffman.HuffmanCodec;
 
 /**
  *
@@ -93,7 +92,7 @@ public abstract class ImageResource extends DataResource implements IDataListene
     /**
      * 
      */
-    private IDataCodec createImageCodec(ImageMeta header) {
+    protected IDataCodec createImageCodec(ImageMeta header) {
         if(header != null) {
             switch(header.colorFormat().encoding()) {
                 case NONE -> {
@@ -162,8 +161,8 @@ public abstract class ImageResource extends DataResource implements IDataListene
         // Bild analysieren
         analyze();
         
-        inCodec.begin(Operation.READ);
-        transcodedImage.getCodec().begin(Operation.WRITE);
+        inCodec.begin(Operation.DECODE);
+        transcodedImage.getCodec().begin(Operation.ENCODE);
         
         // Dekodierung starten
         inCodec.decode(dataBlock, this);
@@ -191,10 +190,10 @@ public abstract class ImageResource extends DataResource implements IDataListene
      *  Bild in Blöcken durch Codecs analysieren
      */
     private void analyze() throws IOException {
-        if( inCodec.analyzeNecessary(Operation.ENCODE)
+        if( inCodec.analyzeNecessary(Operation.DECODE)
         ||  transcodedImage.getCodec().analyzeNecessary(Operation.ENCODE)) {
-            inCodec.begin(Operation.ANALYZE);
-            transcodedImage.getCodec().begin(Operation.ANALYZE);
+            inCodec.begin(Operation.ANALYZE_DECODER);
+            transcodedImage.getCodec().begin(Operation.ANALYZE_ENCODER);
 
             DataBlock dataBlock = new DataBlock(DataCodecRaw.DEFAULT_BLOCK_SIZE);
 

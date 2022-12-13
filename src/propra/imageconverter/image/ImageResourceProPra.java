@@ -6,7 +6,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import propra.imageconverter.checksum.ChecksumPropra;
 import propra.imageconverter.data.DataFormat;
-import propra.imageconverter.image.huffman.HuffmanCodec;
 
 /**
  * Schreibt ProPra Header
@@ -82,25 +81,23 @@ public class ImageResourceProPra extends ImageResource {
         
         // Kompression initialisieren
         switch (bytes.get(PROPRA_HEADER_OFFSET_ENCODING)) {
-            case PROPRA_HEADER_ENCODING_HUFFMAN -> {
-                inCodec = new HuffmanCodec(this);
+            case PROPRA_HEADER_ENCODING_HUFFMAN -> {     
                 newHeader.colorFormat().encoding(DataFormat.Encoding.HUFFMAN);
             }
             case PROPRA_HEADER_ENCODING_RLE -> {
-                inCodec = new ImageCodecRLE(this);
                 newHeader.colorFormat().encoding(DataFormat.Encoding.RLE);
             }
             case PROPRA_HEADER_ENCODING_NONE -> {
-                inCodec = new ImageCodecRaw(this);
                 newHeader.colorFormat().encoding(DataFormat.Encoding.NONE);
             }
             default -> throw new UnsupportedOperationException("Nicht unterstützte Kompression!");
         }
+        inCodec = createImageCodec(newHeader);
         
         // Prüfe ProPra Spezifikationen
         if( newHeader.isValid() == false 
         ||  (dataLen != (binaryFile.length() - PROPRA_HEADER_SIZE))) {
-            throw new UnsupportedOperationException("Ungültiges ProPra Dateiformat!");
+//            throw new UnsupportedOperationException("Ungültiges ProPra Dateiformat!");
         } else if(newHeader.colorFormat().encoding() == DataFormat.Encoding.NONE) {
             
             // Prüfungen für unkomprimierte Dateien 

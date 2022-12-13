@@ -134,6 +134,9 @@ public class DataResource implements IDataResource,
             int len = binaryFile.read(  buffer.array(), 
                                         buffer.position(), 
                                         buffer.capacity());
+            if(len != buffer.capacity()) {
+                throw new IOException("Zu wenig Daten gelesen!");
+            }
             buffer.limit(len);
             return len;
         } 
