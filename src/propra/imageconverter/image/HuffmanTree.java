@@ -3,7 +3,7 @@ package propra.imageconverter.image;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.PriorityQueue;
-import propra.imageconverter.data.BitResource;
+import propra.imageconverter.data.BitStream;
 
 /**
  *  Implementiert einen binären Baum zur Erstellung und Abbildung der Huffmancodes 
@@ -22,7 +22,7 @@ public class HuffmanTree {
     
     
     /**
-     *  Implmentiert den Code für ein Symbol
+     *  Implementiert den Code für ein Symbol
      */
     public static class Code implements Comparable<Code> {
         
@@ -137,7 +137,7 @@ public class HuffmanTree {
         /**
          *  Baum aus der ProPra Kodierung rekursiv wiederherstellen
          */
-        public void buildFromResource(BitResource resource) throws IOException {
+        public void buildFromResource(BitStream resource) throws IOException {
             /*
              * Nächstes Bit gibt an um welchen Knotentyp es sich handelt
              */
@@ -151,6 +151,34 @@ public class HuffmanTree {
                // Blatt erreicht, daher Symbol für das Blatt einlesen
                symbol = resource.readByte();
             }
+        }
+        
+        /**
+         *  Sucht Symbol zu den Bits im Stream, gibt -1 bei EOF zurück, 
+         *  ansonsten Symbol
+         */
+        public int decodeBits(BitStream stream) throws IOException {
+            
+            // Symbol erreicht?
+            if( leftNode == null
+            &&  rightNode == null) {
+                return symbol;
+            }
+            
+            // Nächstes Bit lesen und rekursiv dem Pfad folgen
+            switch(stream.readBit()) {
+                case 1 -> {
+                    return rightNode.decodeBits(stream);
+                }
+                case 0 -> {
+                    return leftNode.decodeBits(stream);
+                }
+                case -1 -> {
+                    return -1;
+                }
+            }
+            
+            return -1;
         }
         
         /**
@@ -205,7 +233,7 @@ public class HuffmanTree {
      *  Rekonstruiert rekursiv einen Huffmantree aus der Resource nach 
      *  Propra-Konstruktionsvorschrift aus einem Code mit Preorder-Durchlauf
      */
-    public void buildFromResource(BitResource resource) throws IOException {
+    public void buildFromResource(BitStream resource) throws IOException {
         if(resource == null) {
             throw new IllegalArgumentException();
         }
@@ -262,6 +290,13 @@ public class HuffmanTree {
         rootNode.buildCode(new Code(0, 0));
         
         System.out.print(toString());
+    }
+    
+    /**
+     *  Dekodiert Byte von Stream, gibt Symbol oder -1 bei EOF zurück
+     */
+    public int decodeBits(BitStream stream) throws IOException {
+        return rootNode.decodeBits(stream);
     }
     
     /**

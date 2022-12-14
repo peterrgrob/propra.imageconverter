@@ -1,7 +1,10 @@
 package propra.imageconverter.image;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.nio.channels.Channels;
 import propra.imageconverter.checksum.Checksum;
+import propra.imageconverter.data.BitStream;
 import propra.imageconverter.data.DataBlock;
 import propra.imageconverter.data.DataCodecRaw;
 import propra.imageconverter.data.DataFormat.Encoding;

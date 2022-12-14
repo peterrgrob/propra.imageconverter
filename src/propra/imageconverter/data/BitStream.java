@@ -1,18 +1,17 @@
 package propra.imageconverter.data;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 
 /**
  *
  */
-public class BitResource {
+public class BitStream {
     
-    // Zugeordnete Resource von der Bits gelesen werden
-    private IDataResource resource;
+    // Zugeordneter Stream von dem Bits gelesen werden
+    private final IStreamable inStream;
     
     // Aktuelles Byte
-    private ByteBuffer value;
+    private byte value;
     
     // Aktueller Bit-Index
     private byte bitIndex;
@@ -20,26 +19,32 @@ public class BitResource {
     /**
      *  Konstruktor
      */
-    public BitResource(IDataResource resource) {
-        this.resource = resource;
-        value = ByteBuffer.allocate(1);
+    public BitStream(IStreamable inStream) {
+        this.inStream = inStream;
         bitIndex = 8;
     }
     
     /**
-     *  Liest ein Bit von der Resource
+     *  Liest ein Bit von der Resource, gibt -1 zurück bei Dateiende
+     *  Speichert gelesene Bytes in bytes
      */
-    public byte readBit() throws IOException {
+    public int readBit() throws IOException {
         /*
          *  Wenn Bytegrenze überschritten, neues Byte einlesen. 
          */
         if(bitIndex > 7) {
-            resource.read(value);
+            int rv = inStream.readByte();
+            if(rv == -1) {
+                return -1;
+            }
+            
+            // Speichern
+            value = (byte)(rv & 0xFF);
             bitIndex = 0;
         }
         
         // Extrahiert und gibt den Bitwert zurück
-        byte b = (byte)((value.array()[0] >>> (7 - bitIndex)) & 1);
+        byte b = (byte)((value >>> (7 - bitIndex)) & 1);
         
         bitIndex++;
         return b;

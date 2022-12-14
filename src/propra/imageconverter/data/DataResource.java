@@ -1,5 +1,6 @@
 package propra.imageconverter.data;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -12,6 +13,8 @@ import java.nio.channels.Channels;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -23,6 +26,7 @@ public class DataResource implements IDataResource,
     protected final DataFormat.IOMode mode;
     protected RandomAccessFile binaryFile;
     protected BufferedOutputStream outStream;
+    protected BufferedInputStream inStream;
     protected BufferedWriter txtWriter;
     protected BufferedReader txtReader;   
 
@@ -178,6 +182,18 @@ public class DataResource implements IDataResource,
         ByteBuffer nb = ByteBuffer.allocate(length);
         read(offset, nb);
         return nb;
+    }
+
+    /**
+     * 
+     */
+    @Override
+    public byte readByte(){
+        try {
+            return binaryFile.readByte();
+        } catch (IOException ex) {
+            return -1;
+        }
     }
     
     /**

@@ -8,7 +8,8 @@ import java.io.IOException;
  *
  * @author pg
  */
-public interface IDataResource extends Closeable {
+public interface IDataResource extends  Closeable,
+                                        IStreamable {
     
     /**
      * 
@@ -26,8 +27,6 @@ public interface IDataResource extends Closeable {
     
     /**
      * 
-     * @return
-     * @throws IOException 
      */
     public long length() throws IOException;
     
