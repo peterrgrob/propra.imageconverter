@@ -1,8 +1,7 @@
 package propra.imageconverter.image;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.BitSet;
+import java.util.HashMap;
 import java.util.PriorityQueue;
 import propra.imageconverter.data.BitResource;
 
@@ -12,11 +11,69 @@ import propra.imageconverter.data.BitResource;
  */
 public class HuffmanTree {
         
-    /**
-     *  Wurzelknoten des Huffmantrees
-     */
+    //  Wurzelknoten
     private Node rootNode;
+    
+    /*
+     *  Hashmap aller Knoten mit dem Symbol als Schlüssel zur schnellen
+     *  Zuordnung von Symbolen zu Codes
+     */
+    private HashMap<Byte, Node> nodeMap;
+    
+    
+    /**
+     *  Implmentiert den Code für ein Symbol
+     */
+    public static class Code implements Comparable<Code> {
+        
+        // Bits des Codes
+        private int code;
+        
+        // Länge des Codes in Bit
+        private int length;
 
+        /**
+         *  Constructor
+         */
+        public Code(int code, 
+                    int length) {
+            this.code = code;
+            this.length = length;
+        }
+        
+        public Code(Code src) {
+            this.code = src.code;
+            this.length = src.length;
+        }
+
+        /**
+         * Bit hinzufügen
+         */
+        public Code addBit(boolean bit) {
+            code <<= 1;
+            code |= (bit == true) ? 1 : 0;
+            length++;
+            return this;
+        }
+        
+        /**
+         *  Getter/Setter
+         */
+        public int getCode() {
+            return code;
+        }
+
+        public int getLength() {
+            return length;
+        }
+        
+        @Override
+        public int compareTo(Code o) {
+            return (code - o.code) + 
+                   (length - o.length); 
+        }       
+    }
+    
     /**
      *  Klasse implementiert einen Knoten des Huffman Baumes
      */    
@@ -37,7 +94,7 @@ public class HuffmanTree {
         /*
          *  Codewort des Knotens  
          */
-        BitSet code;
+        private Code code;
         
         /**
          *  Konstruktoren
@@ -64,20 +121,16 @@ public class HuffmanTree {
         /**
          *  Berechnet rekursiv die Codes je Symbol nach Erstellung des Baumes
          */
-        public void buildCode(BitSet c, int level) {
+        public void buildCode(Code c) {
             // Code speichern
-            code = c;
+            code = new Code(c);
             
             // Innerer Knoten?
             if(leftNode != null 
             && rightNode != null) {
-                //  Linken Teilbaum besuchen
-                buildCode((BitSet)c.clone(), level + 1);
-                
-                //  Rechten Teilbaum besuchen
-                BitSet nb = (BitSet)c.clone();
-                nb.set(level);
-                buildCode(nb, level + 1);
+                //  Linken und rechten Teilbaum besuchen
+                leftNode.buildCode(c.addBit(false));
+                rightNode.buildCode(c.addBit(true));
             }
         }
         
@@ -116,7 +169,7 @@ public class HuffmanTree {
             return frequency;
         }
 
-        public BitSet getCode() {
+        public Code getCode() {
             return code;
         }
         
@@ -159,6 +212,7 @@ public class HuffmanTree {
         
         rootNode = new Node((byte)0, 0);
         rootNode.buildFromResource(resource);
+        rootNode.buildCode(new Code(0,0));
     }
     
     /*
@@ -167,10 +221,19 @@ public class HuffmanTree {
      */
     public void buildFromHistogram(int[] symbols) {
         PriorityQueue<Node> q = new PriorityQueue<>();
+        nodeMap = new HashMap<>();
         
-        // Symbole nach Häufigkeit sortiert in PriorityQueue einfügen
-        Arrays.stream(symbols)
-              .forEach(s -> q.add(new Node((byte)symbols[s], s)));
+        /**
+         *  Symbole nach Häufigkeit sortiert als Knoten 
+         *  in PriorityQueue einfügen
+         */ 
+        for(int s=0; s<symbols.length; s++) {
+            if(symbols[s] > 0) {
+                Node n = new Node((byte)s, symbols[s]);
+                q.add(n);
+                nodeMap.put((byte)s, n);
+            }
+        }
         
         /*
          *  Baum iterativ konstruieren bis nur noch ein Knoten (Wurzel) in der 
@@ -194,6 +257,10 @@ public class HuffmanTree {
         
         // Wurzel speichern
         rootNode = q.remove();
+        
+        // Codes berechnen
+        rootNode.buildCode(new Code(0, 0));
+        
         System.out.print(toString());
     }
     

@@ -42,7 +42,7 @@ public class DataResource implements IDataResource,
         }
         
         if(mode == DataFormat.IOMode.BINARY) {
-            binaryFile = new RandomAccessFile(fileObj, "rw");
+            binaryFile = new RandomAccessFile(fileObj, "r" + (write ? "w":""));
             outStream = new BufferedOutputStream(Channels.newOutputStream(binaryFile.getChannel()));
         } else {
             txtWriter = new BufferedWriter(new FileWriter(fileObj));
@@ -141,9 +141,6 @@ public class DataResource implements IDataResource,
             int len = binaryFile.read(  buffer.array(), 
                                         buffer.position(), 
                                         buffer.capacity());
-            if(len != buffer.capacity()) {
-                throw new IOException("Zu wenig Daten gelesen!");
-            }
             buffer.limit(len);
             return len;
         } 

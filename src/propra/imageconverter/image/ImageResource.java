@@ -165,15 +165,13 @@ public abstract class ImageResource extends DataResource
         
         // Bild analysieren
         analyze();
-                
-        // Bilddaten verarbeiten
-        DataBlock dataBlock = new DataBlock();
         
+        // Bilddaten verarbeiten
         inCodec.begin(Operation.DECODE);
         transcodedImage.getCodec().begin(Operation.ENCODE);
         
         // Dekodierung starten
-        inCodec.decode(dataBlock, this);
+        inCodec.decode(new DataBlock(), this);
         
         // Konvertierung abschließen
         inCodec.end();
@@ -201,11 +199,15 @@ public abstract class ImageResource extends DataResource
     private void analyze() throws IOException {
         if( inCodec.analyzeNecessary(Operation.DECODE)
         ||  transcodedImage.getCodec().analyzeNecessary(Operation.ENCODE)) {
+            
+            // Position merken
+            long p = position();
+            
             inCodec.begin(Operation.ANALYZE_DECODER);
             transcodedImage.getCodec().begin(Operation.ANALYZE_ENCODER);
-
             DataBlock dataBlock = new DataBlock(DataCodecRaw.DEFAULT_BLOCK_SIZE);
-
+            
+            // Daten in Blöcken durchlaufen und an Codec geben
             while(position() < length()) {
                 read(dataBlock.data);
                 inCodec.analyze(dataBlock);
@@ -214,6 +216,9 @@ public abstract class ImageResource extends DataResource
 
             inCodec.end();
             transcodedImage.getCodec().end();
+                
+            // Ursprüngliche Position wiederherstellen
+            position(p);
         }
     }
     
