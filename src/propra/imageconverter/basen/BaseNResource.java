@@ -23,8 +23,9 @@ public class BaseNResource extends DataResource implements IDataListener {
      * 
      */
     public BaseNResource(   String file, 
-                            BaseNFormat format) throws IOException {
-        super(file, IOMode.BINARY);
+                            BaseNFormat format,
+                            boolean write) throws IOException {
+        super(file, IOMode.BINARY, write);
         
         this.format = format;
         if(format == null) {

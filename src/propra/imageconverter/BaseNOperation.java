@@ -80,14 +80,18 @@ public class BaseNOperation implements AutoCloseable {
         // Resourcenobjekte erstellen
         if(cmd.isBaseNDecode()) {
             baseNFile = new BaseNResource(  cmd.getOption(Options.INPUT_FILE), 
-                                            dataFormat);
+                                            dataFormat,
+                                            false);
             binaryFile = new DataResource(  outPath, 
-                                            IOMode.BINARY);
+                                            IOMode.BINARY,
+                                            true);
         } else {
             baseNFile = new BaseNResource(  outPath, 
-                                            dataFormat);
+                                            dataFormat,
+                                            false);
             binaryFile = new DataResource(  cmd.getOption(Options.INPUT_FILE), 
-                                            IOMode.BINARY);
+                                            IOMode.BINARY,
+                                            true);
         }  
     }
     

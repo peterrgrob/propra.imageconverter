@@ -1,7 +1,7 @@
 package propra.imageconverter.image;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.PriorityQueue;
 import propra.imageconverter.data.BitResource;
@@ -11,6 +11,11 @@ import propra.imageconverter.data.BitResource;
  *  und Symbole
  */
 public class HuffmanTree {
+        
+    /**
+     *  Wurzelknoten des Huffmantrees
+     */
+    private Node rootNode;
 
     /**
      *  Klasse implementiert einen Knoten des Huffman Baumes
@@ -26,7 +31,8 @@ public class HuffmanTree {
         /*
          *  Symbol und seine Häufigkeit   
          */
-        private SymbolTupel symbol;
+        private byte symbol;
+        private int frequency;
         
         /*
          *  Codewort des Knotens  
@@ -39,14 +45,18 @@ public class HuffmanTree {
         public Node() {
         }
         
-        public Node(SymbolTupel s) {
+        public Node(byte s, 
+                    int frequency) {
             this.symbol = s;
+            this.frequency = frequency;
         }
         
-        public Node(SymbolTupel s,
+        public Node(byte s,
+                    int frequency,
                     Node leftNode,
                     Node rightNode) {
             this.symbol = s;
+            this.frequency = frequency;
             this.leftNode = leftNode;
             this.rightNode = rightNode;
         }
@@ -86,7 +96,7 @@ public class HuffmanTree {
                rightNode.buildFromResource(resource); 
             } else {
                // Blatt erreicht, daher Symbol für das Blatt einlesen
-               symbol = new SymbolTupel(resource.readByte(), 0);
+               symbol = resource.readByte();
             }
         }
         
@@ -96,16 +106,16 @@ public class HuffmanTree {
          */
         @Override
         public int compareTo(Node o) {
-            return symbol.compareTo(o.symbol);
+            return frequency - o.frequency;
         }
         
         /**
          * Getter/Setter
          */
         public int getFrequency() {
-            return symbol.getFrequency();
+            return frequency;
         }
-        
+
         public BitSet getCode() {
             return code;
         }
@@ -118,7 +128,7 @@ public class HuffmanTree {
         public String toString() {
             if(leftNode == null 
             && rightNode == null) {
-                return "1" + symbol.toString();
+                return "1" + symbol;
             } else {
                 String code = "0";
                 if(leftNode != null) {
@@ -131,56 +141,6 @@ public class HuffmanTree {
             }
         }
     }
-    
-    /**
-     *  Implementiert Tupel aus Symbol und Zähler
-     */
-    public static class SymbolTupel implements Comparable<SymbolTupel> {
-
-        /**
-         *  Symbol und seine Häufigkeit
-         */
-        private byte symbol;
-        private int frequency;
-
-        /**
-         *  Konstruktor
-         */
-        public SymbolTupel( byte symbol, 
-                            int frequency) {
-            this.symbol = symbol;
-            this.frequency = frequency;
-        }
-        
-        /**
-         *  Vergleicht zwei Symbole anhand ihrer Häufigkeit, benötigt für die 
-         *  Sortierung nach Häufigkeit
-         */
-        @Override
-        public int compareTo(SymbolTupel o) {
-            return frequency - o.frequency;
-        }
-        
-        /**
-         * Getter
-         */
-        public int getFrequency() {
-            return frequency;
-        }
-        
-        /**
-         * 
-         */
-        @Override
-        public String toString() {
-            return "[" + symbol + "]";
-        }
-    }
-    
-    /**
-     *  Wurzelknoten des Huffmantrees
-     */
-    private Node rootNode;
 
     /**
      * 
@@ -197,7 +157,7 @@ public class HuffmanTree {
             throw new IllegalArgumentException();
         }
         
-        rootNode = new Node(new SymbolTupel((byte)0, 0));
+        rootNode = new Node((byte)0, 0);
         rootNode.buildFromResource(resource);
     }
     
@@ -205,11 +165,12 @@ public class HuffmanTree {
      *  Erstellt einen Huffmantree aus den Eingabesymbolen und Häufigkeiten
      *  durch Verwendung einer PriorityQueue
      */
-    public void buildFromHistogram(ArrayList<SymbolTupel> symbols) {
+    public void buildFromHistogram(int[] symbols) {
         PriorityQueue<Node> q = new PriorityQueue<>();
         
-        // Symbole nach Häufigkeit sortieren und in Queue einfügen
-        symbols.forEach(s -> q.add(new Node(s)));
+        // Symbole nach Häufigkeit sortiert in PriorityQueue einfügen
+        Arrays.stream(symbols)
+              .forEach(s -> q.add(new Node((byte)symbols[s], s)));
         
         /*
          *  Baum iterativ konstruieren bis nur noch ein Knoten (Wurzel) in der 
@@ -223,10 +184,10 @@ public class HuffmanTree {
              */
             Node left = q.remove();
             Node right = q.remove();
-            Node parentNode = new Node(new SymbolTupel((byte)0, 
-                                                        left.getFrequency() + right.getFrequency()),
-                                                        left,
-                                                        right);
+            Node parentNode = new Node( (byte)0, 
+                                        left.getFrequency() + right.getFrequency(),
+                                        left,
+                                        right);
                     
             q.add(parentNode);
         }

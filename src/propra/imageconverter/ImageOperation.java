@@ -44,8 +44,9 @@ public class ImageOperation implements AutoCloseable{
         String outExt = cmd.getExtension(Options.OUTPUT_FILE);
         
         // Readerobjekt erstellen
-        inImage = createImageResource( cmd.getOption(Options.INPUT_FILE), 
-                                        inExt);
+        inImage = ImageResource.createImageResource( cmd.getOption(Options.INPUT_FILE), 
+                                                    inExt,
+                                                    false);
         if(inImage == null) {
             throw new IOException("Nicht unterstütztes Bildformat.");
         }
@@ -99,26 +100,6 @@ public class ImageOperation implements AutoCloseable{
         }
         
         return stateString;
-    }
-    
-    /**
-     *  Erstellt Ausgabe Objekt
-     * 
-     * @param ext
-     * @param streamLen
-     * @return
-     */
-    private static ImageResource createImageResource(String path, String ext) throws IOException {
-        switch(ext) {
-            case "tga" -> {
-                return new ImageResourceTGA(path, IOMode.BINARY);
-            }
-            case "propra" -> {
-                return new ImageResourceProPra(path, IOMode.BINARY);
-            }
-
-        }
-        return null;
     }
 
     /**

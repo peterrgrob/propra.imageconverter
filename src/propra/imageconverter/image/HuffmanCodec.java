@@ -1,7 +1,6 @@
 package propra.imageconverter.image;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import propra.imageconverter.data.BitResource;
 import propra.imageconverter.data.DataBlock;
@@ -76,18 +75,7 @@ public class HuffmanCodec extends DataCodecRaw {
              *  ermittelten Histogram erstellen
              */
             huffmanTree = new HuffmanTree();
-            ArrayList<HuffmanTree.SymbolTupel> hl = new ArrayList<>();
-            
-            // Symbole mit Anzahl größer 0 in Liste packen
-            for(int i=0; i<256; i++) {
-                if(histogram[i] > 0) {
-                    hl.add(new HuffmanTree.SymbolTupel( Byte.valueOf((byte)i), 
-                                                        histogram[i]));
-                }
-            }
-            
-            // Baum erstellen
-            huffmanTree.buildFromHistogram(hl);
+            huffmanTree.buildFromHistogram(histogram);
         }
         
         super.end();

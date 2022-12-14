@@ -31,9 +31,11 @@ public class ImageResourceProPra extends ImageResource {
      *
      * 
      */
-    public ImageResourceProPra(String file, DataFormat.IOMode mode) throws IOException {
+    public ImageResourceProPra( String file, 
+                                DataFormat.IOMode mode,
+                                boolean write) throws IOException {
         
-        super(file, mode);
+        super(file, mode, write);
         fileHeaderSize = PROPRA_HEADER_SIZE;
         colorFormat = new ColorFormat(0, 2, 1);
         checksum = new ChecksumPropra();
@@ -97,7 +99,7 @@ public class ImageResourceProPra extends ImageResource {
         // Prüfe ProPra Spezifikationen
         if( newHeader.isValid() == false 
         ||  (dataLen != (binaryFile.length() - PROPRA_HEADER_SIZE))) {
-//            throw new UnsupportedOperationException("Ungültiges ProPra Dateiformat!");
+            throw new UnsupportedOperationException("Ungültiges ProPra Dateiformat!");
         } else if(newHeader.colorFormat().encoding() == DataFormat.Encoding.NONE) {
             
             // Prüfungen für unkomprimierte Dateien 

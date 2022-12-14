@@ -30,10 +30,17 @@ public class DataResource implements IDataResource,
      * 
      */
     public DataResource(String file, 
-                        DataFormat.IOMode mode) throws IOException {
+                        DataFormat.IOMode mode,
+                        boolean write) throws IOException {
         this.mode = mode;
+        File fileObj;
+                
+        if(write) {
+            fileObj = createFileAndDirectory(file); 
+        } else {
+            fileObj = new File(file);
+        }
         
-        File fileObj = createFileAndDirectory(file); 
         if(mode == DataFormat.IOMode.BINARY) {
             binaryFile = new RandomAccessFile(fileObj, "rw");
             outStream = new BufferedOutputStream(Channels.newOutputStream(binaryFile.getChannel()));

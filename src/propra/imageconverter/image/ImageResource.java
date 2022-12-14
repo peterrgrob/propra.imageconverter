@@ -15,7 +15,8 @@ import propra.imageconverter.data.IDataListener;
  *
  * @author pg
  */
-public abstract class ImageResource extends DataResource implements IDataListener {
+public abstract class ImageResource extends DataResource 
+                                    implements IDataListener {
     
     protected int fileHeaderSize;   
     protected ImageMeta header;
@@ -28,8 +29,9 @@ public abstract class ImageResource extends DataResource implements IDataListene
      * 
      */
     public ImageResource(   String file, 
-                    IOMode mode) throws IOException {
-        super(file, mode);
+                            IOMode mode,
+                            boolean write) throws IOException {
+        super(file, mode, write);
         colorFormat = new ColorFormat();
     }
     
@@ -112,13 +114,15 @@ public abstract class ImageResource extends DataResource implements IDataListene
     /**
      *  Erstellt ein ImageResource Objekt basierend auf Dateipfad
      */
-    private static ImageResource createImageResource(String path, String ext) throws IOException {
+    public static ImageResource createImageResource(String path, 
+                                                    String ext,
+                                                    boolean write) throws IOException {
         switch(ext) {
             case "tga" -> {
-                return new ImageResourceTGA(path, IOMode.BINARY);
+                return new ImageResourceTGA(path, IOMode.BINARY, write);
             }
             case "propra" -> {
-                return new ImageResourceProPra(path, IOMode.BINARY);
+                return new ImageResourceProPra(path, IOMode.BINARY, write);
             }
 
         }
@@ -126,7 +130,8 @@ public abstract class ImageResource extends DataResource implements IDataListene
     }
     
     /**
-     * 
+     *  Konvertiert ein Bild in ein neues Bild mit gegebenem Format und 
+     *  Kodierung
      */
     public ImageResource transcode( String outFile, 
                                     String ext, 
@@ -135,22 +140,22 @@ public abstract class ImageResource extends DataResource implements IDataListene
             throw new IllegalArgumentException();
         }
         
-        transcodedImage = createImageResource(outFile, ext);
+        // Neues Bild erstellen
+        transcodedImage = createImageResource(outFile, ext, true);
         if(transcodedImage == null) {
             return null;
         }        
         Checksum transcodedChecksum = transcodedImage.getChecksum();
         
+        
+        // Bildkopf einlesen und mit neuem Format in Ausgabedatei schreiben
         readHeader();
         
         ImageMeta outHeader = new ImageMeta(header);
         outHeader.colorFormat().encoding(outEncoding);    
         transcodedImage.writeHeader(outHeader);
-       
-        // Bilddaten verarbeiten
-        DataBlock dataBlock = new DataBlock();
         
-        // Transcoding vorbereiten
+        // Konvertierung vorbereiten
         if(checksum != null) {
             checksum.begin();
         }
@@ -160,6 +165,9 @@ public abstract class ImageResource extends DataResource implements IDataListene
         
         // Bild analysieren
         analyze();
+                
+        // Bilddaten verarbeiten
+        DataBlock dataBlock = new DataBlock();
         
         inCodec.begin(Operation.DECODE);
         transcodedImage.getCodec().begin(Operation.ENCODE);
@@ -167,7 +175,7 @@ public abstract class ImageResource extends DataResource implements IDataListene
         // Dekodierung starten
         inCodec.decode(dataBlock, this);
         
-        // Transcoding abschließen
+        // Konvertierung abschließen
         inCodec.end();
         transcodedImage.getCodec().end();
         if(checksum != null) {
@@ -177,9 +185,10 @@ public abstract class ImageResource extends DataResource implements IDataListene
             transcodedChecksum.end();
         }
         
-        // Falls nötig Header aktualisieren
+        //  Falls nötig Header mit Prüfsumme, oder Länge des komprimierten Datensegements 
+        //  aktualisieren
         if( transcodedChecksum != null
-        ||  transcodedImage.getHeader().colorFormat().encoding() == Encoding.RLE) {
+        ||  transcodedImage.getHeader().colorFormat().encoding() != Encoding.NONE) {
             transcodedImage.writeHeader(transcodedImage.getHeader());
         }
         
