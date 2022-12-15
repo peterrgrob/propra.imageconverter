@@ -81,9 +81,20 @@ public class ImageCodecRaw extends DataCodecRaw {
         super.encode(block, listener);
         
         // Daten an Listener senden
-        dispatchEvent(  Event.DATA_BLOCK_DECODED, 
+        dispatchEvent(  Event.DATA_BLOCK_ENCODED, 
                             listener, 
                             block);
+    }
+    
+    /**
+     *  Sendet Datenblock an Listener
+     */
+    protected void dispatchData(Event event,
+                                IDataListener listener,
+                                DataBlock block) throws IOException {
+        block.data.flip();
+        dispatchEvent(event, listener, block);
+        block.data.clear();
     }
     
     /**

@@ -3,13 +3,13 @@ package propra.imageconverter.data;
 import java.nio.ByteBuffer;
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  *
  * @author pg
  */
-public interface IDataResource extends  Closeable,
-                                        IStreamable {
+public interface IDataResource extends  Closeable {
     
     /**
      * 
@@ -29,6 +29,11 @@ public interface IDataResource extends  Closeable,
      * 
      */
     public long length() throws IOException;
+    
+    /**
+     *  
+     */
+    public DataInputStream getBufferedInput();
     
     /**
      * 

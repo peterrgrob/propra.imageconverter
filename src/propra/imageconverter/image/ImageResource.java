@@ -1,15 +1,14 @@
 package propra.imageconverter.image;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.nio.channels.Channels;
 import propra.imageconverter.checksum.Checksum;
-import propra.imageconverter.data.BitStream;
 import propra.imageconverter.data.DataBlock;
 import propra.imageconverter.data.DataCodecRaw;
 import propra.imageconverter.data.DataFormat.Encoding;
 import propra.imageconverter.data.DataFormat.IOMode;
 import propra.imageconverter.data.DataFormat.Operation;
+import propra.imageconverter.data.DataInputStream;
 import propra.imageconverter.data.DataResource;
 import propra.imageconverter.data.IDataCodec;
 import propra.imageconverter.data.IDataListener;
@@ -95,6 +94,15 @@ public abstract class ImageResource extends DataResource
     }
     
     /**
+     *  
+     */
+    @Override
+    public DataInputStream getBufferedInput() {
+        checkState();
+        return new DataInputStream(Channels.newInputStream(binaryFile.getChannel()), checksum);
+    }
+    
+    /**
      * 
      */
     protected IDataCodec createImageCodec(ImageMeta header) {
@@ -107,7 +115,7 @@ public abstract class ImageResource extends DataResource
                     return new ImageCodecRLE(this);
                 }
                 case HUFFMAN -> {
-                    return new HuffmanCodec(this);
+                    return new ImageCodecHuffman(this);
                 }
             }
         }

@@ -8,18 +8,19 @@ import java.io.IOException;
 public class BitStream {
     
     // Zugeordneter Stream von dem Bits gelesen werden
-    private final IStreamable inStream;
+    private final DataInputStream inStream;
     
     // Aktuelles Byte
     private byte value;
     
     // Aktueller Bit-Index
     private byte bitIndex;
+
     
     /**
      *  Konstruktor
      */
-    public BitStream(IStreamable inStream) {
+    public BitStream(   DataInputStream inStream) {
         this.inStream = inStream;
         bitIndex = 8;
     }
@@ -33,7 +34,7 @@ public class BitStream {
          *  Wenn Bytegrenze überschritten, neues Byte einlesen. 
          */
         if(bitIndex > 7) {
-            int rv = inStream.readByte();
+            int rv = inStream.read();
             if(rv == -1) {
                 return -1;
             }

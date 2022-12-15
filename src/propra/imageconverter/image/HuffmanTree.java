@@ -88,7 +88,7 @@ public class HuffmanTree {
         /*
          *  Symbol und seine Häufigkeit   
          */
-        private byte symbol;
+        private int symbol;
         private int frequency;
         
         /*
@@ -142,14 +142,16 @@ public class HuffmanTree {
              * Nächstes Bit gibt an um welchen Knotentyp es sich handelt
              */
             if(resource.readBit() == 0) {
+                
                // Innerer Knoten, daher mit Pre-Order Durchlauf fortfahren
                leftNode = new Node();
                leftNode.buildFromResource(resource);
                rightNode = new Node();
                rightNode.buildFromResource(resource); 
             } else {
+                
                // Blatt erreicht, daher Symbol für das Blatt einlesen
-               symbol = resource.readByte();
+               symbol = resource.readByte() & 0xFF;
             }
         }
         
@@ -164,7 +166,7 @@ public class HuffmanTree {
             &&  rightNode == null) {
                 return symbol;
             }
-            
+
             // Nächstes Bit lesen und rekursiv dem Pfad folgen
             switch(stream.readBit()) {
                 case 1 -> {
@@ -177,7 +179,7 @@ public class HuffmanTree {
                     return -1;
                 }
             }
-            
+
             return -1;
         }
         

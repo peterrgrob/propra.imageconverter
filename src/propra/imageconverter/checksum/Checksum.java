@@ -76,4 +76,9 @@ public abstract class Checksum {
      * @return 
      */
     public abstract ByteBuffer update(ByteBuffer in);
+    
+    /**
+     * 
+     */
+    public abstract void update(byte b);
 }

@@ -5,17 +5,15 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import propra.imageconverter.data.BitStream;
 import propra.imageconverter.data.DataBlock;
-import propra.imageconverter.data.DataCodecRaw;
 import static propra.imageconverter.data.DataCodecRaw.DEFAULT_BLOCK_SIZE;
 import propra.imageconverter.data.DataFormat.Operation;
 import propra.imageconverter.data.IDataListener;
-import propra.imageconverter.data.IDataResource;
 
 /**
  *
  * @author pg
  */
-public class HuffmanCodec extends DataCodecRaw {
+public class ImageCodecHuffman extends ImageCodecRaw {
     
     //  Histogramm der Daten
     private final int[] histogram = new int[256]; 
@@ -26,7 +24,7 @@ public class HuffmanCodec extends DataCodecRaw {
     /*
      *  Konstruktor
      */
-    public HuffmanCodec(IDataResource resource) {
+    public ImageCodecHuffman(ImageResource resource) {
         super(resource);
     }
 
@@ -39,14 +37,7 @@ public class HuffmanCodec extends DataCodecRaw {
         
         if(op == Operation.ANALYZE_ENCODER) {
             Arrays.fill(histogram, 0);
-        } else if(op == Operation.DECODE) {    
-            // Kodierten Baum einlesen und erstellen
-            huffmanTree = new HuffmanTree();
-            huffmanTree.buildFromResource(new BitStream(resource));
-            
-            // TODO Gelesene Daten filtern
-            // dispatchEvent(IDataListener.Event.DATA_IO_READ, target, block);
-        }
+        } 
     }
  
     /**
@@ -59,6 +50,7 @@ public class HuffmanCodec extends DataCodecRaw {
         }
         
         if(operation == Operation.ANALYZE_ENCODER) {
+            
             // Histogram aktualisieren für den aktuellen Block
             byte[] buffer = block.array();
             int offset = 0;
@@ -76,6 +68,7 @@ public class HuffmanCodec extends DataCodecRaw {
     @Override
     public void end() throws IOException {
         if(operation == Operation.ANALYZE_ENCODER) {
+            
             /*
              *  Nach der Encoder-Analyse den entsprechenden Huffman Baum aus dem 
              *  ermittelten Histogram erstellen
@@ -95,51 +88,44 @@ public class HuffmanCodec extends DataCodecRaw {
         return op == Operation.ENCODE;
     }
 
+    /**
+     * 
+     */
     @Override
     public void decode(DataBlock block, IDataListener listener) throws IOException {
-        if(huffmanTree == null) {
-            throw new IllegalStateException("Huffmann-Tree nicht initialisiert.");
-        }
         
-        // Puffer vorbereiten
+        // Ausgabepuffer vorbereiten
         if(block.data == null) {
             block.data = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
         }
-        DataBlock inBlock = new DataBlock();
-        inBlock.data = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
         
         int symbol;
         
-        /*
-         * Lädt, dekodiert und sendet Pixelblöcke an Listener  
-         */
-        while(resource.position() < resource.length()) {
-            
-            // Block von Resource laden
-            super.decode(inBlock, listener);
-
-            // BitStream erstellen
-            BitStream stream = new BitStream(inBlock);
+        // BitStream erstellen
+        BitStream stream = new BitStream(resource.getBufferedInput());
         
-            // Bits dekodieren
-            while((symbol = huffmanTree.decodeBits(stream)) != -1) {
-                
-                // Symbol speichern
-                block.data.put((byte)symbol);
+        // Kodierten Baum einlesen und erstellen
+        huffmanTree = new HuffmanTree();
+        huffmanTree.buildFromResource(stream);
+        
+        // Lädt, dekodiert und sendet Pixelblöcke an Listener  
+        while((symbol = huffmanTree.decodeBits(stream)) != -1) {
 
-                // Wenn Blockgröße erreicht an Listener senden
-                if(block.data.capacity() == block.data.position()) {
-                    
-                    dispatchEvent(  IDataListener.Event.DATA_BLOCK_DECODED, 
-                                    listener, 
-                                    block);
-                    
-                    block.data.clear();
-                }
+            // Symbol speichern
+            block.data.put((byte)symbol);
+
+            // Wenn Blockgröße erreicht an Listener senden
+            if(block.data.capacity() == block.data.position()) {
+
+                dispatchData(   IDataListener.Event.DATA_BLOCK_DECODED, 
+                                listener, 
+                                block);    
             }
-            
-            inBlock.data.clear();
         }
+        
+        dispatchData(   IDataListener.Event.DATA_BLOCK_DECODED, 
+                        listener, 
+                        block);     
     }
 
     /*

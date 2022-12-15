@@ -13,8 +13,6 @@ import java.nio.channels.Channels;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -133,6 +131,16 @@ public class DataResource implements IDataResource,
         }
         return 0;
     }
+    
+        
+    /**
+     *  
+     */
+    @Override
+    public DataInputStream getBufferedInput() {
+        checkState();
+        return new DataInputStream(Channels.newInputStream(binaryFile.getChannel()));
+    }
 
     /**
      * 
@@ -182,18 +190,6 @@ public class DataResource implements IDataResource,
         ByteBuffer nb = ByteBuffer.allocate(length);
         read(offset, nb);
         return nb;
-    }
-
-    /**
-     * 
-     */
-    @Override
-    public byte readByte(){
-        try {
-            return binaryFile.readByte();
-        } catch (IOException ex) {
-            return -1;
-        }
     }
     
     /**

@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
  *
  * @author pg
  */
-public class DataBlock implements IStreamable {
+public class DataBlock {
     
     // Enthaltene Daten im Block
     public ByteBuffer data;
@@ -39,13 +39,5 @@ public class DataBlock implements IStreamable {
      */
     public byte[] array() {
         return data.array();
-    }
-
-    /**
-     * Gibt nächstes Byte im Puffer zurück
-     */
-    @Override
-    public byte readByte() {
-        return data.get();
     }
 }

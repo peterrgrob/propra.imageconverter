@@ -48,6 +48,14 @@ public class ChecksumPropra extends Checksum {
     }
     
     /**
+     * 
+     */
+    public void update(byte b) {
+        currAi = (++currIndex + currAi + (b & 0xFF)) % X;
+        currBi = (currBi + currAi) % X; 
+    }
+    
+    /**
      *
      */
     @Override
