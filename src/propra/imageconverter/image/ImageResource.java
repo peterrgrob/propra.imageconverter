@@ -1,14 +1,12 @@
 package propra.imageconverter.image;
 
 import java.io.IOException;
-import java.nio.channels.Channels;
 import propra.imageconverter.checksum.Checksum;
 import propra.imageconverter.data.DataBlock;
 import propra.imageconverter.data.DataCodecRaw;
 import propra.imageconverter.data.DataFormat.Encoding;
 import propra.imageconverter.data.DataFormat.IOMode;
 import propra.imageconverter.data.DataFormat.Operation;
-import propra.imageconverter.data.DataInputStream;
 import propra.imageconverter.data.DataResource;
 import propra.imageconverter.data.IDataCodec;
 import propra.imageconverter.data.IDataListener;
@@ -21,7 +19,7 @@ public abstract class ImageResource extends DataResource
                                     implements IDataListener {
     
     protected int fileHeaderSize;   
-    protected ImageMeta header;
+    protected ImageHeader header;
     protected ColorFormat colorFormat;
     protected IDataCodec inCodec;
     protected ImageResource transcodedImage;
@@ -54,7 +52,7 @@ public abstract class ImageResource extends DataResource
     /**
      *
      */
-    public ImageMeta getHeader() {
+    public ImageHeader getHeader() {
         return header;
     }
     
@@ -75,27 +73,27 @@ public abstract class ImageResource extends DataResource
     /**
      * 
      */
-    public void setHeader(ImageMeta header) {
-        this.header = new ImageMeta(header);
+    public void setHeader(ImageHeader header) {
+        this.header = new ImageHeader(header);
         inCodec = createImageCodec(header);
     }
     
     /**
      * 
      */
-    abstract public ImageMeta readHeader() throws IOException;
+    abstract public ImageHeader readHeader() throws IOException;
     
     /**
      * 
      */
-    public void writeHeader(ImageMeta srcHeader) throws IOException {
+    public void writeHeader(ImageHeader srcHeader) throws IOException {
         setHeader(srcHeader);
     }
     
     /**
      * 
      */
-    protected IDataCodec createImageCodec(ImageMeta header) {
+    protected IDataCodec createImageCodec(ImageHeader header) {
         if(header != null) {
             switch(header.colorFormat().encoding()) {
                 case NONE -> {
@@ -152,16 +150,16 @@ public abstract class ImageResource extends DataResource
         // Bildkopf einlesen und mit neuem Format in Ausgabedatei schreiben
         readHeader();
         
-        ImageMeta outHeader = new ImageMeta(header);
+        ImageHeader outHeader = new ImageHeader(header);
         outHeader.colorFormat().encoding(outEncoding);    
         transcodedImage.writeHeader(outHeader);
         
         // Konvertierung vorbereiten
         if(checksum != null) {
-            checksum.begin();
+            checksum.reset();
         }
         if(transcodedChecksum != null) {
-            transcodedChecksum.begin();
+            transcodedChecksum.reset();
         }
         
         // Bild analysieren
@@ -177,12 +175,6 @@ public abstract class ImageResource extends DataResource
         // Konvertierung abschließen
         inCodec.end();
         transcodedImage.getCodec().end();
-        if(checksum != null) {
-            checksum.end();
-        }
-        if(transcodedChecksum != null) {
-            transcodedChecksum.end();
-        }
         
         //  Falls nötig Header mit Prüfsumme, oder Länge des komprimierten Datensegements 
         //  aktualisieren

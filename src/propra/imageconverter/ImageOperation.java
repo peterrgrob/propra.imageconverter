@@ -81,7 +81,7 @@ public class ImageOperation implements AutoCloseable{
         String stateString = "";
 
         if(inImage != null) {
-            ImageMeta header = inImage.getHeader();
+            ImageHeader header = inImage.getHeader();
             stateString = "\nBildinfo: " + header.width();
             stateString = stateString.concat("x" + header.height());
             stateString = stateString.concat("x" + header.pixelSize());

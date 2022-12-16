@@ -51,23 +51,18 @@ public abstract class Checksum {
      * @return
      */
     public long check(ByteBuffer buffer) {
-        begin();
+        reset();
         update(buffer);
-        end();
+        getValue();
         return getValue();
     }
     
     /**
      *
      */
-    public void begin() {
+    public void reset() {
         value = 0;
     }
-    
-    /**
-     *
-     */
-    public abstract void end();
     
     /**
      * Aktualisiert die aktuelle Prüfsumme mit Bytes 

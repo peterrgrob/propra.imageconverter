@@ -46,7 +46,7 @@ public class ImageResourceProPra extends ImageResource {
      * 
      */
     @Override
-    public ImageMeta readHeader() throws IOException {
+    public ImageHeader readHeader() throws IOException {
         if(binaryFile == null) {
             throw new IllegalArgumentException();
         }
@@ -70,7 +70,7 @@ public class ImageResourceProPra extends ImageResource {
         }
         
         // Headerfelder in allgemeinen Header konvertieren
-        ImageMeta newHeader = new ImageMeta();
+        ImageHeader newHeader = new ImageHeader();
         newHeader.width(bytes.getShort(PROPRA_HEADER_OFFSET_WIDTH));
         newHeader.height(bytes.getShort(PROPRA_HEADER_OFFSET_HEIGHT));
         newHeader.pixelSize((int)bytes.get(PROPRA_HEADER_OFFSET_BPP) >> 3); 
@@ -118,7 +118,7 @@ public class ImageResourceProPra extends ImageResource {
      * 
      */
     @Override
-    public void writeHeader(ImageMeta srcHeader) throws IOException {
+    public void writeHeader(ImageHeader srcHeader) throws IOException {
         if(srcHeader.isValid() == false) {
             throw new IllegalArgumentException();
         }

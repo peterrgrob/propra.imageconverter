@@ -18,7 +18,7 @@ public class ChecksumPropra extends Checksum {
      * 
      */
     @Override
-    public void begin() {
+    public void reset() {
         currAi = 0;
         currBi = 1;
         currIndex = 0;
@@ -50,6 +50,7 @@ public class ChecksumPropra extends Checksum {
     /**
      * 
      */
+    @Override
     public void update(byte b) {
         currAi = (++currIndex + currAi + (b & 0xFF)) % X;
         currBi = (currBi + currAi) % X; 
@@ -59,8 +60,9 @@ public class ChecksumPropra extends Checksum {
      *
      */
     @Override
-    public void end() {
+    public long getValue() {
         value = (currAi << 16) + currBi;
+        return value;
     }
 
     /**

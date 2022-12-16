@@ -4,7 +4,7 @@ package propra.imageconverter.image;
  * Klasse für einen allgemeinen Bildkopf
  * 
  */
-public class ImageMeta {
+public class ImageHeader {
     
     // Bildattribute
     private int width;
@@ -17,13 +17,13 @@ public class ImageMeta {
     /**
      * 
      */
-    public ImageMeta() {
+    public ImageHeader() {
     }
 
     /**
      *
      */
-    public ImageMeta(ImageMeta src) {
+    public ImageHeader(ImageHeader src) {
         if (src == null) {
             throw new IllegalArgumentException();
         }

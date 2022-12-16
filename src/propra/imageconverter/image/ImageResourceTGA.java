@@ -42,7 +42,7 @@ public class ImageResourceTGA extends ImageResource {
      * 
      */
     @Override
-    public ImageMeta readHeader() throws IOException {
+    public ImageHeader readHeader() throws IOException {
         
         // DataBuffer für Header erstellen       
         ByteBuffer bytes = ByteBuffer.allocate(fileHeaderSize);
@@ -52,7 +52,7 @@ public class ImageResourceTGA extends ImageResource {
         read(bytes);
         
         // Headerfelder konvertieren
-        ImageMeta newHeader = new ImageMeta();
+        ImageHeader newHeader = new ImageHeader();
         newHeader.width(bytes.getShort(TGA_HEADER_OFFSET_WIDTH));
         newHeader.height(bytes.getShort(TGA_HEADER_OFFSET_HEIGHT));
         newHeader.pixelSize(bytes.get(TGA_HEADER_OFFSET_BPP) >> 3); 
@@ -88,7 +88,7 @@ public class ImageResourceTGA extends ImageResource {
      * 
      */
     @Override
-    public void writeHeader(ImageMeta srcHeader) throws IOException {
+    public void writeHeader(ImageHeader srcHeader) throws IOException {
         if(srcHeader.isValid() == false) {
             throw new IllegalArgumentException();
         }
