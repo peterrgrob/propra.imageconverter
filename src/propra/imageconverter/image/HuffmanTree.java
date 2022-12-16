@@ -3,7 +3,8 @@ package propra.imageconverter.image;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.PriorityQueue;
-import propra.imageconverter.data.BitStream;
+import propra.imageconverter.data.BitCode;
+import propra.imageconverter.data.BitInputStream;
 
 /**
  *  Implementiert einen binären Baum zur Erstellung und Abbildung der Huffmancodes 
@@ -14,70 +15,19 @@ public class HuffmanTree {
     //  Wurzelknoten
     private Node rootNode;
     
+    // Maximale Anzahl möglicher Blätter
+    private final int maxLeafs = 256;
+    
     /*
      *  Hashmap aller Knoten mit dem Symbol als Schlüssel zur schnellen
      *  Zuordnung von Symbolen zu Codes
      */
     private HashMap<Byte, Node> nodeMap;
     
-    
-    /**
-     *  Implementiert den Code für ein Symbol
-     */
-    public static class Code implements Comparable<Code> {
-        
-        // Bits des Codes
-        private int code;
-        
-        // Länge des Codes in Bit
-        private int length;
-
-        /**
-         *  Constructor
-         */
-        public Code(int code, 
-                    int length) {
-            this.code = code;
-            this.length = length;
-        }
-        
-        public Code(Code src) {
-            this.code = src.code;
-            this.length = src.length;
-        }
-
-        /**
-         * Bit hinzufügen
-         */
-        public Code addBit(boolean bit) {
-            code <<= 1;
-            code |= (bit == true) ? 1 : 0;
-            length++;
-            return this;
-        }
-        
-        /**
-         *  Getter/Setter
-         */
-        public int getCode() {
-            return code;
-        }
-
-        public int getLength() {
-            return length;
-        }
-        
-        @Override
-        public int compareTo(Code o) {
-            return (code - o.code) + 
-                   (length - o.length); 
-        }       
-    }
-    
     /**
      *  Klasse implementiert einen Knoten des Huffman Baumes
      */    
-    private static class Node implements Comparable<Node>{
+    private class Node implements Comparable<Node>{
         
         /**
          *  Knoten
@@ -94,7 +44,7 @@ public class HuffmanTree {
         /*
          *  Codewort des Knotens  
          */
-        private Code code;
+        private BitCode code;
         
         /**
          *  Konstruktoren
@@ -121,25 +71,26 @@ public class HuffmanTree {
         /**
          *  Berechnet rekursiv die Codes je Symbol nach Erstellung des Baumes
          */
-        public void buildCode(Code c) {
+        public void generateCode(BitCode c) {
             
             // Code speichern
-            code = new Code(c);
+            code = new BitCode(c);
             
             // Innerer Knoten?
             if(leftNode != null 
             && rightNode != null) {
                 
                 //  Linken und rechten Teilbaum besuchen
-                leftNode.buildCode(c.addBit(false));
-                rightNode.buildCode(c.addBit(true));
+                leftNode.generateCode(c.addBit(false));
+                rightNode.generateCode(c.addBit(true));
             }
         }
         
         /**
          *  Baum aus der ProPra Kodierung rekursiv wiederherstellen
          */
-        public void buildFromResource(BitStream resource) throws IOException {
+        public void buildFromResource(BitInputStream resource) throws IOException {
+            
             /*
              * Nächstes Bit gibt an um welchen Knotentyp es sich handelt
              */
@@ -155,6 +106,14 @@ public class HuffmanTree {
                 
                // Blatt erreicht, daher Symbol für das Blatt einlesen
                symbol = resource.readByte() & 0xFF;
+               
+               // Blatt vermerken
+               nodeMap.put((byte)symbol, this);
+               
+               // Fehlerbehandlung bei möglicherweise korrupten Daten
+               if(nodeMap.size() > maxLeafs) {
+                   throw new IOException("Anzahl Blätter zu groß, Datei möglicherweise ungültig.");
+               }
             }
         }
         
@@ -162,7 +121,7 @@ public class HuffmanTree {
          *  Sucht Symbol zu den Bits im Stream, gibt -1 bei EOF zurück, 
          *  ansonsten Symbol
          */
-        public int decodeBits(BitStream stream) throws IOException {
+        public int decodeSymbol(BitInputStream stream) throws IOException {
             
             // Symbol erreicht?
             if( leftNode == null
@@ -173,10 +132,10 @@ public class HuffmanTree {
             // Nächstes Bit lesen und rekursiv dem Pfad folgen
             switch(stream.readBit()) {
                 case 1 -> {
-                    return rightNode.decodeBits(stream);
+                    return rightNode.decodeSymbol(stream);
                 }
                 case 0 -> {
-                    return leftNode.decodeBits(stream);
+                    return leftNode.decodeSymbol(stream);
                 }
                 case -1 -> {
                     return -1;
@@ -202,7 +161,7 @@ public class HuffmanTree {
             return frequency;
         }
 
-        public Code getCode() {
+        public BitCode getCode() {
             return code;
         }
         
@@ -238,14 +197,14 @@ public class HuffmanTree {
      *  Rekonstruiert rekursiv einen Huffmantree aus der Resource nach 
      *  Propra-Konstruktionsvorschrift aus einem Code mit Preorder-Durchlauf
      */
-    public void buildFromResource(BitStream resource) throws IOException {
+    public void buildFromResource(BitInputStream resource) throws IOException {
         if(resource == null) {
             throw new IllegalArgumentException();
         }
         
         rootNode = new Node((byte)0, 0);
         rootNode.buildFromResource(resource);
-        rootNode.buildCode(new Code(0,0));
+        rootNode.generateCode(new BitCode(0,0));
     }
     
     /*
@@ -293,7 +252,7 @@ public class HuffmanTree {
         rootNode = q.remove();
         
         // Codes berechnen
-        rootNode.buildCode(new Code(0, 0));
+        rootNode.generateCode(new BitCode(0, 0));
         
         System.out.print(toString());
     }
@@ -301,8 +260,8 @@ public class HuffmanTree {
     /**
      *  Dekodiert Byte von Stream, gibt Symbol oder -1 bei EOF zurück
      */
-    public int decodeBits(BitStream stream) throws IOException {
-        return rootNode.decodeBits(stream);
+    public int decodeSymbol(BitInputStream stream) throws IOException {
+        return rootNode.decodeSymbol(stream);
     }
     
     /**

@@ -18,10 +18,19 @@ import propra.imageconverter.data.IDataListener;
 public abstract class ImageResource extends DataResource 
                                     implements IDataListener {
     
-    protected int fileHeaderSize;   
+    // Größe des Bildheaders in der Datei
+    protected int fileHeaderSize; 
+    
+    // Logischer Bildheader
     protected ImageHeader header;
+    
+    // Farbformat
     protected ColorFormat colorFormat;
+    
+    // Zugeordneter Codec zum lesen/schreiben der Bilddaten
     protected IDataCodec inCodec;
+    
+    // Konvertiertes Bild
     protected ImageResource transcodedImage;
 
     /**
@@ -32,14 +41,6 @@ public abstract class ImageResource extends DataResource
                             boolean write) throws IOException {
         super(file, mode, write);
         colorFormat = new ColorFormat();
-    }
-    
-    /**
-     *
-     */
-    @Override
-    public boolean isValid() {
-        return super.isValid();
     }
     
     /**
@@ -146,7 +147,6 @@ public abstract class ImageResource extends DataResource
         }        
         Checksum transcodedChecksum = transcodedImage.getChecksum();
         
-        
         // Bildkopf einlesen und mit neuem Format in Ausgabedatei schreiben
         readHeader();
         
@@ -154,25 +154,21 @@ public abstract class ImageResource extends DataResource
         outHeader.colorFormat().encoding(outEncoding);    
         transcodedImage.writeHeader(outHeader);
         
-        // Konvertierung vorbereiten
-        if(checksum != null) {
-            checksum.reset();
-        }
-        if(transcodedChecksum != null) {
-            transcodedChecksum.reset();
-        }
+        // Prüfumme initialisieren
+        if(checksum != null) {checksum.reset();}
+        if(transcodedChecksum != null) {transcodedChecksum.reset();}
         
         // Bild analysieren
         analyze();
         
-        // Bilddaten verarbeiten
+        // Bildverarbeitung initialisieren
         inCodec.begin(Operation.DECODE);
         transcodedImage.getCodec().begin(Operation.ENCODE);
         
         // Dekodierung starten
         inCodec.decode(new DataBlock(), this);
         
-        // Konvertierung abschließen
+        // Bildverarbeitung abschließen
         inCodec.end();
         transcodedImage.getCodec().end();
         
@@ -190,6 +186,7 @@ public abstract class ImageResource extends DataResource
      *  Bild in Blöcken durch Codecs analysieren
      */
     private void analyze() throws IOException {
+        
         if( inCodec.analyzeNecessary(Operation.DECODE)
         ||  transcodedImage.getCodec().analyzeNecessary(Operation.ENCODE)) {
             
@@ -222,6 +219,7 @@ public abstract class ImageResource extends DataResource
     public void onData( Event event, 
                         IDataCodec caller, 
                         DataBlock block) throws IOException {
+        
         switch(event) {
             case DATA_BLOCK_DECODED -> {
                 transcodedImage.getCodec().encode(  block, 

@@ -5,22 +5,21 @@ import java.io.IOException;
 /**
  *
  */
-public class BitStream {
+public class BitInputStream {
     
     // Zugeordneter Stream von dem Bits gelesen werden
     private final DataInputStream inStream;
     
-    // Aktuelles Byte
+    // Aktuelles Lese-Byte
     private byte value;
     
     // Aktueller Bit-Index
     private byte bitIndex;
-
     
     /**
      *  Konstruktor
      */
-    public BitStream(   DataInputStream inStream) {
+    public BitInputStream(   DataInputStream inStream) {
         this.inStream = inStream;
         bitIndex = 8;
     }
@@ -64,4 +63,6 @@ public class BitStream {
         
         return b;
     }
+    
+    
 }

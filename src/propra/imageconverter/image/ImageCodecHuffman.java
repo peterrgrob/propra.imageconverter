@@ -3,7 +3,7 @@ package propra.imageconverter.image;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import propra.imageconverter.data.BitStream;
+import propra.imageconverter.data.BitInputStream;
 import propra.imageconverter.data.DataBlock;
 import static propra.imageconverter.data.DataCodecRaw.DEFAULT_BLOCK_SIZE;
 import propra.imageconverter.data.DataFormat.Operation;
@@ -92,7 +92,8 @@ public class ImageCodecHuffman extends ImageCodecRaw {
      * 
      */
     @Override
-    public void decode(DataBlock block, IDataListener listener) throws IOException {
+    public void decode( DataBlock block, 
+                        IDataListener listener) throws IOException {
         
         // Ausgabepuffer vorbereiten
         if(block.data == null) {
@@ -102,14 +103,14 @@ public class ImageCodecHuffman extends ImageCodecRaw {
         int symbol;
         
         // BitStream erstellen
-        BitStream stream = new BitStream(resource.getCheckedInputStream());
+        BitInputStream stream = new BitInputStream(resource.getCheckedInputStream());
         
         // Kodierten Baum einlesen und erstellen
         huffmanTree = new HuffmanTree();
         huffmanTree.buildFromResource(stream);
         
         // Lädt, dekodiert und sendet Pixelblöcke an Listener  
-        while((symbol = huffmanTree.decodeBits(stream)) != -1) {
+        while((symbol = huffmanTree.decodeSymbol(stream)) != -1) {
 
             // Symbol speichern
             block.data.put((byte)symbol);
@@ -123,6 +124,8 @@ public class ImageCodecHuffman extends ImageCodecRaw {
             }
         }
         
+        // Restliche Daten im Puffer übertragen
+        block.lastBlock = true;
         dispatchData(   IDataListener.Event.DATA_BLOCK_DECODED, 
                         listener, 
                         block);     
@@ -132,12 +135,24 @@ public class ImageCodecHuffman extends ImageCodecRaw {
      * 
      */
     @Override
-    public void encode(DataBlock block, IDataListener listener) throws IOException {
+    public void encode( DataBlock block, 
+                        IDataListener listener) throws IOException {
         if(huffmanTree == null) {
             throw new IllegalStateException("Huffmann-Tree nicht initialisiert.");
         }
         
+        ByteBuffer buff = block.data;
         
+        /**
+         *  Symbole im Puffer iterieren, per Huffmantree zu Bitcode umsetzen und 
+         *  diesen in der Resource speichern
+         */
+        while(buff.position() < buff.limit()) {
+            
+            byte symbol = buff.get();
+            
+            
+        }
     }
     
     /**
