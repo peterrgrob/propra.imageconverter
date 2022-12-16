@@ -24,7 +24,6 @@ public abstract class ImageResource extends DataResource
     protected ImageMeta header;
     protected ColorFormat colorFormat;
     protected IDataCodec inCodec;
-    protected Checksum checksum;
     protected ImageResource transcodedImage;
 
     /**
@@ -91,15 +90,6 @@ public abstract class ImageResource extends DataResource
      */
     public void writeHeader(ImageMeta srcHeader) throws IOException {
         setHeader(srcHeader);
-    }
-    
-    /**
-     *  
-     */
-    @Override
-    public DataInputStream getBufferedInput() {
-        checkState();
-        return new DataInputStream(Channels.newInputStream(binaryFile.getChannel()), checksum);
     }
     
     /**

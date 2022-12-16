@@ -13,6 +13,7 @@ import java.nio.channels.Channels;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import propra.imageconverter.checksum.Checksum;
 
 /**
  *
@@ -27,7 +28,8 @@ public class DataResource implements IDataResource,
     protected BufferedInputStream inStream;
     protected BufferedWriter txtWriter;
     protected BufferedReader txtReader;   
-
+    protected Checksum checksum;
+    
     /**
      * 
      */
@@ -137,9 +139,9 @@ public class DataResource implements IDataResource,
      *  
      */
     @Override
-    public DataInputStream getBufferedInput() {
+    public DataInputStream getCheckedInputStream() {
         checkState();
-        return new DataInputStream(Channels.newInputStream(binaryFile.getChannel()));
+        return new DataInputStream(Channels.newInputStream(binaryFile.getChannel()), checksum);
     }
 
     /**

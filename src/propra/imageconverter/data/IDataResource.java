@@ -33,7 +33,7 @@ public interface IDataResource extends  Closeable {
     /**
      *  
      */
-    public DataInputStream getBufferedInput();
+    public DataInputStream getCheckedInputStream();
     
     /**
      * 

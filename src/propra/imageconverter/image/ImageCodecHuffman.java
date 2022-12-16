@@ -102,7 +102,7 @@ public class ImageCodecHuffman extends ImageCodecRaw {
         int symbol;
         
         // BitStream erstellen
-        BitStream stream = new BitStream(resource.getBufferedInput());
+        BitStream stream = new BitStream(resource.getCheckedInputStream());
         
         // Kodierten Baum einlesen und erstellen
         huffmanTree = new HuffmanTree();
