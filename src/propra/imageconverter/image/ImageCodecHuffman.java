@@ -3,10 +3,13 @@ package propra.imageconverter.image;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import propra.imageconverter.data.BitCode;
 import propra.imageconverter.data.BitInputStream;
+import propra.imageconverter.data.BitOutputStream;
 import propra.imageconverter.data.DataBlock;
 import static propra.imageconverter.data.DataCodecRaw.DEFAULT_BLOCK_SIZE;
 import propra.imageconverter.data.DataFormat.Operation;
+import propra.imageconverter.data.DataOutputStream;
 import propra.imageconverter.data.IDataListener;
 
 /**
@@ -142,6 +145,10 @@ public class ImageCodecHuffman extends ImageCodecRaw {
         }
         
         ByteBuffer buff = block.data;
+                
+        // BitStream erstellen
+        DataOutputStream os = resource.getCheckedOutputStream();
+        BitOutputStream stream = new BitOutputStream(os);
         
         /**
          *  Symbole im Puffer iterieren, per Huffmantree zu Bitcode umsetzen und 
@@ -149,10 +156,11 @@ public class ImageCodecHuffman extends ImageCodecRaw {
          */
         while(buff.position() < buff.limit()) {
             
-            byte symbol = buff.get();
-            
-            
+            BitCode code = huffmanTree.encodeSymbol(buff.get());
+            stream.write(code);
         }
+        
+        os.flush();
     }
     
     /**

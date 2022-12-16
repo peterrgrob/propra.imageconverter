@@ -36,6 +36,11 @@ public interface IDataResource extends  Closeable {
     public DataInputStream getCheckedInputStream();
     
     /**
+     *  
+     */
+    public DataOutputStream getCheckedOutputStream();
+    
+    /**
      * 
      * @param buffer
      * @throws IOException 

@@ -22,7 +22,7 @@ public class HuffmanTree {
      *  Hashmap aller Knoten mit dem Symbol als Schlüssel zur schnellen
      *  Zuordnung von Symbolen zu Codes
      */
-    private HashMap<Byte, Node> nodeMap;
+    private HashMap<Integer, Node> nodeMap;
     
     /**
      *  Klasse implementiert einen Knoten des Huffman Baumes
@@ -52,13 +52,13 @@ public class HuffmanTree {
         public Node() {
         }
         
-        public Node(byte s, 
+        public Node(int s, 
                     int frequency) {
             this.symbol = s;
             this.frequency = frequency;
         }
         
-        public Node(byte s,
+        public Node(int s,
                     int frequency,
                     Node leftNode,
                     Node rightNode) {
@@ -74,15 +74,15 @@ public class HuffmanTree {
         public void generateCode(BitCode c) {
             
             // Code speichern
-            code = new BitCode(c);
+            code = c;
             
             // Innerer Knoten?
             if(leftNode != null 
             && rightNode != null) {
                 
                 //  Linken und rechten Teilbaum besuchen
-                leftNode.generateCode(c.addBit(false));
-                rightNode.generateCode(c.addBit(true));
+                leftNode.generateCode(new BitCode(c).addBit(false));
+                rightNode.generateCode(new BitCode(c).addBit(true));
             }
         }
         
@@ -108,7 +108,7 @@ public class HuffmanTree {
                symbol = resource.readByte() & 0xFF;
                
                // Blatt vermerken
-               nodeMap.put((byte)symbol, this);
+               nodeMap.put(symbol, this);
                
                // Fehlerbehandlung bei möglicherweise korrupten Daten
                if(nodeMap.size() > maxLeafs) {
@@ -202,6 +202,7 @@ public class HuffmanTree {
             throw new IllegalArgumentException();
         }
         
+        nodeMap = new HashMap<>();
         rootNode = new Node((byte)0, 0);
         rootNode.buildFromResource(resource);
         rootNode.generateCode(new BitCode(0,0));
@@ -222,12 +223,12 @@ public class HuffmanTree {
          */ 
         for(int s=0; s<symbols.length; s++) {
             if(symbols[s] > 0) {
-                Node n = new Node((byte)s, symbols[s]);
-                q.add(n);
-                nodeMap.put((byte)s, n);
+                Node n = new Node(s, symbols[s]);
+                q.offer(n);
+                nodeMap.put(s, n);
             }
         }
-        
+
         /*
          *  Baum iterativ konstruieren bis nur noch ein Knoten (Wurzel) in der 
          *  Queue enthalten ist.
@@ -235,17 +236,17 @@ public class HuffmanTree {
         while(q.size() > 1) {
                     
             /*
-             *  Zwei häufigste Knoten zu einem Knoten verbinden
-             *  und an das Ende der Queue einfügen
+             *  Zwei niedrigste Knoten zu einem Knoten verbinden
+             *  und in der Queue einfügen
              */
-            Node left = q.remove();
-            Node right = q.remove();
+            Node left = q.poll();
+            Node right = q.poll();
             Node parentNode = new Node( (byte)0, 
                                         left.getFrequency() + right.getFrequency(),
                                         left,
                                         right);
                     
-            q.add(parentNode);
+            q.offer(parentNode);
         }
         
         // Wurzel speichern
@@ -262,6 +263,14 @@ public class HuffmanTree {
      */
     public int decodeSymbol(BitInputStream stream) throws IOException {
         return rootNode.decodeSymbol(stream);
+    }
+    
+    /**
+     *  Gibt den Bitcode für ein Symbol zurück
+     */
+    public BitCode encodeSymbol(int symbol) {
+        Node n = nodeMap.get(symbol);
+        return n != null ? n.getCode() : null;
     }
     
     /**

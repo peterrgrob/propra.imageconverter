@@ -143,6 +143,15 @@ public class DataResource implements IDataResource,
         checkState();
         return new DataInputStream(Channels.newInputStream(binaryFile.getChannel()), checksum);
     }
+    
+    /**
+     *  
+     */
+    @Override
+    public DataOutputStream getCheckedOutputStream() {
+        checkState();
+        return new DataOutputStream(Channels.newOutputStream(binaryFile.getChannel()), checksum);       
+    }
 
     /**
      * 

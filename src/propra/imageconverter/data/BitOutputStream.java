@@ -21,24 +21,34 @@ public class BitOutputStream {
      */
     public BitOutputStream(DataOutputStream stream) {
         this.stream = stream;
-        value = 8;
+        value = 0;
         bitIndex = 0;
     }
     
     /**
      *  Schreibt ein Bit in den Stream
      */
-    public void write(int bit) {
-        if(bitIndex > 7) {
-            
+    public void write(int bit) throws IOException {
+        
+        value |= (bit & 1) << (7 - bitIndex);
+        
+        if(bitIndex >= 7) {
+            stream.write(value);
+            value = 0;
+            bitIndex = 0;
         }
+        
+        bitIndex++;
     }
     
     /**
      *  Schreibt einen BitCode in den Stream
      */
-    public void write(BitCode code) {
-        
+    public void write(BitCode code) throws IOException {  
         int c = code.getCode();
+        
+        for(int i=code.getLength()-1; i>=0; i--) {
+            write((c >>> i) & 1);
+        }
     }
 }
