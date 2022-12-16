@@ -47,6 +47,22 @@ public class ChecksumPropra extends Checksum {
         return buffer;
     }
     
+    @Override
+    public void update(byte[] b, int offset, int len) {
+        if (b == null) {
+            throw new IllegalArgumentException();
+        }
+        
+        int dindex = 0;
+        
+        for(int i=1; i<=b.length; i++) {
+            currAi = (i + currIndex + currAi + (b[dindex++] & 0xFF)) % X;
+            currBi = (currBi + currAi) % X; 
+        }  
+        
+        currIndex += b.length;
+    }
+    
     /**
      * 
      */

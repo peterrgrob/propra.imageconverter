@@ -122,12 +122,14 @@ public class HuffmanTree {
          *  Berechnet rekursiv die Codes je Symbol nach Erstellung des Baumes
          */
         public void buildCode(Code c) {
+            
             // Code speichern
             code = new Code(c);
             
             // Innerer Knoten?
             if(leftNode != null 
             && rightNode != null) {
+                
                 //  Linken und rechten Teilbaum besuchen
                 leftNode.buildCode(c.addBit(false));
                 rightNode.buildCode(c.addBit(true));
@@ -148,6 +150,7 @@ public class HuffmanTree {
                leftNode.buildFromResource(resource);
                rightNode = new Node();
                rightNode.buildFromResource(resource); 
+               
             } else {
                 
                // Blatt erreicht, daher Symbol für das Blatt einlesen
@@ -250,6 +253,7 @@ public class HuffmanTree {
      *  durch Verwendung einer PriorityQueue
      */
     public void buildFromHistogram(int[] symbols) {
+        
         PriorityQueue<Node> q = new PriorityQueue<>();
         nodeMap = new HashMap<>();
         

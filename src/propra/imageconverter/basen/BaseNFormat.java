@@ -1,7 +1,6 @@
 package propra.imageconverter.basen;
 
 import propra.imageconverter.data.DataFormat;
-import propra.imageconverter.data.DataFormat;
 
 /**
  * BaseN Datenformat

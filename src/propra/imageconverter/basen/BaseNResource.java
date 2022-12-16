@@ -71,14 +71,5 @@ public class BaseNResource extends DataResource implements IDataListener {
     public void onData( Event event, 
                         IDataCodec caller, 
                         DataBlock block) throws IOException {
-        switch(event) {
-            case DATA_BLOCK_DECODED -> {
-                
-            }
-            case DATA_IO_READ -> {
-                
-            }
-                
-        }
     }
 }
