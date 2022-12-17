@@ -28,6 +28,11 @@ public class DataResource implements IDataResource,
     protected BufferedInputStream inStream;
     protected BufferedWriter txtWriter;
     protected BufferedReader txtReader;   
+    
+    // Zugeordneter Codec zum lesen/schreiben der Daten
+    protected IDataCodec inCodec;
+    
+    // Prüfsumme 
     protected Checksum checksum;
     
     /**

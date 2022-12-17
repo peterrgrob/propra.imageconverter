@@ -30,7 +30,7 @@ public class BitCode implements Comparable<BitCode> {
     */
    public BitCode addBit(boolean bit) {
        code <<= 1;
-       code |= (bit == true) ? 1 : 0;
+       code |= ((bit == true) ? 1 : 0);
        length++;
        return this;
    }
@@ -50,5 +50,10 @@ public class BitCode implements Comparable<BitCode> {
    public int compareTo(BitCode o) {
        return (code - o.code) + 
               (length - o.length); 
-   }       
+   }     
+
+    @Override
+    public String toString() {
+        return "BitCode{" + "code=" + Integer.toBinaryString(code) + ", length=" + length + '}';
+    }
 }

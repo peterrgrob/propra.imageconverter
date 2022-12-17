@@ -2,6 +2,7 @@ package propra.imageconverter.image;
 
 import java.io.IOException;
 import propra.imageconverter.checksum.Checksum;
+import propra.imageconverter.checksum.ChecksumPropra;
 import propra.imageconverter.data.DataBlock;
 import propra.imageconverter.data.DataCodecRaw;
 import propra.imageconverter.data.DataFormat.Encoding;
@@ -26,9 +27,6 @@ public abstract class ImageResource extends DataResource
     
     // Farbformat
     protected ColorFormat colorFormat;
-    
-    // Zugeordneter Codec zum lesen/schreiben der Bilddaten
-    protected IDataCodec inCodec;
     
     // Konvertiertes Bild
     protected ImageResource transcodedImage;
@@ -145,7 +143,6 @@ public abstract class ImageResource extends DataResource
         if(transcodedImage == null) {
             return null;
         }        
-        Checksum transcodedChecksum = transcodedImage.getChecksum();
         
         // Bildkopf einlesen und mit neuem Format in Ausgabedatei schreiben
         readHeader();
@@ -154,12 +151,15 @@ public abstract class ImageResource extends DataResource
         outHeader.colorFormat().encoding(outEncoding);    
         transcodedImage.writeHeader(outHeader);
         
-        // Prüfumme initialisieren
-        if(checksum != null) {checksum.reset();}
-        if(transcodedChecksum != null) {transcodedChecksum.reset();}
-        
         // Bild analysieren
         analyze();
+        
+        if(checksum != null) {
+            checksum.reset();
+        }
+        if(transcodedImage.getChecksum() != null) {
+            transcodedImage.getChecksum().reset();
+        }
         
         // Bildverarbeitung initialisieren
         inCodec.begin(Operation.DECODE);
@@ -172,9 +172,16 @@ public abstract class ImageResource extends DataResource
         inCodec.end();
         transcodedImage.getCodec().end();
         
+        if(checksum != null) {
+            header.checksum(checksum.getValue());
+        }
+        if(transcodedImage.getChecksum() != null) {
+            transcodedImage.getHeader().checksum(transcodedImage.getChecksum().getValue());
+        }
+        
         //  Falls nötig Header mit Prüfsumme, oder Länge des komprimierten Datensegements 
         //  aktualisieren
-        if( transcodedChecksum != null
+        if( transcodedImage.getChecksum() != null
         ||  transcodedImage.getHeader().colorFormat().encoding() != Encoding.NONE) {
             transcodedImage.writeHeader(transcodedImage.getHeader());
         }

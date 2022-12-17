@@ -72,6 +72,18 @@ public class ImageCodecHuffman extends ImageCodecRaw {
     public void end() throws IOException {
         if(operation == Operation.ANALYZE_ENCODER) {
             
+            /**
+             *  Histogram prüfen
+             */
+            int hCtr = 0;
+            for(int i:histogram) {
+                hCtr += i;
+            }  
+            if(hCtr != image.getHeader().imageSize()) {
+                //throw new IOException("Fehlerhafte Bilddaten (Histogram)");
+            }
+            System.out.println("Huffman Symbole (Ok): " + hCtr);
+            
             /*
              *  Nach der Encoder-Analyse den entsprechenden Huffman Baum aus dem 
              *  ermittelten Histogram erstellen
@@ -151,15 +163,24 @@ public class ImageCodecHuffman extends ImageCodecRaw {
         BitOutputStream stream = new BitOutputStream(os);
         
         /**
+         *   Baum als Bitfolge kodieren
+         */
+        huffmanTree.storeTree(stream);
+        
+        /**
          *  Symbole im Puffer iterieren, per Huffmantree zu Bitcode umsetzen und 
          *  diesen in der Resource speichern
          */
         while(buff.position() < buff.limit()) {
-            
-            BitCode code = huffmanTree.encodeSymbol(buff.get());
+            BitCode code = huffmanTree.encodeSymbol(buff.get() & 0xFF);
+            if(code == null) {
+                throw new IOException("Ungültiges Huffman Symbol");
+            }
             stream.write(code);
         }
         
+        stream.flush();
+        image.getHeader().encodedSize(stream.getByteCounter());
         os.flush();
     }
     

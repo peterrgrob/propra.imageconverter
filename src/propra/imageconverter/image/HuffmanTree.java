@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.PriorityQueue;
 import propra.imageconverter.data.BitCode;
 import propra.imageconverter.data.BitInputStream;
+import propra.imageconverter.data.BitOutputStream;
 
 /**
  *  Implementiert einen binären Baum zur Erstellung und Abbildung der Huffmancodes 
@@ -16,7 +17,7 @@ public class HuffmanTree {
     private Node rootNode;
     
     // Maximale Anzahl möglicher Blätter
-    private final int maxLeafs = 256;
+    private static final int maxLeafs = 256;
     
     /*
      *  Hashmap aller Knoten mit dem Symbol als Schlüssel zur schnellen
@@ -83,6 +84,8 @@ public class HuffmanTree {
                 //  Linken und rechten Teilbaum besuchen
                 leftNode.generateCode(new BitCode(c).addBit(false));
                 rightNode.generateCode(new BitCode(c).addBit(true));
+            } else {
+                System.out.print("\n Symbol: "+symbol + " " + code.toString());
             }
         }
         
@@ -114,6 +117,21 @@ public class HuffmanTree {
                if(nodeMap.size() > maxLeafs) {
                    throw new IOException("Anzahl Blätter zu groß, Datei möglicherweise ungültig.");
                }
+            }
+        }
+        
+        /**
+         *  
+         */
+        public void storeNode(BitOutputStream stream) throws IOException {
+            if( leftNode == null 
+            &&  rightNode == null) {
+                stream.write(1);
+                stream.writeByte(symbol);
+            } else {
+                stream.write(0);
+                leftNode.storeNode(stream);
+                rightNode.storeNode(stream);
             }
         }
         
@@ -173,14 +191,14 @@ public class HuffmanTree {
         public String toString() {
             if(leftNode == null 
             && rightNode == null) {
-                return "1" + symbol;
+                return " S:" + symbol + " F:" + frequency + " | ";
             } else {
-                String code = "0";
+                String code = "";
                 if(leftNode != null) {
-                    code += leftNode.toString();
+                    code += "L"+leftNode.toString();
                 }
                 if(rightNode != null) {
-                   code += rightNode.toString();
+                   code += "R"+rightNode.toString();
                 }    
                 return code;
             }
@@ -228,7 +246,7 @@ public class HuffmanTree {
                 nodeMap.put(s, n);
             }
         }
-
+        
         /*
          *  Baum iterativ konstruieren bis nur noch ein Knoten (Wurzel) in der 
          *  Queue enthalten ist.
@@ -256,6 +274,13 @@ public class HuffmanTree {
         rootNode.generateCode(new BitCode(0, 0));
         
         System.out.print(toString());
+    }
+    
+    /**
+     *  Baum als kodierte Bitfolge in Stream speichern
+     */
+    public void storeTree(BitOutputStream stream) throws IOException {
+        rootNode.storeNode(stream);
     }
     
     /**
