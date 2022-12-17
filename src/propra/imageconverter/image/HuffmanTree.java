@@ -17,7 +17,7 @@ public class HuffmanTree {
     private Node rootNode;
     
     // Maximale Anzahl möglicher Blätter
-    private static final int maxLeafs = 256;
+    private static final int MAX_LEAFS = 256;
     
     /*
      *  Hashmap aller Knoten mit dem Symbol als Schlüssel zur schnellen
@@ -84,6 +84,7 @@ public class HuffmanTree {
                 //  Linken und rechten Teilbaum besuchen
                 leftNode.generateCode(new BitCode(c).addBit(false));
                 rightNode.generateCode(new BitCode(c).addBit(true));
+                
             } else {
                 System.out.print("\n Symbol: "+symbol + " " + code.toString());
             }
@@ -114,7 +115,7 @@ public class HuffmanTree {
                nodeMap.put(symbol, this);
                
                // Fehlerbehandlung bei möglicherweise korrupten Daten
-               if(nodeMap.size() > maxLeafs) {
+               if(nodeMap.size() > MAX_LEAFS) {
                    throw new IOException("Anzahl Blätter zu groß, Datei möglicherweise ungültig.");
                }
             }
@@ -169,7 +170,11 @@ public class HuffmanTree {
          */
         @Override
         public int compareTo(Node o) {
-            return frequency - o.frequency;
+            int f = frequency - o.frequency;
+            if(f == 0) {
+                f = code.getLength() - o.code.getLength();
+            }
+            return f;
         }
         
         /**
@@ -189,19 +194,7 @@ public class HuffmanTree {
          */
         @Override
         public String toString() {
-            if(leftNode == null 
-            && rightNode == null) {
-                return " S:" + symbol + " F:" + frequency + " | ";
-            } else {
-                String code = "";
-                if(leftNode != null) {
-                    code += "L"+leftNode.toString();
-                }
-                if(rightNode != null) {
-                   code += "R"+rightNode.toString();
-                }    
-                return code;
-            }
+            return "";
         }
     }
 
@@ -257,8 +250,8 @@ public class HuffmanTree {
              *  Zwei niedrigste Knoten zu einem Knoten verbinden
              *  und in der Queue einfügen
              */
-            Node left = q.poll();
             Node right = q.poll();
+            Node left = q.poll();
             Node parentNode = new Node( (byte)0, 
                                         left.getFrequency() + right.getFrequency(),
                                         left,

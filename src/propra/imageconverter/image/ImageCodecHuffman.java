@@ -3,7 +3,6 @@ package propra.imageconverter.image;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import propra.imageconverter.data.BitCode;
 import propra.imageconverter.data.BitInputStream;
 import propra.imageconverter.data.BitOutputStream;
 import propra.imageconverter.data.DataBlock;
@@ -24,6 +23,10 @@ public class ImageCodecHuffman extends ImageCodecRaw {
     //  Huffman-Baum zur Kodierung
     private HuffmanTree huffmanTree;
     
+    // Bitstreams
+    BitOutputStream outStream;
+    BitInputStream inStream;   
+    
     /*
      *  Konstruktor
      */
@@ -40,7 +43,10 @@ public class ImageCodecHuffman extends ImageCodecRaw {
         
         if(op == Operation.ANALYZE_ENCODER) {
             Arrays.fill(histogram, 0);
-        } 
+        } else if(op == Operation.ENCODE) {
+            // BitStream erstellen
+            outStream = new BitOutputStream(resource.getCheckedOutputStream());
+        }
     }
  
     /**
@@ -62,7 +68,7 @@ public class ImageCodecHuffman extends ImageCodecRaw {
                 histogram[buffer[offset] & 0xFF]++;
                 offset++;
             }
-        }
+        } 
     }
     
     /**
@@ -90,6 +96,11 @@ public class ImageCodecHuffman extends ImageCodecRaw {
              */
             huffmanTree = new HuffmanTree();
             huffmanTree.buildFromHistogram(histogram);
+            
+        } else if(operation == Operation.ENCODE) {
+            outStream.flush();
+            image.getHeader().encodedSize(outStream.getByteCounter());
+            outStream.flush();
         }
         
         super.end();
@@ -115,7 +126,7 @@ public class ImageCodecHuffman extends ImageCodecRaw {
             block.data = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
         }
         
-        int symbol;
+        int symbolCtr = 0;
         
         // BitStream erstellen
         BitInputStream stream = new BitInputStream(resource.getCheckedInputStream());
@@ -125,18 +136,40 @@ public class ImageCodecHuffman extends ImageCodecRaw {
         huffmanTree.buildFromResource(stream);
         
         // Lädt, dekodiert und sendet Pixelblöcke an Listener  
-        while((symbol = huffmanTree.decodeSymbol(stream)) != -1) {
-
+        while(symbolCtr++ < image.getHeader().imageSize()) {
+            
+            // Symbol dekodieren
+            int symbol = huffmanTree.decodeSymbol(stream);
+            if(symbol == -1) {
+                break;
+            }
+            
             // Symbol speichern
             block.data.put((byte)symbol);
 
             // Wenn Blockgröße erreicht an Listener senden
             if(block.data.capacity() == block.data.position()) {
-
+                
+                // Farbkonvertierung
+                if(image.getHeader().colorFormat().compareTo(ColorFormat.FORMAT_RGB) != 0) {   
+                    ColorFormat.convertColorBuffer( block.data,
+                                                    image.getHeader().colorFormat(),
+                                                    block.data, 
+                                                    ColorFormat.FORMAT_RGB);
+                }
+                
                 dispatchData(   IDataListener.Event.DATA_BLOCK_DECODED, 
                                 listener, 
                                 block);    
             }
+        }
+        
+        // Farbkonvertierung
+        if(image.getHeader().colorFormat().compareTo(ColorFormat.FORMAT_RGB) != 0) {   
+            ColorFormat.convertColorBuffer( block.data,
+                                            image.getHeader().colorFormat(),
+                                            block.data, 
+                                            ColorFormat.FORMAT_RGB);
         }
         
         // Restliche Daten im Puffer übertragen
@@ -157,31 +190,29 @@ public class ImageCodecHuffman extends ImageCodecRaw {
         }
         
         ByteBuffer buff = block.data;
-                
-        // BitStream erstellen
-        DataOutputStream os = resource.getCheckedOutputStream();
-        BitOutputStream stream = new BitOutputStream(os);
-        
+                  
         /**
          *   Baum als Bitfolge kodieren
          */
-        huffmanTree.storeTree(stream);
+        huffmanTree.storeTree(outStream);
         
         /**
          *  Symbole im Puffer iterieren, per Huffmantree zu Bitcode umsetzen und 
          *  diesen in der Resource speichern
          */
+        ByteBuffer c = ByteBuffer.allocate(3);
         while(buff.position() < buff.limit()) {
-            BitCode code = huffmanTree.encodeSymbol(buff.get() & 0xFF);
-            if(code == null) {
-                throw new IOException("Ungültiges Huffman Symbol");
-            }
-            stream.write(code);
+            
+            // Pixel lesen und Farbe konvertieren
+            buff.get(c.array());
+            ColorFormat.convertColorBuffer( c, ColorFormat.FORMAT_RGB, 
+                                            c, image.colorFormat);
+                    
+            outStream.write(huffmanTree.encodeSymbol(c.get() & 0xFF));
+            outStream.write(huffmanTree.encodeSymbol(c.get() & 0xFF));
+            outStream.write(huffmanTree.encodeSymbol(c.get() & 0xFF));
+            c.clear();
         }
-        
-        stream.flush();
-        image.getHeader().encodedSize(stream.getByteCounter());
-        os.flush();
     }
     
     /**

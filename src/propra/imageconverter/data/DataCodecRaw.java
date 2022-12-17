@@ -2,7 +2,6 @@ package propra.imageconverter.data;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import propra.imageconverter.checksum.Checksum;
 import propra.imageconverter.data.DataFormat.Operation;
 import propra.imageconverter.data.IDataListener.Event;
 
@@ -12,7 +11,7 @@ import propra.imageconverter.data.IDataListener.Event;
 public class DataCodecRaw implements IDataCodec {
 
     // Standardblockgröße, muss vielfaches der Pixelgröße sein
-    public static final int DEFAULT_BLOCK_SIZE = 4096 * 16 * 3;
+    public static final int DEFAULT_BLOCK_SIZE = 4096 * 16 * 3*1024;
     
     // Temporärer Lesepuffer
     protected ByteBuffer readBuffer;
