@@ -36,9 +36,17 @@ public class BitOutputStream {
     }
     
     /**
-     *  Schließt Byte ab und schreibt es in den Stream
+     * 
      */
     public void flush() throws IOException {
+        flushByte();
+        stream.flush();
+    }
+    
+    /**
+     *  Schließt Byte ab und schreibt es in den Stream
+     */
+    public void flushByte() throws IOException {
         if(bitIndex > 0) {
             stream.write(value);
             value = 0;
@@ -54,7 +62,7 @@ public class BitOutputStream {
         value |= (bit & 1) << (7 - bitIndex);
         
         if(bitIndex >= 7) {
-            flush();
+            flushByte();
         } else { 
             bitIndex++;
         }

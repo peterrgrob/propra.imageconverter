@@ -11,7 +11,7 @@ import propra.imageconverter.data.IDataListener.Event;
 public class DataCodecRaw implements IDataCodec {
 
     // Standardblockgröße, muss vielfaches der Pixelgröße sein
-    public static final int DEFAULT_BLOCK_SIZE = 4096 * 16 * 3*1024;
+    public static final int DEFAULT_BLOCK_SIZE = 4096 * 16 * 3;
     
     // Temporärer Lesepuffer
     protected ByteBuffer readBuffer;

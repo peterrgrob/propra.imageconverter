@@ -8,7 +8,6 @@ import propra.imageconverter.data.BitOutputStream;
 import propra.imageconverter.data.DataBlock;
 import static propra.imageconverter.data.DataCodecRaw.DEFAULT_BLOCK_SIZE;
 import propra.imageconverter.data.DataFormat.Operation;
-import propra.imageconverter.data.DataOutputStream;
 import propra.imageconverter.data.IDataListener;
 
 /**
@@ -44,8 +43,14 @@ public class ImageCodecHuffman extends ImageCodecRaw {
         if(op == Operation.ANALYZE_ENCODER) {
             Arrays.fill(histogram, 0);
         } else if(op == Operation.ENCODE) {
+            
             // BitStream erstellen
             outStream = new BitOutputStream(resource.getCheckedOutputStream());
+            
+            /**
+            *   Baum als Bitfolge kodieren
+            */
+            huffmanTree.storeTree(outStream);
         }
     }
  
@@ -77,7 +82,6 @@ public class ImageCodecHuffman extends ImageCodecRaw {
     @Override
     public void end() throws IOException {
         if(operation == Operation.ANALYZE_ENCODER) {
-            
             /**
              *  Histogram prüfen
              */
@@ -98,9 +102,10 @@ public class ImageCodecHuffman extends ImageCodecRaw {
             huffmanTree.buildFromHistogram(histogram);
             
         } else if(operation == Operation.ENCODE) {
+            
             outStream.flush();
             image.getHeader().encodedSize(outStream.getByteCounter());
-            outStream.flush();
+            
         }
         
         super.end();
@@ -190,11 +195,6 @@ public class ImageCodecHuffman extends ImageCodecRaw {
         }
         
         ByteBuffer buff = block.data;
-                  
-        /**
-         *   Baum als Bitfolge kodieren
-         */
-        huffmanTree.storeTree(outStream);
         
         /**
          *  Symbole im Puffer iterieren, per Huffmantree zu Bitcode umsetzen und 
