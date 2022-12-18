@@ -1,30 +1,31 @@
-package propra.imageconverter.image;
+package propra.imageconverter.image.huffman;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import propra.imageconverter.data.BitInputStream;
-import propra.imageconverter.data.BitOutputStream;
+import propra.imageconverter.util.BitInputStream;
+import propra.imageconverter.util.BitOutputStream;
 import propra.imageconverter.data.DataBlock;
 import static propra.imageconverter.data.DataCodecRaw.DEFAULT_BLOCK_SIZE;
 import propra.imageconverter.data.DataFormat.Operation;
 import propra.imageconverter.data.IDataListener;
+import propra.imageconverter.image.ColorFormat;
+import propra.imageconverter.image.ImageCodecRaw;
+import propra.imageconverter.image.ImageResource;
 
 /**
  *
- * @author pg
  */
 public class ImageCodecHuffman extends ImageCodecRaw {
     
     //  Histogramm der Daten
-    private final int[] histogram = new int[256]; 
+    private final long[] histogram = new long[256]; 
     
     //  Huffman-Baum zur Kodierung
     private HuffmanTree huffmanTree;
     
-    // Bitstreams
-    BitOutputStream outStream;
-    BitInputStream inStream;   
+    // Ausgabe Bitstream
+    BitOutputStream outStream;  
     
     /*
      *  Konstruktor
@@ -34,23 +35,23 @@ public class ImageCodecHuffman extends ImageCodecRaw {
     }
 
     /**
-     * 
+     *  Bereitet Blockweise Datenverarbeitung vor
      */
     @Override
     public void begin(Operation op) throws IOException {
         super.begin(op);
         
-        if(op == Operation.ANALYZE_ENCODER) {
-            Arrays.fill(histogram, 0);
-        } else if(op == Operation.ENCODE) {
-            
-            // BitStream erstellen
-            outStream = new BitOutputStream(resource.getCheckedOutputStream());
-            
-            /**
-            *   Baum als Bitfolge kodieren
-            */
-            huffmanTree.storeTree(outStream);
+        switch(op) {
+            case ANALYZE_ENCODER -> {
+                Arrays.fill(histogram, 0);
+            }
+            case ENCODE -> {
+                /*
+                 *  BitStream erstellen und Baum als Bitfolge in Stream kodieren
+                 */
+                outStream = new BitOutputStream(resource.getCheckedOutputStream());
+                huffmanTree.storeTreeInStream(outStream);
+            }
         }
     }
  
@@ -63,9 +64,8 @@ public class ImageCodecHuffman extends ImageCodecRaw {
             throw new IllegalArgumentException();
         }
         
-        if(operation == Operation.ANALYZE_ENCODER) {
-            
-            // Histogram aktualisieren für den aktuellen Block
+        if(operation == Operation.ANALYZE_ENCODER) {           
+            // Histogram aktualisieren fmit dem Datenblock
             byte[] buffer = block.array();
             int offset = 0;
 
@@ -77,37 +77,40 @@ public class ImageCodecHuffman extends ImageCodecRaw {
     }
     
     /**
-     * 
+     *   Schließt Blockweise Datenverarbeitung ab
      */
     @Override
     public void end() throws IOException {
-        if(operation == Operation.ANALYZE_ENCODER) {
-            /**
-             *  Histogram prüfen
-             */
-            int hCtr = 0;
-            for(int i:histogram) {
-                hCtr += i;
-            }  
-            if(hCtr != image.getHeader().imageSize()) {
-                //throw new IOException("Fehlerhafte Bilddaten (Histogram)");
+        switch(operation) {
+            case ANALYZE_ENCODER -> {
+               /**
+                *  Histogram prüfen
+                */
+                long sum = 0;
+                for(long i:histogram) {
+                    sum += i;
+                }  
+                if(sum != image.getHeader().imageSize()) {
+                    throw new IOException("Fehlerhafte Bilddaten (Histogram)");
+                }
+                System.out.println("Huffman Symbole: " + sum);
+
+                /*
+                 *  Nach der Encoder-Analyse den entsprechenden Huffman Baum aus dem 
+                 *  ermittelten Histogram erstellen
+                 */
+                huffmanTree = new HuffmanTree();
+                huffmanTree.buildTreeFromHistogram(histogram);
             }
-            System.out.println("Huffman Symbole (Ok): " + hCtr);
-            
-            /*
-             *  Nach der Encoder-Analyse den entsprechenden Huffman Baum aus dem 
-             *  ermittelten Histogram erstellen
-             */
-            huffmanTree = new HuffmanTree();
-            huffmanTree.buildFromHistogram(histogram);
-            
-        } else if(operation == Operation.ENCODE) {
-            
-            outStream.flush();
-            image.getHeader().encodedSize(outStream.getByteCounter());
-            
+            case ENCODE -> {
+                /*
+                 *  Stream flushen und kodierte Datengröße aktualisieren
+                 */
+                outStream.flush();
+                image.getHeader().encodedSize(outStream.getByteCounter()); 
+            }
         }
-        
+
         super.end();
     }
     
@@ -120,7 +123,7 @@ public class ImageCodecHuffman extends ImageCodecRaw {
     }
 
     /**
-     * 
+     *  Dekodiert Huffman kodierten Datenblock
      */
     @Override
     public void decode( DataBlock block, 
@@ -135,10 +138,11 @@ public class ImageCodecHuffman extends ImageCodecRaw {
         
         // BitStream erstellen
         BitInputStream stream = new BitInputStream(resource.getCheckedInputStream());
+        ByteBuffer data = block.data;
         
         // Kodierten Baum einlesen und erstellen
         huffmanTree = new HuffmanTree();
-        huffmanTree.buildFromResource(stream);
+        huffmanTree.buildTreeFromResource(stream);
         
         // Lädt, dekodiert und sendet Pixelblöcke an Listener  
         while(symbolCtr++ < image.getHeader().imageSize()) {
@@ -150,10 +154,10 @@ public class ImageCodecHuffman extends ImageCodecRaw {
             }
             
             // Symbol speichern
-            block.data.put((byte)symbol);
+            data.put((byte)symbol);
 
             // Wenn Blockgröße erreicht an Listener senden
-            if(block.data.capacity() == block.data.position()) {
+            if(data.capacity() == data.position()) {
                 
                 // Farbkonvertierung
                 if(image.getHeader().colorFormat().compareTo(ColorFormat.FORMAT_RGB) != 0) {   
@@ -200,23 +204,17 @@ public class ImageCodecHuffman extends ImageCodecRaw {
          *  Symbole im Puffer iterieren, per Huffmantree zu Bitcode umsetzen und 
          *  diesen in der Resource speichern
          */
-        ByteBuffer c = ByteBuffer.allocate(3);
+        byte[] c = new byte[3];
         while(buff.position() < buff.limit()) {
             
             // Pixel lesen und Farbe konvertieren
-            buff.get(c.array());
-            ColorFormat.convertColorBuffer( c, ColorFormat.FORMAT_RGB, 
-                                            c, image.colorFormat);
+            buff.get(c);
+            ColorFormat.convertColor(   c, ColorFormat.FORMAT_RGB, 
+                                        c, image.getHeader().colorFormat());
                     
-            outStream.write(huffmanTree.encodeSymbol(c.get() & 0xFF));
-            outStream.write(huffmanTree.encodeSymbol(c.get() & 0xFF));
-            outStream.write(huffmanTree.encodeSymbol(c.get() & 0xFF));
-            c.clear();
+            outStream.write(huffmanTree.encodeSymbol(c[0] & 0xFF));
+            outStream.write(huffmanTree.encodeSymbol(c[1] & 0xFF));
+            outStream.write(huffmanTree.encodeSymbol(c[2] & 0xFF));
         }
-    }
-    
-    /**
-     * 
-     */
-    
+    }   
 }

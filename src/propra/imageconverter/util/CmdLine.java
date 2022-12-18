@@ -1,4 +1,4 @@
-package propra.imageconverter;
+package propra.imageconverter.util;
 import java.util.HashMap;
 import propra.imageconverter.basen.BaseNFormat;
 import propra.imageconverter.image.ColorFormat;

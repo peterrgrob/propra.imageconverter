@@ -6,6 +6,7 @@ import propra.imageconverter.data.DataCodecRaw;
 import propra.imageconverter.data.IDataListener;
 import propra.imageconverter.data.IDataListener.Event;
 
+
 /**
  *
  * 

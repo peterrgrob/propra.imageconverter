@@ -3,7 +3,7 @@ package propra.imageconverter.data;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import propra.imageconverter.checksum.Checksum;
+import propra.imageconverter.util.Checksum;
 
 /**
  *

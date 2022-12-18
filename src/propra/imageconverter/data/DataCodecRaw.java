@@ -49,6 +49,14 @@ public class DataCodecRaw implements IDataCodec {
      * 
      */
     @Override
+    public Operation getOperation() {
+        return operation;
+    }
+    
+    /**
+     * 
+     */
+    @Override
     public void analyze(DataBlock data) {
         
     }

@@ -1,10 +1,11 @@
 package propra.imageconverter;
 
+import propra.imageconverter.util.CmdLine;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.logging.*;
 import java.util.logging.Level;
-import propra.imageconverter.CmdLine.Options;
+import propra.imageconverter.util.CmdLine.Options;
 
 /*
  *  Einstiegsklasse für ImageConverter 

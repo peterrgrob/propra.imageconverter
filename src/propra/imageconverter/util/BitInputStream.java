@@ -1,6 +1,7 @@
-package propra.imageconverter.data;
+package propra.imageconverter.util;
 
 import java.io.IOException;
+import propra.imageconverter.data.DataInputStream;
 
 /**
  *
@@ -62,7 +63,5 @@ public class BitInputStream {
         }
         
         return b;
-    }
-    
-    
+    }  
 }

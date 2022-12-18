@@ -1,8 +1,8 @@
 package propra.imageconverter.image;
 
+import propra.imageconverter.image.huffman.ImageCodecHuffman;
 import java.io.IOException;
-import propra.imageconverter.checksum.Checksum;
-import propra.imageconverter.checksum.ChecksumPropra;
+import propra.imageconverter.util.Checksum;
 import propra.imageconverter.data.DataBlock;
 import propra.imageconverter.data.DataCodecRaw;
 import propra.imageconverter.data.DataFormat.Encoding;
@@ -151,7 +151,7 @@ public abstract class ImageResource extends DataResource
         outHeader.colorFormat().encoding(outEncoding);    
         transcodedImage.writeHeader(outHeader);
         
-        // Bild analysieren
+        // Bild durch Codecs analysieren
         analyze();
         
         if(checksum != null) {
@@ -194,29 +194,53 @@ public abstract class ImageResource extends DataResource
      */
     private void analyze() throws IOException {
         
+        // Position merken
+        long p = position();
+        
+        DataBlock dataBlock = new DataBlock(DataCodecRaw.DEFAULT_BLOCK_SIZE);
+        
+        inCodec.begin(Operation.ANALYZE_DECODER);
+        transcodedImage.getCodec().begin(Operation.ANALYZE_ENCODER);
+        
+        /*
+         *  Analyse durch Ein- und Ausgabecodec erfordert eine spezielle Behandlung
+         */
         if( inCodec.analyzeNecessary(Operation.DECODE)
-        ||  transcodedImage.getCodec().analyzeNecessary(Operation.ENCODE)) {
+        &&  transcodedImage.getCodec().analyzeNecessary(Operation.ENCODE)) {
             
-            // Position merken
-            long p = position();
-            
-            inCodec.begin(Operation.ANALYZE_DECODER);
-            transcodedImage.getCodec().begin(Operation.ANALYZE_ENCODER);
-            DataBlock dataBlock = new DataBlock(DataCodecRaw.DEFAULT_BLOCK_SIZE);
-            
-            // Daten in Blöcken durchlaufen und an Codec geben
+            // Durchlauf für Decoder-Analyse 
             while(position() < length()) {
                 read(dataBlock.data);
                 inCodec.analyze(dataBlock);
-                transcodedImage.getCodec().analyze(dataBlock);
             }
-
-            inCodec.end();
-            transcodedImage.getCodec().end();
-                
+            
             // Ursprüngliche Position wiederherstellen
             position(p);
+            
+            // Durchlauf mit Dekodierung und Encoder-Analyse 
+            while(position() < length()) {
+                inCodec.decode(dataBlock, this);
+            } 
+        } else if(inCodec.analyzeNecessary(Operation.DECODE)) {
+            
+            // Durchlauf für Decoder-Analyse 
+            while(position() < length()) {
+                read(dataBlock.data);
+                inCodec.analyze(dataBlock);
+            }
+        } else if(transcodedImage.getCodec().analyzeNecessary(Operation.ENCODE)) {
+            
+            // Durchlauf mit Dekodierung und Encoder-Analyse 
+            while(position() < length()) {
+                inCodec.decode(dataBlock, this);
+            } 
         }
+        
+        inCodec.end();
+        transcodedImage.getCodec().end();
+        
+        // Ursprüngliche Position wiederherstellen
+        position(p);
     }
     
     /**
@@ -229,8 +253,12 @@ public abstract class ImageResource extends DataResource
         
         switch(event) {
             case DATA_BLOCK_DECODED -> {
-                transcodedImage.getCodec().encode(  block, 
-                                                    transcodedImage);
+                if(caller.getOperation() == Operation.ANALYZE_DECODER) {
+                    transcodedImage.getCodec().analyze( block);
+                } else {
+                    transcodedImage.getCodec().encode(  block, 
+                                                        transcodedImage);
+                }
             }
             case DATA_IO_READ, DATA_IO_WRITE  -> {
                 if(checksum != null) {

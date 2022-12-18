@@ -13,7 +13,7 @@ import java.nio.channels.Channels;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import propra.imageconverter.checksum.Checksum;
+import propra.imageconverter.util.Checksum;
 
 /**
  *

@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import propra.imageconverter.checksum.ChecksumPropra;
+import propra.imageconverter.util.ChecksumPropra;
 import propra.imageconverter.data.DataFormat;
 
 /**
@@ -99,7 +99,7 @@ public class ImageResourceProPra extends ImageResource {
         // Prüfe ProPra Spezifikationen
         if( newHeader.isValid() == false 
         ||  (dataLen != (binaryFile.length() - PROPRA_HEADER_SIZE))) {
-            //throw new UnsupportedOperationException("Ungültiges ProPra Dateiformat!");
+            throw new UnsupportedOperationException("Ungültiges ProPra Dateiformat!");
         } else if(newHeader.colorFormat().encoding() == DataFormat.Encoding.NONE) {
             
             // Prüfungen für unkomprimierte Dateien 

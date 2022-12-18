@@ -61,7 +61,24 @@ public class ColorFormat extends DataFormat
         }
         return -1;
     }
-      
+    
+    /**
+     * 
+     */
+    public static void convertColor(byte[] src, 
+                                    ColorFormat srcFormat,
+                                    byte[] dst,
+                                    ColorFormat dstFormat) {
+        int[] srcMap = srcFormat.getMapping();
+        int[] dstMap = dstFormat.getMapping();
+        byte r = src[srcMap[RED]];
+        byte g = src[srcMap[GREEN]];
+        byte b = src[srcMap[BLUE]];
+        dst[dstMap[RED]] = r;
+        dst[dstMap[GREEN]] = g;
+        dst[dstMap[BLUE]] = b;
+    }
+    
     /**
      * 
      */

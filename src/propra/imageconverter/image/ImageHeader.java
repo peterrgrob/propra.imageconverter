@@ -51,7 +51,7 @@ public class ImageHeader {
         return width * height;
     }
     
-    public int imageSize() {
+    public long imageSize() {
         return width * height * pixelSize;
     }
     

@@ -1,24 +1,29 @@
 package propra.imageconverter.data;
 
 import java.io.IOException;
+import propra.imageconverter.data.DataFormat.Operation;
 
 /**
  *
- * @author pg
  */
 public interface IDataCodec {
     /**
      * 
      */
-    public void begin(DataFormat.Operation op) throws IOException;
+    public void begin(Operation op) throws IOException;
     
     /**
      * 
      */
-    public boolean analyzeNecessary(DataFormat.Operation op);
+    public Operation getOperation();
     
     /**
-     * 
+     *  Analyse der ganzen Daten vor Kodierung nötig?
+     */
+    public boolean analyzeNecessary(Operation op);
+    
+    /**
+     *  Ermöglicht die Analyse der Daten vor der Kodierung
      */
     public void analyze(DataBlock data);
             

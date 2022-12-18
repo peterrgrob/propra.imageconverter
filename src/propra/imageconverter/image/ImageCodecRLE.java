@@ -5,6 +5,8 @@ import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataBlock;
 import propra.imageconverter.data.IDataListener;
 import propra.imageconverter.data.IDataListener.Event;
+import propra.imageconverter.image.ColorFormat;
+import propra.imageconverter.image.ImageResource;
 
 /**
  *

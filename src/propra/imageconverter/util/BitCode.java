@@ -1,4 +1,4 @@
-package propra.imageconverter.data;
+package propra.imageconverter.util;
 
 /**
  *  Implementiert den Code für ein Symbol
@@ -51,9 +51,4 @@ public class BitCode implements Comparable<BitCode> {
        return (code - o.code) + 
               (length - o.length); 
    }     
-
-    @Override
-    public String toString() {
-        return "BitCode{" + "code=" + Integer.toBinaryString(code) + ", length=" + length + '}';
-    }
 }
