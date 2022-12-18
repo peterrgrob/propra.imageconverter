@@ -1,7 +1,6 @@
 package propra.imageconverter.util;
 
 import java.io.IOException;
-import propra.imageconverter.data.DataOutputStream;
 
 /**
  * 
@@ -9,7 +8,7 @@ import propra.imageconverter.data.DataOutputStream;
 public class BitOutputStream {
     
     // Zugeordneter Stream von dem Bits gelesen werden
-    private final DataOutputStream stream;
+    private final CheckedOutputStream stream;
     
     // Aktuelles Schreib-Byte
     private byte value;
@@ -23,7 +22,7 @@ public class BitOutputStream {
     /**
      *  Konstruktor
      */
-    public BitOutputStream(DataOutputStream stream) {
+    public BitOutputStream(CheckedOutputStream stream) {
         this.stream = stream;
         value = 0;
         bitIndex = 0;

@@ -1,5 +1,7 @@
 package propra.imageconverter.data;
 
+import propra.imageconverter.util.CheckedOutputStream;
+import propra.imageconverter.util.CheckedInputStream;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -144,18 +146,18 @@ public class DataResource implements IDataResource,
      *  
      */
     @Override
-    public DataInputStream getCheckedInputStream() {
+    public CheckedInputStream getCheckedInputStream() {
         checkState();
-        return new DataInputStream(Channels.newInputStream(binaryFile.getChannel()), checksum);
+        return new CheckedInputStream(Channels.newInputStream(binaryFile.getChannel()), checksum);
     }
     
     /**
      *  
      */
     @Override
-    public DataOutputStream getCheckedOutputStream() {
+    public CheckedOutputStream getCheckedOutputStream() {
         checkState();
-        return new DataOutputStream(Channels.newOutputStream(binaryFile.getChannel()), checksum);       
+        return new CheckedOutputStream(Channels.newOutputStream(binaryFile.getChannel()), checksum);       
     }
 
     /**

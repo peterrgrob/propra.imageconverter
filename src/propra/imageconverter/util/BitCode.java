@@ -1,7 +1,7 @@
 package propra.imageconverter.util;
 
 /**
- *  Implementiert den Code für ein Symbol
+ *  Klasse hält den Code für ein Symbol
  */
 public class BitCode implements Comparable<BitCode> {
 
@@ -12,7 +12,7 @@ public class BitCode implements Comparable<BitCode> {
    private int length;
 
    /**
-    *  Constructor
+    *  Konstruktor
     */
    public BitCode( int code, 
                    int length) {

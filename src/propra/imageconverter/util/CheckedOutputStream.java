@@ -1,15 +1,14 @@
-package propra.imageconverter.data;
+package propra.imageconverter.util;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import propra.imageconverter.util.Checksum;
+import java.nio.ByteBuffer;
 
 /**
  *
- * @author pg
  */
-public class DataOutputStream extends BufferedOutputStream {
+public class CheckedOutputStream extends BufferedOutputStream {
     
     // Prüfsumme
     protected Checksum checksum;
@@ -17,11 +16,11 @@ public class DataOutputStream extends BufferedOutputStream {
     /**
      *  Konstruktoren
      */
-    public DataOutputStream(OutputStream in) {
+    public CheckedOutputStream(OutputStream in) {
         super(in);
     }
     
-    public DataOutputStream( OutputStream in,
+    public CheckedOutputStream( OutputStream in,
                             Checksum checksum) {
         super(in);
         this.checksum = checksum;
@@ -44,5 +43,10 @@ public class DataOutputStream extends BufferedOutputStream {
         if(checksum != null) {
             checksum.update((byte)b);
         }
+    }
+   
+    public ByteBuffer write(ByteBuffer buff) throws IOException {
+        write(buff.array(), buff.position(), buff.limit());
+        return buff;
     }
 }

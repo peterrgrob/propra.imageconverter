@@ -1,5 +1,7 @@
 package propra.imageconverter.data;
 
+import propra.imageconverter.util.CheckedOutputStream;
+import propra.imageconverter.util.CheckedInputStream;
 import java.nio.ByteBuffer;
 import java.io.Closeable;
 import java.io.IOException;
@@ -32,12 +34,12 @@ public interface IDataResource extends  Closeable {
     /**
      *  
      */
-    public DataInputStream getCheckedInputStream();
+    public CheckedInputStream getCheckedInputStream();
     
     /**
      *  
      */
-    public DataOutputStream getCheckedOutputStream();
+    public CheckedOutputStream getCheckedOutputStream();
     
     /**
      * 

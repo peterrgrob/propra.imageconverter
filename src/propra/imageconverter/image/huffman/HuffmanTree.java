@@ -1,7 +1,6 @@
 package propra.imageconverter.image.huffman;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.PriorityQueue;
 import propra.imageconverter.util.BitCode;
 import propra.imageconverter.util.BitInputStream;
@@ -17,11 +16,9 @@ public class HuffmanTree {
     private HuffmanNode rootNode;
     
     /*
-     *  Hashmap aller Knoten mit dem Symbol als Schlüssel zur schnellen
+     *  Array aller Knoten mit dem Symbol als Schlüssel zur schnellen
      *  Zuordnung von Symbolen zu Codes
      */
-    private HashMap<Integer, HuffmanNode> nodeMap;
-    
     HuffmanNode[] nodeArray = new HuffmanNode[256];
 
     /**
@@ -38,8 +35,7 @@ public class HuffmanTree {
         if(resource == null) {
             throw new IllegalArgumentException();
         }
-        
-        nodeMap = new HashMap<>();
+
         rootNode = new HuffmanNode((byte)0, 0);
         rootNode.buildTreeFromResource(resource, nodeArray);
         rootNode.buildBitCodes(new BitCode(0,0));
@@ -52,7 +48,6 @@ public class HuffmanTree {
     public void buildTreeFromHistogram(long[] symbols) {
         
         PriorityQueue<HuffmanNode> q = new PriorityQueue<>();
-        nodeMap = new HashMap<>();
         
         /**
          *  Symbole nach Häufigkeit sortiert als Knoten 
