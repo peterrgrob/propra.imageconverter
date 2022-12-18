@@ -56,7 +56,7 @@ public class ImageResourceProPra extends ImageResource {
         bytes.order(ByteOrder.LITTLE_ENDIAN);
         
         // Headerbytes von Stream lesen
-        read(bytes);
+        binaryFile.read(bytes.array());
         
         // Prüfe Formatkennung
         String version;
@@ -126,33 +126,33 @@ public class ImageResourceProPra extends ImageResource {
         super.writeHeader(srcHeader);
         
         // DataBuffer für Header erstellen
-        ByteBuffer byteBuffer = ByteBuffer.allocate(fileHeaderSize);
-        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+        ByteBuffer buff = ByteBuffer.allocate(fileHeaderSize);
+        buff.order(ByteOrder.LITTLE_ENDIAN);
         
         // ProPra spezifisches RBG Farbmapping setzen
         header.colorFormat().setMapping(colorFormat.getMapping());
         
         // Headerfelder in ByteBuffer schreiben
-        DataFormat.putStringToByteBuffer(byteBuffer, 0, PROPRA_VERSION);
-        byteBuffer.put(PROPRA_HEADER_OFFSET_ENCODING, (byte)0);
-        byteBuffer.putShort(PROPRA_HEADER_OFFSET_WIDTH,(short)srcHeader.width());
-        byteBuffer.putShort(PROPRA_HEADER_OFFSET_HEIGHT,(short)srcHeader.height());
-        byteBuffer.put(PROPRA_HEADER_OFFSET_BPP,(byte)(srcHeader.pixelSize() << 3));
-        byteBuffer.putInt(PROPRA_HEADER_OFFSET_CHECKSUM, (int)srcHeader.checksum());
+        DataFormat.putStringToByteBuffer(buff, 0, PROPRA_VERSION);
+        buff.put(PROPRA_HEADER_OFFSET_ENCODING, (byte)0);
+        buff.putShort(PROPRA_HEADER_OFFSET_WIDTH,(short)srcHeader.width());
+        buff.putShort(PROPRA_HEADER_OFFSET_HEIGHT,(short)srcHeader.height());
+        buff.put(PROPRA_HEADER_OFFSET_BPP,(byte)(srcHeader.pixelSize() << 3));
+        buff.putInt(PROPRA_HEADER_OFFSET_CHECKSUM, (int)srcHeader.checksum());
         
         // Kompression 
         switch(header.colorFormat().encoding()) {
             case HUFFMAN -> {
-                byteBuffer.put(PROPRA_HEADER_OFFSET_ENCODING, (byte)PROPRA_HEADER_ENCODING_HUFFMAN);
-                byteBuffer.putLong(PROPRA_HEADER_OFFSET_DATALEN,srcHeader.encodedSize());
+                buff.put(PROPRA_HEADER_OFFSET_ENCODING, (byte)PROPRA_HEADER_ENCODING_HUFFMAN);
+                buff.putLong(PROPRA_HEADER_OFFSET_DATALEN,srcHeader.encodedSize());
             }
             case RLE -> {
-                byteBuffer.put(PROPRA_HEADER_OFFSET_ENCODING, (byte)PROPRA_HEADER_ENCODING_RLE);
-                byteBuffer.putLong(PROPRA_HEADER_OFFSET_DATALEN,srcHeader.encodedSize());
+                buff.put(PROPRA_HEADER_OFFSET_ENCODING, (byte)PROPRA_HEADER_ENCODING_RLE);
+                buff.putLong(PROPRA_HEADER_OFFSET_DATALEN,srcHeader.encodedSize());
             }
             case NONE -> {
-                byteBuffer.put(PROPRA_HEADER_OFFSET_ENCODING, (byte)PROPRA_HEADER_ENCODING_NONE);
-                byteBuffer.putLong(PROPRA_HEADER_OFFSET_DATALEN,(long)srcHeader.imageSize());
+                buff.put(PROPRA_HEADER_OFFSET_ENCODING, (byte)PROPRA_HEADER_ENCODING_NONE);
+                buff.putLong(PROPRA_HEADER_OFFSET_DATALEN,(long)srcHeader.imageSize());
             }
             default -> {
                 throw new IllegalArgumentException("Ungültige Kompression.");
@@ -161,7 +161,6 @@ public class ImageResourceProPra extends ImageResource {
         
         // In Stream schreiben
         binaryFile.seek(0);
-        byteBuffer.clear();
-        write(byteBuffer);
+        binaryFile.write(buff.array());
     }
 }

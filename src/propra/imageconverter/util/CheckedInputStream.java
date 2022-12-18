@@ -12,7 +12,7 @@ import java.nio.ByteBuffer;
 public class CheckedInputStream extends BufferedInputStream {
     
     // Prüfsumme
-    protected Checksum checksum;
+    private Checksum checksum;
     
     /**
      *  Konstruktoren
@@ -26,7 +26,7 @@ public class CheckedInputStream extends BufferedInputStream {
         super(in);
         this.checksum = checksum;
     }
-
+    
     /**
      * 
      */

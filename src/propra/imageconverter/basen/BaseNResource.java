@@ -2,13 +2,9 @@ package propra.imageconverter.basen;
 
 import java.io.IOException;
 import propra.imageconverter.data.DataBlock;
-import propra.imageconverter.data.DataBlock;
 import propra.imageconverter.data.DataFormat.IOMode;
 import propra.imageconverter.data.DataResource;
-import propra.imageconverter.data.DataResource;
 import propra.imageconverter.data.IDataCodec;
-import propra.imageconverter.data.IDataCodec;
-import propra.imageconverter.data.IDataListener;
 import propra.imageconverter.data.IDataListener;
 
 /**

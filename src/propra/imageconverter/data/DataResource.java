@@ -2,8 +2,6 @@ package propra.imageconverter.data;
 
 import propra.imageconverter.util.CheckedOutputStream;
 import propra.imageconverter.util.CheckedInputStream;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -26,8 +24,8 @@ public class DataResource implements IDataResource,
     
     protected final DataFormat.IOMode mode;
     protected RandomAccessFile binaryFile;
-    protected BufferedOutputStream outStream;
-    protected BufferedInputStream inStream;
+    protected CheckedOutputStream outStream;
+    protected CheckedInputStream inStream;
     protected BufferedWriter txtWriter;
     protected BufferedReader txtReader;   
     
@@ -54,7 +52,8 @@ public class DataResource implements IDataResource,
         
         if(mode == DataFormat.IOMode.BINARY) {
             binaryFile = new RandomAccessFile(fileObj, "r" + (write ? "w":""));
-            outStream = new BufferedOutputStream(Channels.newOutputStream(binaryFile.getChannel()));
+            inStream = new CheckedInputStream(Channels.newInputStream(binaryFile.getChannel()));
+            outStream = new CheckedOutputStream(Channels.newOutputStream(binaryFile.getChannel()));
         } else {
             txtWriter = new BufferedWriter(new FileWriter(fileObj));
         }
@@ -146,18 +145,18 @@ public class DataResource implements IDataResource,
      *  
      */
     @Override
-    public CheckedInputStream getCheckedInputStream() {
+    public CheckedInputStream getInputStream() {
         checkState();
-        return new CheckedInputStream(Channels.newInputStream(binaryFile.getChannel()), checksum);
+        return inStream;
     }
     
     /**
      *  
      */
     @Override
-    public CheckedOutputStream getCheckedOutputStream() {
+    public CheckedOutputStream getOutputStream() {
         checkState();
-        return new CheckedOutputStream(Channels.newOutputStream(binaryFile.getChannel()), checksum);       
+        return outStream;       
     }
 
     /**
@@ -254,31 +253,6 @@ public class DataResource implements IDataResource,
             
             binaryFile.seek(p);
         } 
-    }
-    
-    /**
-     * 
-     */
-    @Override
-    public void writeBuffered(ByteBuffer buffer) throws IOException {
-        if( outStream == null
-        ||  buffer == null) {
-            throw new IllegalArgumentException();
-        }
-        outStream.write(buffer.array(), 
-                        buffer.position(), 
-                        buffer.limit());
-    }
-    
-    
-    /**
-     * 
-     */
-    @Override
-    public void flush() throws IOException {
-        if(outStream != null) {
-            outStream.flush();
-        }
     }
     
     /**

@@ -34,12 +34,12 @@ public interface IDataResource extends  Closeable {
     /**
      *  
      */
-    public CheckedInputStream getCheckedInputStream();
+    public CheckedInputStream getInputStream();
     
     /**
      *  
      */
-    public CheckedOutputStream getCheckedOutputStream();
+    public CheckedOutputStream getOutputStream();
     
     /**
      * 
@@ -87,17 +87,4 @@ public interface IDataResource extends  Closeable {
      * @throws IOException 
      */
     public void write(long offset, ByteBuffer buffer) throws IOException;    
-    
-    /**
-     * 
-     * @param buffer
-     * @throws IOException 
-     */
-    public void writeBuffered(ByteBuffer buffer) throws IOException;
-    
-    /**
-     * 
-     * @throws IOException
-     */
-    public void flush() throws IOException;
 }

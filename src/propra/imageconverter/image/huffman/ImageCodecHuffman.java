@@ -48,7 +48,7 @@ public class ImageCodecHuffman extends ImageCodecRaw {
                 /*
                  *  BitStream erstellen und Baum als Bitfolge in Stream kodieren
                  */
-                outStream = new BitOutputStream(resource.getCheckedOutputStream());
+                outStream = new BitOutputStream(resource.getOutputStream());
                 huffmanTree.storeTreeInStream(outStream);
             }
         }
@@ -136,7 +136,7 @@ public class ImageCodecHuffman extends ImageCodecRaw {
         int symbolCtr = 0;
         
         // BitStream erstellen
-        BitInputStream stream = new BitInputStream(resource.getCheckedInputStream());
+        BitInputStream stream = new BitInputStream(resource.getInputStream());
         ByteBuffer data = block.data;
         
         // Kodierten Baum einlesen und erstellen

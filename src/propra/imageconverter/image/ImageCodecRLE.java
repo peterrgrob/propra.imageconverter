@@ -5,8 +5,7 @@ import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataBlock;
 import propra.imageconverter.data.IDataListener;
 import propra.imageconverter.data.IDataListener.Event;
-import propra.imageconverter.image.ColorFormat;
-import propra.imageconverter.image.ImageResource;
+import propra.imageconverter.util.CheckedOutputStream;
 
 /**
  *
@@ -173,6 +172,8 @@ public class ImageCodecRLE extends ImageCodecRaw {
         ByteBuffer inBuffer = getDataToEncode(block.data);
         int dataLimit = inBuffer.limit();
         
+        CheckedOutputStream stream = resource.getOutputStream();
+        
         // Über Bytes iterieren und gemäß RLE verarbeiten
         while(inBuffer.position() < dataLimit) {
             
@@ -212,11 +213,11 @@ public class ImageCodecRLE extends ImageCodecRaw {
                             new DataBlock(rleBlock, false));
             
             // In Resource schreiben
-            resource.writeBuffered(rleBlock);
+            stream.write(rleBlock);
             rleBlock.clear();
         }
         
-        resource.flush();
+        stream.flush();
     }
     
     /**
