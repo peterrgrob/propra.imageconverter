@@ -3,7 +3,6 @@ package propra.imageconverter;
 import propra.imageconverter.util.CmdLine;
 import java.io.IOException;
 import propra.imageconverter.util.CmdLine.Options;
-import propra.imageconverter.data.DataFormat.IOMode;
 import propra.imageconverter.data.DataResource;
 import propra.imageconverter.image.*;
 

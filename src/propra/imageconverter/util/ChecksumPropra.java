@@ -9,7 +9,10 @@ import java.nio.ByteBuffer;
  */
 public class ChecksumPropra extends Checksum {
 
+    // Modulo
     private static final int X = 65521;
+    
+    // Aktuelle Prüfsummenvariablen
     private int currAi;
     private int currBi = 1;
     private int currIndex;

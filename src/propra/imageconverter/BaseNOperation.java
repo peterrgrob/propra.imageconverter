@@ -10,7 +10,6 @@ import propra.imageconverter.basen.BaseNFormat;
 import propra.imageconverter.basen.BaseNResource;
 import propra.imageconverter.data.DataBlock;
 import propra.imageconverter.data.DataFormat;
-import propra.imageconverter.data.DataFormat.IOMode;
 import propra.imageconverter.data.DataResource;
 
 /**
@@ -83,15 +82,13 @@ public class BaseNOperation implements AutoCloseable {
             baseNFile = new BaseNResource(  cmd.getOption(Options.INPUT_FILE), 
                                             dataFormat,
                                             false);
-            binaryFile = new DataResource(  outPath, 
-                                            IOMode.BINARY,
+            binaryFile = new DataResource(  outPath,
                                             true);
         } else {
             baseNFile = new BaseNResource(  outPath, 
                                             dataFormat,
                                             false);
-            binaryFile = new DataResource(  cmd.getOption(Options.INPUT_FILE), 
-                                            IOMode.BINARY,
+            binaryFile = new DataResource(  cmd.getOption(Options.INPUT_FILE),
                                             true);
         }  
     }
@@ -135,7 +132,8 @@ public class BaseNOperation implements AutoCloseable {
             decoder.end();
             
             // Daten in Daei schreiben 
-            binaryFile.write(block.data);
+            binaryFile.getOutputStream()
+                      .write(block.data);
             
         } else {
             /**
@@ -151,7 +149,8 @@ public class BaseNOperation implements AutoCloseable {
             block.data = ByteBuffer.allocate((int)binaryFile.length());
             
             // Daten von Datei lesen
-            binaryFile.read(block.data);
+            binaryFile.getInputStream()
+                      .read(block.data);
             
             // Daten in Resource dekodieren
             encoder.begin(DataFormat.Operation.DECODE);

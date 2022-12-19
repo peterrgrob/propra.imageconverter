@@ -2,7 +2,6 @@ package propra.imageconverter.data;
 
 import propra.imageconverter.util.CheckedOutputStream;
 import propra.imageconverter.util.CheckedInputStream;
-import java.nio.ByteBuffer;
 import java.io.Closeable;
 import java.io.IOException;
 
@@ -14,22 +13,18 @@ public interface IDataResource extends  Closeable {
     
     /**
      * 
-     * @param pos
-     * @throws IOException 
      */
-    public void position(long pos) throws IOException;
+    public long length() throws IOException;
     
     /**
      * 
-     * @return
-     * @throws IOException 
      */
     public long position() throws IOException;
     
     /**
      * 
      */
-    public long length() throws IOException;
+    public void position(long p) throws IOException;
     
     /**
      *  
@@ -39,52 +34,5 @@ public interface IDataResource extends  Closeable {
     /**
      *  
      */
-    public CheckedOutputStream getOutputStream();
-    
-    /**
-     * 
-     * @param buffer
-     * @throws IOException 
-     */
-    public int read(ByteBuffer buffer) throws IOException;
-    
-    /**
-     * 
-     * @param offset
-     * @param buffer
-     * @throws IOException 
-     */
-    public int read(long offset, ByteBuffer buffer) throws IOException;  
-    
-    /**
-     * 
-     * @param offset
-     * @param length
-     * @return
-     * @throws IOException 
-     */
-    public ByteBuffer read(long offset, int length) throws IOException;
-    
-    /**
-     * 
-     * @return
-     * @throws IOException 
-     */
-    public String readLine() throws IOException ;
-    
-    
-    /**
-     * 
-     * @param buffer
-     * @throws IOException 
-     */
-    public void write(ByteBuffer buffer) throws IOException;
-    
-    /**
-     * 
-     * @param offset
-     * @param buffer
-     * @throws IOException 
-     */
-    public void write(long offset, ByteBuffer buffer) throws IOException;    
+    public CheckedOutputStream getOutputStream();  
 }

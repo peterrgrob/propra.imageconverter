@@ -31,11 +31,10 @@ public class ImageResourceProPra extends ImageResource {
      *
      * 
      */
-    public ImageResourceProPra( String file, 
-                                DataFormat.IOMode mode,
+    public ImageResourceProPra( String file,
                                 boolean write) throws IOException {
         
-        super(file, mode, write);
+        super(file, write);
         fileHeaderSize = PROPRA_HEADER_SIZE;
         colorFormat = new ColorFormat(0, 2, 1);
         checksum = new ChecksumPropra();

@@ -8,6 +8,7 @@ import propra.imageconverter.data.DataFormat;
 import propra.imageconverter.data.IDataListener;
 import propra.imageconverter.data.IDataListener.Event;
 import propra.imageconverter.data.IDataResource;
+import propra.imageconverter.util.CheckedInputStream;
 
 /**
  * Klasse für allgemeine Base-N Kodierung, die Parametrisierung erfolgt
@@ -59,7 +60,8 @@ public class BaseNCodec extends DataCodecRaw {
         ByteBuffer tData = ByteBuffer.allocate(blockLength);
         
         // Daten einlesen
-        resource.read(inData);
+        CheckedInputStream stream = resource.getInputStream();
+        stream.read(inData);
         
         int charCtr = 0;
         
@@ -138,7 +140,8 @@ public class BaseNCodec extends DataCodecRaw {
                         charBuffer);
 
             // Kodierte Zeichen in Resource schreiben
-            resource.write(charBuffer);
+            resource.getOutputStream()
+                    .write(charBuffer);
 
             inOffset += byteCount;
         }

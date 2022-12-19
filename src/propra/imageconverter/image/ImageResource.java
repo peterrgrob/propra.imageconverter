@@ -6,7 +6,6 @@ import propra.imageconverter.util.Checksum;
 import propra.imageconverter.data.DataBlock;
 import propra.imageconverter.data.DataCodecRaw;
 import propra.imageconverter.data.DataFormat.Encoding;
-import propra.imageconverter.data.DataFormat.IOMode;
 import propra.imageconverter.data.DataFormat.Operation;
 import propra.imageconverter.data.DataResource;
 import propra.imageconverter.data.IDataCodec;
@@ -34,10 +33,9 @@ public abstract class ImageResource extends DataResource
     /**
      * 
      */
-    public ImageResource(   String file, 
-                            IOMode mode,
+    public ImageResource(   String file,
                             boolean write) throws IOException {
-        super(file, mode, write);
+        super(file, write);
         colorFormat = new ColorFormat();
     }
     
@@ -117,10 +115,10 @@ public abstract class ImageResource extends DataResource
                                                     boolean write) throws IOException {
         switch(ext) {
             case "tga" -> {
-                return new ImageResourceTGA(path, IOMode.BINARY, write);
+                return new ImageResourceTGA(path, write);
             }
             case "propra" -> {
-                return new ImageResourceProPra(path, IOMode.BINARY, write);
+                return new ImageResourceProPra(path, write);
             }
 
         }
@@ -199,8 +197,8 @@ public abstract class ImageResource extends DataResource
         
         DataBlock dataBlock = new DataBlock(DataCodecRaw.DEFAULT_BLOCK_SIZE);
         
-        inCodec.begin(Operation.ANALYZE_DECODER);
-        transcodedImage.getCodec().begin(Operation.ANALYZE_ENCODER);
+        inCodec.begin(Operation.DECODER_ANALYZE);
+        transcodedImage.getCodec().begin(Operation.ENCODER_ANALYZE);
         
         /*
          *  Analyse durch Ein- und Ausgabecodec erfordert eine spezielle Behandlung
@@ -210,7 +208,7 @@ public abstract class ImageResource extends DataResource
             
             // Durchlauf für Decoder-Analyse 
             while(position() < length()) {
-                read(dataBlock.data);
+                getInputStream().read(dataBlock.data);
                 inCodec.analyze(dataBlock);
             }
             
@@ -225,7 +223,7 @@ public abstract class ImageResource extends DataResource
             
             // Durchlauf für Decoder-Analyse 
             while(position() < length()) {
-                read(dataBlock.data);
+                getInputStream().read(dataBlock.data);
                 inCodec.analyze(dataBlock);
             }
         } else if(transcodedImage.getCodec().analyzeNecessary(Operation.ENCODE)) {
@@ -253,7 +251,7 @@ public abstract class ImageResource extends DataResource
         
         switch(event) {
             case DATA_BLOCK_DECODED -> {
-                if(caller.getOperation() == Operation.ANALYZE_DECODER) {
+                if(caller.getOperation() == Operation.DECODER_ANALYZE) {
                     transcodedImage.getCodec().analyze( block);
                 } else {
                     transcodedImage.getCodec().encode(  block, 

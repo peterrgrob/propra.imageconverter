@@ -41,7 +41,7 @@ public class ImageCodecHuffman extends ImageCodecRaw {
         super.begin(op);
         
         switch(op) {
-            case ANALYZE_ENCODER -> {
+            case ENCODER_ANALYZE -> {
                 Arrays.fill(histogram, 0);
             }
             case ENCODE -> {
@@ -63,7 +63,7 @@ public class ImageCodecHuffman extends ImageCodecRaw {
             throw new IllegalArgumentException();
         }
         
-        if(operation == Operation.ANALYZE_ENCODER) {           
+        if(operation == Operation.ENCODER_ANALYZE) {           
             // Histogram aktualisieren fmit dem Datenblock
             byte[] buffer = block.array();
             int offset = 0;
@@ -81,7 +81,7 @@ public class ImageCodecHuffman extends ImageCodecRaw {
     @Override
     public void end() throws IOException {
         switch(operation) {
-            case ANALYZE_ENCODER -> {
+            case ENCODER_ANALYZE -> {
                /**
                 *  Histogram prüfen
                 */

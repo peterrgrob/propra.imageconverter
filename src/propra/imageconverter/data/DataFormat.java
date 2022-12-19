@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
  */
 public class DataFormat {
     
-    // Gesetzte Kodierung
+    // Aktuelle Kodierung
     protected Encoding encoding = Encoding.NONE;
     
     // Kodierungstypen der Daten
@@ -18,20 +18,13 @@ public class DataFormat {
         BASEN,
         HUFFMAN;
     }
-
-    
-    // Datenmodus für Ein- und Ausgabe
-    public enum IOMode {
-        BINARY,
-        TEXT;
-    }
     
     // Datenoperation
     public enum Operation {
         ENCODE,
         DECODE,
-        ANALYZE_ENCODER,
-        ANALYZE_DECODER,
+        ENCODER_ANALYZE,
+        DECODER_ANALYZE,
         NONE;
     }
 

@@ -1,16 +1,12 @@
 package propra.imageconverter.basen;
 
 import java.io.IOException;
-import propra.imageconverter.data.DataBlock;
-import propra.imageconverter.data.DataFormat.IOMode;
 import propra.imageconverter.data.DataResource;
-import propra.imageconverter.data.IDataCodec;
-import propra.imageconverter.data.IDataListener;
 
 /**
  *
  */
-public class BaseNResource extends DataResource implements IDataListener {
+public class BaseNResource extends DataResource{
     
     // BaseN Kodierungsformat
     private final BaseNFormat format;
@@ -21,7 +17,7 @@ public class BaseNResource extends DataResource implements IDataListener {
     public BaseNResource(   String file, 
                             BaseNFormat format,
                             boolean write) throws IOException {
-        super(file, IOMode.BINARY, write);
+        super(file, write);
         
         this.format = format;
         if(format == null) {
@@ -58,14 +54,5 @@ public class BaseNResource extends DataResource implements IDataListener {
      */
     public BaseNFormat getFormat() {
         return format;
-    }
-    
-    /**
-     * 
-     */
-    @Override
-    public void onData( Event event, 
-                        IDataCodec caller, 
-                        DataBlock block) throws IOException {
     }
 }

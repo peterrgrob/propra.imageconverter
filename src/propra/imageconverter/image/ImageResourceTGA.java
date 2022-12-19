@@ -30,10 +30,9 @@ public class ImageResourceTGA extends ImageResource {
      *
      * 
      */
-    public ImageResourceTGA(String file, 
-                            DataFormat.IOMode mode,
+    public ImageResourceTGA(String file,
                             boolean write) throws IOException {
-        super(file, mode, write);
+        super(file, write);
         fileHeaderSize = TGA_HEADER_SIZE;
     }
     

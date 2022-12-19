@@ -68,6 +68,7 @@ public abstract class Checksum {
      * Aktualisiert die aktuelle Prüfsumme mit Bytes 
      */
     public abstract ByteBuffer update(ByteBuffer in);
+    
     public abstract void update(byte[] b, int offset, int len);
     
     /**
