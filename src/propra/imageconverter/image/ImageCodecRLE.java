@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataBlock;
 import propra.imageconverter.data.IDataListener;
 import propra.imageconverter.data.IDataListener.Event;
+import propra.imageconverter.util.CheckedInputStream;
 import propra.imageconverter.util.CheckedOutputStream;
 
 /**
@@ -25,7 +26,7 @@ public class ImageCodecRLE extends ImageCodecRaw {
         bufferedData = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE * 2);
     }
     
-    /*
+        /*
      * 
      */
     @Override
@@ -38,112 +39,66 @@ public class ImageCodecRLE extends ImageCodecRaw {
         }
         
         // Temporäre Variablen zur Performanceoptimierung
-        int inOffset = (int)resource.position();
-        int inLength = (int)resource.length();
-        byte[] inRleColor = new byte[3];
-        int inColorCounter;
-        int inPacketHeader;
-        int outNextBytes;
+        CheckedInputStream stream = resource.getInputStream();
     
         // Puffer vorbereiten
         if(outBlock.data == null) {
             outBlock.data = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
-        }
+        }        
         ByteBuffer outBuffer = outBlock.data;
-        ByteBuffer inBuffer = bufferedData;
-        byte[] outBytes = outBuffer.array();
         
-        /**
-         * Blockweise Daten einlesen und dekodieren bis Ausgabeblock 
-         * gefüllt ist
+        /*
+         * Rle Block dekodieren
          */
-        while( inOffset < inLength ) {
-            
-            // Blockgröße verkleinern am Ende der Datei
-            if(inOffset + inBuffer.capacity() > inLength) {
-                inBuffer.limit(inBuffer.capacity() - ((inOffset + inBuffer.capacity()) - inLength));
-            }
-            
-            // Block von Resource lesen
-            int inLen = resource.read(inBuffer);
-            inOffset += inLen;
-            
-            /**
-             * Rle Block dekodieren
+        int packetHeader;
+        while((packetHeader = stream.read()) != -1) {
+
+            // Paketkopf und Wiederholungen dekodieren
+            packetHeader = packetHeader & 0xFF;
+            int pixelCount = (packetHeader & 127) + 1;
+            int packetLen = pixelCount * 3;
+            byte[] rleColor = new byte[3];
+
+            /*
+             * Wenn im Ausgabepuffer nicht mehr genug Platz ist, Datenblock zum 
+             * Empfänger senden
              */
-            while(inBuffer.remaining() != 0) {
+            if( outBuffer.position() + packetLen > outBuffer.capacity()) {
+                outBuffer.flip();
+                dispatchEvent(  Event.DATA_BLOCK_DECODED, 
+                                target, 
+                                outBlock);
+                outBuffer.clear();
+            }
 
-                // Paketkopf und Wiederholungen dekodieren
-                inPacketHeader =  inBuffer.get() & 0xFF;
-                inColorCounter = (inPacketHeader & 127) + 1;
-                outNextBytes = inColorCounter * 3;
-
-                // Wenn gefüllt, Datenblock zum Empfänger senden
-                if( outBuffer.position() + outNextBytes > outBuffer.capacity()) {
-                    
-                    outBuffer.flip();
-                    dispatchEvent(  Event.DATA_BLOCK_DECODED, 
-                                    target, 
-                                    outBlock);
-                    outBuffer.clear();
-                }
-                
-                /**
-                 *  Wenn nicht mehr genügend Daten im Block vorhanden sind,
-                 *  Eingabeposition zurückschieben und neuen Block einlesen
-                 */
-                if((inPacketHeader > 127 && inBuffer.remaining() < 3)
-                || (inPacketHeader <= 127 && inBuffer.remaining() < outNextBytes)) {
-                        
-                        inOffset = inOffset - inBuffer.remaining() - 1;
-                        inBuffer.position(inBuffer.position() - 1);
-                        resource.position(inOffset); 
-                        break;
-                }
-                
-                // RLE oder RAW Paket?
-                if(inPacketHeader > 127) {
-                    
-                    // Farbwert auslesen und auffüllen
-                    inBuffer.get(inRleColor);
-                    int o = ColorFormat.fillColor(inRleColor,
-                                                    outBytes,
-                                                    outBuffer.position(),
-                                                    inColorCounter);
-                    outBuffer.position(o);
-                    
-                } else {
-
-                    // RAW Farben übertragen
-                    outBuffer.put(inBuffer.array(), 
-                                inBuffer.position(), 
-                                outNextBytes);
-                    inBuffer.position(inBuffer.position() + outNextBytes);
-                }
+            // RLE oder RAW Paket?
+            if(packetHeader > 127) {
+                // Farbwert auslesen und Ausgabepuffer auffüllen
+                stream.read(rleColor);
+                ColorFormat.fillColor(rleColor,
+                                        outBuffer.array(),
+                                        outBuffer.position(),
+                                        pixelCount);
+            } else {
+                // RAW Farben übertragen
+                stream.read(outBuffer.array(), 
+                            outBuffer.position(), 
+                            packetLen);
             }
             
-            // Eingabedaten filtern
-            dispatchEvent(Event.DATA_IO_READ, 
-                            target, 
-                            new DataBlock(inBuffer.flip(),false));
-            inBuffer.clear();
-        } 
+            outBuffer.position(outBuffer.position() + packetLen);
+        }
         
-
         /**
          *  Letzten Block der Operation kennzeichnen und Restdaten
          *  übertragen
          */
-        if(resource.position() == resource.length()) {
-            outBlock.lastBlock = true;
-        }
-        
+        outBlock.lastBlock = stream.eof();
         outBlock.data.flip();
         dispatchEvent(  Event.DATA_BLOCK_DECODED, 
                         target, 
                         outBlock);
     }
-    
     
     /*
      *  Kodiert Pixelblock als RLE
