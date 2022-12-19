@@ -6,7 +6,8 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 /**
- *
+ * 
+ * @author pg
  */
 public class CheckedOutputStream extends BufferedOutputStream {
     
@@ -14,12 +15,18 @@ public class CheckedOutputStream extends BufferedOutputStream {
     private Checksum checksum;
     
     /**
-     *  Konstruktoren
+     * 
+     * @param in 
      */
     public CheckedOutputStream(OutputStream in) {
         super(in);
     }
     
+    /**
+     * 
+     * @param in
+     * @param checksum 
+     */
     public CheckedOutputStream( OutputStream in,
                             Checksum checksum) {
         super(in);
@@ -28,13 +35,18 @@ public class CheckedOutputStream extends BufferedOutputStream {
     
     /**
      * 
+     * @param checksum 
      */
     public void setChecksum(Checksum checksum) {
         this.checksum = checksum;
     }
 
     /**
-     *  Write Methoden 
+     * 
+     * @param b
+     * @param off
+     * @param len
+     * @throws IOException 
      */
     @Override
     public synchronized void write(byte[] b, int off, int len) throws IOException {
@@ -43,7 +55,12 @@ public class CheckedOutputStream extends BufferedOutputStream {
             checksum.update(b, off, len);
         }
     }
-
+    
+    /**
+     * 
+     * @param b
+     * @throws IOException 
+     */
     @Override
     public synchronized void write(int b) throws IOException {
         super.write(b);
@@ -51,7 +68,13 @@ public class CheckedOutputStream extends BufferedOutputStream {
             checksum.update((byte)b);
         }
     }
-   
+    
+    /**
+     * 
+     * @param buff
+     * @return
+     * @throws IOException 
+     */
     public ByteBuffer write(ByteBuffer buff) throws IOException {
         write(buff.array(), buff.position(), buff.limit());
         return buff;

@@ -1,4 +1,5 @@
 package propra.imageconverter.util;
+
 import java.util.HashMap;
 import propra.imageconverter.basen.BaseNFormat;
 import propra.imageconverter.image.ColorFormat;
@@ -24,12 +25,21 @@ import propra.imageconverter.image.ColorFormat;
         ENCODE_BASE_N("--encode-base-n"),
         DECODE_BASE_N("--decode-base-n");
         
+        // Schlüssel
         private final String key;
         
+        /**
+         * 
+         * @param key 
+         */
         private Options(String key) {
             this.key = key;
         }
         
+        /**
+         * 
+         * @return 
+         */
         public String getKey() {
             return key;
         }
@@ -37,6 +47,7 @@ import propra.imageconverter.image.ColorFormat;
    
     /**
      * 
+     * @param args 
      */
     public CmdLine(String[] args) {
         this.options = new HashMap<>();

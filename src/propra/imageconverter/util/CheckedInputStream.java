@@ -7,7 +7,8 @@ import java.nio.ByteBuffer;
 
 
 /**
- *
+ * 
+ * @author pg
  */
 public class CheckedInputStream extends BufferedInputStream {
     
@@ -18,12 +19,18 @@ public class CheckedInputStream extends BufferedInputStream {
     private int r;
     
     /**
-     *  Konstruktoren
+     * 
+     * @param in 
      */
     public CheckedInputStream(InputStream in) {
         super(in);
     }
     
+    /**
+     * 
+     * @param in
+     * @param checksum 
+     */
     public CheckedInputStream(  InputStream in,
                                 Checksum checksum) {
         super(in);
@@ -32,6 +39,7 @@ public class CheckedInputStream extends BufferedInputStream {
     
     /**
      * 
+     * @param checksum 
      */
     public void setChecksum(Checksum checksum) {
         this.checksum = checksum;
@@ -39,6 +47,7 @@ public class CheckedInputStream extends BufferedInputStream {
     
     /**
      * 
+     * @return 
      */
     public boolean eof() {
         return r == -1;
@@ -46,6 +55,8 @@ public class CheckedInputStream extends BufferedInputStream {
     
     /**
      * 
+     * @return
+     * @throws IOException 
      */
     @Override
     public synchronized int read() throws IOException {
@@ -57,6 +68,14 @@ public class CheckedInputStream extends BufferedInputStream {
         return r;
     }   
 
+    /**
+     * 
+     * @param b
+     * @param off
+     * @param len
+     * @return
+     * @throws IOException 
+     */
     @Override
     public synchronized int read(byte[] b, int off, int len) throws IOException {
         r = super.read(b, off, len);
@@ -69,6 +88,9 @@ public class CheckedInputStream extends BufferedInputStream {
     
     /**
      * 
+     * @param b
+     * @return
+     * @throws IOException 
      */
     @Override
     public int read(byte[] b) throws IOException {
@@ -77,6 +99,9 @@ public class CheckedInputStream extends BufferedInputStream {
     
     /**
      * 
+     * @param buff
+     * @return
+     * @throws IOException 
      */
     public int read(ByteBuffer buff) throws IOException {
         return read(buff.array(), buff.position(), buff.limit());

@@ -3,8 +3,8 @@ package propra.imageconverter.util;
 import java.nio.ByteBuffer;
 
 /**
- * Basisklasse für Prüfsummen-Algorithmen
- * 
+ * Basisklasse für Prüfsummen
+ *
  * @author pg
  */
 public abstract class Checksum {
@@ -15,40 +15,23 @@ public abstract class Checksum {
     protected long value;    
 
     /**
-     *
+     * 
      */
     public Checksum() {   
     }
-    
-    /**
-     *
-     * @param value
-     */
-    public Checksum(int value) {
-        this.value = value;
-    }
 
     /**
-     *
-     * @return
+     * 
      */
     public long getValue() {
         return value;
     }
-
-    /**
-     *
-     * @param value
-     */
-    public void setValue(long value) {
-        this.value = value;
-    }
     
     /**
-     * Berechnet die Prüfsumme über Bytes
+     * Berechnet die Prüfsumme der Bytes
      * 
      * @param buffer
-     * @return
+     * @return 
      */
     public long check(ByteBuffer buffer) {
         reset();
@@ -58,7 +41,7 @@ public abstract class Checksum {
     }
     
     /**
-     *
+     *  Setzt Prüfsumme zurück
      */
     public void reset() {
         value = 0;
@@ -66,13 +49,25 @@ public abstract class Checksum {
     
     /**
      * Aktualisiert die aktuelle Prüfsumme mit Bytes 
+     * 
+     * @param in
+     * @return 
      */
     public abstract ByteBuffer update(ByteBuffer in);
     
+    /**
+     * Aktualisiert die aktuelle Prüfsumme mit Bytes 
+     * 
+     * @param b
+     * @param offset
+     * @param len 
+     */
     public abstract void update(byte[] b, int offset, int len);
     
     /**
+     * Aktualisiert die aktuelle Prüfsumme mit einem Byte 
      * 
+     * @param b 
      */
     public abstract void update(byte b);
 }

@@ -3,7 +3,7 @@ package propra.imageconverter.util;
 import java.nio.ByteBuffer;
 
 /**
- *  ProPra Implementierung einer Prüfsumme
+ * ProPra Implementierung einer Prüfsumme
  * 
  * @author pg
  */
@@ -37,7 +37,10 @@ public class ChecksumPropra extends Checksum {
     }
     
     /**
-     * Aktualisiert Prüfsumme mit ProPra-Prüfsummen Verfahren, wie vorgegeben
+     * Aktualisiert Prüfsumme mit der ProPra-Prüfsummenvorschrift
+     * 
+     * @param buffer
+     * @return 
      */
     @Override
     public ByteBuffer update(ByteBuffer buffer) {
@@ -48,6 +51,13 @@ public class ChecksumPropra extends Checksum {
         return buffer;
     }
 
+    /**
+     * Aktualisiert Prüfsumme mit der ProPra-Prüfsummenvorschrift
+     * 
+     * @param b
+     * @param offset
+     * @param len 
+     */
     @Override
     public void update(byte[] b, int offset, int len) {
         if (b == null) {
@@ -63,6 +73,11 @@ public class ChecksumPropra extends Checksum {
         currIndex += len;
     }
 
+    /**
+     * Aktualisiert Prüfsumme mit der ProPra-Prüfsummenvorschrift
+     * 
+     * @param b 
+     */
     @Override
     public void update(byte b) {
         currAi = (++currIndex + currAi + (b & 0xFF)) % X;

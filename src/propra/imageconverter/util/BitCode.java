@@ -1,7 +1,9 @@
 package propra.imageconverter.util;
 
 /**
- *  Klasse hält den Code für ein Symbol
+ * Klasse hält den Code für ein Symbol
+ *
+ * @author pg
  */
 public class BitCode implements Comparable<BitCode> {
 
@@ -12,7 +14,9 @@ public class BitCode implements Comparable<BitCode> {
    private int length;
 
    /**
-    *  Konstruktor
+    * 
+    * @param code
+    * @param length 
     */
    public BitCode( int code, 
                    int length) {
@@ -20,6 +24,10 @@ public class BitCode implements Comparable<BitCode> {
        this.length = length;
    }
 
+   /**
+    * 
+    * @param src 
+    */
    public BitCode(BitCode src) {
        this.code = src.code;
        this.length = src.length;
@@ -27,6 +35,9 @@ public class BitCode implements Comparable<BitCode> {
 
    /**
     * Bit hinzufügen
+    * 
+    * @param bit
+    * @return 
     */
    public BitCode addBit(boolean bit) {
        code <<= 1;
@@ -36,16 +47,26 @@ public class BitCode implements Comparable<BitCode> {
    }
 
    /**
-    *  Getter/Setter
+    * 
+    * @return 
     */
    public int getCode() {
        return code;
    }
 
+   /**
+    * 
+    * @return 
+    */
    public int getLength() {
        return length;
    }
 
+   /**
+    * 
+    * @param o
+    * @return 
+    */
    @Override
    public int compareTo(BitCode o) {
        return (code - o.code) + 

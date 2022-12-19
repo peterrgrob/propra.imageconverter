@@ -4,6 +4,7 @@ import java.io.IOException;
 
 /**
  * 
+ * @author pg
  */
 public class BitOutputStream {
     
@@ -20,7 +21,8 @@ public class BitOutputStream {
     private int byteCounter;
     
     /**
-     *  Konstruktor
+     * 
+     * @param stream 
      */
     public BitOutputStream(CheckedOutputStream stream) {
         this.stream = stream;
@@ -29,7 +31,8 @@ public class BitOutputStream {
     }
 
     /**
-     *  Getter 
+     * 
+     * @return 
      */
     public int getByteCounter() {
         return byteCounter;
@@ -37,6 +40,7 @@ public class BitOutputStream {
     
     /**
      * 
+     * @throws IOException 
      */
     public void flush() throws IOException {
         flushByte();
@@ -44,7 +48,8 @@ public class BitOutputStream {
     }
     
     /**
-     *  Schließt Byte ab und schreibt es in den Stream
+     * 
+     * @throws IOException 
      */
     public void flushByte() throws IOException {
         if(bitIndex > 0) {
@@ -56,7 +61,10 @@ public class BitOutputStream {
     }
     
     /**
-     *  Schreibt ein Bit in den Stream
+     * Schreibt ein Bit in den Stream
+     * 
+     * @param bit
+     * @throws IOException 
      */
     public void write(int bit) throws IOException {
         value |= (bit & 1) << (7 - bitIndex);
@@ -69,7 +77,10 @@ public class BitOutputStream {
     }
     
     /**
-     *  Schreibt einen BitCode in den Stream
+     * Schreibt einen BitCode in den Stream
+     * 
+     * @param code
+     * @throws IOException 
      */
     public void write(BitCode code) throws IOException {  
         int c = code.getCode();
@@ -80,7 +91,10 @@ public class BitOutputStream {
     }
     
     /**
-     *  Schreibt ein Byte 
+     * Schreibt ein Byte 
+     * 
+     * @param b
+     * @throws IOException 
      */
     public void writeByte(int b) throws IOException {
         for(int i=7; i>=0; i--) {

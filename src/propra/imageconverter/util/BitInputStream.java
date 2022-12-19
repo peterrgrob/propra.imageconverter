@@ -3,7 +3,8 @@ package propra.imageconverter.util;
 import java.io.IOException;
 
 /**
- *
+ * 
+ * @author pg
  */
 public class BitInputStream {
     
@@ -17,16 +18,20 @@ public class BitInputStream {
     private byte bitIndex;
     
     /**
-     *  Konstruktor
+     * 
+     * @param inStream 
      */
-    public BitInputStream(   CheckedInputStream inStream) {
+    public BitInputStream(CheckedInputStream inStream) {
         this.inStream = inStream;
         bitIndex = 8;
     }
     
     /**
-     *  Liest ein Bit von der Resource, gibt -1 zurück bei Dateiende
-     *  Speichert gelesene Bytes in bytes
+     * Liest ein Bit von der Resource, gibt -1 zurück bei Dateiende
+     * Speichert gelesene Bytes in bytes
+     * 
+     * @return
+     * @throws IOException 
      */
     public int readBit() throws IOException {
         /*
@@ -37,8 +42,7 @@ public class BitInputStream {
             if(rv == -1) {
                 return -1;
             }
-            
-            // Speichern
+
             value = (byte)(rv & 0xFF);
             bitIndex = 0;
         }
@@ -51,7 +55,10 @@ public class BitInputStream {
     }
     
     /**
-     *  Liest ein Byte ausgehend von der aktuellen Bit Position ein 
+     * Liest ein Byte ausgehend von der aktuellen Bit Position ein 
+     * 
+     * @return
+     * @throws IOException 
      */
     public byte readByte() throws IOException {
         byte b = 0;
