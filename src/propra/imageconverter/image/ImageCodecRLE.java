@@ -111,7 +111,10 @@ public class ImageCodecRLE extends ImageCodecRaw {
             throw new IllegalArgumentException();
         }
         
+        CheckedOutputStream stream = resource.getOutputStream();
+        
         ByteBuffer rleBlock = ByteBuffer.allocate(192*3);
+        byte[] color = new byte[3];
 
         // Farbkonvertierung
         if(image.getHeader().colorFormat().compareTo(ColorFormat.FORMAT_RGB) != 0) {   
@@ -125,20 +128,15 @@ public class ImageCodecRLE extends ImageCodecRaw {
          *  Eingabedaten mit gepufferten Daten zusammenführen
          */
         ByteBuffer inBuffer = getDataToEncode(block.data);
-        int dataLimit = inBuffer.limit();
-        
-        CheckedOutputStream stream = resource.getOutputStream();
         
         // Über Bytes iterieren und gemäß RLE verarbeiten
-        while(inBuffer.position() < dataLimit) {
-            
+        while(inBuffer.position() < inBuffer.limit()) {
             /*
-             *  Wenn Blockgrenze erreichbar, Restdaten puffern für nächsten Block
-             *  wenn es sich nicht um den letzten Block handelt.
+             *  Wenn Blockgrenze erreichbar Restdaten puffern für nächsten Block, 
+             *  nur wenn es sich nicht um den letzten Block handelt.
              */
-            boolean boundary = inBuffer.position() + (127 * 3) >= dataLimit;
-            if(boundary && !block.lastBlock) {
-                
+            boolean boundary = inBuffer.position() + (127 * 3) >= inBuffer.limit();
+            if(boundary && !block.lastBlock) {    
                 bufferInputData(inBuffer);
                 isBufferedData = true;
                 return; 
@@ -148,24 +146,23 @@ public class ImageCodecRLE extends ImageCodecRaw {
              *  Kodierung
              */
             int colorCtr = countRleColor(inBuffer);
-            if(colorCtr > 1 ) {
-                
+            if(colorCtr > 1 ) {     
                 /**
                  * Rle Pixel kodieren
                  */
-                encodeRleData(inBuffer, rleBlock, colorCtr);   
-            } else {
-                
+                inBuffer.get(color);
+                rleBlock.put((byte)(128 + colorCtr - 1));
+                rleBlock.put(color);
+                rleBlock.flip();
+
+                // Gleiche Farben im Eingabepuffer überspringen
+                inBuffer.position(inBuffer.position() + (colorCtr - 1) * 3);
+            } else {      
                /*
                 * Raw Pixel kopieren und Paketkopf schreiben
                 */
                 encodeRawData(inBuffer, rleBlock);
             }
-            
-            
-            dispatchEvent(  Event.DATA_IO_WRITE, 
-                            listener, 
-                            new DataBlock(rleBlock, false));
             
             // In Resource schreiben
             stream.write(rleBlock);
@@ -187,40 +184,17 @@ public class ImageCodecRLE extends ImageCodecRaw {
      *  Zählt identische Pixel bis zu 128
      */
     private int countRleColor(ByteBuffer data) {
-        
-        byte[] array = data.array();
-        int baseOffset = data.position();
-        int nextOffset = baseOffset + 3;
+        int offs = data.position() + 3;
         int counter = 1;
 
-        while ( ColorFormat.compareColor(array, baseOffset, nextOffset)
-        &&      counter < 128
-        &&      nextOffset < data.limit()) {
+        while ( ColorFormat.compareColor(data.array(), data.position(), offs)
+            &&  counter < 128
+            &&  offs < data.limit()) {
             counter++;
-            nextOffset += 3;         
+            offs += 3;         
         }
 
         return counter;
-    }
-    
-    /**
-     * 
-     */
-    private void encodeRleData( ByteBuffer inBuffer, 
-                                ByteBuffer outBuffer,
-                                int rleCount) throws IOException {
-        byte[] color = new byte[3];
-        /*
-         *  Rle Farbe lesen, RLE Paket kodieren und mit Pixel in den 
-         *  Schreibpuffer schreiben
-         */
-        inBuffer.get(color);
-        outBuffer.put((byte)(128 + rleCount - 1));
-        outBuffer.put(color);
-        outBuffer.flip();
-
-        // Gleiche Farben im Eingabepuffer überspringen
-        inBuffer.position(inBuffer.position() + (rleCount - 1) * 3);
     }
     
     /**
@@ -238,9 +212,7 @@ public class ImageCodecRLE extends ImageCodecRaw {
         int limit = inBuffer.limit();
         
         // Vergleicht aktuelle Farbe mit der folgenden Farbe
-        while( !ColorFormat.compareColor(s, 
-                                        inOffset, 
-                                        inOffset + 3)
+        while( !ColorFormat.compareColor(s, inOffset, inOffset + 3)
             && rawCounter < 128
             && inOffset < limit) {
 
@@ -265,7 +237,6 @@ public class ImageCodecRLE extends ImageCodecRaw {
      *  Puffert zu kodierende Daten bis zum nächsten Block
      */
     private void bufferInputData(ByteBuffer inBuffer) {
-        
         if(inBuffer == bufferedData) {
             bufferedData.compact();
         } else {
@@ -284,16 +255,12 @@ public class ImageCodecRLE extends ImageCodecRaw {
      *  zurückgeben
      */
     private ByteBuffer getDataToEncode(ByteBuffer data) {
-        
         if(isBufferedData) {
             bufferedData.put(data);
             bufferedData.flip();
             isBufferedData = false;
             return bufferedData;
         } 
-        
         return data;
     }
-    
-
 }
