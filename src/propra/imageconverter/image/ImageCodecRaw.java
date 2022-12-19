@@ -38,7 +38,8 @@ public class ImageCodecRaw extends DataCodecRaw {
         /*
          * Lädt, konvertiert und sendet Pixelblöcke an Listener  
          */
-        while(resource.position() < resource.length()) {
+        while(!resource .getInputStream()
+                        .eof()) {
             
             // Block dekodieren 
             super.decode(block, listener);
@@ -96,13 +97,5 @@ public class ImageCodecRaw extends DataCodecRaw {
         block.data.flip();
         dispatchEvent(event, listener, block);
         block.data.clear();
-    }
-    
-    /**
-     * 
-     */
-    @Override
-    public void end() throws IOException {
-        super.end();
     }
 }

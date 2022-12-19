@@ -73,7 +73,8 @@ public class DataCodecRaw implements IDataCodec {
         }
         
         // Datenblock in Resource schreiben
-        resource.write(block.data);
+        resource.getOutputStream()
+                .write(block.data);
         
         // Gelesene Daten filtern
         dispatchEvent(Event.DATA_IO_WRITE, listener, block);
@@ -91,11 +92,12 @@ public class DataCodecRaw implements IDataCodec {
         }
         
         // Datenblock von Resource lesen 
-        resource.read(readBuffer.clear());
+        int r = resource.getInputStream()
+                        .read(readBuffer.clear());
         block.data = readBuffer;
         
         // Letzter Block der Operation?
-        if(resource.position() == resource.length()) {
+        if(r == -1) {
             block.lastBlock = true;
         }
         

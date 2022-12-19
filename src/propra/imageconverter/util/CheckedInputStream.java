@@ -14,6 +14,9 @@ public class CheckedInputStream extends BufferedInputStream {
     // Prüfsumme
     private Checksum checksum;
     
+    // Letzte Ergebnis
+    private int r;
+    
     /**
      *  Konstruktoren
      */
@@ -30,9 +33,16 @@ public class CheckedInputStream extends BufferedInputStream {
     /**
      * 
      */
+    public boolean eof() {
+        return r == -1;
+    }
+    
+    /**
+     * 
+     */
     @Override
     public synchronized int read() throws IOException {
-        int r = super.read();
+        r = super.read();
         if( checksum != null
         &&  r != -1) {
             checksum.update((byte)r);
@@ -42,7 +52,7 @@ public class CheckedInputStream extends BufferedInputStream {
 
     @Override
     public synchronized int read(byte[] b, int off, int len) throws IOException {
-        int r = super.read(b, off, len);
+        r = super.read(b, off, len);
         if( checksum != null
         &&  r != -1) {
             checksum.update(b, off, len);

@@ -112,9 +112,7 @@ public class HuffmanNode implements Comparable<HuffmanNode>{
            leftNode.buildBitCodes(new BitCode(c).addBit(false));
            rightNode.buildBitCodes(new BitCode(c).addBit(true));
 
-       } /*else {
-           System.out.print("\n Symbol: "+symbol + " " + code.toString());
-       }*/
+       } 
    }
 
    /**
