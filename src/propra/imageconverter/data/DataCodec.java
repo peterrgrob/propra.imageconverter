@@ -6,7 +6,7 @@ import propra.imageconverter.data.DataFormat.Operation;
 import propra.imageconverter.data.IDataListener.Event;
 
 /**
- *  Codec für die unkomprimierte Datenübertragung
+ *  Basis-Codec für die unkomprimierte Datenübertragung
  */
 public class DataCodec implements IDataCodec {
 

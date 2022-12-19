@@ -12,8 +12,12 @@ import propra.imageconverter.util.CmdLine.Options;
  * 
  *  Änderungen zu KE2
  *  -   Meine Abgabe für KE2 hat die Verarbeitung großer Dateien in Bezug auf RLE nicht 
- *      unterstützt. Dazu habe ich jetzt nochmal grundlegende Änderungen bei der Klassenstruktur 
- *      vorgenommen. Hier eine Übersicht über die Struktur:
+ *      unterstützt und war teilweise aus Zeitgründen nicht ganz optimal umgesetzt. 
+ *      Deshalb habe ich jetzt nochmal grundlegende Änderungen bei der Klassenstruktur 
+ *      vorgenommen und das ganze etwas streamorientierter implementiert. 
+ *      Trotzdem verarbeite ich die Pixel aus Performancegründen noch in Blöcken. 
+ *      
+ *      Klassenhierarchie Übersicht:
  * 
  */
 public class ImageConverter {

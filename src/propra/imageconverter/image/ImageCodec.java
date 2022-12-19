@@ -9,8 +9,7 @@ import propra.imageconverter.data.IDataListener.Event;
 
 
 /**
- *
- * 
+ *  Basiscodec für die Konvertierung von unkomprimierten Pixelblöcken
  */
 public class ImageCodec extends DataCodec {
     
@@ -20,7 +19,7 @@ public class ImageCodec extends DataCodec {
     /**
      * 
      */
-    public ImageCodec(   ImageResource resource) {
+    public ImageCodec(ImageResource resource) {
         super(resource);
         image = resource;
     }
