@@ -2,8 +2,8 @@ package propra.imageconverter.image;
 
 import propra.imageconverter.image.huffman.ImageCodecHuffman;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import propra.imageconverter.util.Checksum;
-import propra.imageconverter.data.DataBlock;
 import propra.imageconverter.data.DataCodec;
 import propra.imageconverter.data.DataFormat.Encoding;
 import propra.imageconverter.data.DataFormat.Operation;
@@ -83,7 +83,7 @@ public abstract class ImageResource extends DataResource
         transcodedImage.getCodec().begin(Operation.ENCODE);
         
         // Dekodierung starten
-        inCodec.decode(new DataBlock(), this);
+        inCodec.decode(null, false, this);
         
         // Bildverarbeitung abschließen
         inCodec.end();
@@ -115,7 +115,7 @@ public abstract class ImageResource extends DataResource
         // Position merken
         long p = position();
         
-        DataBlock dataBlock = new DataBlock(DataCodec.DEFAULT_BLOCK_SIZE);
+        ByteBuffer dataBlock = ByteBuffer.allocate(DataCodec.DEFAULT_BLOCK_SIZE);
         
         inCodec.begin(Operation.DECODER_ANALYZE);
         transcodedImage.getCodec().begin(Operation.ENCODER_ANALYZE);
@@ -128,8 +128,8 @@ public abstract class ImageResource extends DataResource
             
             // Durchlauf für Decoder-Analyse 
             while(position() < length()) {
-                getInputStream().read(dataBlock.data);
-                inCodec.analyze(dataBlock);
+                getInputStream().read(dataBlock);
+                inCodec.analyze(dataBlock, false);
             }
             
             // Ursprüngliche Position wiederherstellen
@@ -137,20 +137,20 @@ public abstract class ImageResource extends DataResource
             
             // Durchlauf mit Dekodierung und Encoder-Analyse 
             while(position() < length()) {
-                inCodec.decode(dataBlock, this);
+                inCodec.decode(dataBlock, false, this);
             } 
         } else if(inCodec.analyzeNecessary(Operation.DECODE)) {
             
             // Durchlauf für Decoder-Analyse 
             while(position() < length()) {
-                getInputStream().read(dataBlock.data);
-                inCodec.analyze(dataBlock);
+                getInputStream().read(dataBlock);
+                inCodec.analyze(dataBlock, false);
             }
         } else if(transcodedImage.getCodec().analyzeNecessary(Operation.ENCODE)) {
             
             // Durchlauf mit Dekodierung und Encoder-Analyse 
             while(position() < length()) {
-                inCodec.decode(dataBlock, this);
+                inCodec.decode(dataBlock, false, this);
             } 
         }
         
@@ -167,13 +167,15 @@ public abstract class ImageResource extends DataResource
     @Override
     public void onData( Event event, 
                         IDataCodec caller, 
-                        DataBlock block) throws IOException {
+                        ByteBuffer block,
+                        boolean last) throws IOException {
         switch(event) {
             case DATA_BLOCK_DECODED -> {
                 if(caller.getOperation() == Operation.DECODER_ANALYZE) {
-                    transcodedImage.getCodec().analyze( block);
+                    transcodedImage.getCodec().analyze( block, last);
                 } else {
-                    transcodedImage.getCodec().encode(  block, 
+                    transcodedImage.getCodec().encode(  block,
+                                                        last,
                                                         transcodedImage);
                 }
             }

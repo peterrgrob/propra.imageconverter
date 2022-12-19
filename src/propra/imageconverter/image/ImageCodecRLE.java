@@ -2,12 +2,10 @@ package propra.imageconverter.image;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import propra.imageconverter.data.DataBlock;
 import propra.imageconverter.data.IDataListener;
 import propra.imageconverter.data.IDataListener.Event;
 import propra.imageconverter.util.CheckedInputStream;
 import propra.imageconverter.util.CheckedOutputStream;
-import propra.imageconverter.util.ChecksumPropra;
 
 /**
  *
@@ -31,10 +29,10 @@ public class ImageCodecRLE extends ImageCodec {
      * 
      */
     @Override
-    public void decode( DataBlock outBlock, 
+    public void decode( ByteBuffer outBlock,
+                        boolean last,
                         IDataListener target) throws IOException {     
         if(!isValid()
-        ||  outBlock == null
         ||  target == null) {
             throw new IllegalArgumentException();
         }
@@ -43,10 +41,10 @@ public class ImageCodecRLE extends ImageCodec {
         CheckedInputStream stream = resource.getInputStream();
     
         // Puffer vorbereiten
-        if(outBlock.data == null) {
-            outBlock.data = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
+        if(outBlock == null) {
+            outBlock = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
         }        
-        ByteBuffer outBuffer = outBlock.data;
+        ByteBuffer outBuffer = outBlock;
         
         /*
          * Rle Block dekodieren
@@ -68,7 +66,8 @@ public class ImageCodecRLE extends ImageCodec {
                 outBuffer.flip();
                 dispatchEvent(  Event.DATA_BLOCK_DECODED, 
                                 target, 
-                                outBlock);
+                                outBlock,
+                                false);
                 outBuffer.clear();
             }
 
@@ -95,18 +94,19 @@ public class ImageCodecRLE extends ImageCodec {
          *  Letzten Block der Operation kennzeichnen und Restdaten
          *  übertragen
          */
-        outBlock.lastBlock = stream.eof();
-        outBlock.data.flip();
+        outBlock.flip();
         dispatchEvent(  Event.DATA_BLOCK_DECODED, 
                         target, 
-                        outBlock);
+                        outBlock,
+                        stream.eof());
     }
     
     /*
      *  Kodiert Pixelblock als RLE
      */
     @Override
-    public void encode( DataBlock block,
+    public void encode( ByteBuffer block,
+                        boolean last,
                         IDataListener listener) throws IOException{ 
         if(!isValid()
         ||  block == null) {
@@ -120,16 +120,16 @@ public class ImageCodecRLE extends ImageCodec {
 
         // Farbkonvertierung
         if(image.getHeader().colorFormat().compareTo(ColorFormat.FORMAT_RGB) != 0) {   
-            ColorFormat.convertColorBuffer( block.data, 
+            ColorFormat.convertColorBuffer( block, 
                                             ColorFormat.FORMAT_RGB, 
-                                            block.data,
+                                            block,
                                             image.getHeader().colorFormat());
         }
         
         /*
          *  Eingabedaten mit gepufferten Daten zusammenführen
          */
-        ByteBuffer inBuffer = getDataToEncode(block.data);
+        ByteBuffer inBuffer = getDataToEncode(block);
         int dataLimit = inBuffer.limit();
         
         // Über Bytes iterieren und gemäß RLE verarbeiten
@@ -139,7 +139,7 @@ public class ImageCodecRLE extends ImageCodec {
              *  nur wenn es sich nicht um den letzten Block handelt.
              */
             boolean boundary = inBuffer.position() + (127 * 3) >= dataLimit;
-            if(boundary && !block.lastBlock) {    
+            if(boundary && !last) {    
                 bufferInputData(inBuffer);
                 isBufferedData = true;
                 return; 

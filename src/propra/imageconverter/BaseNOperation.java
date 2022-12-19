@@ -8,7 +8,6 @@ import propra.imageconverter.util.CmdLine.Options;
 import propra.imageconverter.basen.BaseNCodec;
 import propra.imageconverter.basen.BaseNFormat;
 import propra.imageconverter.basen.BaseNResource;
-import propra.imageconverter.data.DataBlock;
 import propra.imageconverter.data.DataFormat;
 import propra.imageconverter.data.DataResource;
 
@@ -123,17 +122,16 @@ public class BaseNOperation implements AutoCloseable {
                                                 baseNFile.getFormat());
 
             // Puffer für dekodierte Daten erstellen 
-            DataBlock block = new DataBlock();
-            block.data = ByteBuffer.allocate((int)baseNFile.length());
+            ByteBuffer data = ByteBuffer.allocate((int)baseNFile.length());
             
             // Datei in Puffer dekodieren
             decoder.begin(DataFormat.Operation.DECODE);
-            decoder.decode(block, null);
+            decoder.decode(data, true, null);
             decoder.end();
             
             // Daten in Daei schreiben 
             binaryFile.getOutputStream()
-                      .write(block.data);
+                      .write(data);
             
         } else {
             /**
@@ -145,16 +143,15 @@ public class BaseNOperation implements AutoCloseable {
                                                 baseNFile.getFormat());
             
             // Puffer für kodierte Daten erstellen 
-            DataBlock block = new DataBlock();
-            block.data = ByteBuffer.allocate((int)binaryFile.length());
+            ByteBuffer data = ByteBuffer.allocate((int)binaryFile.length());
             
             // Daten von Datei lesen
             binaryFile.getInputStream()
-                      .read(block.data);
+                      .read(data);
             
             // Daten in Resource dekodieren
             encoder.begin(DataFormat.Operation.DECODE);
-            encoder.encode(block, null);
+            encoder.encode(data, true, null);
             encoder.end();
         }
         

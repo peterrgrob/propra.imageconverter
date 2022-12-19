@@ -1,6 +1,7 @@
 package propra.imageconverter.data;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataFormat.Operation;
 import propra.imageconverter.data.IDataListener.Event;
 
@@ -52,7 +53,8 @@ public class DataCodec implements IDataCodec {
      * 
      */
     @Override
-    public void analyze(DataBlock data) {
+    public void analyze(ByteBuffer data, 
+                        boolean last) {
         
     }
 
@@ -60,7 +62,8 @@ public class DataCodec implements IDataCodec {
      * 
      */
     @Override
-    public void encode( DataBlock block, 
+    public void encode( ByteBuffer data, 
+                        boolean last, 
                         IDataListener listener) throws IOException {
     }
     
@@ -68,7 +71,8 @@ public class DataCodec implements IDataCodec {
      * 
      */
     @Override
-    public void decode( DataBlock block,
+    public void decode( ByteBuffer data, 
+                        boolean last,
                         IDataListener target) throws IOException {
         
     }        
@@ -93,9 +97,10 @@ public class DataCodec implements IDataCodec {
      */
     protected void dispatchEvent(   Event event,
                                     IDataListener listener, 
-                                    DataBlock block) throws IOException {            
+                                    ByteBuffer data,
+                                    boolean lastBlock) throws IOException {            
         if(listener != null) {
-            listener.onData(event,this, block);
+            listener.onData(event,this, data, lastBlock);
         }
     }
     

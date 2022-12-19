@@ -28,28 +28,26 @@ public class ChecksumPropra extends Checksum {
     }
     
     /**
-     *  Aktualisiert Prüfsumme mit ProPra-Prüfsummen Verfahren, wie vorgegeben
-     * 
-     * @param buffer
+     *
+     */
+    @Override
+    public long getValue() {
+        value = (currAi << 16) + currBi;
+        return value;
+    }
+    
+    /**
+     * Aktualisiert Prüfsumme mit ProPra-Prüfsummen Verfahren, wie vorgegeben
      */
     @Override
     public ByteBuffer update(ByteBuffer buffer) {
         if (buffer == null) {
             throw new IllegalArgumentException();
         }
-        
-        int dindex = 0;
-        byte[] data = buffer.array();
-        
-        for(int i=1; i<=buffer.limit(); i++) {
-            currAi = (i + currIndex + currAi + (data[dindex++] & 0xFF)) % X;
-            currBi = (currBi + currAi) % X; 
-        }  
-        
-        currIndex += buffer.limit();
+        update(buffer.array(), buffer.position(), buffer.limit());
         return buffer;
     }
-    
+
     @Override
     public void update(byte[] b, int offset, int len) {
         if (b == null) {
@@ -64,30 +62,10 @@ public class ChecksumPropra extends Checksum {
         
         currIndex += len;
     }
-    
-    /**
-     * 
-     */
+
     @Override
     public void update(byte b) {
         currAi = (++currIndex + currAi + (b & 0xFF)) % X;
         currBi = (currBi + currAi) % X; 
-    }
-    
-    /**
-     *
-     */
-    @Override
-    public long getValue() {
-        value = (currAi << 16) + currBi;
-        return value;
-    }
-
-    /**
-     *
-     * @return
-     */
-    public boolean isValid() {
-        return true;
     }
 }

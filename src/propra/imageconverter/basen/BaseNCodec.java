@@ -2,7 +2,6 @@ package propra.imageconverter.basen;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import propra.imageconverter.data.DataBlock;
 import propra.imageconverter.data.DataCodec;
 import propra.imageconverter.data.DataFormat;
 import propra.imageconverter.data.IDataListener;
@@ -45,17 +44,18 @@ public class BaseNCodec extends DataCodec {
      * 
      */
     @Override
-    public void decode( DataBlock block,
+    public void decode( ByteBuffer data, 
+                        boolean last,
                         IDataListener target) throws IOException {
         if(!isValid()
-        ||  block == null) {
+        ||  data == null) {
             throw new IllegalArgumentException();
         }   
         
         // Größe der binären Base-N Byteblöcke
         int blockLength = format.getBlockLength();
         
-        ByteBuffer out = block.data;
+        ByteBuffer out = data;
         ByteBuffer inData = ByteBuffer.allocate(encodedBufferLength(out));
         ByteBuffer tData = ByteBuffer.allocate(blockLength);
         
@@ -92,21 +92,23 @@ public class BaseNCodec extends DataCodec {
         //  Daten an Listener senden
         dispatchEvent(  Event.DATA_BLOCK_DECODED, 
                         target, 
-                        new DataBlock(out.flip(),false));
+                        out.flip(),
+                        false);
     }
     
     /**
      * Kodiert Binärdaten in BaseNCodec
      */
     @Override
-    public void encode( DataBlock block,
+    public void encode( ByteBuffer data, 
+                        boolean last,
                         IDataListener target) throws IOException {
         if(!isValid()
-        ||  block == null) {
+        ||  data == null) {
             throw new IllegalArgumentException();
         }   
         
-        ByteBuffer inBuffer = block.data;
+        ByteBuffer inBuffer = data;
         ByteBuffer charBuffer = ByteBuffer.allocate(8);         
 
         // Anzahl der Ausgabezeichen ermitteln

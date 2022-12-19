@@ -1,6 +1,7 @@
 package propra.imageconverter.data;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataFormat.Operation;
 
 /**
@@ -25,19 +26,24 @@ public interface IDataCodec {
     /**
      *  Ermöglicht die Analyse der Daten vor der Kodierung
      */
-    public void analyze(DataBlock data);
+    public void analyze(ByteBuffer data, 
+                        boolean last);
             
     /*
      *  Kodiert Daten des Blocks und speichert diese in der Resource.
      */
-    public void encode(DataBlock data, IDataListener listener) throws IOException;
+    public void encode( ByteBuffer data, 
+                        boolean last, 
+                        IDataListener listener) throws IOException;
     
     /*
      *  Dekodiert Daten von Resource, sendet diese an Listener und speichert in 
      *  Data, falls übergeben. Die Blockgröße kann je nach Codec unterschiedlich 
      *  sein.
      */
-    public void decode(DataBlock data, IDataListener listener) throws IOException;
+    public void decode( ByteBuffer data, 
+                        boolean last, 
+                        IDataListener listener) throws IOException;
     
     /**
      * 

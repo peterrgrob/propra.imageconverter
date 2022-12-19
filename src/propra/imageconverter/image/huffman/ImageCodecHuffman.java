@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import propra.imageconverter.util.*;
-import propra.imageconverter.data.DataBlock;
 import static propra.imageconverter.data.DataCodec.DEFAULT_BLOCK_SIZE;
 import propra.imageconverter.data.DataFormat.Operation;
 import propra.imageconverter.data.IDataListener;
@@ -58,7 +57,8 @@ public class ImageCodecHuffman extends ImageCodec {
      *  Ermittelt die Häufigkeit der Symbole im Datenblock
      */
     @Override
-    public void analyze(DataBlock block) {
+    public void analyze(ByteBuffer block,
+                        boolean last) {
         if(block == null) {
             throw new IllegalArgumentException();
         }
@@ -68,7 +68,7 @@ public class ImageCodecHuffman extends ImageCodec {
             byte[] buffer = block.array();
             int offset = 0;
 
-            while(offset < block.data.limit()) {
+            while(offset < block.limit()) {
                 histogram[buffer[offset] & 0xFF]++;
                 offset++;
             }
@@ -125,19 +125,20 @@ public class ImageCodecHuffman extends ImageCodec {
      *  Dekodiert Huffman kodierten Datenblock
      */
     @Override
-    public void decode( DataBlock block, 
+    public void decode( ByteBuffer block,
+                        boolean last,
                         IDataListener listener) throws IOException {
         
         // Ausgabepuffer vorbereiten
-        if(block.data == null) {
-            block.data = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
+        if(block == null) {
+            block = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
         }
         
         int symbolCtr = 0;
         
         // BitStream erstellen
         BitInputStream stream = new BitInputStream(resource.getInputStream());
-        ByteBuffer data = block.data;
+        ByteBuffer data = block;
         
         // Kodierten Baum einlesen und erstellen
         huffmanTree = new HuffmanTree();
@@ -160,44 +161,46 @@ public class ImageCodecHuffman extends ImageCodec {
                 
                 // Farbkonvertierung
                 if(image.getHeader().colorFormat().compareTo(ColorFormat.FORMAT_RGB) != 0) {   
-                    ColorFormat.convertColorBuffer( block.data,
+                    ColorFormat.convertColorBuffer( block,
                                                     image.getHeader().colorFormat(),
-                                                    block.data, 
+                                                    block, 
                                                     ColorFormat.FORMAT_RGB);
                 }
                 
                 dispatchData(   IDataListener.Event.DATA_BLOCK_DECODED, 
                                 listener, 
-                                block);    
+                                block,
+                                false);    
             }
         }
         
         // Farbkonvertierung
         if(image.getHeader().colorFormat().compareTo(ColorFormat.FORMAT_RGB) != 0) {   
-            ColorFormat.convertColorBuffer( block.data,
+            ColorFormat.convertColorBuffer( block,
                                             image.getHeader().colorFormat(),
-                                            block.data, 
+                                            block, 
                                             ColorFormat.FORMAT_RGB);
         }
         
         // Restliche Daten im Puffer übertragen
-        block.lastBlock = true;
         dispatchData(   IDataListener.Event.DATA_BLOCK_DECODED, 
                         listener, 
-                        block);     
+                        block,
+                        true);     
     }
 
     /*
      * 
      */
     @Override
-    public void encode( DataBlock block, 
+    public void encode( ByteBuffer block, 
+                        boolean last,
                         IDataListener listener) throws IOException {
         if(huffmanTree == null) {
             throw new IllegalStateException("Huffmann-Tree nicht initialisiert.");
         }
         
-        ByteBuffer buff = block.data;
+        ByteBuffer buff = block;
         
         /**
          *  Symbole im Puffer iterieren, per Huffmantree zu Bitcode umsetzen und 
