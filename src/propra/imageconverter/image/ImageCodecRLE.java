@@ -12,7 +12,7 @@ import propra.imageconverter.util.CheckedOutputStream;
  *
  * 
  */
-public class ImageCodecRLE extends ImageCodecRaw {
+public class ImageCodecRLE extends ImageCodec {
 
     private final ByteBuffer bufferedData; 
     private boolean isBufferedData;
@@ -128,14 +128,15 @@ public class ImageCodecRLE extends ImageCodecRaw {
          *  Eingabedaten mit gepufferten Daten zusammenführen
          */
         ByteBuffer inBuffer = getDataToEncode(block.data);
+        int dataLimit = inBuffer.limit();
         
         // Über Bytes iterieren und gemäß RLE verarbeiten
-        while(inBuffer.position() < inBuffer.limit()) {
+        while(inBuffer.position() < dataLimit) {
             /*
              *  Wenn Blockgrenze erreichbar Restdaten puffern für nächsten Block, 
              *  nur wenn es sich nicht um den letzten Block handelt.
              */
-            boolean boundary = inBuffer.position() + (127 * 3) >= inBuffer.limit();
+            boolean boundary = inBuffer.position() + (127 * 3) >= dataLimit;
             if(boundary && !block.lastBlock) {    
                 bufferInputData(inBuffer);
                 isBufferedData = true;
@@ -157,6 +158,7 @@ public class ImageCodecRLE extends ImageCodecRaw {
 
                 // Gleiche Farben im Eingabepuffer überspringen
                 inBuffer.position(inBuffer.position() + (colorCtr - 1) * 3);
+                
             } else {      
                /*
                 * Raw Pixel kopieren und Paketkopf schreiben

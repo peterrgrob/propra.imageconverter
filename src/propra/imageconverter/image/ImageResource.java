@@ -4,7 +4,7 @@ import propra.imageconverter.image.huffman.ImageCodecHuffman;
 import java.io.IOException;
 import propra.imageconverter.util.Checksum;
 import propra.imageconverter.data.DataBlock;
-import propra.imageconverter.data.DataCodecRaw;
+import propra.imageconverter.data.DataCodec;
 import propra.imageconverter.data.DataFormat.Encoding;
 import propra.imageconverter.data.DataFormat.Operation;
 import propra.imageconverter.data.DataResource;
@@ -40,42 +40,6 @@ public abstract class ImageResource extends DataResource
     }
     
     /**
-     *
-     */
-    public int getFileHeaderSize() {
-        return fileHeaderSize;
-    }
-    
-    /**
-     *
-     */
-    public ImageHeader getHeader() {
-        return header;
-    }
-    
-    /**
-     * 
-     */
-    public IDataCodec getCodec() {
-        return inCodec;
-    }
-    
-    /**
-     * 
-     */
-    public Checksum getChecksum() {
-        return checksum;
-    }
-    
-    /**
-     * 
-     */
-    public void setHeader(ImageHeader header) {
-        this.header = new ImageHeader(header);
-        inCodec = createImageCodec(header);
-    }
-    
-    /**
      * 
      */
     abstract public ImageHeader readHeader() throws IOException;
@@ -85,44 +49,6 @@ public abstract class ImageResource extends DataResource
      */
     public void writeHeader(ImageHeader srcHeader) throws IOException {
         setHeader(srcHeader);
-    }
-    
-    /**
-     * 
-     */
-    protected IDataCodec createImageCodec(ImageHeader header) {
-        if(header != null) {
-            switch(header.colorFormat().encoding()) {
-                case NONE -> {
-                    return new ImageCodecRaw(this);
-                }
-                case RLE -> {
-                    return new ImageCodecRLE(this);
-                }
-                case HUFFMAN -> {
-                    return new ImageCodecHuffman(this);
-                }
-            }
-        }
-        return null;
-    }
-    
-    /**
-     *  Erstellt ein ImageResource Objekt basierend auf Dateipfad
-     */
-    public static ImageResource createImageResource(String path, 
-                                                    String ext,
-                                                    boolean write) throws IOException {
-        switch(ext) {
-            case "tga" -> {
-                return new ImageResourceTGA(path, write);
-            }
-            case "propra" -> {
-                return new ImageResourceProPra(path, write);
-            }
-
-        }
-        return null;
     }
     
     /**
@@ -152,13 +78,6 @@ public abstract class ImageResource extends DataResource
         // Bild durch Codecs analysieren
         analyze();
         
-        if(checksum != null) {
-            checksum.reset();
-        }
-        if(transcodedImage.getChecksum() != null) {
-            transcodedImage.getChecksum().reset();
-        }
-        
         // Bildverarbeitung initialisieren
         inCodec.begin(Operation.DECODE);
         transcodedImage.getCodec().begin(Operation.ENCODE);
@@ -170,9 +89,6 @@ public abstract class ImageResource extends DataResource
         inCodec.end();
         transcodedImage.getCodec().end();
         
-        if(checksum != null) {
-            header.checksum(checksum.getValue());
-        }
         if(transcodedImage.getChecksum() != null) {
             transcodedImage.getHeader().checksum(transcodedImage.getChecksum().getValue());
         }
@@ -191,11 +107,15 @@ public abstract class ImageResource extends DataResource
      *  Bild in Blöcken durch Codecs analysieren
      */
     private void analyze() throws IOException {
+        if( !inCodec.analyzeNecessary(Operation.DECODE)
+        &&  !transcodedImage.getCodec().analyzeNecessary(Operation.ENCODE)) {
+            return;
+        }
         
         // Position merken
         long p = position();
         
-        DataBlock dataBlock = new DataBlock(DataCodecRaw.DEFAULT_BLOCK_SIZE);
+        DataBlock dataBlock = new DataBlock(DataCodec.DEFAULT_BLOCK_SIZE);
         
         inCodec.begin(Operation.DECODER_ANALYZE);
         transcodedImage.getCodec().begin(Operation.ENCODER_ANALYZE);
@@ -248,7 +168,6 @@ public abstract class ImageResource extends DataResource
     public void onData( Event event, 
                         IDataCodec caller, 
                         DataBlock block) throws IOException {
-        
         switch(event) {
             case DATA_BLOCK_DECODED -> {
                 if(caller.getOperation() == Operation.DECODER_ANALYZE) {
@@ -258,11 +177,68 @@ public abstract class ImageResource extends DataResource
                                                         transcodedImage);
                 }
             }
-            case DATA_IO_READ, DATA_IO_WRITE  -> {
-                if(checksum != null) {
-                    checksum.update(block.data);
+        }
+    }
+    
+    /**
+     * 
+     */
+    protected IDataCodec createImageCodec(ImageHeader header) {
+        if(header != null) {
+            switch(header.colorFormat().encoding()) {
+                case NONE -> {
+                    return new ImageCodec(this);
+                }
+                case RLE -> {
+                    return new ImageCodecRLE(this);
+                }
+                case HUFFMAN -> {
+                    return new ImageCodecHuffman(this);
                 }
             }
         }
+        return null;
+    }
+    
+    /**
+     *  Erstellt ein ImageResource Objekt basierend auf Dateipfad
+     */
+    public static ImageResource createImageResource(String path, 
+                                                    String ext,
+                                                    boolean write) throws IOException {
+        switch(ext) {
+            case "tga" -> {
+                return new ImageResourceTGA(path, write);
+            }
+            case "propra" -> {
+                return new ImageResourceProPra(path, write);
+            }
+
+        }
+        return null;
+    }
+    
+    /**
+     *
+     */
+    public int getFileHeaderSize() {
+        return fileHeaderSize;
+    }
+    
+    public ImageHeader getHeader() {
+        return header;
+    }
+
+    public IDataCodec getCodec() {
+        return inCodec;
+    }
+    
+    public Checksum getChecksum() {
+        return checksum;
+    }
+
+    public void setHeader(ImageHeader header) {
+        this.header = new ImageHeader(header);
+        inCodec = createImageCodec(header);
     }
 }

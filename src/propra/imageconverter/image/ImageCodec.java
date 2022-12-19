@@ -1,8 +1,10 @@
 package propra.imageconverter.image;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataBlock;
-import propra.imageconverter.data.DataCodecRaw;
+import propra.imageconverter.data.DataCodec;
+import static propra.imageconverter.data.DataCodec.DEFAULT_BLOCK_SIZE;
 import propra.imageconverter.data.IDataListener;
 import propra.imageconverter.data.IDataListener.Event;
 
@@ -11,7 +13,7 @@ import propra.imageconverter.data.IDataListener.Event;
  *
  * 
  */
-public class ImageCodecRaw extends DataCodecRaw {
+public class ImageCodec extends DataCodec {
     
     // Zugeordnete Resource zur Ein-, oder Ausgabe der Daten 
     protected ImageResource image;
@@ -19,7 +21,7 @@ public class ImageCodecRaw extends DataCodecRaw {
     /**
      * 
      */
-    public ImageCodecRaw(   ImageResource resource) {
+    public ImageCodec(   ImageResource resource) {
         super(resource);
         image = resource;
     }
@@ -35,14 +37,26 @@ public class ImageCodecRaw extends DataCodecRaw {
             throw new IllegalArgumentException();
         }
         
+        // Lese Puffer 
+        block.data = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
+        
         /*
          * Lädt, konvertiert und sendet Pixelblöcke an Listener  
          */
-        while(!resource .getInputStream()
-                        .eof()) {
+        while(resource.position() < resource.length()) {
             
-            // Block dekodieren 
-            super.decode(block, listener);
+            // Blockgröße anpassen
+            if(resource.length() - resource.position() < block.data.capacity()) {
+                block.data.limit((int)(resource.length() - resource.position()));
+                block.lastBlock = true;
+            }
+            
+            // Datenblock von Resource lesen 
+            int r = resource.getInputStream()
+                            .read(block.data);
+            if(r == -1) {
+                throw new IOException("Lesefehler!");
+            }
 
             // Pixelformat ggfs. konvertieren
             if(image.getHeader().colorFormat().compareTo(ColorFormat.FORMAT_RGB) != 0) {  
@@ -55,8 +69,8 @@ public class ImageCodecRaw extends DataCodecRaw {
             // Daten an Listener senden
             dispatchEvent(  Event.DATA_BLOCK_DECODED, 
                             listener, 
-                            block);
-
+                            block);  
+            block.data.clear();
         }
     }
 
@@ -80,7 +94,8 @@ public class ImageCodecRaw extends DataCodecRaw {
         }
         
         // Block in Resource kodieren
-        super.encode(block, listener);
+        resource.getOutputStream()
+                .write(block.data);
         
         // Daten an Listener senden
         dispatchEvent(  Event.DATA_BLOCK_ENCODED, 

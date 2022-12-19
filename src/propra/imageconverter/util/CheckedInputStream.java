@@ -33,6 +33,13 @@ public class CheckedInputStream extends BufferedInputStream {
     /**
      * 
      */
+    public void setChecksum(Checksum checksum) {
+        this.checksum = checksum;
+    }
+    
+    /**
+     * 
+     */
     public boolean eof() {
         return r == -1;
     }

@@ -1,20 +1,16 @@
 package propra.imageconverter.data;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataFormat.Operation;
 import propra.imageconverter.data.IDataListener.Event;
 
 /**
  *  Codec für die unkomprimierte Datenübertragung
  */
-public class DataCodecRaw implements IDataCodec {
+public class DataCodec implements IDataCodec {
 
     // Standardblockgröße, muss vielfaches der Pixelgröße sein
     public static final int DEFAULT_BLOCK_SIZE = 4096 * 16 * 3;
-    
-    // Temporärer Lesepuffer
-    protected ByteBuffer readBuffer;
     
     // Zugeordnete Resource
     protected IDataResource resource;
@@ -25,7 +21,7 @@ public class DataCodecRaw implements IDataCodec {
     /*
      * 
      */
-    public DataCodecRaw(IDataResource resource) {
+    public DataCodec(IDataResource resource) {
         this.resource = resource;
     }
     
@@ -42,7 +38,6 @@ public class DataCodecRaw implements IDataCodec {
     @Override
     public void begin(DataFormat.Operation op) throws IOException {  
         operation = op;
-        readBuffer = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
     }
     
     /**
@@ -67,17 +62,6 @@ public class DataCodecRaw implements IDataCodec {
     @Override
     public void encode( DataBlock block, 
                         IDataListener listener) throws IOException {
-        if(!isValid() 
-        ||  block == null) {
-            throw new IllegalArgumentException();
-        }
-        
-        // Datenblock in Resource schreiben
-        resource.getOutputStream()
-                .write(block.data);
-        
-        // Gelesene Daten filtern
-        dispatchEvent(Event.DATA_IO_WRITE, listener, block);
     }
     
     /*
@@ -86,23 +70,7 @@ public class DataCodecRaw implements IDataCodec {
     @Override
     public void decode( DataBlock block,
                         IDataListener target) throws IOException {
-        if(!isValid()
-        || block == null) {
-            throw new IllegalArgumentException();
-        }
         
-        // Datenblock von Resource lesen 
-        int r = resource.getInputStream()
-                        .read(readBuffer.clear());
-        block.data = readBuffer;
-        
-        // Letzter Block der Operation?
-        if(r == -1) {
-            block.lastBlock = true;
-        }
-        
-        // Gelesene Daten filtern
-        dispatchEvent(Event.DATA_IO_READ, target, block);
     }        
 
     /*

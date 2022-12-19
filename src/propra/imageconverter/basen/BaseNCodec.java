@@ -3,7 +3,7 @@ package propra.imageconverter.basen;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataBlock;
-import propra.imageconverter.data.DataCodecRaw;
+import propra.imageconverter.data.DataCodec;
 import propra.imageconverter.data.DataFormat;
 import propra.imageconverter.data.IDataListener;
 import propra.imageconverter.data.IDataListener.Event;
@@ -15,7 +15,7 @@ import propra.imageconverter.util.CheckedInputStream;
  * über das per Konstruktor übergebene DataFormat Objekt. 
  *  
  */
-public class BaseNCodec extends DataCodecRaw {
+public class BaseNCodec extends DataCodec {
     
     // BaseN Kodierung 
     private final BaseNFormat format;

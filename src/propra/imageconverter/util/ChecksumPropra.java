@@ -57,13 +57,12 @@ public class ChecksumPropra extends Checksum {
         }
         
         int dindex = 0;
-        
-        for(int i=1; i<=b.length; i++) {
+        for(int i=1; i<=len; i++) {
             currAi = (i + currIndex + currAi + (b[dindex++] & 0xFF)) % X;
             currBi = (currBi + currAi) % X; 
         }  
         
-        currIndex += b.length;
+        currIndex += len;
     }
     
     /**

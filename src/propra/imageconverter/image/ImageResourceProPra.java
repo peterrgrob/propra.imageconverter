@@ -38,6 +38,8 @@ public class ImageResourceProPra extends ImageResource {
         fileHeaderSize = PROPRA_HEADER_SIZE;
         colorFormat = new ColorFormat(0, 2, 1);
         checksum = new ChecksumPropra();
+        inStream.setChecksum(checksum);
+        outStream.setChecksum(checksum);
     }
     
     /**

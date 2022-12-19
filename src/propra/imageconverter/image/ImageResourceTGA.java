@@ -22,7 +22,7 @@ public class ImageResourceTGA extends ImageResource {
     static final int TGA_HEADER_OFFSET_BPP = 16;
     static final int TGA_HEADER_OFFSET_ORIGIN = 17; 
     
-    // Kodierungungen
+    // Kodierungen
     static final int TGA_HEADER_ENCODING_NONE = 2;     
     static final int TGA_HEADER_ENCODING_RLE = 10;    
     
@@ -64,7 +64,7 @@ public class ImageResourceTGA extends ImageResource {
                 newHeader.colorFormat().encoding(DataFormat.Encoding.RLE);
             }
             case TGA_HEADER_ENCODING_NONE -> {
-                inCodec = new ImageCodecRaw(this);
+                inCodec = new ImageCodec(this);
                 newHeader.colorFormat().encoding(DataFormat.Encoding.NONE);
             }
             default -> throw new UnsupportedOperationException("Nicht unterstützte TGA Kompression!");

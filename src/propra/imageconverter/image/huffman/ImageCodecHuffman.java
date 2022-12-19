@@ -5,17 +5,17 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import propra.imageconverter.util.*;
 import propra.imageconverter.data.DataBlock;
-import static propra.imageconverter.data.DataCodecRaw.DEFAULT_BLOCK_SIZE;
+import static propra.imageconverter.data.DataCodec.DEFAULT_BLOCK_SIZE;
 import propra.imageconverter.data.DataFormat.Operation;
 import propra.imageconverter.data.IDataListener;
 import propra.imageconverter.image.ColorFormat;
-import propra.imageconverter.image.ImageCodecRaw;
+import propra.imageconverter.image.ImageCodec;
 import propra.imageconverter.image.ImageResource;
 
 /**
  *
  */
-public class ImageCodecHuffman extends ImageCodecRaw {
+public class ImageCodecHuffman extends ImageCodec {
     
     //  Histogramm der Daten
     private final long[] histogram = new long[256]; 

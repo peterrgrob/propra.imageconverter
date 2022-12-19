@@ -25,6 +25,13 @@ public class CheckedOutputStream extends BufferedOutputStream {
         super(in);
         this.checksum = checksum;
     }
+    
+    /**
+     * 
+     */
+    public void setChecksum(Checksum checksum) {
+        this.checksum = checksum;
+    }
 
     /**
      *  Write Methoden 
