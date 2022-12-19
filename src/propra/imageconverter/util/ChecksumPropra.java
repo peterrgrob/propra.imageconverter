@@ -56,7 +56,7 @@ public class ChecksumPropra extends Checksum {
             throw new IllegalArgumentException();
         }
         
-        int dindex = 0;
+        int dindex = offset;
         for(int i=1; i<=len; i++) {
             currAi = (i + currIndex + currAi + (b[dindex++] & 0xFF)) % X;
             currBi = (currBi + currAi) % X; 

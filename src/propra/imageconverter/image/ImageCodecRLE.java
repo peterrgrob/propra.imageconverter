@@ -7,6 +7,7 @@ import propra.imageconverter.data.IDataListener;
 import propra.imageconverter.data.IDataListener.Event;
 import propra.imageconverter.util.CheckedInputStream;
 import propra.imageconverter.util.CheckedOutputStream;
+import propra.imageconverter.util.ChecksumPropra;
 
 /**
  *
@@ -52,7 +53,7 @@ public class ImageCodecRLE extends ImageCodec {
          */
         int packetHeader;
         while((packetHeader = stream.read()) != -1) {
-
+            
             // Paketkopf und Wiederholungen dekodieren
             packetHeader = packetHeader & 0xFF;
             int pixelCount = (packetHeader & 127) + 1;
@@ -75,6 +76,7 @@ public class ImageCodecRLE extends ImageCodec {
             if(packetHeader > 127) {
                 // Farbwert auslesen und Ausgabepuffer auffüllen
                 stream.read(rleColor);
+                
                 ColorFormat.fillColor(rleColor,
                                         outBuffer.array(),
                                         outBuffer.position(),

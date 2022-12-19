@@ -65,7 +65,15 @@ public class CheckedInputStream extends BufferedInputStream {
             checksum.update(b, off, len);
         }
         return r;
-    }    
+    }   
+    
+    /**
+     * 
+     */
+    @Override
+    public int read(byte[] b) throws IOException {
+        return read(b, 0, b.length);
+    }
     
     /**
      * 
