@@ -11,7 +11,7 @@ import propra.imageconverter.data.IDataListener.Event;
 public class DataCodec implements IDataCodec {
 
     // Standardblockgröße, muss vielfaches der Pixelgröße sein
-    public static final int DEFAULT_BLOCK_SIZE = 4096 * 16 * 3;
+    public static final int DEFAULT_BLOCK_SIZE = 4096 * 8 * 3;
     
     // Zugeordnete Resource
     protected IDataResource resource;
@@ -71,9 +71,7 @@ public class DataCodec implements IDataCodec {
      * 
      */
     @Override
-    public void decode( ByteBuffer data, 
-                        boolean last,
-                        IDataListener target) throws IOException {
+    public void decode(IDataListener target) throws IOException {
         
     }        
 

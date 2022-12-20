@@ -20,6 +20,9 @@ public class ColorFormat extends DataFormat
     
     // Standard RGB Format
     public static final ColorFormat FORMAT_RGB = new ColorFormat(RED, GREEN, BLUE);
+       
+    // Pixelgröße in Bytes
+    public static int PIXEL_SIZE = 3;
     
     // Bildet Indizes der Farkomponenten ab
     protected int[] mapping = new int[3];

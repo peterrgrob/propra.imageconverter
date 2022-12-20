@@ -2,8 +2,6 @@ package propra.imageconverter.data;
 
 import propra.imageconverter.util.CheckedOutputStream;
 import propra.imageconverter.util.CheckedInputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -15,7 +13,6 @@ import propra.imageconverter.util.Checksum;
 
 /**
  *
- * @author pg
  */
 public class DataResource implements IDataResource,
                                      AutoCloseable {
@@ -25,9 +22,7 @@ public class DataResource implements IDataResource,
     
     // Zugeordnete Streams
     protected CheckedOutputStream outStream;
-    protected CheckedInputStream inStream;
-    protected BufferedWriter txtWriter;
-    protected BufferedReader txtReader;   
+    protected CheckedInputStream inStream; 
     
     // Zugeordneter Codec zum lesen/schreiben der Daten
     protected IDataCodec inCodec;
@@ -41,7 +36,6 @@ public class DataResource implements IDataResource,
     public DataResource(String file,
                         boolean write) throws IOException {
         File fileObj;
-                
         if(write) {
             fileObj = createFileAndDirectory(file); 
         } else {
@@ -61,20 +55,16 @@ public class DataResource implements IDataResource,
         if(outStream != null) {
             outStream.close();
         }
+        if(inStream != null) {
+            inStream.close();
+        }
         if(binaryFile != null) {
             binaryFile.close();
-        }
-        if(txtWriter != null) {
-            txtWriter.close();
-        }
-        if(txtReader != null) {
-            txtReader.close();
         }
     }
     
     /**
      *
-     * @return
      */
     public boolean isValid() {
         return binaryFile != null;

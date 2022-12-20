@@ -125,20 +125,14 @@ public class ImageCodecHuffman extends ImageCodec {
      *  Dekodiert Huffman kodierten Datenblock
      */
     @Override
-    public void decode( ByteBuffer block,
-                        boolean last,
-                        IDataListener listener) throws IOException {
+    public void decode(IDataListener listener) throws IOException {
         
         // Ausgabepuffer vorbereiten
-        if(block == null) {
-            block = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
-        }
-        
         int symbolCtr = 0;
         
         // BitStream erstellen
         BitInputStream stream = new BitInputStream(resource.getInputStream());
-        ByteBuffer data = block;
+        ByteBuffer data = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);;
         
         // Kodierten Baum einlesen und erstellen
         huffmanTree = new HuffmanTree();
@@ -161,31 +155,31 @@ public class ImageCodecHuffman extends ImageCodec {
                 
                 // Farbkonvertierung
                 if(image.getHeader().colorFormat().compareTo(ColorFormat.FORMAT_RGB) != 0) {   
-                    ColorFormat.convertColorBuffer( block,
+                    ColorFormat.convertColorBuffer( data,
                                                     image.getHeader().colorFormat(),
-                                                    block, 
+                                                    data, 
                                                     ColorFormat.FORMAT_RGB);
                 }
                 
                 dispatchData(   IDataListener.Event.DATA_BLOCK_DECODED, 
                                 listener, 
-                                block,
+                                data,
                                 false);    
             }
         }
         
         // Farbkonvertierung
         if(image.getHeader().colorFormat().compareTo(ColorFormat.FORMAT_RGB) != 0) {   
-            ColorFormat.convertColorBuffer( block,
+            ColorFormat.convertColorBuffer( data,
                                             image.getHeader().colorFormat(),
-                                            block, 
+                                            data, 
                                             ColorFormat.FORMAT_RGB);
         }
         
         // Restliche Daten im Puffer übertragen
         dispatchData(   IDataListener.Event.DATA_BLOCK_DECODED, 
                         listener, 
-                        block,
+                        data,
                         true);     
     }
 

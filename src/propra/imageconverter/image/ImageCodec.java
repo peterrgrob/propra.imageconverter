@@ -3,7 +3,6 @@ package propra.imageconverter.image;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataCodec;
-import static propra.imageconverter.data.DataCodec.DEFAULT_BLOCK_SIZE;
 import propra.imageconverter.data.IDataListener;
 import propra.imageconverter.data.IDataListener.Event;
 
@@ -12,6 +11,10 @@ import propra.imageconverter.data.IDataListener.Event;
  *  Basiscodec für die Konvertierung von unkomprimierten Pixelblöcken
  */
 public class ImageCodec extends DataCodec {
+    
+    // Standardblockgröße, muss vielfaches der Pixelgröße sein
+    public static final int DEFAULT_IMAGEBLOCK_SIZE = 4096 * 8;
+    
     
     // Zugeordnete Resource zur Ein-, oder Ausgabe der Daten 
     protected ImageResource image;
@@ -28,15 +31,13 @@ public class ImageCodec extends DataCodec {
      * 
      */
     @Override
-    public void decode( ByteBuffer data, 
-                        boolean last, 
-                        IDataListener listener) throws IOException {
+    public void decode(IDataListener listener) throws IOException {
         if(!isValid()) {
             throw new IllegalArgumentException();
         }
         
         // Lese Puffer 
-        data = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
+        PixelBuffer data = new PixelBuffer(DEFAULT_IMAGEBLOCK_SIZE, image.getHeader().colorFormat());
         boolean bLast = false;
         
         /*
@@ -57,18 +58,23 @@ public class ImageCodec extends DataCodec {
                 throw new IOException("Lesefehler!");
             }
 
+            /*PixelBuffer pb = new PixelBuffer(data, image.colorFormat);
+            while(pb.iterator().hasNext()) {
+                Pixel p = pb.iterator().next();
+            }*/
+            
             // Pixelformat ggfs. konvertieren
             if(image.getHeader().colorFormat().compareTo(ColorFormat.FORMAT_RGB) != 0) {  
-                ColorFormat.convertColorBuffer(data, 
+                ColorFormat.convertColorBuffer(data.getBuffer(), 
                                                 image.getHeader().colorFormat(), 
-                                                data,
+                                                data.getBuffer(),
                                                 ColorFormat.FORMAT_RGB);
             }
 
             // Daten an Listener senden
             dispatchEvent(  Event.DATA_BLOCK_DECODED, 
                             listener, 
-                            data,
+                            data.getBuffer(),
                             bLast);  
             data.clear();
         }

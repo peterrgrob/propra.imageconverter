@@ -126,7 +126,7 @@ public class BaseNOperation implements AutoCloseable {
             
             // Datei in Puffer dekodieren
             decoder.begin(DataFormat.Operation.DECODE);
-            decoder.decode(data, true, null);
+            decoder.decode(null);
             decoder.end();
             
             // Daten in Daei schreiben 

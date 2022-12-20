@@ -29,9 +29,7 @@ public class ImageCodecRLE extends ImageCodec {
      * 
      */
     @Override
-    public void decode( ByteBuffer outBlock,
-                        boolean last,
-                        IDataListener target) throws IOException {     
+    public void decode(IDataListener target) throws IOException {     
         if(!isValid()
         ||  target == null) {
             throw new IllegalArgumentException();
@@ -41,10 +39,7 @@ public class ImageCodecRLE extends ImageCodec {
         CheckedInputStream stream = resource.getInputStream();
     
         // Puffer vorbereiten
-        if(outBlock == null) {
-            outBlock = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
-        }        
-        ByteBuffer outBuffer = outBlock;
+        ByteBuffer outBuffer = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
         
         /*
          * Rle Block dekodieren
@@ -66,7 +61,7 @@ public class ImageCodecRLE extends ImageCodec {
                 outBuffer.flip();
                 dispatchEvent(  Event.DATA_BLOCK_DECODED, 
                                 target, 
-                                outBlock,
+                                outBuffer,
                                 false);
                 outBuffer.clear();
             }
@@ -94,10 +89,10 @@ public class ImageCodecRLE extends ImageCodec {
          *  Letzten Block der Operation kennzeichnen und Restdaten
          *  übertragen
          */
-        outBlock.flip();
+        outBuffer.flip();
         dispatchEvent(  Event.DATA_BLOCK_DECODED, 
                         target, 
-                        outBlock,
+                        outBuffer,
                         stream.eof());
     }
     

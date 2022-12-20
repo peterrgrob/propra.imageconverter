@@ -83,7 +83,7 @@ public abstract class ImageResource extends DataResource
         transcodedImage.getCodec().begin(Operation.ENCODE);
         
         // Dekodierung starten
-        inCodec.decode(null, false, this);
+        inCodec.decode(this);
         
         // Bildverarbeitung abschließen
         inCodec.end();
@@ -137,7 +137,7 @@ public abstract class ImageResource extends DataResource
             
             // Durchlauf mit Dekodierung und Encoder-Analyse 
             while(position() < length()) {
-                inCodec.decode(dataBlock, false, this);
+                inCodec.decode(this);
             } 
         } else if(inCodec.analyzeNecessary(Operation.DECODE)) {
             
@@ -150,7 +150,7 @@ public abstract class ImageResource extends DataResource
             
             // Durchlauf mit Dekodierung und Encoder-Analyse 
             while(position() < length()) {
-                inCodec.decode(dataBlock, false, this);
+                inCodec.decode(this);
             } 
         }
         

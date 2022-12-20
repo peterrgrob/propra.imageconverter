@@ -44,7 +44,7 @@ public class BaseNResource extends DataResource{
         
         // Alphabet in Datei schreiben 
         if(format.getBaseEncoding() != BaseNFormat.BaseNEncoding.BASE_32) {
-            txtWriter.write(alphabet + "\n");
+            binaryFile.writeChars(alphabet + "\n");
         }
     }
     

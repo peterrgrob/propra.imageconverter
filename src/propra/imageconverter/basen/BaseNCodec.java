@@ -5,9 +5,7 @@ import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataCodec;
 import propra.imageconverter.data.DataFormat;
 import propra.imageconverter.data.IDataListener;
-import propra.imageconverter.data.IDataListener.Event;
 import propra.imageconverter.data.IDataResource;
-import propra.imageconverter.util.CheckedInputStream;
 
 /**
  * Klasse für allgemeine Base-N Kodierung, die Parametrisierung erfolgt
@@ -44,16 +42,13 @@ public class BaseNCodec extends DataCodec {
      * 
      */
     @Override
-    public void decode( ByteBuffer data, 
-                        boolean last,
-                        IDataListener target) throws IOException {
-        if(!isValid()
-        ||  data == null) {
+    public void decode(IDataListener target) throws IOException {
+        if(!isValid()) {
             throw new IllegalArgumentException();
         }   
         
         // Größe der binären Base-N Byteblöcke
-        int blockLength = format.getBlockLength();
+        /*int blockLength = format.getBlockLength();
         
         ByteBuffer out = data;
         ByteBuffer inData = ByteBuffer.allocate(encodedBufferLength(out));
@@ -93,7 +88,7 @@ public class BaseNCodec extends DataCodec {
         dispatchEvent(  Event.DATA_BLOCK_DECODED, 
                         target, 
                         out.flip(),
-                        false);
+                        false);*/
     }
     
     /**
