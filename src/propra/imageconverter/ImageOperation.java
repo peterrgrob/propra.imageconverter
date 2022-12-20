@@ -44,7 +44,7 @@ public class ImageOperation implements AutoCloseable{
         String outExt = cmd.getExtension(Options.OUTPUT_FILE);
         
         // Readerobjekt erstellen
-        inImage = ImageResource.createImageResource( cmd.getOption(Options.INPUT_FILE), 
+        inImage = ImageResource.createResource( cmd.getOption(Options.INPUT_FILE), 
                                                     inExt,
                                                     false);
         if(inImage == null) {

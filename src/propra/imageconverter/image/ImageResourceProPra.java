@@ -12,9 +12,11 @@ import propra.imageconverter.data.DataFormat;
  * @author pg
  */
 public class ImageResourceProPra extends ImageResource {
-       
-    // Offsets der Headerdaten in der Datei */
+    
+    // Magic String
     static final String PROPRA_VERSION = "ProPraWiSe22";
+    
+    // Offsets der Headerdaten in der Datei */
     static final int PROPRA_HEADER_SIZE = 30;
     static final int PROPRA_HEADER_OFFSET_ENCODING = 12;
     static final int PROPRA_HEADER_OFFSET_WIDTH = 13;
@@ -23,20 +25,24 @@ public class ImageResourceProPra extends ImageResource {
     static final int PROPRA_HEADER_OFFSET_DATALEN = 18;
     static final int PROPRA_HEADER_OFFSET_CHECKSUM = 26;   
     
+    // Kodierungen
     static final int PROPRA_HEADER_ENCODING_NONE = 0;     
     static final int PROPRA_HEADER_ENCODING_RLE = 1;   
     static final int PROPRA_HEADER_ENCODING_HUFFMAN = 2;  
     
     /**
-     *
      * 
+     * @param file
+     * @param write
+     * @throws IOException 
      */
     public ImageResourceProPra( String file,
                                 boolean write) throws IOException {
-        
         super(file, write);
+        
         fileHeaderSize = PROPRA_HEADER_SIZE;
         colorFormat = new ColorFormat(0, 2, 1);
+        
         checksum = new ChecksumPropra();
         inStream.setChecksum(checksum);
         outStream.setChecksum(checksum);
@@ -95,7 +101,7 @@ public class ImageResourceProPra extends ImageResource {
             }
             default -> throw new UnsupportedOperationException("Nicht unterstützte Kompression!");
         }
-        inCodec = createImageCodec(newHeader);
+        inCodec = createCodec(newHeader);
         
         // Prüfe ProPra Spezifikationen
         if( newHeader.isValid() == false 

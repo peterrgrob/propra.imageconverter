@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataCodec;
 import propra.imageconverter.data.IDataListener;
 import propra.imageconverter.data.IDataListener.Event;
+import propra.imageconverter.util.CheckedInputStream;
 
 
 /**
@@ -13,7 +14,7 @@ import propra.imageconverter.data.IDataListener.Event;
 public class ImageCodec extends DataCodec {
     
     // Standardblockgröße, muss vielfaches der Pixelgröße sein
-    public static final int DEFAULT_IMAGEBLOCK_SIZE = 4096 * 8;
+    public static final int DEFAULT_IMAGEBLOCK_SIZE = 4096 * 4;
     
     
     // Zugeordnete Resource zur Ein-, oder Ausgabe der Daten 
@@ -29,6 +30,8 @@ public class ImageCodec extends DataCodec {
     
     /**
      * 
+     * @param listener
+     * @throws IOException 
      */
     @Override
     public void decode(IDataListener listener) throws IOException {
@@ -36,12 +39,14 @@ public class ImageCodec extends DataCodec {
             throw new IllegalArgumentException();
         }
         
-        // Lese Puffer 
-        ColorBuffer data = new ColorBuffer(DEFAULT_IMAGEBLOCK_SIZE, image.getHeader().colorFormat());
+        CheckedInputStream stream = resource.getInputStream();
+        
+        // Lese Puffer  
+        ByteBuffer data = ByteBuffer.allocate(DEFAULT_IMAGEBLOCK_SIZE * ColorFormat.PIXEL_SIZE);
         boolean bLast = false;
         
         /*
-         * Lädt, konvertiert und sendet Pixelblöcke an Listener  
+         * Lädt und sendet Pixelblöcke direkt an Listener  
          */
         while(resource.position() < resource.length()) {
             
@@ -52,29 +57,15 @@ public class ImageCodec extends DataCodec {
             }
             
             // Datenblock von Resource lesen 
-            int r = resource.getInputStream()
-                            .read(data);
+            int r = stream.read(data);
             if(r == -1) {
                 throw new IOException("Lesefehler!");
             }
-
-            /*ColorBuffer pb = new ColorBuffer(data, image.colorFormat);
-            while(pb.iterator().hasNext()) {
-                Pixel p = pb.iterator().next();
-            }*/
             
-            // Pixelformat ggfs. konvertieren
-            if(image.getHeader().colorFormat().compareTo(ColorFormat.FORMAT_RGB) != 0) {  
-                ColorFormat.convertColorBuffer(data.getBuffer(), 
-                                                image.getHeader().colorFormat(), 
-                                                data.getBuffer(),
-                                                ColorFormat.FORMAT_RGB);
-            }
-
             // Daten an Listener senden
-            dispatchEvent(  Event.DATA_BLOCK_DECODED, 
-                            listener, 
-                            data.getBuffer(),
+            listener.onData(Event.DATA_BLOCK_DECODED, 
+                            this, 
+                            data,
                             bLast);  
             data.clear();
         }
@@ -82,33 +73,22 @@ public class ImageCodec extends DataCodec {
 
     /**
      * 
+     * @param block
+     * @param last
+     * @param listener
+     * @throws IOException 
      */
     @Override
     public void encode( ByteBuffer block,
-                        boolean last,
-                        IDataListener listener) throws IOException {
+                        boolean last) throws IOException {
         if(!isValid()
         ||  block == null) {
             throw new IllegalArgumentException();
         }
         
-        // Farbkonvertierung
-        if(image.getHeader().colorFormat().compareTo(ColorFormat.FORMAT_RGB) != 0) {   
-            ColorFormat.convertColorBuffer( block, 
-                                            ColorFormat.FORMAT_RGB, 
-                                            block,
-                                            image.getHeader().colorFormat());
-        }
-        
-        // Block in Resource kodieren
+        // Block direkt in Resource schreiben
         resource.getOutputStream()
                 .write(block);
-        
-        // Daten an Listener senden
-        dispatchEvent(  Event.DATA_BLOCK_ENCODED, 
-                            listener, 
-                            block,
-                            last);
     }
     
     /**
@@ -119,7 +99,7 @@ public class ImageCodec extends DataCodec {
                                 ByteBuffer block,
                                 boolean last) throws IOException {
         block.flip();
-        dispatchEvent(event, listener, block, last);
+        listener.onData(event, this, block, last);
         block.clear();
     }
 }

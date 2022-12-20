@@ -151,7 +151,7 @@ public class BaseNOperation implements AutoCloseable {
             
             // Daten in Resource dekodieren
             encoder.begin(DataFormat.Operation.DECODE);
-            encoder.encode(data, true, null);
+            encoder.encode(data, true);
             encoder.end();
         }
         

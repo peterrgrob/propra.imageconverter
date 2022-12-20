@@ -14,6 +14,7 @@ import propra.imageconverter.util.CheckedOutputStream;
  */
 public class ImageCodecRLE extends ImageCodec {
 
+    // Gepufferte Daten
     private ColorBuffer bufferedData; 
     private boolean isBufferedData;
 
@@ -69,12 +70,10 @@ public class ImageCodecRLE extends ImageCodec {
              * Empfänger senden
              */
             if( buff.position() + packetLen > buff.capacity()) {
-                buff.flip();
-                dispatchEvent(Event.DATA_BLOCK_DECODED, 
-                                target, 
-                                buff.getBuffer(),
-                                false);
-                buff.clear();
+                dispatchData(Event.DATA_BLOCK_DECODED, 
+                            target, 
+                            buff.getBuffer(),
+                            false);
             }
 
             // RLE oder RAW Paket?
@@ -88,7 +87,7 @@ public class ImageCodecRLE extends ImageCodec {
                 stream.read(buff.array(), 
                             buff.position(), 
                             packetLen);
-                buff.position(buff.position() + packetLen);
+                buff.skip(packetLen);
             }
         }
         
@@ -96,8 +95,7 @@ public class ImageCodecRLE extends ImageCodec {
          *  Letzten Block der Operation kennzeichnen und Restdaten
          *  übertragen
          */
-        buff.flip();
-        dispatchEvent(Event.DATA_BLOCK_DECODED, 
+        dispatchData(Event.DATA_BLOCK_DECODED, 
                         target, 
                         buff.getBuffer(),
                         stream.eof());
@@ -108,8 +106,7 @@ public class ImageCodecRLE extends ImageCodec {
      */
     @Override
     public void encode( ByteBuffer block,
-                        boolean last,
-                        IDataListener listener) throws IOException{ 
+                        boolean last) throws IOException{ 
         if(!isValid()
         ||  block == null) {
             throw new IllegalArgumentException();
@@ -120,16 +117,7 @@ public class ImageCodecRLE extends ImageCodec {
         
         // Puffer erstellen
         ByteBuffer rleBlock = ByteBuffer.allocate(192 * ColorFormat.PIXEL_SIZE);
-        ColorBuffer buff = new ColorBuffer(block, image.getHeader().colorFormat());
-        
-
-        // Farbkonvertierung
-        if(image.getHeader().colorFormat().compareTo(ColorFormat.FORMAT_RGB) != 0) {   
-            ColorFormat.convertColorBuffer( block, 
-                                            ColorFormat.FORMAT_RGB, 
-                                            block,
-                                            image.getHeader().colorFormat());
-        }
+        ColorBuffer buff = new ColorBuffer(block, new ColorFormat());
         
         /*
          *  Eingabedaten mit gepufferten Daten zusammenführen
@@ -165,7 +153,7 @@ public class ImageCodecRLE extends ImageCodec {
                 rleBlock.flip();
 
                 // Gleiche Farben im Eingabepuffer überspringen
-                inBuffer.position(inBuffer.position() + (colorCtr - 1) * 3);
+                inBuffer.skip((colorCtr - 1) * 3);
                 
             } else {      
                /*
@@ -194,12 +182,14 @@ public class ImageCodecRLE extends ImageCodec {
      *  Zählt identische Pixel bis zu 128
      */
     private int countRleColor(ColorBuffer data) {
+        
         int offs = data.position() + ColorFormat.PIXEL_SIZE;
         int counter = 1;
 
-        while ( data.compareColor(data.position(), offs)
-            &&  counter < 128
-            &&  offs < data.limit()) {
+        while (     data.compareColor(data.position(), offs)
+                &&  counter < 128
+                &&  offs < data.limit()) {
+            
             offs += ColorFormat.PIXEL_SIZE;  
             counter++;
         }
@@ -253,7 +243,9 @@ public class ImageCodecRLE extends ImageCodec {
         } else {
             bufferedData.clear();
             bufferedData.getBuffer()
-                        .put(0, inBuffer.getBuffer(), inBuffer.position(), inBuffer.remaining());
+                        .put(0, inBuffer.getBuffer(), 
+                                    inBuffer.position(), 
+                                    inBuffer.remaining());
             bufferedData.position(inBuffer.remaining());
         }
     }

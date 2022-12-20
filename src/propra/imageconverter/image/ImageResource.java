@@ -46,14 +46,26 @@ public abstract class ImageResource extends DataResource
     
     /**
      * 
+     * @param srcHeader
+     * @throws IOException 
      */
     public void writeHeader(ImageHeader srcHeader) throws IOException {
+        // Prüfsumme aktualisieren und Header speichern
+        if(checksum != null) {
+            header.checksum(checksum.getValue());
+        }
         setHeader(srcHeader);
     }
     
     /**
-     *  Konvertiert ein Bild in ein neues Bild mit gegebenem Format und 
-     *  Kodierung
+     * Konvertiert ein Quellbild in ein neues Bild mit gegebenem Format und 
+     * Kodierung
+     * 
+     * @param outFile
+     * @param ext
+     * @param outEncoding
+     * @return
+     * @throws IOException 
      */
     public ImageResource transcode( String outFile, 
                                     String ext, 
@@ -63,35 +75,32 @@ public abstract class ImageResource extends DataResource
         }
         
         // Neues Bild erstellen
-        transcodedImage = createImageResource(outFile, ext, true);
+        transcodedImage = createResource(outFile, ext, true);
         if(transcodedImage == null) {
-            return null;
+            throw new IllegalArgumentException("Nicht unterstütztes Dateiformat!");
         }        
         
-        // Bildkopf einlesen und mit neuem Format in Ausgabedatei schreiben
+        // Bilddaten einlesen
         readHeader();
         
+        // Neuen Header schreiben
         ImageHeader outHeader = new ImageHeader(header);
         outHeader.colorFormat().encoding(outEncoding);    
         transcodedImage.writeHeader(outHeader);
         
-        // Bild durch Codecs analysieren
+        // Bild ggfs. analysieren für Kodierungen
         analyze();
         
-        // Bildverarbeitung initialisieren
+        // Bildkonvertierung initialisieren
         inCodec.begin(Operation.DECODE);
         transcodedImage.getCodec().begin(Operation.ENCODE);
         
         // Dekodierung starten
         inCodec.decode(this);
         
-        // Bildverarbeitung abschließen
+        // Bildkonvertierung abschließen
         inCodec.end();
         transcodedImage.getCodec().end();
-        
-        if(transcodedImage.getChecksum() != null) {
-            transcodedImage.getHeader().checksum(transcodedImage.getChecksum().getValue());
-        }
         
         //  Falls nötig Header mit Prüfsumme, oder Länge des komprimierten Datensegements 
         //  aktualisieren
@@ -104,7 +113,9 @@ public abstract class ImageResource extends DataResource
     }
 
     /**
-     *  Bild in Blöcken durch Codecs analysieren
+     * Bild durch die Codecs analysieren
+     * 
+     * @throws IOException 
      */
     private void analyze() throws IOException {
         if( !inCodec.analyzeNecessary(Operation.DECODE)
@@ -121,7 +132,8 @@ public abstract class ImageResource extends DataResource
         transcodedImage.getCodec().begin(Operation.ENCODER_ANALYZE);
         
         /*
-         *  Analyse durch Ein- und Ausgabecodec erfordert eine spezielle Behandlung
+         *  Analyse durch Ein- und Ausgabecodec erfordert je nach Kombination
+         *  eine spezielle Behandlung
          */
         if( inCodec.analyzeNecessary(Operation.DECODE)
         &&  transcodedImage.getCodec().analyzeNecessary(Operation.ENCODE)) {
@@ -160,9 +172,14 @@ public abstract class ImageResource extends DataResource
         // Ursprüngliche Position wiederherstellen
         position(p);
     }
-    
+        
     /**
      * 
+     * @param event
+     * @param caller
+     * @param block
+     * @param last
+     * @throws IOException 
      */
     @Override
     public void onData( Event event, 
@@ -174,9 +191,16 @@ public abstract class ImageResource extends DataResource
                 if(caller.getOperation() == Operation.DECODER_ANALYZE) {
                     transcodedImage.getCodec().analyze( block, last);
                 } else {
-                    transcodedImage.getCodec().encode(  block,
-                                                        last,
-                                                        transcodedImage);
+                    
+                    // Farben ggfs. konvertieren
+                    if(colorFormat.compareTo(transcodedImage.getHeader().colorFormat()) != 0) { 
+                        ColorBuffer cb = new ColorBuffer(block, colorFormat);
+                        cb.convert(cb,
+                                              transcodedImage.getHeader().colorFormat());
+                    }
+                    
+                    // An Encoder weiterreichen
+                    transcodedImage.getCodec().encode(block, last);
                 }
             }
         }
@@ -184,8 +208,10 @@ public abstract class ImageResource extends DataResource
     
     /**
      * 
+     * @param header
+     * @return 
      */
-    protected IDataCodec createImageCodec(ImageHeader header) {
+    protected IDataCodec createCodec(ImageHeader header) {
         if(header != null) {
             switch(header.colorFormat().encoding()) {
                 case NONE -> {
@@ -203,9 +229,15 @@ public abstract class ImageResource extends DataResource
     }
     
     /**
-     *  Erstellt ein ImageResource Objekt basierend auf Dateipfad
+     * Erstellt ein ImageResource Objekt
+     * 
+     * @param path
+     * @param ext
+     * @param write
+     * @return
+     * @throws IOException 
      */
-    public static ImageResource createImageResource(String path, 
+    public static ImageResource createResource(String path, 
                                                     String ext,
                                                     boolean write) throws IOException {
         switch(ext) {
@@ -241,6 +273,6 @@ public abstract class ImageResource extends DataResource
 
     public void setHeader(ImageHeader header) {
         this.header = new ImageHeader(header);
-        inCodec = createImageCodec(header);
+        inCodec = createCodec(header);
     }
 }

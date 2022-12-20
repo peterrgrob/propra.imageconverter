@@ -96,8 +96,7 @@ public class BaseNCodec extends DataCodec {
      */
     @Override
     public void encode( ByteBuffer data, 
-                        boolean last,
-                        IDataListener target) throws IOException {
+                        boolean last) throws IOException {
         if(!isValid()
         ||  data == null) {
             throw new IllegalArgumentException();

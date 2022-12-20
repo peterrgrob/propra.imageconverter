@@ -64,79 +64,8 @@ public class ColorFormat extends DataFormat
         }
         return -1;
     }
-    
-    /**
-     * 
-     */
-    public static void convertColor(byte[] src, 
-                                    ColorFormat srcFormat,
-                                    byte[] dst,
-                                    ColorFormat dstFormat) {
-        int[] srcMap = srcFormat.getMapping();
-        int[] dstMap = dstFormat.getMapping();
-        byte r = src[srcMap[RED]];
-        byte g = src[srcMap[GREEN]];
-        byte b = src[srcMap[BLUE]];
-        dst[dstMap[RED]] = r;
-        dst[dstMap[GREEN]] = g;
-        dst[dstMap[BLUE]] = b;
-    }
-    
-    /**
-     * 
-     */
-    public static ByteBuffer convertColorBuffer(ByteBuffer input, ColorFormat srcFormat,
-                                                ByteBuffer output,ColorFormat dstFormat) {
-        if (input == null
-        ||  output == null
-        ||  srcFormat == null
-        ||  dstFormat == null) {
-            throw new IllegalArgumentException();
-        }  
-        
-        byte[] inBytes = input.array();
-        byte[] outBytes = output.array();
-        byte r,g,b;
-                
-        int srcOffset = 0;
-        int dstOffset = 0;
-        
-        int[] srcMap = srcFormat.getMapping();
-        int[] dstMap = dstFormat.getMapping();
-        
-        for (int i=0; i<input.limit(); i+=3) {
-            int sIndex = srcOffset + i;
-            int dIndex = dstOffset + i;
-            
-            r = inBytes[sIndex + srcMap[RED]];
-            g = inBytes[sIndex + srcMap[GREEN]];
-            b = inBytes[sIndex + srcMap[BLUE]];
-            
-            outBytes[dIndex + dstMap[RED]] = r;
-            outBytes[dIndex + dstMap[GREEN]] = g;
-            outBytes[dIndex + dstMap[BLUE]] = b;
-        }
-        
-        return output;
-    }
-    
-    /**
-     *  Füllt Buffer len-mal mit Farbwert und gibt neuen Offset zurück
-     */
-    static public int fillColor(byte[] color, byte[] array, int offset, int len) {
-        byte r = color[0];
-        byte g = color[1];
-        byte b = color[2];
-
-        for(int i=0;i<len;i++) {
-            array[offset++] = r;
-            array[offset++] = g;
-            array[offset++] = b; 
-        }
-        return offset;
-    }
-    
-    /**
+   
+     /**
      * Vergleicht zwei Pixel in einem Byte-Array
      */
     static public boolean compareColor(byte[] array, int offset0, int offset1) {

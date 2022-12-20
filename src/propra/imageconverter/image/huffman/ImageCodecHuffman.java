@@ -7,7 +7,7 @@ import propra.imageconverter.util.*;
 import static propra.imageconverter.data.DataCodec.DEFAULT_BLOCK_SIZE;
 import propra.imageconverter.data.DataFormat.Operation;
 import propra.imageconverter.data.IDataListener;
-import propra.imageconverter.image.ColorFormat;
+import propra.imageconverter.image.ColorBuffer;
 import propra.imageconverter.image.ImageCodec;
 import propra.imageconverter.image.ImageResource;
 
@@ -132,7 +132,7 @@ public class ImageCodecHuffman extends ImageCodec {
         
         // BitStream erstellen
         BitInputStream stream = new BitInputStream(resource.getInputStream());
-        ByteBuffer data = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);;
+        ByteBuffer data = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
         
         // Kodierten Baum einlesen und erstellen
         huffmanTree = new HuffmanTree();
@@ -151,29 +151,12 @@ public class ImageCodecHuffman extends ImageCodec {
             data.put((byte)symbol);
 
             // Wenn Blockgröße erreicht an Listener senden
-            if(data.capacity() == data.position()) {
-                
-                // Farbkonvertierung
-                if(image.getHeader().colorFormat().compareTo(ColorFormat.FORMAT_RGB) != 0) {   
-                    ColorFormat.convertColorBuffer( data,
-                                                    image.getHeader().colorFormat(),
-                                                    data, 
-                                                    ColorFormat.FORMAT_RGB);
-                }
-                
+            if(data.capacity() == data.position()) {                
                 dispatchData(   IDataListener.Event.DATA_BLOCK_DECODED, 
                                 listener, 
                                 data,
                                 false);    
             }
-        }
-        
-        // Farbkonvertierung
-        if(image.getHeader().colorFormat().compareTo(ColorFormat.FORMAT_RGB) != 0) {   
-            ColorFormat.convertColorBuffer( data,
-                                            image.getHeader().colorFormat(),
-                                            data, 
-                                            ColorFormat.FORMAT_RGB);
         }
         
         // Restliche Daten im Puffer übertragen
@@ -188,8 +171,7 @@ public class ImageCodecHuffman extends ImageCodec {
      */
     @Override
     public void encode( ByteBuffer block, 
-                        boolean last,
-                        IDataListener listener) throws IOException {
+                        boolean last) throws IOException {
         if(huffmanTree == null) {
             throw new IllegalStateException("Huffmann-Tree nicht initialisiert.");
         }
@@ -205,8 +187,6 @@ public class ImageCodecHuffman extends ImageCodec {
             
             // Pixel lesen und Farbe konvertieren
             buff.get(c);
-            ColorFormat.convertColor(   c, ColorFormat.FORMAT_RGB, 
-                                        c, image.getHeader().colorFormat());
                     
             outStream.write(huffmanTree.encodeSymbol(c[0] & 0xFF));
             outStream.write(huffmanTree.encodeSymbol(c[1] & 0xFF));

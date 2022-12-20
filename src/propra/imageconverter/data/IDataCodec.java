@@ -26,8 +26,7 @@ public interface IDataCodec {
     /**
      *  Ermöglicht die Analyse der Daten vor der Kodierung
      */
-    public void analyze(ByteBuffer data, 
-                        boolean last);
+    public void analyze(ByteBuffer data, boolean last);
 
     /*
      *  Dekodiert Daten von Resource, sendet diese an Listener und speichert in 
@@ -39,9 +38,7 @@ public interface IDataCodec {
     /*
      *  Kodiert Daten des Blocks und speichert diese in der Resource.
      */
-    public void encode( ByteBuffer data, 
-                        boolean last, 
-                        IDataListener listener) throws IOException;
+    public void encode(ByteBuffer data, boolean last) throws IOException;
     
     /**
      * 

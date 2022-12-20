@@ -9,6 +9,7 @@ import java.nio.ByteBuffer;
  */
 public interface IDataListener {
     
+    // Daten Events
     public enum Event {
         DATA_BLOCK_DECODED,
         DATA_BLOCK_ENCODED,

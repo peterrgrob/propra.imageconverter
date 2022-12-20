@@ -2,6 +2,9 @@ package propra.imageconverter.image;
 
 import java.nio.ByteBuffer;
 import java.util.Iterator;
+import static propra.imageconverter.image.ColorFormat.BLUE;
+import static propra.imageconverter.image.ColorFormat.GREEN;
+import static propra.imageconverter.image.ColorFormat.RED;
 
 /**
  *
@@ -10,7 +13,7 @@ import java.util.Iterator;
 public class ColorBuffer implements Iterable<Color> {
     
     // Interner Puffer
-    private ByteBuffer dataBuffer;
+    private ByteBuffer buffer;
     
     // Pixelformat
     private ColorFormat format;
@@ -28,7 +31,7 @@ public class ColorBuffer implements Iterable<Color> {
      */
     public ColorBuffer( byte[] data,
                         ColorFormat format) {
-        dataBuffer = ByteBuffer.wrap(data);
+        buffer = ByteBuffer.wrap(data);
         this.format = new ColorFormat(format);
     }
     
@@ -39,7 +42,7 @@ public class ColorBuffer implements Iterable<Color> {
      */
     public ColorBuffer( ByteBuffer data,
                         ColorFormat format) {
-        dataBuffer = data;
+        buffer = data;
         this.format = new ColorFormat(format);
     }
     
@@ -50,30 +53,23 @@ public class ColorBuffer implements Iterable<Color> {
      */
     public ColorBuffer( int size,
                         ColorFormat format) {
-        dataBuffer = ByteBuffer.allocate(size * ColorFormat.PIXEL_SIZE);
+        buffer = ByteBuffer.allocate(size * ColorFormat.PIXEL_SIZE);
         this.format = new ColorFormat(format);
     }
     
     /**
-     *  Füllt Buffer len-mal mit Farbwert und gibt neuen Offset zurück
+     * Füllt Buffer len-mal mit Farbwert und gibt neuen Offset zurück
+     * 
+     * @param color
+     * @param len
+     * @return 
      */
     public int fill(Color color, int len) {
-        /*byte r = color[0];
-        byte g = color[1];
-        byte b = color[2];
-
-        for(int i=0;i<len;i++) {
-            array[offset++] = r;
-            array[offset++] = g;
-            array[offset++] = b; 
-        }
-        return offset;*/
-        
         for(int i=0; i<len; i++){
             put(color);
         }
         
-        return dataBuffer.position();
+        return buffer.position();
     }
     
     /**
@@ -83,7 +79,7 @@ public class ColorBuffer implements Iterable<Color> {
      * @return 
      */
     public boolean compareColor(int offset1, int offset2) {
-        byte[] array = dataBuffer.array();
+        byte[] array = buffer.array();
         return (array[offset1 + 0] == array[offset2 + 0]
             &&  array[offset1 + 1] == array[offset2 + 1]
             &&  array[offset1 + 2] == array[offset2 + 2]);
@@ -91,10 +87,51 @@ public class ColorBuffer implements Iterable<Color> {
     
     /**
      * 
+     * @param input
+     * @param srcFormat
+     * @param output
+     * @param dstFormat
+     * @return 
+     */
+    public ColorBuffer convert( ColorBuffer output,
+                                ColorFormat dstFormat) {
+        if (output == null
+        ||  dstFormat == null) {
+            throw new IllegalArgumentException();
+        }  
+        
+        byte[] inBytes = buffer.array();
+        byte[] outBytes = output.array();
+        byte r,g,b;
+                
+        int srcOffset = 0;
+        int dstOffset = 0;
+        
+        int[] srcMap = format.getMapping();
+        int[] dstMap = dstFormat.getMapping();
+        
+        for (int i=0; i<buffer.limit(); i+=3) {
+            int sIndex = srcOffset + i;
+            int dIndex = dstOffset + i;
+            
+            r = inBytes[sIndex + srcMap[RED]];
+            g = inBytes[sIndex + srcMap[GREEN]];
+            b = inBytes[sIndex + srcMap[BLUE]];
+            
+            outBytes[dIndex + dstMap[RED]] = r;
+            outBytes[dIndex + dstMap[GREEN]] = g;
+            outBytes[dIndex + dstMap[BLUE]] = b;
+        }
+        
+        return output;
+    }
+    
+    /**
+     * 
      * @return 
      */
     public ByteBuffer getBuffer() {
-        return dataBuffer;
+        return buffer;
     }
     
     /**
@@ -102,7 +139,7 @@ public class ColorBuffer implements Iterable<Color> {
      * @return 
      */
     public byte[] array() {
-        return dataBuffer.array();
+        return buffer.array();
     }
     
     /**
@@ -111,7 +148,7 @@ public class ColorBuffer implements Iterable<Color> {
      * @return 
      */
     public ColorBuffer get(Color p) {
-        dataBuffer.get(p.get());
+        buffer.get(p.get());
         return this;
     }
     
@@ -121,7 +158,7 @@ public class ColorBuffer implements Iterable<Color> {
      * @return 
      */
     public ColorBuffer put(Color p) {
-        dataBuffer.put(p.get());
+        buffer.put(p.get());
         return this;
     }
     
@@ -131,7 +168,7 @@ public class ColorBuffer implements Iterable<Color> {
      * @return 
      */
     public ColorBuffer put(ColorBuffer buff) {
-        dataBuffer.put(buff.getBuffer());
+        buffer.put(buff.getBuffer());
         return this;
     }
 
@@ -148,7 +185,7 @@ public class ColorBuffer implements Iterable<Color> {
              */
             @Override
             public boolean hasNext() {
-                return dataBuffer.hasRemaining();
+                return buffer.hasRemaining();
             }
             
             /**
@@ -157,9 +194,9 @@ public class ColorBuffer implements Iterable<Color> {
              */
             @Override
             public Color next() {
-                Color p = new Color(dataBuffer.array(),
-                                    dataBuffer.position());
-                dataBuffer.position(dataBuffer.position() + 1);
+                Color p = new Color(buffer.array(),
+                                    buffer.position());
+                buffer.position(buffer.position() + 1);
                 return p;
             }
 
@@ -178,62 +215,69 @@ public class ColorBuffer implements Iterable<Color> {
      * 
      */
     public int capacity() {
-        return dataBuffer.capacity();
+        return buffer.capacity();
     }
     
     /**
      * 
      */
     public int limit() {
-        return dataBuffer.limit();
+        return buffer.limit();
     }
     
     /**
      * 
      */
     public void limit(int l) {
-        dataBuffer.limit(l);
+        buffer.limit(l);
     }
     
     /**
      * 
      */
     public int position() {
-        return dataBuffer.position();
+        return buffer.position();
     }
     
     /**
      * 
      */
     public void position(int p) {
-        dataBuffer.position(p);
+        buffer.position(p);
+    }
+    
+    /**
+     * 
+     */
+    public void skip(int len) {
+        buffer.position(buffer.position() + len);
     }
     
     /**
      * 
      */
     public int remaining() {
-        return dataBuffer.remaining();
+        return buffer.remaining();
     }
     
     /**
      * 
      */
     public void clear() {
-        dataBuffer.clear();
+        buffer.clear();
     }
     
     /**
      * 
      */
     public void reset() {
-        dataBuffer.reset();
+        buffer.reset();
     }
     
     /**
      * 
      */
     public void flip() {
-        dataBuffer.flip();
+        buffer.flip();
     }
 }

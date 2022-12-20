@@ -14,8 +14,7 @@ import propra.imageconverter.util.Checksum;
 /**
  *
  */
-public class DataResource implements IDataResource,
-                                     AutoCloseable {
+public class DataResource implements IDataResource {
     
     // Dateiresource
     protected RandomAccessFile binaryFile;

@@ -3,14 +3,13 @@ package propra.imageconverter.data;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataFormat.Operation;
-import propra.imageconverter.data.IDataListener.Event;
 
 /**
  *  Basis-Codec für die unkomprimierte Datenübertragung
  */
 public class DataCodec implements IDataCodec {
 
-    // Standardblockgröße, muss vielfaches der Pixelgröße sein
+    // Standardblockgröße
     public static final int DEFAULT_BLOCK_SIZE = 4096 * 8 * 3;
     
     // Zugeordnete Resource
@@ -63,8 +62,7 @@ public class DataCodec implements IDataCodec {
      */
     @Override
     public void encode( ByteBuffer data, 
-                        boolean last, 
-                        IDataListener listener) throws IOException {
+                        boolean last) throws IOException {
     }
     
     /*
@@ -88,18 +86,6 @@ public class DataCodec implements IDataCodec {
      */
     public boolean isValid() {
         return resource != null;
-    }
-    
-    /*
-     *
-     */
-    protected void dispatchEvent(   Event event,
-                                    IDataListener listener, 
-                                    ByteBuffer data,
-                                    boolean lastBlock) throws IOException {            
-        if(listener != null) {
-            listener.onData(event,this, data, lastBlock);
-        }
     }
     
     /**
