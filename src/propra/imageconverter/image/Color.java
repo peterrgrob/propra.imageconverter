@@ -3,7 +3,7 @@ package propra.imageconverter.image;
 /**
  * 
  */
-public class Pixel {
+public class Color {
 
     // Farbwerte
     protected byte[] values;
@@ -14,21 +14,21 @@ public class Pixel {
     /**
      * 
      */
-    public Pixel() {
+    public Color() {
          values = new byte[ColorFormat.PIXEL_SIZE];
     }
    
     /**
     * 
     */
-    public Pixel(byte[] values) {
+    public Color(byte[] values) {
         set(values);
     }
     
     /**
      * 
      */
-    public Pixel(byte[] values,
+    public Color(byte[] values,
                  int index) {
         this.values = values;
         this.index = index;

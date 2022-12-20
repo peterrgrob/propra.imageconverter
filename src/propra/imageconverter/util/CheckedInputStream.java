@@ -4,7 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import propra.imageconverter.image.PixelBuffer;
+import propra.imageconverter.image.ColorBuffer;
 
 
 /**
@@ -114,7 +114,7 @@ public class CheckedInputStream extends BufferedInputStream {
      * @return
      * @throws IOException 
      */
-    public int read(PixelBuffer buff) throws IOException {
+    public int read(ColorBuffer buff) throws IOException {
         return read(buff.array(), buff.position(), buff.limit());
     }
 }

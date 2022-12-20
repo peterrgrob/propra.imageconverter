@@ -37,7 +37,7 @@ public class ImageCodec extends DataCodec {
         }
         
         // Lese Puffer 
-        PixelBuffer data = new PixelBuffer(DEFAULT_IMAGEBLOCK_SIZE, image.getHeader().colorFormat());
+        ColorBuffer data = new ColorBuffer(DEFAULT_IMAGEBLOCK_SIZE, image.getHeader().colorFormat());
         boolean bLast = false;
         
         /*
@@ -58,7 +58,7 @@ public class ImageCodec extends DataCodec {
                 throw new IOException("Lesefehler!");
             }
 
-            /*PixelBuffer pb = new PixelBuffer(data, image.colorFormat);
+            /*ColorBuffer pb = new ColorBuffer(data, image.colorFormat);
             while(pb.iterator().hasNext()) {
                 Pixel p = pb.iterator().next();
             }*/
