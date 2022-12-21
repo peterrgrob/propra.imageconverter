@@ -10,7 +10,7 @@ import propra.imageconverter.data.DataFormat;
  * 
  */
 public class ColorFormat extends DataFormat 
-                        implements Comparable<ColorFormat> {
+                         implements Comparable<ColorFormat> {
     
     // Konstanten zur Indizierung von Farbkomponenten (Little Endian)
     public static final int BLUE = 0;

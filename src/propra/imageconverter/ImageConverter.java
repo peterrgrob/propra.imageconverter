@@ -31,6 +31,7 @@ public class ImageConverter {
     
     /**
      * 
+     * @param cmdLine 
      */
     ImageConverter(CmdLine cmdLine) {
         this.cmdLine = cmdLine;
@@ -100,9 +101,8 @@ public class ImageConverter {
         printMessage(cmdLine.getOption(Options.INPUT_FILE));
         printMessage(cmdLine.getOption(Options.OUTPUT_FILE));
         
-        try(ImageOperation op = new ImageOperation(cmdLine)) {
+        try(ImageTask op = new ImageTask(cmdLine)) {
             op.run();
-        
             printMessage(op.toString());
         }
     }   
@@ -120,10 +120,8 @@ public class ImageConverter {
         printMessage(cmdLine.getOption(CmdLine.Options.INPUT_FILE));
         
         // BaseN Kodierung ausführen
-        try(BaseNOperation op = new BaseNOperation(cmdLine)) {   
+        try(BaseNTask op = new BaseNTask(cmdLine)) {   
             op.run();  
-            
-            // Info ausgeben
             printMessage(op.toString());
         }
     } 

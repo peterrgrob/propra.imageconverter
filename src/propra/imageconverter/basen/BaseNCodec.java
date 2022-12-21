@@ -3,7 +3,7 @@ package propra.imageconverter.basen;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataCodec;
-import propra.imageconverter.data.DataFormat;
+import propra.imageconverter.data.DataUtil;
 import propra.imageconverter.data.IDataResource;
 import propra.imageconverter.data.IDataTarget;
 import propra.imageconverter.data.IDataTarget.Event;
@@ -32,6 +32,7 @@ public class BaseNCodec extends DataCodec {
 
     /**
      * 
+     * @return 
      */
     @Override
     public boolean isValid() {
@@ -41,6 +42,8 @@ public class BaseNCodec extends DataCodec {
     /**
      * Dekodiert BaseNCodec kodierte Daten
      * 
+     * @param target
+     * @throws java.io.IOException
      */
     @Override
     public void decode(IDataTarget target) throws IOException {
@@ -177,7 +180,7 @@ public class BaseNCodec extends DataCodec {
         
         // Bits in den Ausgabepuffer schreiben
         int byteCount = bitCount >> 3;
-        out.put(DataFormat.longToBytes(decodedValue, byteCount), 
+        out.put(DataUtil.longToBytes(decodedValue, byteCount), 
                 0,byteCount);
         
         return byteCount;
@@ -195,7 +198,7 @@ public class BaseNCodec extends DataCodec {
         int bitLength = format.getBitCount();
 
         // Eingabe-Bytes zum maskieren in long umwandeln
-        long value = DataFormat.bytesToLong(in.array(), 
+        long value = DataUtil.bytesToLong(in.array(), 
                                         inOffset, 
                                         inLen);
 
@@ -228,6 +231,8 @@ public class BaseNCodec extends DataCodec {
     }
     
     /**
+     * @param buffer
+     * @return 
      */
     public int encodedBufferLength(ByteBuffer buffer) {
         if( buffer == null 

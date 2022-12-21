@@ -13,10 +13,10 @@ import propra.imageconverter.util.CmdLine.Options;
  * 
  * @author pg
  */
-public class BaseNOperation implements AutoCloseable, IDataTarget {
+public class BaseNTask implements AutoCloseable, IDataTarget {
     
     // Kommandozeilenobjekt
-    private final CmdLine cmdLine;
+    private final CmdLine cmd;
     
     // Ein- und Ausgabeobjekt 
     private BaseNResource baseNFile;
@@ -25,8 +25,8 @@ public class BaseNOperation implements AutoCloseable, IDataTarget {
     /**
      * 
      */
-    public BaseNOperation() {
-        cmdLine = null;
+    public BaseNTask() {
+        cmd = null;
         baseNFile = null;
         binaryFile = null;
     }
@@ -35,11 +35,28 @@ public class BaseNOperation implements AutoCloseable, IDataTarget {
      * Konstruktor, initialisiert die Operation
      * 
      */
-    public BaseNOperation(CmdLine cmd) throws FileNotFoundException, IOException {
+    public BaseNTask(CmdLine cmd) throws FileNotFoundException, IOException {
         if(cmd == null) {
             throw new IllegalArgumentException();
         }
-        this.cmdLine = cmd;
+        
+        this.cmd = cmd;
+    }
+    
+    /**
+     *
+     * @return Statusstring
+     */
+    @Override
+    public String toString() {
+        String stateString = "";
+        return stateString;
+    }
+    
+    /**
+     * Aufgabe ausführen
+     */
+    public void run() throws IOException {
         
         // Ausgabedatei Pfad ableiten
         String outPath = cmd.getOption(Options.INPUT_FILE);      
@@ -50,7 +67,7 @@ public class BaseNOperation implements AutoCloseable, IDataTarget {
         // BaseN Kodierung ableiten
         BaseNFormat dataFormat = cmd.getBaseNDataFormat();  
         if(dataFormat == null) {
-            throw new IOException("Kein Alphabet gegeben!");            
+            throw new IOException("Kein gültiges BaseN Format!");            
         }
             
         // Ausgabeendung ableiten
@@ -73,48 +90,26 @@ public class BaseNOperation implements AutoCloseable, IDataTarget {
         }          
         ImageConverter.printMessage(outPath);
         
-        // Resourcenobjekte erstellen
+        /*
+         *  Kodieren / Dekodieren 
+         */
         if(cmd.isBaseNDecode()) {
+            // Resourcenobjekte erstellen
             baseNFile = new BaseNResource(  cmd.getOption(Options.INPUT_FILE), 
                                             dataFormat,
                                             false);
-            binaryFile = new DataResource(  outPath,
-                                            true);
+            binaryFile = new DataResource(  outPath,true);
+            
+            baseNFile.decode(this);
+            
         } else {
             baseNFile = new BaseNResource(  outPath, 
                                             dataFormat,
-                                            false);
-            binaryFile = new DataResource(  cmd.getOption(Options.INPUT_FILE),
                                             true);
+            binaryFile = new DataResource(  cmd.getOption(Options.INPUT_FILE),false);
+            
+            baseNFile.encode(binaryFile);
         }  
-    }
-    
-    /**
-     *
-     * @return Statusstring
-     */
-    @Override
-    public String toString() {
-        String stateString = "";
-        return stateString;
-    }
-    
-    /**
-     * Aufgabe ausführen
-     */
-    public void run() throws IOException {
-        
-        if(cmdLine.isBaseNDecode()) {
-            /**
-             *  Dekodiert BaseN Datei
-             */
-            baseNFile.decode(this);
-        } else {
-            /**
-             *  Kodiert eine Datei als BaseN Datei
-             */
-            baseNFile.encode(this);
-        }
         
         baseNFile.close();
         binaryFile.close();
@@ -136,8 +131,17 @@ public class BaseNOperation implements AutoCloseable, IDataTarget {
         }
     }
 
+    /**
+     * 
+     * @param event
+     * @param caller
+     * @param data
+     * @param lastBlock
+     * @throws IOException 
+     */
     @Override
-    public void onData(Event event, IDataCodec caller, ByteBuffer data, boolean lastBlock) throws IOException {
+    public void onData( Event event, IDataCodec caller, 
+                        ByteBuffer data, boolean lastBlock) throws IOException {
         if(event == Event.DATA_BLOCK_DECODED) {
             binaryFile.getOutputStream().write(data);
         }

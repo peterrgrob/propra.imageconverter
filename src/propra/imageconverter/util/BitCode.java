@@ -71,5 +71,5 @@ public class BitCode implements Comparable<BitCode> {
    public int compareTo(BitCode o) {
        return (code - o.code) + 
               (length - o.length); 
-   }     
+   }   
 }

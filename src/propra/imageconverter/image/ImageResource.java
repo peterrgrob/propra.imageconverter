@@ -29,6 +29,9 @@ public abstract class ImageResource extends DataResource
     
     // Konvertiertes Bild
     protected ImageResource transcodedImage;
+    
+    // Prüfsumme 
+    protected Checksum checksum;
 
     /**
      * 

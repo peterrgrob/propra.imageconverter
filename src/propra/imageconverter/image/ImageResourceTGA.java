@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import propra.imageconverter.data.DataFormat;
+import propra.imageconverter.data.DataUtil;
+import propra.imageconverter.util.BitCode;
 
 /**
  *  Schreibt TGA Header
@@ -80,8 +82,8 @@ public class ImageResourceTGA extends ImageResource {
         
         // Prüfe tga Spezifikationen
         if(newHeader.isValid() == false
-        || !DataFormat.checkBit(bytes.get(TGA_HEADER_OFFSET_ORIGIN), (byte)6)
-        || DataFormat.checkBit(bytes.get(TGA_HEADER_OFFSET_ORIGIN), (byte)5)
+        || !DataUtil.checkBit(bytes.get(TGA_HEADER_OFFSET_ORIGIN), (byte)6)
+        || DataUtil.checkBit(bytes.get(TGA_HEADER_OFFSET_ORIGIN), (byte)5)
         || bytes.get(0) != 0) {
             throw new UnsupportedOperationException("Ungültiges TGA Dateiformat!");
         }

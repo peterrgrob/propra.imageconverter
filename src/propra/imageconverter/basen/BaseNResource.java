@@ -4,18 +4,24 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataFormat;
 import propra.imageconverter.data.DataResource;
+import propra.imageconverter.data.IDataResource;
 import propra.imageconverter.data.IDataTarget;
 
 /**
  *
+ * @author pg
  */
-public class BaseNResource  extends DataResource {
+public class BaseNResource extends DataResource {
     
     // BaseN Kodierungsformat
     private final BaseNFormat format;
     
     /**
      * 
+     * @param file
+     * @param format
+     * @param write
+     * @throws IOException
      */
     public BaseNResource(   String file, 
                             BaseNFormat format,
@@ -30,6 +36,8 @@ public class BaseNResource  extends DataResource {
     
     /**
      * Alphabet aus Datei einlesen und DatenFormat ableiten
+     * @return 
+     * @throws java.io.IOException
      */
     public String readAlphabet() throws IOException {
         String alphabet = binaryFile.readLine();
@@ -39,6 +47,8 @@ public class BaseNResource  extends DataResource {
     
     /**
      * Alphabet in Datei schreiben
+     * @param alphabet
+     * @throws java.io.IOException
      */
     public void writeAlphabet(String alphabet) throws IOException {
         if(!isValid()) {
@@ -53,7 +63,8 @@ public class BaseNResource  extends DataResource {
     
     /**
      * 
-     * @param res 
+     * @param target 
+     * @throws java.io.IOException 
      */
     public void decode(IDataTarget target) throws IOException {
         // Alphabet aus Datei laden?
@@ -72,17 +83,18 @@ public class BaseNResource  extends DataResource {
     
     /**
      * 
-     * @param res 
+     * @param input 
+     * @throws java.io.IOException 
      */
-    public void encode(IDataTarget target) throws IOException {
+    public void encode(IDataResource input) throws IOException {
         // Encoder erstellen
         BaseNCodec encoder = new BaseNCodec(this,getFormat());
 
         // Daten von Datei lesen
-        ByteBuffer data = ByteBuffer.allocate((int)binaryFile.length());
-        binaryFile.read(data.array());
+        ByteBuffer data = ByteBuffer.allocate((int)input.length());
+        input.getInputStream().read(data.array());
 
-        // Daten in Resource dekodieren
+        // Daten in Resource kodieren
         encoder.begin(DataFormat.Operation.ENCODE);
         encoder.encode(data, true);
         encoder.end();

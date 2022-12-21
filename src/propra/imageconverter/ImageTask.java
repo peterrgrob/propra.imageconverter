@@ -11,7 +11,7 @@ import propra.imageconverter.image.*;
  * 
  * @author pg
  */
-public class ImageOperation implements AutoCloseable {
+public class ImageTask implements AutoCloseable {
     
     private CmdLine cmd;
     private ImageResource inImage;
@@ -25,7 +25,7 @@ public class ImageOperation implements AutoCloseable {
      * @param cmd
      * @throws IOException 
      */
-    public ImageOperation(CmdLine cmd) throws IOException {
+    public ImageTask(CmdLine cmd) throws IOException {
         if(cmd == null) {
             throw new IllegalArgumentException();
         }

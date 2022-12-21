@@ -25,15 +25,10 @@ public class DataCodec implements IDataCodec {
         this.resource = resource;
     }
     
-    /*
-     * 
-     */
-    public void setup(  IDataResource resource) {
-        this.resource = resource;
-    }
-
-    /*
-     * 
+    /**
+     *
+     * @param op
+     * @throws IOException
      */
     @Override
     public void begin(DataFormat.Operation op) throws IOException {  
@@ -42,6 +37,7 @@ public class DataCodec implements IDataCodec {
     
     /**
      * 
+     * @return 
      */
     @Override
     public Operation getOperation() {
@@ -50,6 +46,8 @@ public class DataCodec implements IDataCodec {
     
     /**
      * 
+     * @param data
+     * @param last
      */
     @Override
     public void analyze(ByteBuffer data, 
@@ -57,32 +55,39 @@ public class DataCodec implements IDataCodec {
         
     }
 
-    /*
-     * 
+    /**
+     *
+     * @param data
+     * @param last
+     * @throws IOException
      */
     @Override
     public void encode( ByteBuffer data, 
                         boolean last) throws IOException {
     }
-    
-    /*
-     * 
+
+    /**
+     *
+     * @param target
+     * @throws IOException
      */
     @Override
     public void decode(IDataTarget target) throws IOException {
         
     }        
 
-    /*
-     * 
+    /**
+     *
+     * @throws IOException
      */
     @Override
     public void end() throws IOException {
         operation = Operation.NONE;
     }
     
-    /*
-     * 
+    /**
+     *
+     * @return
      */
     public boolean isValid() {
         return resource != null;
@@ -90,6 +95,8 @@ public class DataCodec implements IDataCodec {
     
     /**
      * 
+     * @param op
+     * @return 
      */
     @Override
     public boolean analyzeNecessary(DataFormat.Operation op) {

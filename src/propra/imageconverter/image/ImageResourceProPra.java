@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import propra.imageconverter.util.ChecksumPropra;
 import propra.imageconverter.data.DataFormat;
+import propra.imageconverter.data.DataUtil;
 
 /**
  * Schreibt ProPra Header
@@ -69,7 +70,7 @@ public class ImageResourceProPra extends ImageResource {
         // Prüfe Formatkennung
         String version;
         try {
-            version = DataFormat.getStringFromByteBuffer(bytes, PROPRA_VERSION.length());
+            version = DataUtil.getStringFromByteBuffer(bytes, PROPRA_VERSION.length());
         } catch (UnsupportedEncodingException ex) {
             return null;
         }
@@ -142,7 +143,7 @@ public class ImageResourceProPra extends ImageResource {
         header.colorFormat().setMapping(colorFormat.getMapping());
         
         // Headerfelder in ByteBuffer schreiben
-        DataFormat.putStringToByteBuffer(buff, 0, PROPRA_VERSION);
+        DataUtil.putStringToByteBuffer(buff, 0, PROPRA_VERSION);
         buff.put(PROPRA_HEADER_OFFSET_ENCODING, (byte)0);
         buff.putShort(PROPRA_HEADER_OFFSET_WIDTH,(short)srcHeader.width());
         buff.putShort(PROPRA_HEADER_OFFSET_HEIGHT,(short)srcHeader.height());

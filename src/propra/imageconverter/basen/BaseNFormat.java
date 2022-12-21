@@ -11,7 +11,7 @@ public class BaseNFormat extends DataFormat {
     
     // Alphabettabellen, aus Performancegründen keine Hashmap
     private String alphabet = new String();
-    private byte[] alphabetMap = new byte[256];
+    private final byte[] alphabetMap = new byte[256];
     
     // Verwendete BaseN Kodierung
     private BaseNEncoding baseEncoding;
@@ -34,11 +34,17 @@ public class BaseNFormat extends DataFormat {
         BASE_32(5,5, 8),
         BASE_64(6,3,4);
         
-        // Daten für Base-N Kodierungen
+        // Paramter für Base-N Kodierungen
         private final int blockLength;
         private final int charLength;
         private final int bitCount;
         
+        /**
+         * 
+         * @param bitCount
+         * @param blockLength
+         * @param charLength 
+         */
         private BaseNEncoding(  int bitCount, 
                                 int blockLength, 
                                 int charLength) {
@@ -128,11 +134,11 @@ public class BaseNFormat extends DataFormat {
                     return false;
                 }
                 if(!(alphabet.length() == 2
-                        || alphabet.length() == 4
-                        || alphabet.length() == 8
-                        || alphabet.length() == 16
-                        || alphabet.length() == 32
-                        || alphabet.length() == 64)) {
+                || alphabet.length() == 4
+                || alphabet.length() == 8
+                || alphabet.length() == 16
+                || alphabet.length() == 32
+                || alphabet.length() == 64)) {
                     return false;
                 }
             }

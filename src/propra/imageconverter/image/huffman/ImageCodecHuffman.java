@@ -1,5 +1,7 @@
 package propra.imageconverter.image.huffman;
 
+import propra.imageconverter.util.BitOutputStream;
+import propra.imageconverter.util.BitInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;

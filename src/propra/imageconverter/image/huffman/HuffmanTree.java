@@ -1,8 +1,8 @@
 package propra.imageconverter.image.huffman;
 
+import propra.imageconverter.util.BitCode;
 import java.io.IOException;
 import java.util.PriorityQueue;
-import propra.imageconverter.util.BitCode;
 import propra.imageconverter.util.BitInputStream;
 import propra.imageconverter.util.BitOutputStream;
 

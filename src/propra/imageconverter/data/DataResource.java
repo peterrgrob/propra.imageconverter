@@ -1,9 +1,9 @@
 package propra.imageconverter.data;
 
+import propra.imageconverter.util.CheckedInputStream;
+import propra.imageconverter.util.CheckedOutputStream;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import propra.imageconverter.util.CheckedOutputStream;
-import propra.imageconverter.util.CheckedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -11,7 +11,6 @@ import java.nio.channels.Channels;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import propra.imageconverter.util.Checksum;
 
 /**
  *
@@ -27,9 +26,6 @@ public class DataResource implements IDataResource {
     
     // Zugeordneter Codec zum lesen/schreiben der Daten
     protected IDataCodec inCodec;
-    
-    // Prüfsumme 
-    protected Checksum checksum;
     
     /**
      * 
@@ -47,8 +43,10 @@ public class DataResource implements IDataResource {
         }
         
         binaryFile = new RandomAccessFile(fileObj, "r" + (write ? "w":""));
-        inStream = new CheckedInputStream(new BufferedInputStream(Channels.newInputStream(binaryFile.getChannel())));
-        outStream = new CheckedOutputStream(new BufferedOutputStream(Channels.newOutputStream(binaryFile.getChannel())));
+        inStream = new CheckedInputStream(
+                   new BufferedInputStream(Channels.newInputStream(binaryFile.getChannel())));
+        outStream = new CheckedOutputStream(
+                    new BufferedOutputStream(Channels.newOutputStream(binaryFile.getChannel())));
     }
 
     /**

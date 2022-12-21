@@ -28,19 +28,6 @@ public abstract class Checksum {
     }
     
     /**
-     * Berechnet die Prüfsumme der Bytes
-     * 
-     * @param buffer
-     * @return 
-     */
-    public long check(ByteBuffer buffer) {
-        reset();
-        update(buffer);
-        getValue();
-        return getValue();
-    }
-    
-    /**
      *  Setzt Prüfsumme zurück
      */
     public void reset() {
