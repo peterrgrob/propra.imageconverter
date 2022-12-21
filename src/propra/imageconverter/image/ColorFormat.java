@@ -38,6 +38,12 @@ public class ColorFormat extends DataFormat
     
     /**
      * 
+     * @param r
+     * @param r
+     * @param g
+     * @param g
+     * @param b
+     * @param b
      */
     public ColorFormat(int r, int g, int b) {
         setMapping(r, g, b);
@@ -45,6 +51,8 @@ public class ColorFormat extends DataFormat
     
     /**
      * 
+     * @param src
+     * @param src
      */
     public ColorFormat(ColorFormat src) {
         super(src);
@@ -53,6 +61,8 @@ public class ColorFormat extends DataFormat
     
     /**
      *
+     * @param o
+     * @return 
      */
     @Override
     public int compareTo(ColorFormat o) {
@@ -66,6 +76,10 @@ public class ColorFormat extends DataFormat
    
      /**
      * Vergleicht zwei Pixel in einem Byte-Array
+     * @param array
+     * @param offset0
+     * @param offset1
+     * @return 
      */
     static public boolean compareColor(byte[] array, int offset0, int offset1) {
         return (array[offset0 + 0] == array[offset1 + 0]
@@ -75,6 +89,9 @@ public class ColorFormat extends DataFormat
     
     /**
      *  Getter/Setter 
+     * @param r
+     * @param g
+     * @param b
      */
     public void setMapping(int r, int g, int b) {
         setMapping(RED, r);
@@ -82,17 +99,38 @@ public class ColorFormat extends DataFormat
         setMapping(BLUE, b);
     }
     
+    /**
+     *
+     * @param id
+     * @param newId
+     */
     public void setMapping(int id, int newId) {
         mapping[id] = newId;
     }
+
+    /**
+     *
+     * @param map
+     */
     public void setMapping(int[] map) {
         System.arraycopy(map, 0, 
                         this.mapping,0, 
                         map.length);
     }
+
+    /**
+     *
+     * @param id
+     * @return
+     */
     public int getMapping(int id) {
         return mapping[id];
     }  
+
+    /**
+     *
+     * @return
+     */
     public int[] getMapping() {
         return mapping;
     }

@@ -32,15 +32,19 @@ public abstract class ImageResource extends DataResource
 
     /**
      * 
+     * @param file
+     * @param write
+     * @throws java.io.IOException
      */
-    public ImageResource(   String file,
-                            boolean write) throws IOException {
+    public ImageResource(String file, boolean write) throws IOException {
         super(file, write);
         colorFormat = new ColorFormat();
     }
     
     /**
-     * 
+     *
+     * @return 
+     * @throws IOException
      */
     abstract public ImageHeader readHeader() throws IOException;
     
@@ -237,9 +241,9 @@ public abstract class ImageResource extends DataResource
      * @return
      * @throws IOException 
      */
-    public static ImageResource createResource(String path, 
-                                                    String ext,
-                                                    boolean write) throws IOException {
+    public static ImageResource createResource( String path, 
+                                                String ext,
+                                                boolean write) throws IOException {
         switch(ext) {
             case "tga" -> {
                 return new ImageResourceTGA(path, write);
@@ -254,27 +258,48 @@ public abstract class ImageResource extends DataResource
     
     /**
      *
+     * @return  
      */
     public int getFileHeaderSize() {
         return fileHeaderSize;
     }
     
+    /**
+     *
+     * @return
+     */
     public ImageHeader getHeader() {
         return header;
     }
     
+    /**
+     *
+     * @return
+     */
     public ColorFormat getColorFormat() {
         return header.colorFormat();
     }
 
+    /**
+     *
+     * @return
+     */
     public IDataCodec getCodec() {
         return inCodec;
     }
     
+    /**
+     *
+     * @return
+     */
     public Checksum getChecksum() {
         return checksum;
     }
 
+    /**
+     *
+     * @param header
+     */
     public void setHeader(ImageHeader header) {
         this.header = new ImageHeader(header);
         inCodec = createCodec(header);

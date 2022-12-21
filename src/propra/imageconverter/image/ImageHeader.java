@@ -22,6 +22,7 @@ public class ImageHeader {
 
     /**
      *
+     * @param src
      */
     public ImageHeader(ImageHeader src) {
         if (src == null) {
@@ -37,6 +38,8 @@ public class ImageHeader {
     
     /**
      * 
+     * @return 
+     * @return  
      */
     public boolean isValid() {
         return (    width > 0 
@@ -47,58 +50,116 @@ public class ImageHeader {
     /*
      *  Getter/Setter
      */
+
+    /**
+     *
+     * @return
+     */
+
     public int pixelCount() {
         return width * height;
     }
     
+    /**
+     *
+     * @return
+     */
     public long imageSize() {
         return width * height * pixelSize;
     }
     
+    /**
+     *
+     * @return
+     */
     public ColorFormat colorFormat() {
         return colorType;
     }
 
+    /**
+     *
+     * @param colorType
+     */
     public void colorFormat(ColorFormat colorType) {
         this.colorType = colorType;
     }
     
+    /**
+     *
+     * @return
+     */
     public int pixelSize() {
         return pixelSize;
     }
 
+    /**
+     *
+     * @param elementSize
+     */
     public void pixelSize(int elementSize) {
         this.pixelSize = elementSize;
     }
 
+    /**
+     *
+     * @return
+     */
     public long checksum() {
         return checksum;
     }
 
+    /**
+     *
+     * @param checksum
+     */
     public void checksum(long checksum) {
         this.checksum = checksum;
     }
     
+    /**
+     *
+     * @return
+     */
     public int height() {
         return height;
     }
 
+    /**
+     *
+     * @param height
+     */
     public void height(int height) {
         this.height = height;
     }
 
+    /**
+     *
+     * @return
+     */
     public int width() {
         return width;
     }
 
+    /**
+     *
+     * @param width
+     */
     public void width(int width) {
         this.width = width;
     }
 
+    /**
+     *
+     * @return
+     */
     public long encodedSize() {
         return dataLength;
     }
 
+    /**
+     *
+     * @param encodedSize
+     */
     public void encodedSize(long encodedSize) {
         this.dataLength = encodedSize;
     }

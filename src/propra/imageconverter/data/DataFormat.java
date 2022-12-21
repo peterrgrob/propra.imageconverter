@@ -36,6 +36,7 @@ public class DataFormat {
     
     /**
      *
+     * @param encoding
      */
     public DataFormat(Encoding encoding) {
         this.encoding(encoding);
@@ -43,6 +44,7 @@ public class DataFormat {
     
     /**
      * 
+     * @param src
      */
     public DataFormat(DataFormat src) {
         this.encoding = src.encoding;
@@ -50,6 +52,8 @@ public class DataFormat {
     
     /**
      * 
+     * @param encoding
+     * @return  
      */
     public DataFormat encoding(Encoding encoding) {
         this.encoding = encoding;
@@ -58,6 +62,7 @@ public class DataFormat {
     
     /**
      * 
+     * @return 
      */
     public Encoding encoding() {
         return encoding;
@@ -65,6 +70,7 @@ public class DataFormat {
     
     /**
      *
+     * @return  
      */
     public boolean isValid() {
         return true;
@@ -72,6 +78,7 @@ public class DataFormat {
     
     /**
      * 
+     * @return 
      */
     public boolean isBinary() {
         return (encoding == Encoding.RLE);
@@ -79,6 +86,9 @@ public class DataFormat {
     
     /**
      * Prüft ob ein Bit gesetzt ist
+     * @param value
+     * @param bit
+     * @return 
      */
     public static boolean checkBit( byte value, 
                                     byte bit) {
@@ -87,6 +97,10 @@ public class DataFormat {
     
     /**
      * Konvertiert Byte Array in einen Long Wert 
+     * @param bytes
+     * @param offset
+     * @param len
+     * @return 
      */
     public static long bytesToLong( byte[] bytes, 
                                     int offset, 
@@ -101,6 +115,9 @@ public class DataFormat {
     
     /**
      * Konvertiert Bytes eines long Wertes zu einem Byte Array
+     * @param value
+     * @param byteCount
+     * @return 
      */
     static public byte[] longToBytes(   long value, 
                                         int byteCount) {
@@ -114,6 +131,9 @@ public class DataFormat {
     
     /**
      *
+     * @param buffer
+     * @param offset
+     * @param string
      */
     public static void putStringToByteBuffer(   ByteBuffer buffer, 
                                                 int offset, 
@@ -129,6 +149,10 @@ public class DataFormat {
     
     /**
      *
+     * @param buffer
+     * @param len 
+     * @return
+     * @throws java.io.UnsupportedEncodingException 
      */
     public static String getStringFromByteBuffer(   ByteBuffer buffer, 
                                                     int len) throws UnsupportedEncodingException {

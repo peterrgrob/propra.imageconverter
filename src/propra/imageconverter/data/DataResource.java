@@ -33,6 +33,9 @@ public class DataResource implements IDataResource {
     
     /**
      * 
+     * @param file
+     * @param write
+     * @throws java.io.IOException
      */
     public DataResource(String file,
                         boolean write) throws IOException {
@@ -50,6 +53,7 @@ public class DataResource implements IDataResource {
 
     /**
      *
+     * @throws java.io.IOException
      */
     @Override
     public void close() throws IOException {
@@ -66,6 +70,7 @@ public class DataResource implements IDataResource {
     
     /**
      *
+     * @return  
      */
     public boolean isValid() {
         return binaryFile != null;
@@ -73,6 +78,8 @@ public class DataResource implements IDataResource {
 
     /**
      * 
+     * @return
+     * @throws IOException
      */
     @Override
     public long length() throws IOException {
@@ -82,6 +89,8 @@ public class DataResource implements IDataResource {
     
     /**
      * 
+     * @return
+     * @throws IOException
      */
     @Override
     public long position() throws IOException {
@@ -91,6 +100,8 @@ public class DataResource implements IDataResource {
     
     /**
      * 
+     * @param p
+     * @throws IOException
      */
     @Override
     public void position(long p) throws IOException {
@@ -100,6 +111,7 @@ public class DataResource implements IDataResource {
         
     /**
      *  
+     * @return 
      */
     @Override
     public CheckedInputStream getInputStream() {
@@ -109,6 +121,7 @@ public class DataResource implements IDataResource {
     
     /**
      *  
+     * @return 
      */
     @Override
     public CheckedOutputStream getOutputStream() {
@@ -127,6 +140,9 @@ public class DataResource implements IDataResource {
     
     /**
      * Verzeichnisse und Datei erstellen, falls nötig
+     * @param filePath
+     * @return 
+     * @throws java.io.IOException
      */
     public static File createFileAndDirectory(String filePath) throws IOException {
      

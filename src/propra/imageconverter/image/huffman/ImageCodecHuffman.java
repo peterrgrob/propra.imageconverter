@@ -11,7 +11,8 @@ import propra.imageconverter.image.ImageResource;
 import propra.imageconverter.data.IDataTarget;
 
 /**
- *
+ * 
+ * @author pg
  */
 public class ImageCodecHuffman extends ImageCodec {
     
@@ -24,15 +25,19 @@ public class ImageCodecHuffman extends ImageCodec {
     // Ausgabe Bitstream
     BitOutputStream outStream;  
     
-    /*
-     *  Konstruktor
+    /**
+     *
+     * @param resource
      */
     public ImageCodecHuffman(ImageResource resource) {
         super(resource);
     }
 
     /**
-     *  Bereitet Blockweise Datenverarbeitung vor
+     * Bereitet Datenverarbeitung vor
+     * 
+     * @param op
+     * @throws IOException 
      */
     @Override
     public void begin(Operation op) throws IOException {
@@ -53,11 +58,13 @@ public class ImageCodecHuffman extends ImageCodec {
     }
  
     /**
-     *  Ermittelt die Häufigkeit der Symbole im Datenblock
+     * Ermittelt die Häufigkeit der Symbole im Datenblock
+     *
+     * @param block
+     * @param last 
      */
     @Override
-    public void analyze(ByteBuffer block,
-                        boolean last) {
+    public void analyze(ByteBuffer block, boolean last) {
         if(block == null) {
             throw new IllegalArgumentException();
         }
@@ -75,7 +82,9 @@ public class ImageCodecHuffman extends ImageCodec {
     }
     
     /**
-     *   Schließt Blockweise Datenverarbeitung ab
+     * Schließt Blockweise Datenverarbeitung ab
+     * 
+     * @throws IOException 
      */
     @Override
     public void end() throws IOException {
@@ -114,6 +123,8 @@ public class ImageCodecHuffman extends ImageCodec {
     
     /**
      * 
+     * @param op
+     * @return 
      */
     @Override
     public boolean analyzeNecessary(Operation op) {
@@ -121,7 +132,10 @@ public class ImageCodecHuffman extends ImageCodec {
     }
 
     /**
-     *  Dekodiert Huffman kodierten Datenblock
+     * Dekodiert Huffman kodierten Datenblock
+     * 
+     * @param listener
+     * @throws IOException 
      */
     @Override
     public void decode(IDataTarget listener) throws IOException {
@@ -165,27 +179,28 @@ public class ImageCodecHuffman extends ImageCodec {
                         true);     
     }
 
-    /*
+
+    /**
      * 
+     * @param block
+     * @param last
+     * @throws IOException 
      */
     @Override
-    public void encode( ByteBuffer block, 
-                        boolean last) throws IOException {
+    public void encode(ByteBuffer block, boolean last) throws IOException {
         if(huffmanTree == null) {
             throw new IllegalStateException("Huffmann-Tree nicht initialisiert.");
         }
-        
-        ByteBuffer buff = block;
         
         /**
          *  Symbole im Puffer iterieren, per Huffmantree zu Bitcode umsetzen und 
          *  diesen in der Resource speichern
          */
         byte[] c = new byte[3];
-        while(buff.position() < buff.limit()) {
+        while(block.position() < block.limit()) {
             
             // Pixel lesen und Farbe konvertieren
-            buff.get(c);
+            block.get(c);
                     
             outStream.write(huffmanTree.encodeSymbol(c[0] & 0xFF));
             outStream.write(huffmanTree.encodeSymbol(c[1] & 0xFF));

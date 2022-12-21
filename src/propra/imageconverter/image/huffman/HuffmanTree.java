@@ -28,8 +28,11 @@ public class HuffmanTree {
     }
     
     /**
-     *  Rekonstruiert rekursiv einen Huffmantree aus der Resource nach 
-     *  Propra-Konstruktionsvorschrift aus einem Code mit Preorder-Durchlauf
+     * Rekonstruiert rekursiv einen Huffmantree aus der Resource nach 
+     * Propra-Konstruktionsvorschrift aus einem Code mit Preorder-Durchlauf
+     *
+     * @param resource
+     * @throws IOException 
      */
     public void buildTreeFromResource(BitInputStream resource) throws IOException {
         if(resource == null) {
@@ -41,9 +44,11 @@ public class HuffmanTree {
         rootNode.buildBitCodes(new BitCode(0,0));
     }
     
-    /*
-     *  Erstellt einen Huffmantree aus den Eingabesymbolen und Häufigkeiten
-     *  durch Verwendung einer PriorityQueue
+    /**
+     * Erstellt einen Huffmantree aus den Eingabesymbolen und Häufigkeiten
+     * durch Verwendung einer PriorityQueue
+     *
+     * @param symbols 
      */
     public void buildTreeFromHistogram(long[] symbols) {
         
@@ -90,21 +95,31 @@ public class HuffmanTree {
     }
     
     /**
-     *  Baum als kodierte Bitfolge in Stream speichern
+     * Baum als kodierte Bitfolge in Stream speichern
+     *
+     * @param stream
+     * @throws IOException 
      */
     public void storeTreeInStream(BitOutputStream stream) throws IOException {
         rootNode.storeTreeInStream(stream);
     }
     
     /**
-     *  Dekodiert Byte von Stream, gibt Symbol oder -1 bei EOF zurück
+     * Dekodiert Byte von Stream, gibt Symbol oder -1 bei EOF zurück
+     * 
+     * @param stream
+     * @return
+     * @throws IOException 
      */
     public int decodeSymbol(BitInputStream stream) throws IOException {
         return rootNode.decodeSymbol(stream);
     }
     
     /**
-     *  Gibt den Bitcode für ein Symbol zurück
+     * Gibt den Bitcode für ein Symbol zurück
+     * 
+     * @param symbol
+     * @return 
      */
     public BitCode encodeSymbol(int symbol) {
         HuffmanNode n = nodeArray[symbol];
@@ -112,7 +127,8 @@ public class HuffmanTree {
     }
     
     /**
-     * 
+     *  
+     * @return 
      */
     @Override
     public String toString() {

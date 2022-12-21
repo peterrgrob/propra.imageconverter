@@ -29,6 +29,7 @@ public class ChecksumPropra extends Checksum {
     
     /**
      *
+     * @return   
      */
     @Override
     public long getValue() {

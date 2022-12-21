@@ -36,8 +36,7 @@ public class ImageResourceProPra extends ImageResource {
      * @param write
      * @throws IOException 
      */
-    public ImageResourceProPra( String file,
-                                boolean write) throws IOException {
+    public ImageResourceProPra(String file, boolean write) throws IOException {
         super(file, write);
         
         fileHeaderSize = PROPRA_HEADER_SIZE;
@@ -51,6 +50,8 @@ public class ImageResourceProPra extends ImageResource {
     /**
      * 
      * 
+     * @return
+     * @throws java.io.IOException
      */
     @Override
     public ImageHeader readHeader() throws IOException {
@@ -122,7 +123,8 @@ public class ImageResourceProPra extends ImageResource {
     
     /**
      * Schreibt allgemeinen Header als ProPra Header
-     * 
+     * @param srcHeader
+     * @throws IOException 
      */
     @Override
     public void writeHeader(ImageHeader srcHeader) throws IOException {

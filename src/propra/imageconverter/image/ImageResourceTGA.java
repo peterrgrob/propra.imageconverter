@@ -29,9 +29,13 @@ public class ImageResourceTGA extends ImageResource {
     /**
      *
      * 
+     * @param file
+     * @param file
+     * @param write
+     * @throws java.io.IOException
+     * @throws IOException
      */
-    public ImageResourceTGA(String file,
-                            boolean write) throws IOException {
+    public ImageResourceTGA(String file, boolean write) throws IOException {
         super(file, write);
         fileHeaderSize = TGA_HEADER_SIZE;
     }
@@ -39,6 +43,10 @@ public class ImageResourceTGA extends ImageResource {
     /**
      * 
      * 
+     * @return
+     * @return 
+     * @throws java.io.IOException 
+     * @throws IOException
      */
     @Override
     public ImageHeader readHeader() throws IOException {

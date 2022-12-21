@@ -53,6 +53,8 @@ public class Color {
    
     /**
      * 
+     * @return 
+     * @return  
      */
     public int getIndex() {
         return index;
@@ -85,8 +87,8 @@ public class Color {
     /**
      * Vergleicht zwei Farbwerte
      * 
-     * @param offset1
-     * @param offset2
+     * @param c1
+     * @param c2
      * @return 
      */
     public static boolean compareColor(Color c1, Color c2) {
@@ -98,8 +100,10 @@ public class Color {
     /**
      * Vergleicht zwei Farbwerte in Array
      * 
-     * @param offset1
-     * @param offset2
+     * @param c1
+     * @param index1
+     * @param c2
+     * @param index2
      * @return 
      */
     public static boolean compareColor( byte[] c1, int index1,
@@ -112,6 +116,7 @@ public class Color {
     /**
      * Füllt Buffer len-mal mit Farbwert und gibt neuen Offset zurück
      * 
+     * @param buffer
      * @param color
      * @param len
      * @return 
@@ -130,9 +135,9 @@ public class Color {
      * Konvertiert Farbpuffer
      * 
      * @param input
-     * @param srcFormat
+     * @param srcForm
      * @param output
-     * @param dstFormat
+     * @param dstForm
      * @return 
      */
     public static ByteBuffer convert( ByteBuffer input, ColorFormat srcForm,

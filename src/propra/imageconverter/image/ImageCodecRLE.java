@@ -11,6 +11,7 @@ import propra.imageconverter.data.IDataTarget;
 /**
  *
  * 
+ * @author pg
  */
 public class ImageCodecRLE extends ImageCodec {
 
@@ -18,8 +19,9 @@ public class ImageCodecRLE extends ImageCodec {
     private ByteBuffer bufferedData; 
     private boolean isBufferedData;
 
-    /*
-     * 
+    /**
+     *
+     * @param resource
      */
     public ImageCodecRLE(ImageResource resource) {
         super(resource);
@@ -39,6 +41,13 @@ public class ImageCodecRLE extends ImageCodec {
     /*
      * 
      */
+
+    /**
+     *
+     * @param target
+     * @throws IOException
+     */
+
     @Override
     public void decode(IDataTarget target) throws IOException {     
         if(!isValid()
@@ -99,8 +108,11 @@ public class ImageCodecRLE extends ImageCodec {
                         stream.eof());
     }
     
-    /*
-     *  Kodiert Pixelblock als RLE
+    /**
+     *
+     * @param block
+     * @param last
+     * @throws IOException
      */
     @Override
     public void encode( ByteBuffer block,
@@ -169,6 +181,8 @@ public class ImageCodecRLE extends ImageCodec {
     
     /**
      *  
+     * @return 
+     * @return  
      */
     @Override
     public boolean isValid() {

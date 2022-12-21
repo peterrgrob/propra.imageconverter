@@ -38,7 +38,7 @@ public class ImageCodec extends DataCodec {
         CheckedInputStream stream = resource.getInputStream();
         
         // Lese Puffer  
-        ByteBuffer data = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE * ColorFormat.PIXEL_SIZE);
+        ByteBuffer data = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
         boolean bLast = false;
         
         /*
@@ -88,7 +88,13 @@ public class ImageCodec extends DataCodec {
     }
     
     /**
-     *  Sendet Datenblock an Listener
+     * Sendet Datenblock an Listener
+     * 
+     * @param event
+     * @param listener
+     * @param block
+     * @param last
+     * @throws IOException 
      */
     protected void dispatchData(Event event,
                                 IDataTarget listener,
