@@ -10,6 +10,7 @@ import propra.imageconverter.data.DataFormat.Operation;
 import propra.imageconverter.data.DataResource;
 import propra.imageconverter.data.IDataCodec;
 import propra.imageconverter.data.IDataTarget;
+import propra.imageconverter.util.CheckedInputStream;
 
 /**
  *
@@ -135,6 +136,8 @@ public abstract class ImageResource extends DataResource
         long p = position();
         
         ByteBuffer dataBlock = ByteBuffer.allocate(DataCodec.DEFAULT_BLOCK_SIZE);
+        CheckedInputStream in = getInputStream();
+        in.checked(false);
         
         inCodec.begin(Operation.DECODER_ANALYZE);
         transcodedImage.getCodec().begin(Operation.ENCODER_ANALYZE);
@@ -148,22 +151,23 @@ public abstract class ImageResource extends DataResource
             
             // Durchlauf für Decoder-Analyse 
             while(position() < length()) {
-                getInputStream().read(dataBlock);
+                in.read(dataBlock);
                 inCodec.analyze(dataBlock, false);
             }
             
             // Ursprüngliche Position wiederherstellen
             position(p);
-            
+                        
             // Durchlauf mit Dekodierung und Encoder-Analyse 
             while(position() < length()) {
                 inCodec.decode(this);
             } 
+            
         } else if(inCodec.analyzeNecessary(Operation.DECODE)) {
             
             // Durchlauf für Decoder-Analyse 
             while(position() < length()) {
-                getInputStream().read(dataBlock);
+                in.read(dataBlock);
                 inCodec.analyze(dataBlock, false);
             }
         } else if(transcodedImage.getCodec().analyzeNecessary(Operation.ENCODE)) {
@@ -174,6 +178,7 @@ public abstract class ImageResource extends DataResource
             } 
         }
         
+        in.checked(true);
         inCodec.end();
         transcodedImage.getCodec().end();
         

@@ -53,7 +53,7 @@ public class ImageCodec extends DataCodec {
             }
             
             // Datenblock von Resource lesen 
-            int r = stream.read(data);
+            int r = stream.read(data.array(), data.position(), data.limit());
             if(r == -1) {
                 throw new IOException("Lesefehler!");
             }

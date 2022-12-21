@@ -61,10 +61,6 @@ public class ChecksumPropra extends Checksum {
      */
     @Override
     public void update(byte[] b, int offset, int len) {
-        if (b == null) {
-            throw new IllegalArgumentException();
-        }
-        
         int dindex = offset;
         for(int i=1; i<=len; i++) {
             currAi = (i + currIndex + currAi + (b[dindex++] & 0xFF)) % X;

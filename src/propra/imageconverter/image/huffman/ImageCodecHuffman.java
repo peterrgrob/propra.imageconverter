@@ -102,7 +102,6 @@ public class ImageCodecHuffman extends ImageCodec {
                 if(sum != image.getHeader().imageSize()) {
                     throw new IOException("Fehlerhafte Bilddaten (Histogram)");
                 }
-                System.out.println("Huffman Symbole: " + sum);
 
                 /*
                  *  Nach der Encoder-Analyse den entsprechenden Huffman Baum aus dem 

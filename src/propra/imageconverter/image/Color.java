@@ -122,12 +122,17 @@ public class Color {
      * @return 
      */
     public static int fill(ByteBuffer buffer, Color color, int len) {
-        for(int i=0; i<len; i++){
-            buffer.put( color.get(), 
-                        color.index, 
-                        ColorFormat.PIXEL_SIZE);
-        }
+        byte[] b = buffer.array();
+        byte[] bs = color.values;
+        int offs = buffer.position();
+        int co = color.getIndex();
         
+        for(int i=0; i<len; i++){
+            b[offs++] = bs[co];
+            b[offs++] = bs[co + 1];
+            b[offs++] = bs[co + 2];            
+        }
+        buffer.position(buffer.position() + len * ColorFormat.PIXEL_SIZE);
         return buffer.position();
     }
     

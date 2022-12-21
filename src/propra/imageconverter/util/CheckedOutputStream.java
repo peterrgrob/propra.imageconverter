@@ -15,12 +15,16 @@ public class CheckedOutputStream extends FilterOutputStream {
     // Prüfsumme
     private Checksum checksum;
     
+    // Prüfsumme aktiviert?
+    private boolean checked;
+    
     /**
      * 
      * @param in 
      */
     public CheckedOutputStream(OutputStream out) {
         super(out);
+        checked = false;
     }
     
     /**
@@ -32,6 +36,7 @@ public class CheckedOutputStream extends FilterOutputStream {
                                 Checksum checksum) {
         super(out);
         this.checksum = checksum;
+        checked = true;
     }
     
     /**
@@ -40,8 +45,17 @@ public class CheckedOutputStream extends FilterOutputStream {
      */
     public void setChecksum(Checksum checksum) {
         this.checksum = checksum;
+        checked = true;
     }
 
+    /**
+     * 
+     * @param checked 
+     */
+    public void checked(boolean checked) {
+        this.checked = checked;
+    }
+    
     /**
      * 
      * @param b
@@ -51,8 +65,8 @@ public class CheckedOutputStream extends FilterOutputStream {
      */
     @Override
     public synchronized void write(byte[] b, int off, int len) throws IOException {
-        super.write(b, off, len);
-        if(checksum != null) {
+        out.write(b, off, len);
+        if(checksum != null && checked) {
             checksum.update(b, off, len);
         }
     }
@@ -64,8 +78,8 @@ public class CheckedOutputStream extends FilterOutputStream {
      */
     @Override
     public synchronized void write(int b) throws IOException {
-        super.write(b);
-        if(checksum != null) {
+        out.write(b);
+        if(checksum != null && checked) {
             checksum.update((byte)b);
         }
     }

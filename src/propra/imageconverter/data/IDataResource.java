@@ -3,6 +3,8 @@ package propra.imageconverter.data;
 import propra.imageconverter.util.CheckedInputStream;
 import propra.imageconverter.util.CheckedOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  *
@@ -41,5 +43,5 @@ public interface IDataResource extends AutoCloseable {
      *  
      * @return  
      */
-    public CheckedOutputStream getOutputStream();  
+    public CheckedOutputStream getOutputStream();   
 }

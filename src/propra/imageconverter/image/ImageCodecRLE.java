@@ -77,10 +77,8 @@ public class ImageCodecRLE extends ImageCodec {
              * Empfänger senden
              */
             if( buff.position() + packetLen > buff.capacity()) {
-                dispatchData(Event.DATA_BLOCK_DECODED, 
-                            target, 
-                            buff,
-                            false);
+                dispatchData(Event.DATA_BLOCK_DECODED,target, 
+                            buff,false);
             }
 
             // RLE oder RAW Paket?
@@ -91,21 +89,17 @@ public class ImageCodecRLE extends ImageCodec {
                 Color.fill(buff, rle, pixelCount);
             } else {
                 // RAW Farben übertragen
-                stream.read(buff.array(), 
-                            buff.position(), 
-                            packetLen);
+                stream.read(buff.array(),buff.position(),packetLen);
                 buff.position(buff.position() + packetLen);
             }
         }
         
-        /**
+        /*
          *  Letzten Block der Operation kennzeichnen und Restdaten
          *  übertragen
          */
-        dispatchData(Event.DATA_BLOCK_DECODED, 
-                        target, 
-                        buff,
-                        stream.eof());
+        dispatchData(Event.DATA_BLOCK_DECODED, target, 
+                    buff,stream.eof());
     }
     
     /**
@@ -193,20 +187,24 @@ public class ImageCodecRLE extends ImageCodec {
      *  Zählt identische Pixel bis zu 128
      */
     private int countRleColor(ByteBuffer data) {
-        
-        int offs1 = data.position();
-        int offs2 = offs1 + ColorFormat.PIXEL_SIZE;
-        byte c[] = data.array();
+        int baseOffset = data.position();
+        int runOffset = baseOffset + ColorFormat.PIXEL_SIZE;
+        byte array[] = data.array();
         int counter = 1;
+        int len = data.limit();
 
-        while (     Color.compareColor(c,offs1, c, offs2)
-                &&  counter < 128
-                &&  offs2 < data.limit()) {
-            
-            offs2 += ColorFormat.PIXEL_SIZE;  
+        while(Color.compareColor(array, baseOffset, 
+                                 array, runOffset)) {
+            runOffset += ColorFormat.PIXEL_SIZE;  
             counter++;
+            
+            // Zähler max, oder Ende erreicht?
+            if( counter > 127
+            ||  runOffset >= len) {
+                break;
+            }
         }
-
+        
         return counter;
     }
     
@@ -218,26 +216,29 @@ public class ImageCodecRLE extends ImageCodec {
                                 ByteBuffer outBuffer) {
         
         int inOffset = inBuffer.position();
-        byte[] t = outBuffer.array();
-        byte[] s = inBuffer.array();
+        byte[] outArray = outBuffer.array();
+        byte[] inArray = inBuffer.array();
         int outOffset = 1;
         int rawCounter = 0;
         int limit = inBuffer.limit();
         
         // Vergleicht aktuelle Farbe mit der folgenden Farbe
-        while( !ColorFormat.compareColor(s, inOffset, inOffset + 3)
-            && rawCounter < 128
-            && inOffset < limit) {
+        while( !ColorFormat.compareColor(inArray, inOffset, inOffset + 3)) {
 
-            t[outOffset++] = s[inOffset++];
-            t[outOffset++] = s[inOffset++];
-            t[outOffset++] = s[inOffset++];
+            outArray[outOffset++] = inArray[inOffset++];
+            outArray[outOffset++] = inArray[inOffset++];
+            outArray[outOffset++] = inArray[inOffset++];
 
             rawCounter++;
+            
+            if(rawCounter >= 128
+            || inOffset >= limit) {
+                break;
+            }
         }
         
         // RLE Kopf schreiben
-        t[0] = (byte)(rawCounter - 1);
+        outArray[0] = (byte)(rawCounter - 1);
         
         // Puffer aktualisieren
         inBuffer.position(inOffset);
