@@ -69,7 +69,7 @@ public class DataCodec implements IDataCodec {
      * 
      */
     @Override
-    public void decode(IDataListener target) throws IOException {
+    public void decode(IDataTarget target) throws IOException {
         
     }        
 

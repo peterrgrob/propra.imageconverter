@@ -6,10 +6,9 @@ import java.util.Arrays;
 import propra.imageconverter.util.*;
 import static propra.imageconverter.data.DataCodec.DEFAULT_BLOCK_SIZE;
 import propra.imageconverter.data.DataFormat.Operation;
-import propra.imageconverter.data.IDataListener;
-import propra.imageconverter.image.ColorBuffer;
 import propra.imageconverter.image.ImageCodec;
 import propra.imageconverter.image.ImageResource;
+import propra.imageconverter.data.IDataTarget;
 
 /**
  *
@@ -125,7 +124,7 @@ public class ImageCodecHuffman extends ImageCodec {
      *  Dekodiert Huffman kodierten Datenblock
      */
     @Override
-    public void decode(IDataListener listener) throws IOException {
+    public void decode(IDataTarget listener) throws IOException {
         
         // Ausgabepuffer vorbereiten
         int symbolCtr = 0;
@@ -152,7 +151,7 @@ public class ImageCodecHuffman extends ImageCodec {
 
             // Wenn Blockgröße erreicht an Listener senden
             if(data.capacity() == data.position()) {                
-                dispatchData(   IDataListener.Event.DATA_BLOCK_DECODED, 
+                dispatchData(IDataTarget.Event.DATA_BLOCK_DECODED, 
                                 listener, 
                                 data,
                                 false);    
@@ -160,7 +159,7 @@ public class ImageCodecHuffman extends ImageCodec {
         }
         
         // Restliche Daten im Puffer übertragen
-        dispatchData(   IDataListener.Event.DATA_BLOCK_DECODED, 
+        dispatchData(IDataTarget.Event.DATA_BLOCK_DECODED, 
                         listener, 
                         data,
                         true);     

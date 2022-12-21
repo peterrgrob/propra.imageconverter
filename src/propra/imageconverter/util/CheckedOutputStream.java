@@ -1,16 +1,17 @@
 package propra.imageconverter.util;
 
-import java.io.BufferedOutputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 /**
+ * Kapselt einen InputStream und berechnet Prüfsumme
  * 
  * @author pg
  */
-public class CheckedOutputStream extends BufferedOutputStream {
-    
+public class CheckedOutputStream extends FilterOutputStream {
+       
     // Prüfsumme
     private Checksum checksum;
     
@@ -18,8 +19,8 @@ public class CheckedOutputStream extends BufferedOutputStream {
      * 
      * @param in 
      */
-    public CheckedOutputStream(OutputStream in) {
-        super(in);
+    public CheckedOutputStream(OutputStream out) {
+        super(out);
     }
     
     /**
@@ -27,9 +28,9 @@ public class CheckedOutputStream extends BufferedOutputStream {
      * @param in
      * @param checksum 
      */
-    public CheckedOutputStream( OutputStream in,
-                            Checksum checksum) {
-        super(in);
+    public CheckedOutputStream( OutputStream out,
+                                Checksum checksum) {
+        super(out);
         this.checksum = checksum;
     }
     

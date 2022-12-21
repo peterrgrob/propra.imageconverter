@@ -1,17 +1,16 @@
 package propra.imageconverter.util;
 
-import java.io.BufferedInputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import propra.imageconverter.image.ColorBuffer;
 
 
 /**
  * 
  * @author pg
  */
-public class CheckedInputStream extends BufferedInputStream {
+public class CheckedInputStream extends FilterInputStream {
     
     // Prüfsumme
     private Checksum checksum;
@@ -105,16 +104,6 @@ public class CheckedInputStream extends BufferedInputStream {
      * @throws IOException 
      */
     public int read(ByteBuffer buff) throws IOException {
-        return read(buff.array(), buff.position(), buff.limit());
-    }
-    
-    /**
-     * 
-     * @param buff
-     * @return
-     * @throws IOException 
-     */
-    public int read(ColorBuffer buff) throws IOException {
         return read(buff.array(), buff.position(), buff.limit());
     }
 }

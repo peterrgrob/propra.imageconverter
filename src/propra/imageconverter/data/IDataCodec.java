@@ -33,7 +33,7 @@ public interface IDataCodec {
      *  Data, falls übergeben. Die Blockgröße kann je nach Codec unterschiedlich 
      *  sein.
      */
-    public void decode(IDataListener listener) throws IOException;
+    public void decode(IDataTarget listener) throws IOException;
     
     /*
      *  Kodiert Daten des Blocks und speichert diese in der Resource.

@@ -9,14 +9,14 @@ import propra.imageconverter.data.DataFormat.Encoding;
 import propra.imageconverter.data.DataFormat.Operation;
 import propra.imageconverter.data.DataResource;
 import propra.imageconverter.data.IDataCodec;
-import propra.imageconverter.data.IDataListener;
+import propra.imageconverter.data.IDataTarget;
 
 /**
  *
  * @author pg
  */
 public abstract class ImageResource extends DataResource 
-                                    implements IDataListener {
+                                    implements IDataTarget {
     
     // Größe des Bildheaders in der Datei
     protected int fileHeaderSize; 
@@ -87,20 +87,21 @@ public abstract class ImageResource extends DataResource
         ImageHeader outHeader = new ImageHeader(header);
         outHeader.colorFormat().encoding(outEncoding);    
         transcodedImage.writeHeader(outHeader);
+        IDataCodec outCodec = transcodedImage.getCodec();
         
         // Bild ggfs. analysieren für Kodierungen
-        analyze();
+        analyzeImage();
         
         // Bildkonvertierung initialisieren
         inCodec.begin(Operation.DECODE);
-        transcodedImage.getCodec().begin(Operation.ENCODE);
+        outCodec.begin(Operation.ENCODE);
         
         // Dekodierung starten
         inCodec.decode(this);
         
         // Bildkonvertierung abschließen
         inCodec.end();
-        transcodedImage.getCodec().end();
+        outCodec.end();
         
         //  Falls nötig Header mit Prüfsumme, oder Länge des komprimierten Datensegements 
         //  aktualisieren
@@ -117,7 +118,7 @@ public abstract class ImageResource extends DataResource
      * 
      * @throws IOException 
      */
-    private void analyze() throws IOException {
+    private void analyzeImage() throws IOException {
         if( !inCodec.analyzeNecessary(Operation.DECODE)
         &&  !transcodedImage.getCodec().analyzeNecessary(Operation.ENCODE)) {
             return;
@@ -194,9 +195,8 @@ public abstract class ImageResource extends DataResource
                     
                     // Farben ggfs. konvertieren
                     if(colorFormat.compareTo(transcodedImage.getHeader().colorFormat()) != 0) { 
-                        ColorBuffer cb = new ColorBuffer(block, colorFormat);
-                        cb.convert(cb,
-                                              transcodedImage.getHeader().colorFormat());
+                        Color.convert(block, colorFormat, 
+                                      block, transcodedImage.getColorFormat());
                     }
                     
                     // An Encoder weiterreichen
@@ -261,6 +261,10 @@ public abstract class ImageResource extends DataResource
     
     public ImageHeader getHeader() {
         return header;
+    }
+    
+    public ColorFormat getColorFormat() {
+        return header.colorFormat();
     }
 
     public IDataCodec getCodec() {

@@ -3,19 +3,15 @@ package propra.imageconverter.image;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataCodec;
-import propra.imageconverter.data.IDataListener;
-import propra.imageconverter.data.IDataListener.Event;
+import propra.imageconverter.data.IDataTarget.Event;
 import propra.imageconverter.util.CheckedInputStream;
+import propra.imageconverter.data.IDataTarget;
 
 
 /**
  *  Basiscodec für die Konvertierung von unkomprimierten Pixelblöcken
  */
 public class ImageCodec extends DataCodec {
-    
-    // Standardblockgröße, muss vielfaches der Pixelgröße sein
-    public static final int DEFAULT_IMAGEBLOCK_SIZE = 4096 * 4;
-    
     
     // Zugeordnete Resource zur Ein-, oder Ausgabe der Daten 
     protected ImageResource image;
@@ -34,7 +30,7 @@ public class ImageCodec extends DataCodec {
      * @throws IOException 
      */
     @Override
-    public void decode(IDataListener listener) throws IOException {
+    public void decode(IDataTarget listener) throws IOException {
         if(!isValid()) {
             throw new IllegalArgumentException();
         }
@@ -42,7 +38,7 @@ public class ImageCodec extends DataCodec {
         CheckedInputStream stream = resource.getInputStream();
         
         // Lese Puffer  
-        ByteBuffer data = ByteBuffer.allocate(DEFAULT_IMAGEBLOCK_SIZE * ColorFormat.PIXEL_SIZE);
+        ByteBuffer data = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE * ColorFormat.PIXEL_SIZE);
         boolean bLast = false;
         
         /*
@@ -95,7 +91,7 @@ public class ImageCodec extends DataCodec {
      *  Sendet Datenblock an Listener
      */
     protected void dispatchData(Event event,
-                                IDataListener listener,
+                                IDataTarget listener,
                                 ByteBuffer block,
                                 boolean last) throws IOException {
         block.flip();

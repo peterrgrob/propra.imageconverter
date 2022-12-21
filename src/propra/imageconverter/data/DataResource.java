@@ -1,5 +1,7 @@
 package propra.imageconverter.data;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import propra.imageconverter.util.CheckedOutputStream;
 import propra.imageconverter.util.CheckedInputStream;
 import java.io.File;
@@ -42,8 +44,8 @@ public class DataResource implements IDataResource {
         }
         
         binaryFile = new RandomAccessFile(fileObj, "r" + (write ? "w":""));
-        inStream = new CheckedInputStream(Channels.newInputStream(binaryFile.getChannel()));
-        outStream = new CheckedOutputStream(Channels.newOutputStream(binaryFile.getChannel()));
+        inStream = new CheckedInputStream(new BufferedInputStream(Channels.newInputStream(binaryFile.getChannel())));
+        outStream = new CheckedOutputStream(new BufferedOutputStream(Channels.newOutputStream(binaryFile.getChannel())));
     }
 
     /**

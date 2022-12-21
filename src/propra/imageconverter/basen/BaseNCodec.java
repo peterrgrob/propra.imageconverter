@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataCodec;
 import propra.imageconverter.data.DataFormat;
-import propra.imageconverter.data.IDataListener;
 import propra.imageconverter.data.IDataResource;
+import propra.imageconverter.data.IDataTarget;
 
 /**
  * Klasse für allgemeine Base-N Kodierung, die Parametrisierung erfolgt
@@ -42,7 +42,7 @@ public class BaseNCodec extends DataCodec {
      * 
      */
     @Override
-    public void decode(IDataListener target) throws IOException {
+    public void decode(IDataTarget target) throws IOException {
         if(!isValid()) {
             throw new IllegalArgumentException();
         }   

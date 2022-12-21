@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
  *
  * @author pg
  */
-public interface IDataListener {
+public interface IDataTarget {
     
     // Daten Events
     public enum Event {
