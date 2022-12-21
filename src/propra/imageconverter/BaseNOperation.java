@@ -4,19 +4,16 @@ import propra.imageconverter.util.CmdLine;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import propra.imageconverter.basen.*;
+import propra.imageconverter.data.*;
 import propra.imageconverter.util.CmdLine.Options;
-import propra.imageconverter.basen.BaseNCodec;
-import propra.imageconverter.basen.BaseNFormat;
-import propra.imageconverter.basen.BaseNResource;
-import propra.imageconverter.data.DataFormat;
-import propra.imageconverter.data.DataResource;
 
 /**
  * Klasse implementiert BaseN Programmfunktionalität
  * 
  * @author pg
  */
-public class BaseNOperation implements AutoCloseable {
+public class BaseNOperation implements AutoCloseable, IDataTarget {
     
     // Kommandozeilenobjekt
     private final CmdLine cmdLine;
@@ -111,53 +108,19 @@ public class BaseNOperation implements AutoCloseable {
             /**
              *  Dekodiert BaseN Datei
              */
-            
-            // Alphabet aus Datei laden?
-            if(!baseNFile.getFormat().isValidAlphabet()) {
-                baseNFile.getFormat().setEncoding(baseNFile.readAlphabet());
-            }
-
-            // Decoder erstellen
-            BaseNCodec decoder = new BaseNCodec(baseNFile, 
-                                                baseNFile.getFormat());
-
-            // Puffer für dekodierte Daten erstellen 
-            ByteBuffer data = ByteBuffer.allocate((int)baseNFile.length());
-            
-            // Datei in Puffer dekodieren
-            decoder.begin(DataFormat.Operation.DECODE);
-            decoder.decode(null);
-            decoder.end();
-            
-            // Daten in Daei schreiben 
-            binaryFile.getOutputStream()
-                      .write(data);
-            
+            baseNFile.decode(this);
         } else {
             /**
              *  Kodiert eine Datei als BaseN Datei
              */
-                        
-            // Encoder erstellen
-            BaseNCodec encoder = new BaseNCodec(baseNFile, 
-                                                baseNFile.getFormat());
-            
-            // Puffer für kodierte Daten erstellen 
-            ByteBuffer data = ByteBuffer.allocate((int)binaryFile.length());
-            
-            // Daten von Datei lesen
-            binaryFile.getInputStream()
-                      .read(data);
-            
-            // Daten in Resource dekodieren
-            encoder.begin(DataFormat.Operation.DECODE);
-            encoder.encode(data, true);
-            encoder.end();
+            baseNFile.encode(this);
         }
         
         baseNFile.close();
         binaryFile.close();
     }
+    
+    
     
     /**
      * Schließt geöffnete Resourcen, wird automatisch bei Verwendung mit 
@@ -170,6 +133,13 @@ public class BaseNOperation implements AutoCloseable {
         }
         if(binaryFile != null) {
             baseNFile.close();            
+        }
+    }
+
+    @Override
+    public void onData(Event event, IDataCodec caller, ByteBuffer data, boolean lastBlock) throws IOException {
+        if(event == Event.DATA_BLOCK_DECODED) {
+            binaryFile.getOutputStream().write(data);
         }
     }
 }

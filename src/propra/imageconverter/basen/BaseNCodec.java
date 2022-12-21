@@ -6,6 +6,7 @@ import propra.imageconverter.data.DataCodec;
 import propra.imageconverter.data.DataFormat;
 import propra.imageconverter.data.IDataResource;
 import propra.imageconverter.data.IDataTarget;
+import propra.imageconverter.data.IDataTarget.Event;
 
 /**
  * Klasse für allgemeine Base-N Kodierung, die Parametrisierung erfolgt
@@ -48,61 +49,54 @@ public class BaseNCodec extends DataCodec {
         }   
         
         // Größe der binären Base-N Byteblöcke
-        /*int blockLength = format.getBlockLength();
-        
-        ByteBuffer out = data;
-        ByteBuffer inData = ByteBuffer.allocate(encodedBufferLength(out));
-        ByteBuffer tData = ByteBuffer.allocate(blockLength);
-        
-        // Daten einlesen
-        CheckedInputStream stream = resource.getInputStream();
-        stream.read(inData);
-        
+        int blockLength = format.getBlockLength();
         int charCtr = 0;
         
+        // Daten lesen
+        ByteBuffer data = ByteBuffer.allocate((int)resource.length());
+        resource.getInputStream().read(data.array());
+
+        // Ausgabepuffer erstellen
+        ByteBuffer out = ByteBuffer.allocate((int)resource.length());
+        
         // Zeichen iterieren und dekodieren
-        while(charCtr < inData.limit()) {
+        while(charCtr < out.limit()) {
             
-            // Anzahl der Zeichen pro Byteblock
+            // Anzahl der Zeichen pro Byte
             int charCount = format.getCharLength();
             
             // Bei einem Endblock die Größe anpassen
-            if(charCtr + blockLength >= inData.limit()) {
-                charCount = inData.limit() - charCtr;
+            if(charCtr + blockLength >= out.limit()) {
+                charCount = out.limit() - charCtr;
             }
             
             // Zeichen in Bitblöcke dekodieren
-            decodeCharacters(inData, 
-                            charCtr, 
-                            charCount, 
-                            tData);
-            
-            tData.flip();
-            out.put(tData);
-            tData.clear();
+            decodeCharacters(data,charCtr, 
+                            charCount, out);
             
             charCtr += charCount;
         }
                 
         //  Daten an Listener senden
-        dispatchEvent(  Event.DATA_BLOCK_DECODED, 
-                        target, 
-                        out.flip(),
-                        false);*/
+        target.onData(Event.DATA_BLOCK_DECODED,this,
+                    out.flip(),false);
     }
     
     /**
      * Kodiert Binärdaten in BaseNCodec
+     * 
+     * @param inBuffer
+     * @param last
+     * @throws IOException 
      */
     @Override
-    public void encode( ByteBuffer data, 
+    public void encode( ByteBuffer inBuffer, 
                         boolean last) throws IOException {
         if(!isValid()
-        ||  data == null) {
+        ||  inBuffer == null) {
             throw new IllegalArgumentException();
         }   
         
-        ByteBuffer inBuffer = data;
         ByteBuffer charBuffer = ByteBuffer.allocate(8);         
 
         // Anzahl der Ausgabezeichen ermitteln
@@ -130,10 +124,8 @@ public class BaseNCodec extends DataCodec {
             }
             
             // Bitblöcke in Zeichen umwandeln
-            encodeBits(inBuffer, 
-                        inOffset, 
-                        byteCount, 
-                        charBuffer);
+            encodeBits( inBuffer, inOffset, 
+                        byteCount,charBuffer);
 
             // Kodierte Zeichen in Resource schreiben
             resource.getOutputStream()
@@ -186,8 +178,7 @@ public class BaseNCodec extends DataCodec {
         // Bits in den Ausgabepuffer schreiben
         int byteCount = bitCount >> 3;
         out.put(DataFormat.longToBytes(decodedValue, byteCount), 
-                0, 
-                byteCount);
+                0,byteCount);
         
         return byteCount;
     }

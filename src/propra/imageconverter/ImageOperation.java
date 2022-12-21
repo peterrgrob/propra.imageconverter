@@ -11,7 +11,7 @@ import propra.imageconverter.image.*;
  * 
  * @author pg
  */
-public class ImageOperation implements AutoCloseable{
+public class ImageOperation implements AutoCloseable {
     
     private CmdLine cmd;
     private ImageResource inImage;

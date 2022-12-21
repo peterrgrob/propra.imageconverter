@@ -55,10 +55,10 @@ public abstract class ImageResource extends DataResource
      */
     public void writeHeader(ImageHeader srcHeader) throws IOException {
         // Prüfsumme aktualisieren und Header speichern
+        setHeader(srcHeader);
         if(checksum != null) {
             header.checksum(checksum.getValue());
         }
-        setHeader(srcHeader);
     }
     
     /**
