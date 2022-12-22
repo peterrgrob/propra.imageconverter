@@ -97,6 +97,8 @@ import propra.imageconverter.image.ColorFormat;
                 case "huffman" -> {
                     return ColorFormat.Encoding.HUFFMAN;
                 }
+
+
             }
         }
         return ColorFormat.Encoding.NONE;

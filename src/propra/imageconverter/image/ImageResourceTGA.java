@@ -103,8 +103,6 @@ public class ImageResourceTGA extends ImageResource {
         }
         
         super.writeHeader(srcHeader);
-        ColorFormat writeColorFormat = new ColorFormat(2, 1, 0);
-        header.colorFormat().setMapping(writeColorFormat.getMapping());
                 
         // DataBuffer für Header erstellen
         ByteBuffer bytes = ByteBuffer.allocate(fileHeaderSize);

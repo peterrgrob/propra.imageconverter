@@ -166,10 +166,8 @@ public class ImageCodecHuffman extends ImageCodec {
 
             // Wenn Blockgröße erreicht an Listener senden
             if(data.capacity() == data.position()) {                
-                dispatchData(IDataTarget.Event.DATA_BLOCK_DECODED, 
-                                listener, 
-                                data,
-                                false);    
+                dispatchData(IDataTarget.Event.DATA_BLOCK_DECODED, listener, 
+                                data,false);    
             }
         }
         

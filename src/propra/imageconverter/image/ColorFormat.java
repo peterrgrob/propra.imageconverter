@@ -1,52 +1,54 @@
 package propra.imageconverter.image;
 
+import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataFormat;
 
 /**
- * 
- *  Repräsentiert ein Farbformat mit 3 Bytes. 
- *  Die Reihenfolge der Komponenten ist durch ein Mapping 
- *  konfigurierbar, die Standardreihenfolge ist Little-Endian.
- * 
+ * FunctionalInterfaces für Farbkonvertierungsfunktionen
+ * @author pg
+ */
+@FunctionalInterface
+interface ColorConvertBuffer {
+    void convert(ByteBuffer in, ByteBuffer out);
+}
+
+@FunctionalInterface
+interface ColorConverter {
+    void convert(byte[] in, int offset1,
+                 byte[] out, int offset2);
+}
+
+/**
+ *  Farbformat der Resource
  */
 public class ColorFormat extends DataFormat 
                          implements Comparable<ColorFormat> {
     
-    // Konstanten zur Indizierung von Farbkomponenten (Little Endian)
-    public static final int BLUE = 0;
-    public static final int GREEN = 1;
-    public static final int RED = 2;
-    
-    // Standard RGB Format
-    public static final ColorFormat FORMAT_RGB = new ColorFormat(RED, GREEN, BLUE);
+    // Farbreihenfolge
+    public enum ColorOrder {
+        ORDER_BGR,
+        ORDER_RBG,
+    }
        
     // Pixelgröße in Bytes
     public static int PIXEL_SIZE = 3;
     
-    // Bildet Indizes der Farkomponenten ab
-    protected int[] mapping = new int[3];
-
+    // Reihenfolge
+    private ColorOrder order;
+    
     /**
      * 
      */
     public ColorFormat() {
-        /*
-         * Standard RGB Farben (Little Endian)
-         */
-        setMapping(2,1,0);
+        order = ColorOrder.ORDER_BGR;
     }
     
     /**
      * 
-     * @param r
-     * @param r
-     * @param g
-     * @param g
-     * @param b
-     * @param b
+     * @param order 
      */
-    public ColorFormat(int r, int g, int b) {
-        setMapping(r, g, b);
+    public ColorFormat(ColorOrder order) {
+        this.order = order;
     }
     
     /**
@@ -56,9 +58,9 @@ public class ColorFormat extends DataFormat
      */
     public ColorFormat(ColorFormat src) {
         super(src);
-        setMapping(src.mapping);
+        this.order = src.order;
     }
-    
+
     /**
      *
      * @param o
@@ -66,14 +68,61 @@ public class ColorFormat extends DataFormat
      */
     @Override
     public int compareTo(ColorFormat o) {
-        if( mapping[0] == o.getMapping(0) &&
-            mapping[1] == o.getMapping(1) &&
-            mapping[2] == o.getMapping(2)) {
+        if(this.order == o.order) {
             return 0;
         }
         return -1;
     }
+    
+    /**
+     * 
+     * @param in
+     * @param out 
+     */
+    static public void convertBGRtoRBG( byte[] in, int offset1,
+                                        byte[] out, int offset2) {
+        byte b = in[offset1];
+        byte g = in[offset1 + 1];
+        
+        out[offset2] = in[offset1 + 2];
+        out[offset2 + 1] = b;
+        out[offset2 + 2] = g;
+    }
+    
+    /**
+     * 
+     * @param in
+     * @param out 
+     */
+    static public void convertRBGtoBGR( byte[] in, int offset1,
+                                        byte[] out, int offset2) {
+        byte r = in[offset1];
+
+        out[offset2] = in[offset1 + 1];
+        out[offset2 + 1] = in[offset1 + 2];
+        out[offset2 + 2] = r;
+    }
    
+    /**
+     * 
+     * @param in
+     * @param out 
+     */
+    static void convertColorBuffer(ByteBuffer in, ByteBuffer out, ColorConverter converter) {
+        byte[] inBytes = in.array();
+        byte[] outBytes = out.array();
+                
+        int srcOffset = 0;
+        int dstOffset = 0;
+        
+        for (int i=0; i<in.limit(); i+=3) {
+            int sIndex = srcOffset + i;
+            int dIndex = dstOffset + i;
+            
+            converter.convert(inBytes, sIndex, outBytes, dIndex);
+        }
+    }
+    
      /**
      * Vergleicht zwei Pixel in einem Byte-Array
      * @param array
@@ -86,52 +135,20 @@ public class ColorFormat extends DataFormat
             &&  array[offset0 + 1] == array[offset1 + 1]
             &&  array[offset0 + 2] == array[offset1 + 2]);
     }
-    
+
     /**
-     *  Getter/Setter 
-     * @param r
-     * @param g
-     * @param b
+     * 
+     * @return 
      */
-    public void setMapping(int r, int g, int b) {
-        setMapping(RED, r);
-        setMapping(GREEN,g);
-        setMapping(BLUE, b);
-    }
-    
-    /**
-     *
-     * @param id
-     * @param newId
-     */
-    public void setMapping(int id, int newId) {
-        mapping[id] = newId;
+    public ColorOrder getOrder() {
+        return order;
     }
 
     /**
-     *
-     * @param map
+     * 
+     * @param order 
      */
-    public void setMapping(int[] map) {
-        System.arraycopy(map, 0, 
-                        this.mapping,0, 
-                        map.length);
-    }
-
-    /**
-     *
-     * @param id
-     * @return
-     */
-    public int getMapping(int id) {
-        return mapping[id];
-    }  
-
-    /**
-     *
-     * @return
-     */
-    public int[] getMapping() {
-        return mapping;
+    public void setOrder(ColorOrder order) {
+        this.order = order;
     }
 }

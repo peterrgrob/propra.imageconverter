@@ -41,7 +41,7 @@ public class ImageResourceProPra extends ImageResource {
         super(file, write);
         
         fileHeaderSize = PROPRA_HEADER_SIZE;
-        colorFormat = new ColorFormat(0, 2, 1);
+        colorFormat = new ColorFormat(ColorFormat.ColorOrder.ORDER_RBG);//0, 2, 1);
         
         checksum = new ChecksumPropra();
         inStream.setChecksum(checksum);
@@ -138,9 +138,6 @@ public class ImageResourceProPra extends ImageResource {
         // DataBuffer für Header erstellen
         ByteBuffer buff = ByteBuffer.allocate(fileHeaderSize);
         buff.order(ByteOrder.LITTLE_ENDIAN);
-        
-        // ProPra spezifisches RBG Farbmapping setzen
-        header.colorFormat().setMapping(colorFormat.getMapping());
         
         // Headerfelder in ByteBuffer schreiben
         DataUtil.putStringToByteBuffer(buff, 0, PROPRA_VERSION);

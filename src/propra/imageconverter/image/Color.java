@@ -1,9 +1,6 @@
 package propra.imageconverter.image;
 
 import java.nio.ByteBuffer;
-import static propra.imageconverter.image.ColorFormat.BLUE;
-import static propra.imageconverter.image.ColorFormat.GREEN;
-import static propra.imageconverter.image.ColorFormat.RED;
 
 /**
  * Enthält einen Farbwert, oder indiziert einen Farbwert in einem 
@@ -134,47 +131,5 @@ public class Color {
         }
         buffer.position(buffer.position() + len * ColorFormat.PIXEL_SIZE);
         return buffer.position();
-    }
-    
-    /**
-     * Konvertiert Farbpuffer
-     * 
-     * @param input
-     * @param srcForm
-     * @param output
-     * @param dstForm
-     * @return 
-     */
-    public static ByteBuffer convert( ByteBuffer input, ColorFormat srcForm,
-                                      ByteBuffer output, ColorFormat dstForm) {
-        if (output == null
-        ||  dstForm == null) {
-            throw new IllegalArgumentException();
-        }  
-        
-        byte[] inBytes = input.array();
-        byte[] outBytes = output.array();
-        byte r,g,b;
-                
-        int srcOffset = 0;
-        int dstOffset = 0;
-        
-        int[] srcMap = srcForm.getMapping();
-        int[] dstMap = dstForm.getMapping();
-        
-        for (int i=0; i<input.limit(); i+=3) {
-            int sIndex = srcOffset + i;
-            int dIndex = dstOffset + i;
-            
-            r = inBytes[sIndex + srcMap[RED]];
-            g = inBytes[sIndex + srcMap[GREEN]];
-            b = inBytes[sIndex + srcMap[BLUE]];
-            
-            outBytes[dIndex + dstMap[RED]] = r;
-            outBytes[dIndex + dstMap[GREEN]] = g;
-            outBytes[dIndex + dstMap[BLUE]] = b;
-        }
-        
-        return output;
     }
 }

@@ -33,6 +33,9 @@ public abstract class ImageResource extends DataResource
     
     // Prüfsumme 
     protected Checksum checksum;
+    
+    // Farbkonvertierung Methode 
+    protected ColorConverter colorConverter;
 
     /**
      * 
@@ -93,9 +96,22 @@ public abstract class ImageResource extends DataResource
         
         // Neuen Header schreiben
         ImageHeader outHeader = new ImageHeader(header);
-        outHeader.colorFormat().encoding(outEncoding);    
+        outHeader.colorFormat().encoding(outEncoding); 
+        outHeader.colorFormat().setOrder(transcodedImage.colorFormat.getOrder());  
         transcodedImage.writeHeader(outHeader);
         IDataCodec outCodec = transcodedImage.getCodec();
+        
+        // Farbconverter setzen
+        if(colorFormat.compareTo(transcodedImage.getHeader().colorFormat()) != 0) { 
+            switch(colorFormat.getOrder()) {
+                case ORDER_BGR -> {
+                    colorConverter = ColorFormat::convertBGRtoRBG;
+                }
+                case ORDER_RBG -> {
+                    colorConverter = ColorFormat::convertRBGtoBGR;
+                }
+            }
+        }
         
         // Bild ggfs. analysieren für Kodierungen
         analyzeImage();
@@ -206,9 +222,8 @@ public abstract class ImageResource extends DataResource
                 } else {
                     
                     // Farben ggfs. konvertieren
-                    if(colorFormat.compareTo(transcodedImage.getHeader().colorFormat()) != 0) { 
-                        Color.convert(block, colorFormat, 
-                                      block, transcodedImage.getColorFormat());
+                    if(colorConverter != null) {
+                        ColorFormat.convertColorBuffer(block, block, colorConverter);
                     }
                     
                     // An Encoder weiterreichen

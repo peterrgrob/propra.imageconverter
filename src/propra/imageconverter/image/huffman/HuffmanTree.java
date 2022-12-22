@@ -81,8 +81,7 @@ public class HuffmanTree {
             HuffmanNode left = q.poll();
             HuffmanNode parentNode = new HuffmanNode( (byte)0, 
                                                     left.getFrequency() + right.getFrequency(),
-                                                    left,
-                                                    right);
+                                                    left,right);
                     
             q.offer(parentNode);
         }
