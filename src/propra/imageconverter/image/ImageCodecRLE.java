@@ -18,6 +18,7 @@ public class ImageCodecRLE extends ImageCodec {
     // Gepufferte Daten
     private ByteBuffer bufferedData; 
     private boolean isBufferedData;
+    private int encodedSize;
 
     /**
      *
@@ -38,16 +39,12 @@ public class ImageCodecRLE extends ImageCodec {
         bufferedData = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE * 2);
     }
 
-    /*
-     * 
-     */
-
+    
     /**
      *
      * @param target
      * @throws IOException
      */
-
     @Override
     public void decode(IDataTarget target) throws IOException {     
         if(!isValid()
@@ -156,7 +153,7 @@ public class ImageCodecRLE extends ImageCodec {
                 rleBlock.flip();
 
                 // Gleiche Farben im Eingabepuffer überspringen
-                inBuffer.position(inBuffer.position() + (colorCtr - 1) * 3);
+                inBuffer.position(inBuffer.position() + (colorCtr - 1) * ColorFormat.PIXEL_SIZE);
                 
             } else {      
                /*
@@ -167,11 +164,31 @@ public class ImageCodecRLE extends ImageCodec {
             
             // In Resource schreiben
             stream.write(rleBlock);
+            encodedSize += rleBlock.limit();
             rleBlock.clear();
         }
-        
-        stream.flush();
     }
+
+    /**
+     * 
+     * @throws IOException 
+     */
+    @Override
+    public void end() throws IOException {
+        switch(operation) {
+            case ENCODE -> {
+                /*
+                 *  Stream flushen und kodierte Datengröße aktualisieren
+                 */
+                image.getOutputStream().flush();
+                image.getHeader().encodedSize(encodedSize);
+            }
+        }
+
+        super.end();
+    }
+    
+    
     
     /**
      *  

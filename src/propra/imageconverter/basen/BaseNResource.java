@@ -73,7 +73,7 @@ public class BaseNResource extends DataResource {
         }
 
         // Decoder erstellen
-        BaseNCodec decoder = new BaseNCodec(this,getFormat());
+        BaseN decoder = new BaseN(this,getFormat());
 
         // Datei in Puffer dekodieren
         decoder.begin(DataFormat.Operation.DECODE);
@@ -88,7 +88,7 @@ public class BaseNResource extends DataResource {
      */
     public void encode(IDataResource input) throws IOException {
         // Encoder erstellen
-        BaseNCodec encoder = new BaseNCodec(this,getFormat());
+        BaseN encoder = new BaseN(this,getFormat());
 
         // Daten von Datei lesen
         ByteBuffer data = ByteBuffer.allocate((int)input.length());

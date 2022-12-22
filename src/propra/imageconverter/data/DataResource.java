@@ -6,16 +6,16 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.channels.Channels;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+
 /**
- *
+ * 
+ * @author pg
  */
 public class DataResource implements IDataResource {
     

@@ -13,7 +13,7 @@ import propra.imageconverter.data.IDataTarget.Event;
  * über das per Konstruktor übergebene DataFormat Objekt. 
  *  
  */
-public class BaseNCodec extends DataCodec {
+public class BaseN extends DataCodec {
     
     // BaseN Kodierung 
     private final BaseNFormat format;
@@ -24,7 +24,7 @@ public class BaseNCodec extends DataCodec {
      * @param resource
      * @param format
      */
-    public BaseNCodec(  IDataResource resource,
+    public BaseN(  IDataResource resource,
                         BaseNFormat format) {
         super(resource);
         this.format = format;

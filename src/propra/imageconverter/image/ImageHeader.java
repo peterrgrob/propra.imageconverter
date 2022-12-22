@@ -33,6 +33,7 @@ public class ImageHeader {
         this.height = src.height;
         this.pixelSize = src.pixelSize;
         this.checksum = src.checksum;
+        this.dataLength = src.dataLength;
         this.colorType = new ColorFormat(src.colorFormat());
     }
     

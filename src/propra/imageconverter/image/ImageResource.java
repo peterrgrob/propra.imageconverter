@@ -137,7 +137,7 @@ public abstract class ImageResource extends DataResource
         
         ByteBuffer dataBlock = ByteBuffer.allocate(DataCodec.DEFAULT_BLOCK_SIZE);
         CheckedInputStream in = getInputStream();
-        in.checked(false);
+        in.enableChecksum(false);
         
         inCodec.begin(Operation.DECODER_ANALYZE);
         transcodedImage.getCodec().begin(Operation.ENCODER_ANALYZE);
@@ -178,7 +178,7 @@ public abstract class ImageResource extends DataResource
             } 
         }
         
-        in.checked(true);
+        in.enableChecksum(true);
         inCodec.end();
         transcodedImage.getCodec().end();
         

@@ -145,24 +145,24 @@ public class ImageResourceProPra extends ImageResource {
         // Headerfelder in ByteBuffer schreiben
         DataUtil.putStringToByteBuffer(buff, 0, PROPRA_VERSION);
         buff.put(PROPRA_HEADER_OFFSET_ENCODING, (byte)0);
-        buff.putShort(PROPRA_HEADER_OFFSET_WIDTH,(short)srcHeader.width());
-        buff.putShort(PROPRA_HEADER_OFFSET_HEIGHT,(short)srcHeader.height());
-        buff.put(PROPRA_HEADER_OFFSET_BPP,(byte)(srcHeader.pixelSize() << 3));
-        buff.putInt(PROPRA_HEADER_OFFSET_CHECKSUM, (int)srcHeader.checksum());
+        buff.putShort(PROPRA_HEADER_OFFSET_WIDTH,(short)header.width());
+        buff.putShort(PROPRA_HEADER_OFFSET_HEIGHT,(short)header.height());
+        buff.put(PROPRA_HEADER_OFFSET_BPP,(byte)(header.pixelSize() << 3));
+        buff.putInt(PROPRA_HEADER_OFFSET_CHECKSUM, (int)header.checksum());
         
         // Kompression 
         switch(header.colorFormat().encoding()) {
             case HUFFMAN -> {
                 buff.put(PROPRA_HEADER_OFFSET_ENCODING, (byte)PROPRA_HEADER_ENCODING_HUFFMAN);
-                buff.putLong(PROPRA_HEADER_OFFSET_DATALEN,srcHeader.encodedSize());
+                buff.putLong(PROPRA_HEADER_OFFSET_DATALEN,header.encodedSize());
             }
             case RLE -> {
                 buff.put(PROPRA_HEADER_OFFSET_ENCODING, (byte)PROPRA_HEADER_ENCODING_RLE);
-                buff.putLong(PROPRA_HEADER_OFFSET_DATALEN,srcHeader.encodedSize());
+                buff.putLong(PROPRA_HEADER_OFFSET_DATALEN,header.encodedSize());
             }
             case NONE -> {
                 buff.put(PROPRA_HEADER_OFFSET_ENCODING, (byte)PROPRA_HEADER_ENCODING_NONE);
-                buff.putLong(PROPRA_HEADER_OFFSET_DATALEN,(long)srcHeader.imageSize());
+                buff.putLong(PROPRA_HEADER_OFFSET_DATALEN,(long)header.imageSize());
             }
             default -> {
                 throw new IllegalArgumentException("Ungültige Kompression.");
