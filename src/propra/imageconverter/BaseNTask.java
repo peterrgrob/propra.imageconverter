@@ -142,7 +142,7 @@ public class BaseNTask implements AutoCloseable, IDataTarget {
     @Override
     public void onData( Event event, IDataCodec caller, 
                         ByteBuffer data, boolean lastBlock) throws IOException {
-        if(event == Event.DATA_BLOCK_DECODED) {
+        if(event == Event.DATA_DECODED) {
             binaryFile.getOutputStream().write(data);
         }
     }

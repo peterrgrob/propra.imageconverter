@@ -44,12 +44,13 @@ public class ImageCodecHuffman extends ImageCodec {
         super.begin(op);
         
         switch(op) {
-            case ANALYZE_ENCODING -> {
+            case ENCODE_ANALYZE -> {
                 Arrays.fill(histogram, 0);
             }
             case ENCODE -> {
                 /*
-                 *  BitStream erstellen und Baum als Bitfolge in Stream kodieren
+                 *  BitStream erstellen und den durch Analyse erstellten 
+                 *  Baum als Bitfolge in Stream kodieren
                  */
                 outStream = new BitOutputStream(resource.getOutputStream());
                 huffmanTree.storeTreeInStream(outStream);
@@ -69,8 +70,8 @@ public class ImageCodecHuffman extends ImageCodec {
             throw new IllegalArgumentException();
         }
         
-        if(operation == Operation.ANALYZE_ENCODING) {           
-            // Histogram aktualisieren fmit dem Datenblock
+        if(operation == Operation.ENCODE_ANALYZE) {           
+            // Histogram aktualisieren mit den Daten
             byte[] buffer = block.array();
             int offset = 0;
 
@@ -89,8 +90,8 @@ public class ImageCodecHuffman extends ImageCodec {
     @Override
     public void end() throws IOException {
         switch(operation) {
-            case ANALYZE_ENCODING -> {
-               /**
+            case ENCODE_ANALYZE -> {
+               /*
                 *  Histogram prüfen
                 */
                 long sum = 0;
@@ -133,11 +134,11 @@ public class ImageCodecHuffman extends ImageCodec {
     /**
      * Dekodiert Huffman kodierten Datenblock
      * 
-     * @param listener
+     * @param output
      * @throws IOException 
      */
     @Override
-    public void decode(IDataTarget listener) throws IOException {
+    public void decode(IDataTarget output) throws IOException {
         
         // Ausgabepuffer vorbereiten
         int symbolCtr = 0;
@@ -164,16 +165,14 @@ public class ImageCodecHuffman extends ImageCodec {
 
             // Wenn Blockgröße erreicht an Listener senden
             if(data.capacity() == data.position()) {                
-                dispatchData(IDataTarget.Event.DATA_BLOCK_DECODED, listener, 
-                                data,false);    
+                dispatchData(IDataTarget.Event.DATA_DECODED, output, 
+                            data,false);    
             }
         }
         
         // Restliche Daten im Puffer übertragen
-        dispatchData(IDataTarget.Event.DATA_BLOCK_DECODED, 
-                        listener, 
-                        data,
-                        true);     
+        dispatchData(IDataTarget.Event.DATA_DECODED,output, 
+                        data,true);     
     }
 
 

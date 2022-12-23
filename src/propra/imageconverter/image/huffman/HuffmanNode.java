@@ -10,36 +10,29 @@ import propra.imageconverter.util.BitOutputStream;
  */    
 public class HuffmanNode implements Comparable<HuffmanNode>{
     
-   /**
-    *  Knoten
-    */ 
-   private HuffmanNode leftNode;
-   private HuffmanNode rightNode;
+    // Kindknoten 
+    private HuffmanNode leftNode;
+    private HuffmanNode rightNode;
 
-   /*
-    *  Symbol und seine Häufigkeit   
-    */
-   private int symbol;
-   private long frequency;
+    // Symbol und seine Häufigkeit   
+    private int symbol;
+    private long frequency;
 
-   /*
-    *  Codewort des Knotens  
-    */
-   private BitCode code;
+    // Code des Symbols
+    private BitCode code;
 
-   /**
-    *  Konstruktoren
-    */
-   public HuffmanNode() {
-   }
+    /**
+     *  Konstruktoren
+     */
+    public HuffmanNode() {
+    }
 
     /**
      *
      * @param s
      * @param frequency
      */
-    public HuffmanNode(  int s, 
-                        long frequency) {
+    public HuffmanNode(int s, long frequency) {
        this.symbol = s;
        this.frequency = frequency;
    }
@@ -51,10 +44,8 @@ public class HuffmanNode implements Comparable<HuffmanNode>{
      * @param leftNode
      * @param rightNode
      */
-    public HuffmanNode(  int s,
-                        long frequency,
-                        HuffmanNode leftNode,
-                        HuffmanNode rightNode) {
+    public HuffmanNode(int s, long frequency,
+                       HuffmanNode leftNode, HuffmanNode rightNode) {
        this.symbol = s;
        this.frequency = frequency;
        this.leftNode = leftNode;
@@ -68,8 +59,7 @@ public class HuffmanNode implements Comparable<HuffmanNode>{
     * @param nodeMap
     * @throws java.io.IOException
     */
-   public void buildTreeFromResource(   BitInputStream resource, 
-                                        HuffmanNode[] nodeMap) throws IOException {
+   public void buildTreeFromResource(BitInputStream resource, HuffmanNode[] nodeMap) throws IOException {
 
        /*
         * Nächstes Bit gibt an um welchen Knotentyp es sich handelt

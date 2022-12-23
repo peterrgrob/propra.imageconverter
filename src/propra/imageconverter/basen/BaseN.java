@@ -24,8 +24,7 @@ public class BaseN extends DataCodec {
      * @param resource
      * @param format
      */
-    public BaseN(  IDataResource resource,
-                        BaseNFormat format) {
+    public BaseN(IDataResource resource, BaseNFormat format) {
         super(resource);
         this.format = format;
     }
@@ -81,7 +80,7 @@ public class BaseN extends DataCodec {
         }
                 
         //  Daten an Listener senden
-        target.onData(Event.DATA_BLOCK_DECODED,this,
+        target.onData(Event.DATA_DECODED,this,
                     out.flip(),false);
     }
     
@@ -93,8 +92,7 @@ public class BaseN extends DataCodec {
      * @throws IOException 
      */
     @Override
-    public void encode( ByteBuffer inBuffer, 
-                        boolean last) throws IOException {
+    public void encode(ByteBuffer inBuffer, boolean last) throws IOException {
         if(!isValid()
         ||  inBuffer == null) {
             throw new IllegalArgumentException();

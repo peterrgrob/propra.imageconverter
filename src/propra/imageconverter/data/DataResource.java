@@ -35,8 +35,7 @@ public class DataResource implements IDataResource {
      * @param write
      * @throws java.io.IOException
      */
-    public DataResource(String file,
-                        boolean write) throws IOException {
+    public DataResource(String file, boolean write) throws IOException {
         File fileObj;
         if(write) {
             fileObj = createFileAndDirectory(file); 

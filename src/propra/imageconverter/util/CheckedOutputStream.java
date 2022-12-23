@@ -52,7 +52,7 @@ public class CheckedOutputStream extends FilterOutputStream {
      * 
      * @param checked 
      */
-    public void checked(boolean checked) {
+    public void enableChecksum(boolean checked) {
         this.checked = checked;
     }
     

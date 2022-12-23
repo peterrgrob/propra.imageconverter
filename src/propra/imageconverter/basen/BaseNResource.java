@@ -23,9 +23,7 @@ public class BaseNResource extends DataResource {
      * @param write
      * @throws IOException
      */
-    public BaseNResource(   String file, 
-                            BaseNFormat format,
-                            boolean write) throws IOException {
+    public BaseNResource(String file, BaseNFormat format, boolean write) throws IOException {
         super(file, write);
         
         this.format = format;
@@ -65,10 +63,10 @@ public class BaseNResource extends DataResource {
     
     /**
      * 
-     * @param target 
+     * @param output 
      * @throws java.io.IOException 
      */
-    public void decode(IDataTarget target) throws IOException {
+    public void decode(IDataTarget output) throws IOException {
         // Alphabet aus Datei laden?
         if(!format.isValidAlphabet()) {
             format.setEncoding(readAlphabet());
@@ -79,7 +77,7 @@ public class BaseNResource extends DataResource {
 
         // Datei in Puffer dekodieren
         decoder.begin(Operation.DECODE);
-        decoder.decode(target);
+        decoder.decode(output);
         decoder.end();
     } 
     
@@ -93,9 +91,8 @@ public class BaseNResource extends DataResource {
         BaseN encoder = new BaseN(this,getFormat());
 
         // Daten von Datei lesen
-        ByteBuffer data = ByteBuffer.allocate((int)input.length());
-        input.getInputStream().read(data.array());
-
+        ByteBuffer data = ByteBuffer.wrap(input.getInputStream().readAllBytes());
+ 
         // Daten in Resource kodieren
         encoder.begin(Operation.ENCODE);
         encoder.encode(data, true);

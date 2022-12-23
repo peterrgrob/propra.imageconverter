@@ -13,8 +13,8 @@ public interface IDataCodec {
     public enum Operation {
         ENCODE,
         DECODE,
-        ANALYZE_ENCODING,
-        ANALYZE_DECODING,
+        ENCODE_ANALYZE,
+        DECODE_ANALYZE,
         NONE;
     }
     
@@ -46,17 +46,17 @@ public interface IDataCodec {
     public void analyze(ByteBuffer data, boolean last);
 
     /**
-     * Dekodiert Daten von Resource, sendet diese an Listener und speichert in 
-     * Data, falls übergeben. Die Blockgröße kann je nach Codec unterschiedlich 
+     * Dekodiert Daten in Blöcken und sendet diese an Daten Ziel. 
+     * Die Blockgröße kann je nach Codec unterschiedlich 
      * sein.
      * 
-     * @param listener
+     * @param target
      * @throws IOException
      */
-    public void decode(IDataTarget listener) throws IOException;
+    public void decode(IDataTarget target) throws IOException;
     
     /**
-     * Kodiert Daten des Blocks und speichert diese in der Resource.
+     * Kodiert Daten des Blocks und speichert diese.
      * @param data
      * @param last
      * @throws IOException

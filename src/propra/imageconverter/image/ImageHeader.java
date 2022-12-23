@@ -2,7 +2,6 @@ package propra.imageconverter.image;
 
 /**
  * Klasse für einen allgemeinen Bildkopf
- * 
  */
 public class ImageHeader {
     

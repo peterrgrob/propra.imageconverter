@@ -60,7 +60,7 @@ public class ImageTask implements AutoCloseable {
         
         // Ausgabekompression setzen und Konvertierung starten
         outEncoding = cmd.getColorEncoding();
-        outImage = inImage.transcode(outPath, outExt, outEncoding);
+        outImage = inImage.transferTo(outPath, outExt, outEncoding);
         
         // Prüfsumme prüfen
         if(inImage.getChecksum() != null) {

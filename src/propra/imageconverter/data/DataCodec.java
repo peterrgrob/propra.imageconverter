@@ -49,8 +49,7 @@ public class DataCodec implements IDataCodec {
      * @param last
      */
     @Override
-    public void analyze(ByteBuffer data, 
-                        boolean last) {
+    public void analyze(ByteBuffer data, boolean last) {
         
     }
 
@@ -61,8 +60,7 @@ public class DataCodec implements IDataCodec {
      * @throws IOException
      */
     @Override
-    public void encode( ByteBuffer data, 
-                        boolean last) throws IOException {
+    public void encode(ByteBuffer data, boolean last) throws IOException {
     }
 
     /**

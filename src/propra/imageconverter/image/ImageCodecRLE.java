@@ -73,7 +73,7 @@ public class ImageCodecRLE extends ImageCodec {
              * Empfänger senden
              */
             if( buff.position() + packetLen > buff.capacity()) {
-                dispatchData(Event.DATA_BLOCK_DECODED,target, 
+                dispatchData(Event.DATA_DECODED,target, 
                             buff,false);
             }
 
@@ -94,7 +94,7 @@ public class ImageCodecRLE extends ImageCodec {
          *  Letzten Block der Operation kennzeichnen und Restdaten
          *  übertragen
          */
-        dispatchData(Event.DATA_BLOCK_DECODED, target, 
+        dispatchData(Event.DATA_DECODED, target, 
                     buff,stream.eof());
     }
     
@@ -105,8 +105,7 @@ public class ImageCodecRLE extends ImageCodec {
      * @throws IOException
      */
     @Override
-    public void encode( ByteBuffer block,
-                        boolean last) throws IOException{ 
+    public void encode(ByteBuffer block, boolean last) throws IOException{ 
         if(!isValid()
         ||  block == null) {
             throw new IllegalArgumentException();
@@ -228,8 +227,7 @@ public class ImageCodecRLE extends ImageCodec {
      *  Kopiert bis zu 128 Pixel eines RLE Rawblocks, arbeitet aus 
      *  Performancegründen direkt mit den Arrays der ByteBuffer
      */
-    private int encodeRawData(  ByteBuffer inBuffer, 
-                                ByteBuffer outBuffer) {
+    private int encodeRawData(ByteBuffer inBuffer, ByteBuffer outBuffer) {
         
         int inOffset = inBuffer.position();
         byte[] outArray = outBuffer.array();

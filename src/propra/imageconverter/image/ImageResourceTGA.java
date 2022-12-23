@@ -5,7 +5,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import propra.imageconverter.data.DataFormat;
 import propra.imageconverter.data.DataUtil;
-import propra.imageconverter.util.BitCode;
 
 /**
  *  Schreibt TGA Header
@@ -94,7 +93,6 @@ public class ImageResourceTGA extends ImageResource {
     
     /**
      * Schreibt allgemeinen Header als TGA Header
-     * 
      */
     @Override
     public void writeHeader(ImageHeader srcHeader) throws IOException {
@@ -109,28 +107,22 @@ public class ImageResourceTGA extends ImageResource {
         bytes.order(ByteOrder.LITTLE_ENDIAN);
                 
         // Headerfelder in Buffer schreiben
-        bytes.put(TGA_HEADER_OFFSET_ENCODING, 
-                        (byte)2);
-        bytes.putShort(TGA_HEADER_OFFSET_WIDTH, 
-                            (short)srcHeader.width());
-        bytes.putShort(TGA_HEADER_OFFSET_HEIGHT, 
-                            (short)srcHeader.height());
-        bytes.putShort(TGA_HEADER_OFFSET_Y0, 
-                            (short)srcHeader.height());
-        bytes.put(TGA_HEADER_OFFSET_BPP, 
-                            (byte)(srcHeader.pixelSize() << 3));        
-        bytes.put(TGA_HEADER_OFFSET_ORIGIN, 
-                            (byte)(1 << 5)); 
+        bytes.put(TGA_HEADER_OFFSET_ENCODING, (byte)2);
+        bytes.putShort(TGA_HEADER_OFFSET_WIDTH, (short)srcHeader.width());
+        bytes.putShort(TGA_HEADER_OFFSET_HEIGHT, (short)srcHeader.height());
+        bytes.putShort(TGA_HEADER_OFFSET_Y0, (short)srcHeader.height());
+        bytes.put(TGA_HEADER_OFFSET_BPP, (byte)(srcHeader.pixelSize() << 3));        
+        bytes.put(TGA_HEADER_OFFSET_ORIGIN, (byte)(1 << 5)); 
         
         // Kompression
         switch(header.colorFormat().encoding()) {
             case RLE -> {
                 bytes.put(TGA_HEADER_OFFSET_ENCODING, 
-                                    (byte)TGA_HEADER_ENCODING_RLE);
+                            (byte)TGA_HEADER_ENCODING_RLE);
             }
             case NONE -> {
                 bytes.put(TGA_HEADER_OFFSET_ENCODING, 
-                                    (byte)TGA_HEADER_ENCODING_NONE);
+                            (byte)TGA_HEADER_ENCODING_NONE);
             }
             default -> {
                 throw new IllegalArgumentException("Ungültige Kompression.");

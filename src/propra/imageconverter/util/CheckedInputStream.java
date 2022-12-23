@@ -118,4 +118,18 @@ public class CheckedInputStream extends FilterInputStream {
     public int read(ByteBuffer buff) throws IOException {
         return read(buff.array(), buff.position(), buff.limit());
     }
+
+    /**
+     * 
+     * @return
+     * @throws IOException 
+     */
+    @Override
+    public byte[] readAllBytes() throws IOException {
+        byte[] b = super.readAllBytes();
+        if(b != null && checksum != null && checked) {
+            checksum.update(b, 0, b.length);
+        }
+        return b;
+    }
 }

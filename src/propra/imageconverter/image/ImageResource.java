@@ -35,7 +35,7 @@ public abstract class ImageResource extends DataResource
     protected Checksum checksum;
     
     // Farbkonvertierung Methode 
-    protected ColorConverter colorConverter;
+    protected ColorFilter colorConverter;
 
     /**
      * 
@@ -78,8 +78,7 @@ public abstract class ImageResource extends DataResource
      * @return
      * @throws IOException 
      */
-    public ImageResource transcode( String outFile, 
-                                    String ext, 
+    public ImageResource transferTo(String outFile, String ext, 
                                     Encoding outEncoding) throws IOException {
         if(outFile == null) {
             throw new IllegalArgumentException();
@@ -91,7 +90,7 @@ public abstract class ImageResource extends DataResource
             throw new IllegalArgumentException("Nicht unterstütztes Dateiformat!");
         }        
         
-        // Bilddaten einlesen
+        // Infos einlesen
         readHeader();
         
         // Neuen Header schreiben
@@ -160,8 +159,8 @@ public abstract class ImageResource extends DataResource
         CheckedInputStream in = getInputStream();
         in.enableChecksum(false);
         
-        inCodec.begin(Operation.ANALYZE_DECODING);
-        outCodec.begin(Operation.ANALYZE_ENCODING);
+        inCodec.begin(Operation.DECODE_ANALYZE);
+        outCodec.begin(Operation.ENCODE_ANALYZE);
 
         // Analyse für Ein- und Ausgabe
         if( inCodec.analyzeNecessary(Operation.DECODE)
@@ -219,14 +218,14 @@ public abstract class ImageResource extends DataResource
                         ByteBuffer block,
                         boolean last) throws IOException {
         switch(event) {
-            case DATA_BLOCK_DECODED -> {
-                if(caller.getOperation() == Operation.ANALYZE_DECODING) {
+            case DATA_DECODED -> {
+                if(caller.getOperation() == Operation.DECODE_ANALYZE) {
                     transcodedImage.getCodec().analyze( block, last);
                 } else {
                     
                     // Farben ggfs. konvertieren
                     if(colorConverter != null) {
-                        ColorFormat.convertColorBuffer(block, block, colorConverter);
+                        ColorFormat.filterColorBuffer(block, block, colorConverter);
                     }
                     
                     // An Encoder weiterreichen

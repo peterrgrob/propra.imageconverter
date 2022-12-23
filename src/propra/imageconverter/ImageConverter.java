@@ -16,7 +16,9 @@ import java.util.logging.Level;
  *      unterstützt und war teilweise aus Zeitgründen nicht ganz optimal umgesetzt. 
  *      Deshalb habe ich jetzt nochmal grundlegende Änderungen bei der Klassenstruktur 
  *      vorgenommen und das ganze etwas streamorientierter implementiert. 
- *      Trotzdem verarbeite ich die Pixel aus Performancegründen noch in Blöcken. 
+ *  
+ *  -   Farbkonvertierung ist aus Performancegründen jetzt weniger allgemein 
+ *      implementiert mit Methoden-Referenzen je nach Kombination.
  *      
  *      Klassenhierarchie Übersicht:
  * 

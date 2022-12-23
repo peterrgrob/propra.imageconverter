@@ -62,7 +62,6 @@ public class HuffmanTree {
             if(symbols[s] > 0) {
                 HuffmanNode n = new HuffmanNode(s, symbols[s]);
                 q.offer(n);
-                //nodeMap.put(s, n);
                 nodeArray[s] = n;
             }
         }

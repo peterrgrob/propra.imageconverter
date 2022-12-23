@@ -41,8 +41,7 @@ public class ImageResourceProPra extends ImageResource {
         super(file, write);
         
         fileHeaderSize = PROPRA_HEADER_SIZE;
-        colorFormat = new ColorFormat(ColorFormat.ColorOrder.ORDER_RBG);//0, 2, 1);
-        
+        colorFormat = new ColorFormat(ColorFormat.ColorOrder.ORDER_RBG);
         checksum = new ChecksumPropra();
         inStream.setChecksum(checksum);
         outStream.setChecksum(checksum);
@@ -84,6 +83,7 @@ public class ImageResourceProPra extends ImageResource {
         newHeader.height(bytes.getShort(PROPRA_HEADER_OFFSET_HEIGHT));
         newHeader.pixelSize((int)bytes.get(PROPRA_HEADER_OFFSET_BPP) >> 3); 
         newHeader.checksum(bytes.getInt(PROPRA_HEADER_OFFSET_CHECKSUM)); 
+        
         long dataLen = bytes.getLong(PROPRA_HEADER_OFFSET_DATALEN); 
         newHeader.encodedSize(dataLen);
         
@@ -142,24 +142,30 @@ public class ImageResourceProPra extends ImageResource {
         // Headerfelder in ByteBuffer schreiben
         DataUtil.putStringToByteBuffer(buff, 0, PROPRA_VERSION);
         buff.put(PROPRA_HEADER_OFFSET_ENCODING, (byte)0);
-        buff.putShort(PROPRA_HEADER_OFFSET_WIDTH,(short)header.width());
-        buff.putShort(PROPRA_HEADER_OFFSET_HEIGHT,(short)header.height());
-        buff.put(PROPRA_HEADER_OFFSET_BPP,(byte)(header.pixelSize() << 3));
+        buff.putShort(PROPRA_HEADER_OFFSET_WIDTH, (short)header.width());
+        buff.putShort(PROPRA_HEADER_OFFSET_HEIGHT, (short)header.height());
+        buff.put(PROPRA_HEADER_OFFSET_BPP, (byte)(header.pixelSize() << 3));
         buff.putInt(PROPRA_HEADER_OFFSET_CHECKSUM, (int)header.checksum());
         
         // Kompression 
         switch(header.colorFormat().encoding()) {
             case HUFFMAN -> {
-                buff.put(PROPRA_HEADER_OFFSET_ENCODING, (byte)PROPRA_HEADER_ENCODING_HUFFMAN);
-                buff.putLong(PROPRA_HEADER_OFFSET_DATALEN,header.encodedSize());
+                buff.put(PROPRA_HEADER_OFFSET_ENCODING, 
+                        (byte)PROPRA_HEADER_ENCODING_HUFFMAN);
+                buff.putLong(PROPRA_HEADER_OFFSET_DATALEN,
+                            header.encodedSize());
             }
             case RLE -> {
-                buff.put(PROPRA_HEADER_OFFSET_ENCODING, (byte)PROPRA_HEADER_ENCODING_RLE);
-                buff.putLong(PROPRA_HEADER_OFFSET_DATALEN,header.encodedSize());
+                buff.put(PROPRA_HEADER_OFFSET_ENCODING, 
+                        (byte)PROPRA_HEADER_ENCODING_RLE);
+                buff.putLong(PROPRA_HEADER_OFFSET_DATALEN,
+                            header.encodedSize());
             }
             case NONE -> {
-                buff.put(PROPRA_HEADER_OFFSET_ENCODING, (byte)PROPRA_HEADER_ENCODING_NONE);
-                buff.putLong(PROPRA_HEADER_OFFSET_DATALEN,(long)header.imageSize());
+                buff.put(PROPRA_HEADER_OFFSET_ENCODING, 
+                            (byte)PROPRA_HEADER_ENCODING_NONE);
+                buff.putLong(PROPRA_HEADER_OFFSET_DATALEN,
+                            (long)header.imageSize());
             }
             default -> {
                 throw new IllegalArgumentException("Ungültige Kompression.");

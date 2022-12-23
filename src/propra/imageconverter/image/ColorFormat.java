@@ -8,13 +8,8 @@ import propra.imageconverter.data.DataFormat;
  * @author pg
  */
 @FunctionalInterface
-interface ColorConvertBuffer {
-    void convert(ByteBuffer in, ByteBuffer out);
-}
-
-@FunctionalInterface
-interface ColorConverter {
-    void convert(byte[] in, int offset1,
+interface ColorFilter {
+    void apply(byte[] in, int offset1,
                  byte[] out, int offset2);
 }
 
@@ -108,7 +103,7 @@ public class ColorFormat extends DataFormat
      * @param in
      * @param out 
      */
-    static void convertColorBuffer(ByteBuffer in, ByteBuffer out, ColorConverter converter) {
+    static void filterColorBuffer(ByteBuffer in, ByteBuffer out, ColorFilter filter) {
         byte[] inBytes = in.array();
         byte[] outBytes = out.array();
                 
@@ -119,7 +114,7 @@ public class ColorFormat extends DataFormat
             int sIndex = srcOffset + i;
             int dIndex = dstOffset + i;
             
-            converter.convert(inBytes, sIndex, outBytes, dIndex);
+            filter.apply(inBytes, sIndex, outBytes, dIndex);
         }
     }
     
