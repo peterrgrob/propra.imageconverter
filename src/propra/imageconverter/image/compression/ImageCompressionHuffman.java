@@ -1,4 +1,4 @@
-package propra.imageconverter.image.huffman;
+package propra.imageconverter.image.compression;
 
 import propra.imageconverter.util.BitOutputStream;
 import propra.imageconverter.util.BitInputStream;

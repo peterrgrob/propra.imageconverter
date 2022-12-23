@@ -7,7 +7,7 @@ import propra.imageconverter.data.IDataCompression;
 import propra.imageconverter.data.IDataTarget.Event;
 import propra.imageconverter.util.CheckedInputStream;
 import propra.imageconverter.data.IDataTarget;
-import propra.imageconverter.image.huffman.ImageCompressionHuffman;
+import propra.imageconverter.image.compression.ImageCompressionHuffman;
 
 
 /**

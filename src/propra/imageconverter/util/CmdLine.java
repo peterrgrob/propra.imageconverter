@@ -1,7 +1,7 @@
 package propra.imageconverter.util;
 
 import java.util.HashMap;
-import propra.imageconverter.basen.BaseNResource;
+import propra.imageconverter.data.basen.BaseNResource;
 import propra.imageconverter.data.DataResource.Compression;
 
 /**

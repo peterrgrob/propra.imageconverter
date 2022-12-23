@@ -1,4 +1,4 @@
-package propra.imageconverter.basen;
+package propra.imageconverter.data.basen;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

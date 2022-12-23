@@ -1,10 +1,10 @@
 package propra.imageconverter;
 
+import propra.imageconverter.data.basen.BaseNResource;
 import propra.imageconverter.util.CmdLine;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import propra.imageconverter.basen.*;
 import propra.imageconverter.data.*;
 import propra.imageconverter.util.CmdLine.Options;
 

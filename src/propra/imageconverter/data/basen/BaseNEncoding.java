@@ -1,4 +1,4 @@
-package propra.imageconverter.basen;
+package propra.imageconverter.data.basen;
 
 /* 
  *  Kodierungstypen der Daten mit parametrisierten

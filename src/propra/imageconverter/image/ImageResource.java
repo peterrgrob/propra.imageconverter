@@ -1,6 +1,6 @@
 package propra.imageconverter.image;
 
-import propra.imageconverter.image.huffman.ImageCompressionHuffman;
+import propra.imageconverter.image.compression.ImageCompressionHuffman;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import propra.imageconverter.util.IChecksum;
