@@ -21,6 +21,7 @@ public class ImageAttributes {
      */
     public ImageAttributes() {
         format = Color.Format.COLOR_BGR;
+        encoding = Compression.NONE;
     }
     
     /**

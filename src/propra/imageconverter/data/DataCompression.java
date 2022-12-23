@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 /**
  *  Basis-Codec für die unkomprimierte Datenübertragung
  */
-public class DataCodec implements IDataCodec {
+public class DataCompression implements IDataCompression {
 
     // Standardblockgröße
     public static final int DEFAULT_BLOCK_SIZE = 4096 * 8 * 3;
@@ -20,8 +20,8 @@ public class DataCodec implements IDataCodec {
     /*
      * 
      */
-    public DataCodec(IDataResource resource) {
-        if(resource != null) {
+    public DataCompression(IDataResource resource) {
+        if(resource == null) {
             throw new IllegalArgumentException();
         }
         this.resource = resource;
@@ -55,6 +55,16 @@ public class DataCodec implements IDataCodec {
     public void analyze(ByteBuffer data, boolean last) {
         
     }
+    
+    /**
+     * 
+     * @param op
+     * @return 
+     */
+    @Override
+    public boolean analyzeNecessary(Operation op) {
+        return false;
+    }
 
     /**
      *
@@ -83,15 +93,5 @@ public class DataCodec implements IDataCodec {
     @Override
     public void end() throws IOException {
         operation = Operation.NONE;
-    }
-    
-    /**
-     * 
-     * @param op
-     * @return 
-     */
-    @Override
-    public boolean analyzeNecessary(Operation op) {
-        return false;
     }
 }

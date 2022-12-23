@@ -8,8 +8,7 @@ import propra.imageconverter.util.ChecksumPropra;
 import propra.imageconverter.data.DataUtil;
 
 /**
- * Schreibt ProPra Header
- * @author pg
+ * Schreibt und liest ProPra Header
  */
 public class ImageResourceProPra extends ImageResource {
     
@@ -78,6 +77,7 @@ public class ImageResourceProPra extends ImageResource {
         header.setHeight(bytes.getShort(PROPRA_HEADER_OFFSET_HEIGHT));
         header.setChecksum(bytes.getInt(PROPRA_HEADER_OFFSET_CHECKSUM)); 
         header.setDataLength(bytes.getLong(PROPRA_HEADER_OFFSET_DATALEN));
+        header.setFormat(Color.Format.COLOR_RBG);
         int bpp = (int)bytes.get(PROPRA_HEADER_OFFSET_BPP); 
         
         // Kompression initialisieren

@@ -23,6 +23,6 @@ public interface IDataTarget {
      * @param lastBlock
      * @throws java.io.IOException
      */
-    public void onData( Event event, IDataCodec caller, 
+    public void onData( Event event, IDataCompression caller, 
                         ByteBuffer data, boolean lastBlock) throws IOException;  
 }

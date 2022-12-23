@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
  *
  * @author pg
  */
-public interface IDataCodec {
+public interface IDataCompression {
     
     // Datenoperation
     public enum Operation {

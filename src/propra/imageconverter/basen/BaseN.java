@@ -2,9 +2,8 @@ package propra.imageconverter.basen;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import propra.imageconverter.data.DataCodec;
+import propra.imageconverter.data.DataCompression;
 import propra.imageconverter.data.DataUtil;
-import propra.imageconverter.data.IDataResource;
 import propra.imageconverter.data.IDataTarget;
 import propra.imageconverter.data.IDataTarget.Event;
 
@@ -13,10 +12,11 @@ import propra.imageconverter.data.IDataTarget.Event;
  * über das per Konstruktor übergebene DataFormat Objekt. 
  *  
  */
-public class BaseN extends DataCodec {
+public class BaseN extends DataCompression {
     
     // BaseN Kodierung 
-    private final BaseNFormat format;
+    private final BaseNResource baseResource;
+    private final BaseNEncoding baseEncoding;
     
     
     /**
@@ -24,9 +24,10 @@ public class BaseN extends DataCodec {
      * @param resource
      * @param format
      */
-    public BaseN(IDataResource resource, BaseNFormat format) {
+    public BaseN(BaseNResource resource) {
         super(resource);
-        this.format = format;
+        this.baseResource = resource;
+        this.baseEncoding = resource.getBaseNEncoding();
     }
 
     /**
@@ -38,7 +39,7 @@ public class BaseN extends DataCodec {
     @Override
     public void decode(IDataTarget target) throws IOException {
         // Größe der binären Base-N Byteblöcke
-        int blockLength = format.getBlockLength();
+        int blockLength = baseEncoding.getBlockLength();
         int charCtr = 0;
         
         // Daten lesen
@@ -52,7 +53,7 @@ public class BaseN extends DataCodec {
         while(charCtr < out.limit()) {
             
             // Anzahl der Zeichen pro Byte
-            int charCount = format.getCharLength();
+            int charCount = baseEncoding.getCharLength();
             
             // Bei einem Endblock die Größe anpassen
             if(charCtr + blockLength >= out.limit()) {
@@ -88,11 +89,11 @@ public class BaseN extends DataCodec {
 
         // Anzahl der Ausgabezeichen ermitteln
         int inBitCount = inBuffer.limit() << 3;
-        int characterCount = inBitCount / format.getBitCount();
-        int blockLength = format.getBlockLength();
+        int characterCount = inBitCount / baseEncoding.getBitCount();
+        int blockLength = baseEncoding.getBlockLength();
         
         // Bei einem Rest benötigen wir ein Zeichen mehr
-        if(inBitCount % format.getBitCount() != 0) {
+        if(inBitCount % baseEncoding.getBitCount() != 0) {
             characterCount++;
         }
 
@@ -131,8 +132,8 @@ public class BaseN extends DataCodec {
                                     ByteBuffer out) {
         
         byte[] bytes = in.array();
-        byte[] alphabetMap = format.getAlphabetMap();
-        int bitLength = format.getBitCount();
+        byte[] alphabetMap = baseResource.getAlphabetMap();
+        int bitLength = baseEncoding.getBitCount();
         long decodedValue = 0;
         int bitCount = 0;
         int c;
@@ -178,8 +179,8 @@ public class BaseN extends DataCodec {
                             int inLen, 
                             ByteBuffer out) {
         
-        byte[] alphabet = format.getAlphabet().getBytes();
-        int bitLength = format.getBitCount();
+        byte[] alphabet = baseResource.getAlphabet().getBytes();
+        int bitLength = baseEncoding.getBitCount();
 
         // Eingabe-Bytes zum maskieren in long umwandeln
         long value = DataUtil.bytesToLong(in.array(), 
@@ -224,21 +225,13 @@ public class BaseN extends DataCodec {
         }
         
         int totalBits = buffer.limit() << 3;
-        int len = totalBits / format.getBitCount();
+        int len = totalBits / baseEncoding.getBitCount();
 
         // Aufzufüllende Bits berücksichtigen
-        if(totalBits % format.getBitCount() != 0) {
+        if(totalBits % baseEncoding.getBitCount() != 0) {
             len++;
         }
 
         return len;
-    }
-    
-    /**
-     *
-     * @return Aktuelles Daten Format
-     */
-    public BaseNFormat dataFormat() {
-        return format;
     }
 }

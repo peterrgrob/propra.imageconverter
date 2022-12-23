@@ -1,7 +1,7 @@
 package propra.imageconverter.util;
 
 import java.util.HashMap;
-import propra.imageconverter.basen.BaseNFormat;
+import propra.imageconverter.basen.BaseNResource;
 import propra.imageconverter.data.DataResource.Compression;
 
 /**
@@ -85,62 +85,33 @@ import propra.imageconverter.data.DataResource.Compression;
                 case "huffman" -> {
                     return Compression.HUFFMAN;
                 }
-
-
-
             }
         }
         return Compression.NONE;
     }
     
     /**
-     *
+     * Gibt passendes BaseNFormat Objekt zurück, oder wirft eine Exception
      */
-    public String getExtension(Options opt) {
-        return getExtension(getOption(opt));
-    }
-    
-    /**
-     * 
-     */
-    static private String getExtension(String path) {
-        String[] components = path.split("\\.");
-        if(components.length < 2) {
-            return "";
-        }
-        return components[components.length - 1].toLowerCase();
-    } 
-    
-    /**
-     * Gibt passendes BaseNFormat Objekt zurück, oder null
-     */
-    public BaseNFormat getBaseNDataFormat() {
-        String alphabet = null;
-        
+    public String getAlphabet() {
         // Alphabet wählen
         if( options.containsKey(Options.ENCODE_BASE_32)
         ||  options.containsKey(Options.DECODE_BASE_32)) {
-            
-            alphabet = BaseNFormat.BASE_32_ALPHABET;
-            
-        } else if(  options.containsKey(Options.DECODE_BASE_N)) {
-            
+            return BaseNResource.BASE_32_ALPHABET;
+        } else if(options.containsKey(Options.DECODE_BASE_N)) {  
             // Leeres Alphabet, wird später aus Datei geladen
-            return new BaseNFormat();
-            
-        }else if(  options.containsKey(Options.ENCODE_BASE_N)) {
-            
-            // Von der Kommandozeile übernhemen
-            alphabet = options.get(Options.ENCODE_BASE_N);
-            if(alphabet == null) {
-               return null;
-            } else if(alphabet.length() == 0) {
-               return null; 
-            }           
+            return null;
+        }else if(options.containsKey(Options.ENCODE_BASE_N)) { 
+            // Von der Kommandozeile übernehmen
+            String a = options.get(Options.ENCODE_BASE_N);
+            if(a == null) {
+                throw new IllegalArgumentException("Kein Alphabet übergeben!");
+            } else if(a.length() == 0) {
+                throw new IllegalArgumentException("Kein Alphabet übergeben!");
+            }  
+            return a;
         } 
-        
-        // Format Objekt zurückgeben
-        return new BaseNFormat(alphabet);
+        throw new UnsupportedOperationException("Nicht unterstützte BaseN Kodierung.");
     }
     
     /**

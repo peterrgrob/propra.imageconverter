@@ -19,7 +19,7 @@ public class HuffmanTree {
      *  Array aller Knoten mit dem Symbol als Schlüssel zur schnellen
      *  Zuordnung von Symbolen zu Codes
      */
-    HuffmanNode[] nodeArray = new HuffmanNode[256];
+    private HuffmanNode[] nodeArray = new HuffmanNode[256];
 
     /**
      * 

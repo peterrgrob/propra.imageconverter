@@ -6,9 +6,7 @@ import java.nio.ByteOrder;
 import propra.imageconverter.data.DataUtil;
 
 /**
- *  Schreibt TGA Header
- * 
- * @author pg
+ *  Schreibt und liest TGA Header
  */
 public class ImageResourceTGA extends ImageResource {  
 
@@ -61,17 +59,18 @@ public class ImageResourceTGA extends ImageResource {
         // Headerfelder konvertieren
         header.setWidth(bytes.getShort(TGA_HEADER_OFFSET_WIDTH));
         header.setHeight(bytes.getShort(TGA_HEADER_OFFSET_HEIGHT));
+        header.setFormat(Color.Format.COLOR_BGR);
         int bpp = bytes.get(TGA_HEADER_OFFSET_BPP); 
         
         // Kompression
         byte compression = bytes.get(TGA_HEADER_OFFSET_ENCODING);
         switch (compression) {
             case TGA_HEADER_ENCODING_RLE -> {
-                inCodec = new ImageCodecRLE(this);
+                inCodec = new ImageCompressionRLE(this);
                 header.setCompression(Compression.RLE);
             }
             case TGA_HEADER_ENCODING_NONE -> {
-                inCodec = new ImageCodec(this);
+                inCodec = new ImageCompressionRaw(this);
                 header.setCompression(Compression.NONE);
             }
             default -> throw new UnsupportedOperationException("Nicht unterstützte TGA Kompression!");

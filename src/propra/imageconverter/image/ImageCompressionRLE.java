@@ -12,7 +12,7 @@ import propra.imageconverter.data.IDataTarget;
  * 
  * @author pg
  */
-public class ImageCodecRLE extends ImageCodec {
+public class ImageCompressionRLE extends ImageCompressionRaw {
 
     // Gepufferte Daten
     private ByteBuffer bufferedData; 
@@ -23,7 +23,7 @@ public class ImageCodecRLE extends ImageCodec {
      *
      * @param resource
      */
-    public ImageCodecRLE(ImageResource resource) {
+    public ImageCompressionRLE(ImageResource resource) {
         super(resource);
     }
 

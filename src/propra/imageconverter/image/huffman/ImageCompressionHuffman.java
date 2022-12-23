@@ -5,8 +5,8 @@ import propra.imageconverter.util.BitInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import static propra.imageconverter.data.DataCodec.DEFAULT_BLOCK_SIZE;
-import propra.imageconverter.image.ImageCodec;
+import static propra.imageconverter.data.DataCompression.DEFAULT_BLOCK_SIZE;
+import propra.imageconverter.image.ImageCompressionRaw;
 import propra.imageconverter.image.ImageResource;
 import propra.imageconverter.data.IDataTarget;
 
@@ -14,7 +14,7 @@ import propra.imageconverter.data.IDataTarget;
  * 
  * @author pg
  */
-public class ImageCodecHuffman extends ImageCodec {
+public class ImageCompressionHuffman extends ImageCompressionRaw {
     
     //  Histogramm der Daten
     private final long[] histogram = new long[256]; 
@@ -23,13 +23,13 @@ public class ImageCodecHuffman extends ImageCodec {
     private HuffmanTree huffmanTree;
     
     // Ausgabe Bitstream
-    BitOutputStream outStream;  
+    private BitOutputStream outStream;  
     
     /**
      *
      * @param resource
      */
-    public ImageCodecHuffman(ImageResource resource) {
+    public ImageCompressionHuffman(ImageResource resource) {
         super(resource);
     }
 

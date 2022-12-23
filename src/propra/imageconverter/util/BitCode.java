@@ -18,8 +18,7 @@ public class BitCode implements Comparable<BitCode> {
     * @param code
     * @param length 
     */
-   public BitCode( int code, 
-                   int length) {
+   public BitCode(int code, int length) {
        this.code = code;
        this.length = length;
    }

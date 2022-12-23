@@ -2,16 +2,18 @@ package propra.imageconverter.image;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import propra.imageconverter.data.DataCodec;
+import propra.imageconverter.data.DataCompression;
+import propra.imageconverter.data.IDataCompression;
 import propra.imageconverter.data.IDataTarget.Event;
 import propra.imageconverter.util.CheckedInputStream;
 import propra.imageconverter.data.IDataTarget;
+import propra.imageconverter.image.huffman.ImageCompressionHuffman;
 
 
 /**
  *  Basiscodec für die Konvertierung von unkomprimierten Pixelblöcken
  */
-public class ImageCodec extends DataCodec {
+public class ImageCompressionRaw extends DataCompression {
     
     // Zugeordnete Resource zur Ein-, oder Ausgabe der Daten 
     protected ImageResource image;
@@ -19,7 +21,7 @@ public class ImageCodec extends DataCodec {
     /**
      * 
      */
-    public ImageCodec(ImageResource resource) {
+    public ImageCompressionRaw(ImageResource resource) {
         super(resource);
         image = resource;
     }

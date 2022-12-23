@@ -35,7 +35,7 @@ public class DataResource implements IDataResource {
     protected CheckedInputStream inStream; 
     
     // Zugeordneter Codec zum lesen/schreiben der Daten
-    protected IDataCodec inCodec;
+    protected IDataCompression inCodec;
     
     /**
      * 
@@ -57,9 +57,9 @@ public class DataResource implements IDataResource {
         outStream = new CheckedOutputStream(
                     new BufferedOutputStream(Channels.newOutputStream(binaryFile.getChannel())));
         
-        if(binaryFile != null 
-        || inStream != null
-        || outStream != null) {
+        if(binaryFile == null 
+        || inStream == null
+        || outStream == null) {
             throw new IOException("Fehler beim öffnen der Datei!");
         }
     }

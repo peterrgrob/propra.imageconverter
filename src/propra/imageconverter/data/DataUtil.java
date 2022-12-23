@@ -108,4 +108,15 @@ public class DataUtil {
         
         return file;
     }
+    
+    /**
+     * 
+     */
+    static public String getExtension(String path) {
+        String[] components = path.split("\\.");
+        if(components.length < 2) {
+            return "";
+        }
+        return components[components.length - 1].toLowerCase();
+    } 
 }

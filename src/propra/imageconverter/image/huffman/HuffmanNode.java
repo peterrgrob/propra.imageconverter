@@ -45,7 +45,8 @@ public class HuffmanNode implements Comparable<HuffmanNode>{
      * @param rightNode
      */
     public HuffmanNode(int s, long frequency,
-                       HuffmanNode leftNode, HuffmanNode rightNode) {
+                       HuffmanNode leftNode, 
+                       HuffmanNode rightNode) {
        this.symbol = s;
        this.frequency = frequency;
        this.leftNode = leftNode;
@@ -60,12 +61,10 @@ public class HuffmanNode implements Comparable<HuffmanNode>{
     * @throws java.io.IOException
     */
    public void buildTreeFromResource(BitInputStream resource, HuffmanNode[] nodeMap) throws IOException {
-
        /*
         * Nächstes Bit gibt an um welchen Knotentyp es sich handelt
         */
        if(resource.readBit() == 0) {
-
           // Innerer Knoten, daher mit Pre-Order Durchlauf fortfahren
           leftNode = new HuffmanNode();
           leftNode.buildTreeFromResource(resource, nodeMap);
@@ -73,7 +72,6 @@ public class HuffmanNode implements Comparable<HuffmanNode>{
           rightNode.buildTreeFromResource(resource, nodeMap); 
 
        } else {
-
           // Blatt erreicht, daher Symbol für das Blatt einlesen
           symbol = resource.readByte() & 0xFF;
 
@@ -109,7 +107,6 @@ public class HuffmanNode implements Comparable<HuffmanNode>{
     * @param c
     */
    public void buildBitCodes(BitCode c) {
-
        // Code speichern
        code = c;
 
@@ -133,7 +130,6 @@ public class HuffmanNode implements Comparable<HuffmanNode>{
     * @throws java.io.IOException 
     */
    public int decodeSymbol(BitInputStream stream) throws IOException {
-
        // Symbol erreicht?
        if( leftNode == null
        &&  rightNode == null) {

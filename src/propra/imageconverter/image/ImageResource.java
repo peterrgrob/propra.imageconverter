@@ -1,15 +1,15 @@
 package propra.imageconverter.image;
 
-import propra.imageconverter.image.huffman.ImageCodecHuffman;
+import propra.imageconverter.image.huffman.ImageCompressionHuffman;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import propra.imageconverter.util.IChecksum;
-import propra.imageconverter.data.DataCodec;
+import propra.imageconverter.data.DataCompression;
 import propra.imageconverter.data.DataResource;
-import propra.imageconverter.data.IDataCodec;
-import propra.imageconverter.data.IDataCodec.Operation;
+import propra.imageconverter.data.IDataCompression.Operation;
 import propra.imageconverter.data.IDataTarget;
 import propra.imageconverter.util.CheckedInputStream;
+import propra.imageconverter.data.IDataCompression;
 
 /**
  *
@@ -39,9 +39,31 @@ public abstract class ImageResource extends DataResource
      * @param write
      * @throws java.io.IOException
      */
-    public ImageResource(String file, boolean write) throws IOException {
+    protected ImageResource(String file, boolean write) throws IOException {
         super(file, write);
         this.header = new ImageAttributes();
+    }
+    
+    /**
+     * Erstellt ein ImageResource Objekt
+     * 
+     * @param path
+     * @param ext
+     * @param write
+     * @return
+     * @throws IOException 
+     */
+    public static ImageResource createResource(String path, String ext, boolean write) throws IOException {
+        switch(ext) {
+            case "tga" -> {
+                return new ImageResourceTGA(path, write);
+            }
+            case "propra" -> {
+                return new ImageResourceProPra(path, write);
+            }
+
+        }
+        throw new UnsupportedOperationException("Nicht unterstütztes Dateiformat!");
     }
     
     /**
@@ -57,7 +79,7 @@ public abstract class ImageResource extends DataResource
      * @throws IOException 
      */
     public void writeHeader(ImageAttributes srcHeader) throws IOException {
-        this.header = new ImageAttributes(header);
+        this.header = new ImageAttributes(srcHeader);
         inCodec = createCodec(header);
         
         if(checksum != null) {
@@ -105,10 +127,11 @@ public abstract class ImageResource extends DataResource
         }
         
         // Bild ggfs. analysieren für Kodierungen
-        analyzeTranscoding();
+        analyzeCompression();
         
         // Bildkonvertierung initialisieren
-        IDataCodec outCodec = transcodedImage.getCodec();
+        IDataCompression outCodec = transcodedImage.getCodec();
+        
         inCodec.begin(Operation.DECODE);
         outCodec.begin(Operation.ENCODE);
 
@@ -130,14 +153,14 @@ public abstract class ImageResource extends DataResource
     }
 
     /**
-     * Analyse der Codecs durchführen.         
+     * Analyse für die Kompression durchführen.         
      * Analyse durch Ein- und Ausgabecodec erfordert je nach Kombination
      * eine spezielle Behandlung
      * 
      * @throws IOException 
      */
-    private void analyzeTranscoding() throws IOException {
-        IDataCodec outCodec = transcodedImage.getCodec();
+    private void analyzeCompression() throws IOException {
+        IDataCompression outCodec = transcodedImage.getCodec();
         
         // Keine Analyse notwendig?
         if( !inCodec.analyzeNecessary(Operation.DECODE)
@@ -148,7 +171,7 @@ public abstract class ImageResource extends DataResource
         // Position merken
         long p = position();
 
-        ByteBuffer dataBlock = ByteBuffer.allocate(DataCodec.DEFAULT_BLOCK_SIZE);
+        ByteBuffer dataBlock = ByteBuffer.allocate(DataCompression.DEFAULT_BLOCK_SIZE);
         CheckedInputStream in = getInputStream();
         in.enableChecksum(false);
         
@@ -158,7 +181,6 @@ public abstract class ImageResource extends DataResource
         // Analyse für Ein- und Ausgabe
         if( inCodec.analyzeNecessary(Operation.DECODE)
         &&  outCodec.analyzeNecessary(Operation.ENCODE)) {
-
             // Durchlauf für Decoder-Analyse 
             while(position() < length()) {
                 in.read(dataBlock);
@@ -174,7 +196,6 @@ public abstract class ImageResource extends DataResource
             } 
 
         } else if(inCodec.analyzeNecessary(Operation.DECODE)) {
-            
             // Durchlauf nur für Decoder-Analyse 
             while(position() < length()) {
                 in.read(dataBlock);
@@ -182,7 +203,6 @@ public abstract class ImageResource extends DataResource
             }
             
         } else if(outCodec.analyzeNecessary(Operation.ENCODE)) {
-            
             // Durchlauf mit Dekodierung und Encoder-Analyse 
             while(position() < length()) {
                 inCodec.decode(this);
@@ -206,16 +226,13 @@ public abstract class ImageResource extends DataResource
      * @throws IOException 
      */
     @Override
-    public void onData( Event event, 
-                        IDataCodec caller, 
-                        ByteBuffer block,
-                        boolean last) throws IOException {
+    public void onData( Event event, IDataCompression caller, 
+                        ByteBuffer block, boolean last) throws IOException {
         switch(event) {
             case DATA_DECODED -> {
                 if(caller.getOperation() == Operation.DECODE_ANALYZE) {
                     transcodedImage.getCodec().analyze( block, last);
                 } else {
-                    
                     // Farben ggfs. konvertieren
                     if(colorConverter != null) {
                         ColorUtil.filterColorBuffer(block, block, colorConverter);
@@ -233,45 +250,22 @@ public abstract class ImageResource extends DataResource
      * @param header
      * @return 
      */
-    protected IDataCodec createCodec(ImageAttributes header) {
+    protected IDataCompression createCodec(ImageAttributes header) {
         if(header != null) {
             switch(header.getCompression()) {
                 case NONE -> {
-                    return new ImageCodec(this);
+                    return new ImageCompressionRaw(this);
                 }
                 case RLE -> {
-                    return new ImageCodecRLE(this);
+                    return new ImageCompressionRLE(this);
                 }
                 case HUFFMAN -> {
-                    return new ImageCodecHuffman(this);
+                    return new ImageCompressionHuffman(this);
                 }
+
             }
         }
         throw new UnsupportedOperationException("Nicht unterstützte Kompression!");
-    }
-    
-    /**
-     * Erstellt ein ImageResource Objekt
-     * 
-     * @param path
-     * @param ext
-     * @param write
-     * @return
-     * @throws IOException 
-     */
-    public static ImageResource createResource( String path, 
-                                                String ext,
-                                                boolean write) throws IOException {
-        switch(ext) {
-            case "tga" -> {
-                return new ImageResourceTGA(path, write);
-            }
-            case "propra" -> {
-                return new ImageResourceProPra(path, write);
-            }
-
-        }
-        throw new UnsupportedOperationException("Nicht unterstütztes Dateiformat!");
     }
 
     /**
@@ -286,7 +280,7 @@ public abstract class ImageResource extends DataResource
      *
      * @return
      */
-    public IDataCodec getCodec() {
+    public IDataCompression getCodec() {
         return inCodec;
     }
     
