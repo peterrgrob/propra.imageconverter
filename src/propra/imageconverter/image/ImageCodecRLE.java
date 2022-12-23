@@ -2,7 +2,6 @@ package propra.imageconverter.image;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import propra.imageconverter.data.DataFormat;
 import propra.imageconverter.data.IDataTarget.Event;
 import propra.imageconverter.util.CheckedInputStream;
 import propra.imageconverter.util.CheckedOutputStream;
@@ -34,7 +33,7 @@ public class ImageCodecRLE extends ImageCodec {
      * @throws IOException 
      */
     @Override
-    public void begin(DataFormat.Operation op) throws IOException {
+    public void begin(Operation op) throws IOException {
         super.begin(op);
         bufferedData = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE * 2);
     }

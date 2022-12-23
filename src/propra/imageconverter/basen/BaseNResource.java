@@ -2,8 +2,8 @@ package propra.imageconverter.basen;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import propra.imageconverter.data.DataFormat;
 import propra.imageconverter.data.DataResource;
+import propra.imageconverter.data.IDataCodec.Operation;
 import propra.imageconverter.data.IDataResource;
 import propra.imageconverter.data.IDataTarget;
 
@@ -61,6 +61,8 @@ public class BaseNResource extends DataResource {
         }
     }
     
+    
+    
     /**
      * 
      * @param target 
@@ -76,7 +78,7 @@ public class BaseNResource extends DataResource {
         BaseN decoder = new BaseN(this,getFormat());
 
         // Datei in Puffer dekodieren
-        decoder.begin(DataFormat.Operation.DECODE);
+        decoder.begin(Operation.DECODE);
         decoder.decode(target);
         decoder.end();
     } 
@@ -95,7 +97,7 @@ public class BaseNResource extends DataResource {
         input.getInputStream().read(data.array());
 
         // Daten in Resource kodieren
-        encoder.begin(DataFormat.Operation.ENCODE);
+        encoder.begin(Operation.ENCODE);
         encoder.encode(data, true);
         encoder.end();
     }

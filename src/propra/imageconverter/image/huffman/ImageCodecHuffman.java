@@ -5,9 +5,7 @@ import propra.imageconverter.util.BitInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import propra.imageconverter.util.*;
 import static propra.imageconverter.data.DataCodec.DEFAULT_BLOCK_SIZE;
-import propra.imageconverter.data.DataFormat.Operation;
 import propra.imageconverter.image.ImageCodec;
 import propra.imageconverter.image.ImageResource;
 import propra.imageconverter.data.IDataTarget;
@@ -46,7 +44,7 @@ public class ImageCodecHuffman extends ImageCodec {
         super.begin(op);
         
         switch(op) {
-            case ENCODER_ANALYZE -> {
+            case ANALYZE_ENCODING -> {
                 Arrays.fill(histogram, 0);
             }
             case ENCODE -> {
@@ -71,7 +69,7 @@ public class ImageCodecHuffman extends ImageCodec {
             throw new IllegalArgumentException();
         }
         
-        if(operation == Operation.ENCODER_ANALYZE) {           
+        if(operation == Operation.ANALYZE_ENCODING) {           
             // Histogram aktualisieren fmit dem Datenblock
             byte[] buffer = block.array();
             int offset = 0;
@@ -91,7 +89,7 @@ public class ImageCodecHuffman extends ImageCodec {
     @Override
     public void end() throws IOException {
         switch(operation) {
-            case ENCODER_ANALYZE -> {
+            case ANALYZE_ENCODING -> {
                /**
                 *  Histogram prüfen
                 */

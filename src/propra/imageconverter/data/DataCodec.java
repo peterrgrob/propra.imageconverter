@@ -2,7 +2,6 @@ package propra.imageconverter.data;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import propra.imageconverter.data.DataFormat.Operation;
 
 /**
  *  Basis-Codec für die unkomprimierte Datenübertragung
@@ -16,7 +15,7 @@ public class DataCodec implements IDataCodec {
     protected IDataResource resource;
     
     // Aktuelle Operation
-    protected DataFormat.Operation operation;
+    protected Operation operation;
     
     /*
      * 
@@ -31,7 +30,7 @@ public class DataCodec implements IDataCodec {
      * @throws IOException
      */
     @Override
-    public void begin(DataFormat.Operation op) throws IOException {  
+    public void begin(Operation op) throws IOException {  
         operation = op;
     }
     
@@ -99,7 +98,7 @@ public class DataCodec implements IDataCodec {
      * @return 
      */
     @Override
-    public boolean analyzeNecessary(DataFormat.Operation op) {
+    public boolean analyzeNecessary(Operation op) {
         return false;
     }
 }

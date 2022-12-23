@@ -2,13 +2,22 @@ package propra.imageconverter.data;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import propra.imageconverter.data.DataFormat.Operation;
 
 /**
  *
  * @author pg
  */
 public interface IDataCodec {
+    
+    // Datenoperation
+    public enum Operation {
+        ENCODE,
+        DECODE,
+        ANALYZE_ENCODING,
+        ANALYZE_DECODING,
+        NONE;
+    }
+    
     /**
      * 
      * @param op

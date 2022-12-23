@@ -6,9 +6,9 @@ import java.nio.ByteBuffer;
 import propra.imageconverter.util.Checksum;
 import propra.imageconverter.data.DataCodec;
 import propra.imageconverter.data.DataFormat.Encoding;
-import propra.imageconverter.data.DataFormat.Operation;
 import propra.imageconverter.data.DataResource;
 import propra.imageconverter.data.IDataCodec;
+import propra.imageconverter.data.IDataCodec.Operation;
 import propra.imageconverter.data.IDataTarget;
 import propra.imageconverter.util.CheckedInputStream;
 
@@ -99,7 +99,6 @@ public abstract class ImageResource extends DataResource
         outHeader.colorFormat().encoding(outEncoding); 
         outHeader.colorFormat().setOrder(transcodedImage.colorFormat.getOrder());  
         transcodedImage.writeHeader(outHeader);
-        IDataCodec outCodec = transcodedImage.getCodec();
         
         // Farbconverter setzen
         if(colorFormat.compareTo(transcodedImage.getHeader().colorFormat()) != 0) { 
@@ -114,15 +113,16 @@ public abstract class ImageResource extends DataResource
         }
         
         // Bild ggfs. analysieren für Kodierungen
-        analyzeImage();
+        analyzeTranscoding();
         
         // Bildkonvertierung initialisieren
+        IDataCodec outCodec = transcodedImage.getCodec();
         inCodec.begin(Operation.DECODE);
         outCodec.begin(Operation.ENCODE);
-        
+
         // Dekodierung starten
         inCodec.decode(this);
-        
+
         // Bildkonvertierung abschließen
         inCodec.end();
         outCodec.end();
@@ -138,66 +138,69 @@ public abstract class ImageResource extends DataResource
     }
 
     /**
-     * Bild durch die Codecs analysieren
+     * Analyse der Codecs durchführen.         
+     * Analyse durch Ein- und Ausgabecodec erfordert je nach Kombination
+     * eine spezielle Behandlung
      * 
      * @throws IOException 
      */
-    private void analyzeImage() throws IOException {
+    private void analyzeTranscoding() throws IOException {
+        IDataCodec outCodec = transcodedImage.getCodec();
+        
+        // Keine Analyse notwendig?
         if( !inCodec.analyzeNecessary(Operation.DECODE)
         &&  !transcodedImage.getCodec().analyzeNecessary(Operation.ENCODE)) {
             return;
         }
-        
+
         // Position merken
         long p = position();
-        
+
         ByteBuffer dataBlock = ByteBuffer.allocate(DataCodec.DEFAULT_BLOCK_SIZE);
         CheckedInputStream in = getInputStream();
         in.enableChecksum(false);
         
-        inCodec.begin(Operation.DECODER_ANALYZE);
-        transcodedImage.getCodec().begin(Operation.ENCODER_ANALYZE);
-        
-        /*
-         *  Analyse durch Ein- und Ausgabecodec erfordert je nach Kombination
-         *  eine spezielle Behandlung
-         */
+        inCodec.begin(Operation.ANALYZE_DECODING);
+        outCodec.begin(Operation.ANALYZE_ENCODING);
+
+        // Analyse für Ein- und Ausgabe
         if( inCodec.analyzeNecessary(Operation.DECODE)
-        &&  transcodedImage.getCodec().analyzeNecessary(Operation.ENCODE)) {
-            
+        &&  outCodec.analyzeNecessary(Operation.ENCODE)) {
+
             // Durchlauf für Decoder-Analyse 
             while(position() < length()) {
                 in.read(dataBlock);
                 inCodec.analyze(dataBlock, false);
             }
-            
+
             // Ursprüngliche Position wiederherstellen
             position(p);
-                        
+
             // Durchlauf mit Dekodierung und Encoder-Analyse 
             while(position() < length()) {
                 inCodec.decode(this);
             } 
-            
+
         } else if(inCodec.analyzeNecessary(Operation.DECODE)) {
             
-            // Durchlauf für Decoder-Analyse 
+            // Durchlauf nur für Decoder-Analyse 
             while(position() < length()) {
                 in.read(dataBlock);
                 inCodec.analyze(dataBlock, false);
             }
-        } else if(transcodedImage.getCodec().analyzeNecessary(Operation.ENCODE)) {
+            
+        } else if(outCodec.analyzeNecessary(Operation.ENCODE)) {
             
             // Durchlauf mit Dekodierung und Encoder-Analyse 
             while(position() < length()) {
                 inCodec.decode(this);
             } 
         }
-        
+
         in.enableChecksum(true);
         inCodec.end();
-        transcodedImage.getCodec().end();
-        
+        outCodec.end();
+
         // Ursprüngliche Position wiederherstellen
         position(p);
     }
@@ -217,7 +220,7 @@ public abstract class ImageResource extends DataResource
                         boolean last) throws IOException {
         switch(event) {
             case DATA_BLOCK_DECODED -> {
-                if(caller.getOperation() == Operation.DECODER_ANALYZE) {
+                if(caller.getOperation() == Operation.ANALYZE_DECODING) {
                     transcodedImage.getCodec().analyze( block, last);
                 } else {
                     

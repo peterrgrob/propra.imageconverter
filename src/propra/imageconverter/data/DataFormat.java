@@ -15,15 +15,6 @@ public class DataFormat {
         BASEN,
         HUFFMAN;
     }
-    
-    // Datenoperation
-    public enum Operation {
-        ENCODE,
-        DECODE,
-        ENCODER_ANALYZE,
-        DECODER_ANALYZE,
-        NONE;
-    }
 
     /**
      *
