@@ -3,7 +3,6 @@ package propra.imageconverter;
 import propra.imageconverter.util.CmdLine;
 import java.io.IOException;
 import propra.imageconverter.util.CmdLine.Options;
-import propra.imageconverter.data.DataResource;
 import propra.imageconverter.data.DataResource.Compression;
 import propra.imageconverter.data.DataUtil;
 import propra.imageconverter.image.*;
@@ -42,16 +41,13 @@ public class ImageTask implements AutoCloseable {
      */
     public void run() throws IOException {
         
-        String inExt = cmd.getExtension(Options.INPUT_FILE);
-        String outExt = cmd.getExtension(Options.OUTPUT_FILE);
+        // Dateiendungen ableiten
+        String inExt = DataUtil.getExtension(cmd.getOption(Options.INPUT_FILE));
+        String outExt = DataUtil.getExtension(cmd.getOption(Options.OUTPUT_FILE));
         
         // Readerobjekt erstellen
         inImage = ImageResource.createResource( cmd.getOption(Options.INPUT_FILE), 
-                                                    inExt,
-                                                    false);
-        if(inImage == null) {
-            throw new IOException("Nicht unterstütztes Bildformat.");
-        }
+                                                inExt,false);
        
         // Verzeichnisse und Datei für die Ausgabe erstellen, falls nötig
         String outPath = cmd.getOption(Options.OUTPUT_FILE);  

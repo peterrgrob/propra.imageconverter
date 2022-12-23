@@ -20,8 +20,9 @@ import java.util.logging.Level;
  *  -   Farbkonvertierung ist aus Performancegründen jetzt weniger allgemein 
  *      implementiert mit Methoden-Referenzen je nach Kombination.
  *      
- *  -   Ich habe versucht die Komplexität und nicht genutzte Teile der Klassenstruktur, 
- *      die im Laufe des Projekts entstanden sind zu reduzieren. 
+ *  -   Ich habe versucht, wie einige Reviewer angemerkt haben, die Komplexität und 
+ *      nicht genutzte Teile der Klassenstruktur die im Laufe des Projekts entstanden 
+ *      sind zu reduzieren. 
  *      
  *      Damit es besser verständlich ist hier eine kleine Übersicht über die Klassenhierarchie:
  * 

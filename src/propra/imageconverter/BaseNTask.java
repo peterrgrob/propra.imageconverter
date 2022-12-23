@@ -15,21 +15,12 @@ import propra.imageconverter.util.CmdLine.Options;
  */
 public class BaseNTask implements AutoCloseable, IDataTarget {
     
-    // Kommandozeilenobjekt
-    private final CmdLine cmd;
-    
-    // Ein- und Ausgabeobjekt 
+    // Ressourcen
     private BaseNResource baseNFile;
     private DataResource binaryFile;
     
-    /**
-     * 
-     */
-    public BaseNTask() {
-        cmd = null;
-        baseNFile = null;
-        binaryFile = null;
-    }
+    // Kommandozeilenobjekt
+    private final CmdLine cmd;
     
     /**
      * Konstruktor, initialisiert die Operation
@@ -42,17 +33,7 @@ public class BaseNTask implements AutoCloseable, IDataTarget {
         
         this.cmd = cmd;
     }
-    
-    /**
-     *
-     * @return Statusstring
-     */
-    @Override
-    public String toString() {
-        String stateString = "";
-        return stateString;
-    }
-    
+
     /**
      * Aufgabe ausführen
      */
@@ -65,11 +46,8 @@ public class BaseNTask implements AutoCloseable, IDataTarget {
         }
         
         // BaseN Kodierung ableiten
-        BaseNFormat dataFormat = cmd.getBaseNDataFormat();  
-        if(dataFormat == null) {
-            throw new IOException("Kein gültiges BaseN Format!");            
-        }
-            
+        String alphabet = cmd.getAlphabet();
+        
         // Ausgabeendung ableiten
         String outExt;
         if(cmd.isBase32()) {
@@ -82,10 +60,6 @@ public class BaseNTask implements AutoCloseable, IDataTarget {
         if(cmd.isBaseNDecode()) {
             outPath = outPath.replaceAll(outExt, "");  
         } else {    
-            // Prüfen ob ein gültiges Alphabet übergeben wurde für BaseN
-            if(!dataFormat.isValid()) {
-                throw new IllegalArgumentException("Ungültiges Base-N Alpahabet.");
-            }
             outPath = outPath.concat(outExt);
         }          
         ImageConverter.printMessage(outPath);
@@ -96,16 +70,13 @@ public class BaseNTask implements AutoCloseable, IDataTarget {
         if(cmd.isBaseNDecode()) {
             // Resourcenobjekte erstellen
             baseNFile = new BaseNResource(  cmd.getOption(Options.INPUT_FILE), 
-                                            dataFormat,
-                                            false);
+                                            alphabet,false);
             binaryFile = new DataResource(  outPath,true);
             
             baseNFile.decodeTo(this);
             
         } else {
-            baseNFile = new BaseNResource(  outPath, 
-                                            dataFormat,
-                                            true);
+            baseNFile = new BaseNResource(  outPath,alphabet,true);
             binaryFile = new DataResource(  cmd.getOption(Options.INPUT_FILE),false);
             
             baseNFile.encodeFrom(binaryFile);
@@ -140,7 +111,7 @@ public class BaseNTask implements AutoCloseable, IDataTarget {
      * @throws IOException 
      */
     @Override
-    public void onData( Event event, IDataCodec caller, 
+    public void onData( Event event, IDataCompression caller, 
                         ByteBuffer data, boolean lastBlock) throws IOException {
         if(event == Event.DATA_DECODED) {
             binaryFile.getOutputStream().write(data);
