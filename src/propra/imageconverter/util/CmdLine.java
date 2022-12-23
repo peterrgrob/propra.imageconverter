@@ -2,13 +2,11 @@ package propra.imageconverter.util;
 
 import java.util.HashMap;
 import propra.imageconverter.basen.BaseNFormat;
-import propra.imageconverter.image.ColorFormat;
+import propra.imageconverter.data.DataResource.Compression;
 
 /**
  * Hilfsklasse die Kommandozeilenparameter parsed und speichert, diese
  * können über Option abgefragt werden.
- * 
- * @author pg
  */
  public class CmdLine {
     
@@ -28,18 +26,10 @@ import propra.imageconverter.image.ColorFormat;
         // Schlüssel
         private final String key;
         
-        /**
-         * 
-         * @param key 
-         */
         private Options(String key) {
             this.key = key;
         }
         
-        /**
-         * 
-         * @return 
-         */
         public String getKey() {
             return key;
         }
@@ -47,7 +37,6 @@ import propra.imageconverter.image.ColorFormat;
    
     /**
      * 
-     * @param args 
      */
     public CmdLine(String[] args) {
         this.options = new HashMap<>();
@@ -77,37 +66,35 @@ import propra.imageconverter.image.ColorFormat;
     } 
     
     /**
-     * @param opt
-     * @return Wert der Option oder null
+     *
      */
     public String getOption(Options opt) {
         return options.get(opt);
     }
     
     /**
-     * @return Encoding, je nach Options
+     * 
      */
-    public ColorFormat.Encoding getColorEncoding() {
+    public Compression getCompression() {
         String enc = getOption(Options.COMPRESSION);
         if(enc != null) {
             switch(enc) {
                 case "rle" -> {
-                    return ColorFormat.Encoding.RLE;
+                    return Compression.RLE;
                 }
                 case "huffman" -> {
-                    return ColorFormat.Encoding.HUFFMAN;
+                    return Compression.HUFFMAN;
                 }
+
 
 
             }
         }
-        return ColorFormat.Encoding.NONE;
+        return Compression.NONE;
     }
     
     /**
      *
-     * @param opt
-     * @return 
      */
     public String getExtension(Options opt) {
         return getExtension(getOption(opt));
@@ -115,8 +102,6 @@ import propra.imageconverter.image.ColorFormat;
     
     /**
      * 
-     * @param path
-     * @return Extrahiert Dateiendung
      */
     static private String getExtension(String path) {
         String[] components = path.split("\\.");
@@ -127,8 +112,7 @@ import propra.imageconverter.image.ColorFormat;
     } 
     
     /**
-     *
-     * @return Gibt passendes BaseNFormat Objekt zurück, oder null
+     * Gibt passendes BaseNFormat Objekt zurück, oder null
      */
     public BaseNFormat getBaseNDataFormat() {
         String alphabet = null;
@@ -160,8 +144,7 @@ import propra.imageconverter.image.ColorFormat;
     }
     
     /**
-     * 
-     * @return true wenn Base en- oder dekodierung 
+     *  true wenn Base en- oder dekodierung 
      */
     public boolean isBaseTask() {
         return (options.containsKey(Options.ENCODE_BASE_32)
@@ -171,7 +154,7 @@ import propra.imageconverter.image.ColorFormat;
     }
     
     /**
-     * @return true, wenn BaseNCodec&Base32 Dekodierung
+     * true, wenn BaseNCodec&Base32 Dekodierung
      */
     public boolean isBaseNDecode() {
         return (options.containsKey(Options.DECODE_BASE_32)
@@ -179,7 +162,7 @@ import propra.imageconverter.image.ColorFormat;
     }
     
     /**
-     * @return true, wenn BaseNCodec Verarbeitung
+     * true, wenn BaseNCodec Verarbeitung
      */
     public boolean isBaseN() {
         return (options.containsKey(Options.ENCODE_BASE_N)
@@ -187,7 +170,7 @@ import propra.imageconverter.image.ColorFormat;
     }
     
     /**
-     * @return true, wenn Base32 Verarbeitung
+     * true, wenn Base32 Verarbeitung
      */
     public boolean isBase32() {
         return (options.containsKey(Options.ENCODE_BASE_32)

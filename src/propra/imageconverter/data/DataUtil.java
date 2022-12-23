@@ -1,10 +1,15 @@
 package propra.imageconverter.data;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
- *
+ * Diverse Utility Methoden zur Datenverarbeitung
  * @author pg
  */
 public class DataUtil {
@@ -83,5 +88,24 @@ public class DataUtil {
         byte[] str = new byte[len]; 
         buffer.get(str);
         return new String(str,"utf-8");
+    }
+    
+    /**
+     * Verzeichnisse und Datei erstellen, falls nötig
+     * @param filePath
+     * @return 
+     * @throws java.io.IOException
+     */
+    public static File createFileAndDirectory(String filePath) throws IOException {
+     
+        Path outDirs = Paths.get(filePath);
+        Files.createDirectories(outDirs.getParent());
+        
+        File file = new File(filePath);
+        if(!file.exists()) {
+            file.createNewFile();
+        }
+        
+        return file;
     }
 }

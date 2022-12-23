@@ -3,7 +3,6 @@ package propra.imageconverter.image;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import propra.imageconverter.data.DataFormat;
 import propra.imageconverter.data.DataUtil;
 
 /**
@@ -50,7 +49,7 @@ public class ImageResourceTGA extends ImageResource {
      * @throws IOException
      */
     @Override
-    public ImageHeader readHeader() throws IOException {
+    public ImageAttributes readHeader() throws IOException {
         
         // DataBuffer für Header erstellen       
         ByteBuffer bytes = ByteBuffer.allocate(fileHeaderSize);
@@ -60,34 +59,32 @@ public class ImageResourceTGA extends ImageResource {
         binaryFile.read(bytes.array());
         
         // Headerfelder konvertieren
-        ImageHeader newHeader = new ImageHeader();
-        newHeader.width(bytes.getShort(TGA_HEADER_OFFSET_WIDTH));
-        newHeader.height(bytes.getShort(TGA_HEADER_OFFSET_HEIGHT));
-        newHeader.pixelSize(bytes.get(TGA_HEADER_OFFSET_BPP) >> 3); 
+        header.setWidth(bytes.getShort(TGA_HEADER_OFFSET_WIDTH));
+        header.setHeight(bytes.getShort(TGA_HEADER_OFFSET_HEIGHT));
+        int bpp = bytes.get(TGA_HEADER_OFFSET_BPP); 
         
         // Kompression
         byte compression = bytes.get(TGA_HEADER_OFFSET_ENCODING);
         switch (compression) {
             case TGA_HEADER_ENCODING_RLE -> {
                 inCodec = new ImageCodecRLE(this);
-                newHeader.colorFormat().encoding(DataFormat.Encoding.RLE);
+                header.setCompression(Compression.RLE);
             }
             case TGA_HEADER_ENCODING_NONE -> {
                 inCodec = new ImageCodec(this);
-                newHeader.colorFormat().encoding(DataFormat.Encoding.NONE);
+                header.setCompression(Compression.NONE);
             }
             default -> throw new UnsupportedOperationException("Nicht unterstützte TGA Kompression!");
         }
         
         // Prüfe tga Spezifikationen
-        if(newHeader.isValid() == false
+        if(header.getWidth() <= 0 || header.getHeight() <= 0 || bpp != 24
         || !DataUtil.checkBit(bytes.get(TGA_HEADER_OFFSET_ORIGIN), (byte)6)
         || DataUtil.checkBit(bytes.get(TGA_HEADER_OFFSET_ORIGIN), (byte)5)
         || bytes.get(0) != 0) {
             throw new UnsupportedOperationException("Ungültiges TGA Dateiformat!");
         }
         
-        header = newHeader;
         return header;
     }  
     
@@ -95,11 +92,8 @@ public class ImageResourceTGA extends ImageResource {
      * Schreibt allgemeinen Header als TGA Header
      */
     @Override
-    public void writeHeader(ImageHeader srcHeader) throws IOException {
-        if(srcHeader.isValid() == false) {
-            throw new IllegalArgumentException();
-        }
-        
+    public void writeHeader(ImageAttributes srcHeader) throws IOException {
+
         super.writeHeader(srcHeader);
                 
         // DataBuffer für Header erstellen
@@ -108,14 +102,14 @@ public class ImageResourceTGA extends ImageResource {
                 
         // Headerfelder in Buffer schreiben
         bytes.put(TGA_HEADER_OFFSET_ENCODING, (byte)2);
-        bytes.putShort(TGA_HEADER_OFFSET_WIDTH, (short)srcHeader.width());
-        bytes.putShort(TGA_HEADER_OFFSET_HEIGHT, (short)srcHeader.height());
-        bytes.putShort(TGA_HEADER_OFFSET_Y0, (short)srcHeader.height());
-        bytes.put(TGA_HEADER_OFFSET_BPP, (byte)(srcHeader.pixelSize() << 3));        
+        bytes.putShort(TGA_HEADER_OFFSET_WIDTH, (short)srcHeader.getWidth());
+        bytes.putShort(TGA_HEADER_OFFSET_HEIGHT, (short)srcHeader.getHeight());
+        bytes.putShort(TGA_HEADER_OFFSET_Y0, (short)srcHeader.getHeight());
+        bytes.put(TGA_HEADER_OFFSET_BPP, (byte)(24));        
         bytes.put(TGA_HEADER_OFFSET_ORIGIN, (byte)(1 << 5)); 
         
         // Kompression
-        switch(header.colorFormat().encoding()) {
+        switch(header.getCompression()) {
             case RLE -> {
                 bytes.put(TGA_HEADER_OFFSET_ENCODING, 
                             (byte)TGA_HEADER_ENCODING_RLE);

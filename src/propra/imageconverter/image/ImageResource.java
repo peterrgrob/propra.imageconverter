@@ -3,9 +3,8 @@ package propra.imageconverter.image;
 import propra.imageconverter.image.huffman.ImageCodecHuffman;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import propra.imageconverter.util.Checksum;
+import propra.imageconverter.util.IChecksum;
 import propra.imageconverter.data.DataCodec;
-import propra.imageconverter.data.DataFormat.Encoding;
 import propra.imageconverter.data.DataResource;
 import propra.imageconverter.data.IDataCodec;
 import propra.imageconverter.data.IDataCodec.Operation;
@@ -20,19 +19,16 @@ public abstract class ImageResource extends DataResource
                                     implements IDataTarget {
     
     // Größe des Bildheaders in der Datei
-    protected int fileHeaderSize; 
+    protected int fileHeaderSize;
     
-    // Logischer Bildheader
-    protected ImageHeader header;
-    
-    // Farbformat
-    protected ColorFormat colorFormat;
+    // Bildattribute
+    protected ImageAttributes header;
     
     // Konvertiertes Bild
     protected ImageResource transcodedImage;
     
     // Prüfsumme 
-    protected Checksum checksum;
+    protected IChecksum checksum;
     
     // Farbkonvertierung Methode 
     protected ColorFilter colorConverter;
@@ -45,7 +41,7 @@ public abstract class ImageResource extends DataResource
      */
     public ImageResource(String file, boolean write) throws IOException {
         super(file, write);
-        colorFormat = new ColorFormat();
+        this.header = new ImageAttributes();
     }
     
     /**
@@ -53,18 +49,19 @@ public abstract class ImageResource extends DataResource
      * @return 
      * @throws IOException
      */
-    abstract public ImageHeader readHeader() throws IOException;
+    abstract public ImageAttributes readHeader() throws IOException;
     
     /**
      * 
      * @param srcHeader
      * @throws IOException 
      */
-    public void writeHeader(ImageHeader srcHeader) throws IOException {
-        // Prüfsumme aktualisieren und Header speichern
-        setHeader(srcHeader);
+    public void writeHeader(ImageAttributes srcHeader) throws IOException {
+        this.header = new ImageAttributes(header);
+        inCodec = createCodec(header);
+        
         if(checksum != null) {
-            header.checksum(checksum.getValue());
+            header.setChecksum(checksum.getValue());
         }
     }
     
@@ -78,35 +75,31 @@ public abstract class ImageResource extends DataResource
      * @return
      * @throws IOException 
      */
-    public ImageResource transferTo(String outFile, String ext, 
-                                    Encoding outEncoding) throws IOException {
+    public ImageResource convertTo(String outFile, String ext, Compression outEncoding) throws IOException {
         if(outFile == null) {
             throw new IllegalArgumentException();
         }
         
         // Neues Bild erstellen
-        transcodedImage = createResource(outFile, ext, true);
-        if(transcodedImage == null) {
-            throw new IllegalArgumentException("Nicht unterstütztes Dateiformat!");
-        }        
+        transcodedImage = createResource(outFile, ext, true);    
         
-        // Infos einlesen
+        // Bildattribute einlesen
         readHeader();
         
         // Neuen Header schreiben
-        ImageHeader outHeader = new ImageHeader(header);
-        outHeader.colorFormat().encoding(outEncoding); 
-        outHeader.colorFormat().setOrder(transcodedImage.colorFormat.getOrder());  
+        ImageAttributes outHeader = new ImageAttributes(header);
+        outHeader.setCompression(outEncoding); 
+        outHeader.setFormat(transcodedImage.getAttributes().getFormat());  
         transcodedImage.writeHeader(outHeader);
         
         // Farbconverter setzen
-        if(colorFormat.compareTo(transcodedImage.getHeader().colorFormat()) != 0) { 
-            switch(colorFormat.getOrder()) {
-                case ORDER_BGR -> {
-                    colorConverter = ColorFormat::convertBGRtoRBG;
+        if(transcodedImage.getAttributes().getFormat() != header.getFormat()) { 
+            switch(header.getFormat()) {
+                case COLOR_BGR -> {
+                    colorConverter = ColorUtil::convertBGRtoRBG;
                 }
-                case ORDER_RBG -> {
-                    colorConverter = ColorFormat::convertRBGtoBGR;
+                case COLOR_RBG -> {
+                    colorConverter = ColorUtil::convertRBGtoBGR;
                 }
             }
         }
@@ -129,8 +122,8 @@ public abstract class ImageResource extends DataResource
         //  Falls nötig Header mit Prüfsumme, oder Länge des komprimierten Datensegements 
         //  aktualisieren
         if( transcodedImage.getChecksum() != null
-        ||  transcodedImage.getHeader().colorFormat().encoding() != Encoding.NONE) {
-            transcodedImage.writeHeader(transcodedImage.getHeader());
+        ||  transcodedImage.getAttributes().getCompression() != Compression.NONE) {
+            transcodedImage.writeHeader(transcodedImage.getAttributes());
         }
         
         return transcodedImage;
@@ -225,7 +218,7 @@ public abstract class ImageResource extends DataResource
                     
                     // Farben ggfs. konvertieren
                     if(colorConverter != null) {
-                        ColorFormat.filterColorBuffer(block, block, colorConverter);
+                        ColorUtil.filterColorBuffer(block, block, colorConverter);
                     }
                     
                     // An Encoder weiterreichen
@@ -240,9 +233,9 @@ public abstract class ImageResource extends DataResource
      * @param header
      * @return 
      */
-    protected IDataCodec createCodec(ImageHeader header) {
+    protected IDataCodec createCodec(ImageAttributes header) {
         if(header != null) {
-            switch(header.colorFormat().encoding()) {
+            switch(header.getCompression()) {
                 case NONE -> {
                     return new ImageCodec(this);
                 }
@@ -254,7 +247,7 @@ public abstract class ImageResource extends DataResource
                 }
             }
         }
-        return null;
+        throw new UnsupportedOperationException("Nicht unterstützte Kompression!");
     }
     
     /**
@@ -278,31 +271,15 @@ public abstract class ImageResource extends DataResource
             }
 
         }
-        return null;
+        throw new UnsupportedOperationException("Nicht unterstütztes Dateiformat!");
     }
-    
-    /**
-     *
-     * @return  
-     */
-    public int getFileHeaderSize() {
-        return fileHeaderSize;
-    }
-    
+
     /**
      *
      * @return
      */
-    public ImageHeader getHeader() {
+    public ImageAttributes getAttributes() {
         return header;
-    }
-    
-    /**
-     *
-     * @return
-     */
-    public ColorFormat getColorFormat() {
-        return header.colorFormat();
     }
 
     /**
@@ -317,16 +294,7 @@ public abstract class ImageResource extends DataResource
      *
      * @return
      */
-    public Checksum getChecksum() {
+    public IChecksum getChecksum() {
         return checksum;
-    }
-
-    /**
-     *
-     * @param header
-     */
-    public void setHeader(ImageHeader header) {
-        this.header = new ImageHeader(header);
-        inCodec = createCodec(header);
     }
 }

@@ -8,21 +8,29 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.Channels;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 
 /**
- * 
+ * Klasse bietet Basisfunktionen für Dateiressourcen 
  * @author pg
  */
 public class DataResource implements IDataResource {
     
+    // Kodierungstypen der Daten
+    public enum Compression {
+        NONE,
+        RLE,
+        BASEN,
+        HUFFMAN;
+    }
+    
+    // Aktuelle Kodierung
+    protected Compression compression = Compression.NONE;
+    
     // Dateiresource
     protected RandomAccessFile binaryFile;
     
-    // Zugeordnete Streams
+    // Zugeordnete I/O Streams
     protected CheckedOutputStream outStream;
     protected CheckedInputStream inStream; 
     
@@ -38,7 +46,7 @@ public class DataResource implements IDataResource {
     public DataResource(String file, boolean write) throws IOException {
         File fileObj;
         if(write) {
-            fileObj = createFileAndDirectory(file); 
+            fileObj = DataUtil.createFileAndDirectory(file); 
         } else {
             fileObj = new File(file);
         }
@@ -48,8 +56,62 @@ public class DataResource implements IDataResource {
                    new BufferedInputStream(Channels.newInputStream(binaryFile.getChannel())));
         outStream = new CheckedOutputStream(
                     new BufferedOutputStream(Channels.newOutputStream(binaryFile.getChannel())));
+        
+        if(binaryFile != null 
+        || inStream != null
+        || outStream != null) {
+            throw new IOException("Fehler beim öffnen der Datei!");
+        }
     }
 
+    /**
+     * 
+     * @return
+     * @throws IOException
+     */
+    @Override
+    public long length() throws IOException {
+        return binaryFile.length();
+    }
+    
+    /**
+     * 
+     * @return
+     * @throws IOException
+     */
+    @Override
+    public long position() throws IOException {
+        return binaryFile.getFilePointer();        
+    }
+    
+    /**
+     * 
+     * @param p
+     * @throws IOException
+     */
+    @Override
+    public void position(long p) throws IOException {
+        binaryFile.seek(p);        
+    } 
+        
+    /**
+     *  
+     * @return 
+     */
+    @Override
+    public CheckedInputStream getInputStream() {
+        return inStream;
+    }
+    
+    /**
+     *  
+     * @return 
+     */
+    @Override
+    public CheckedOutputStream getOutputStream() {
+        return outStream;       
+    }
+    
     /**
      *
      * @throws java.io.IOException
@@ -65,94 +127,5 @@ public class DataResource implements IDataResource {
         if(binaryFile != null) {
             binaryFile.close();
         }
-    }
-    
-    /**
-     *
-     * @return  
-     */
-    public boolean isValid() {
-        return binaryFile != null;
-    }
-
-    /**
-     * 
-     * @return
-     * @throws IOException
-     */
-    @Override
-    public long length() throws IOException {
-        checkState();
-        return binaryFile.length();
-    }
-    
-    /**
-     * 
-     * @return
-     * @throws IOException
-     */
-    @Override
-    public long position() throws IOException {
-        checkState();
-        return binaryFile.getFilePointer();        
-    }
-    
-    /**
-     * 
-     * @param p
-     * @throws IOException
-     */
-    @Override
-    public void position(long p) throws IOException {
-        checkState();
-        binaryFile.seek(p);        
-    } 
-        
-    /**
-     *  
-     * @return 
-     */
-    @Override
-    public CheckedInputStream getInputStream() {
-        checkState();
-        return inStream;
-    }
-    
-    /**
-     *  
-     * @return 
-     */
-    @Override
-    public CheckedOutputStream getOutputStream() {
-        checkState();
-        return outStream;       
-    }
-
-    /**
-     * 
-     */
-    protected void checkState() {
-        if(!isValid()) {
-            throw new IllegalArgumentException("Ungültige Resource!");
-        }
-    }
-    
-    /**
-     * Verzeichnisse und Datei erstellen, falls nötig
-     * @param filePath
-     * @return 
-     * @throws java.io.IOException
-     */
-    public static File createFileAndDirectory(String filePath) throws IOException {
-     
-        Path outDirs = Paths.get(filePath);
-        Files.createDirectories(outDirs.getParent());
-        
-        File file = new File(filePath);
-        if(!file.exists()) {
-            file.createNewFile();
-        }
-        
-        return file;
     }
 }

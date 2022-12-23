@@ -4,6 +4,8 @@ import propra.imageconverter.util.CmdLine;
 import java.io.IOException;
 import propra.imageconverter.util.CmdLine.Options;
 import propra.imageconverter.data.DataResource;
+import propra.imageconverter.data.DataResource.Compression;
+import propra.imageconverter.data.DataUtil;
 import propra.imageconverter.image.*;
 
 /**
@@ -18,7 +20,7 @@ public class ImageTask implements AutoCloseable {
     private ImageResource outImage;
     
     // Kodierung des Ausgabebildes
-    private ColorFormat.Encoding outEncoding = ColorFormat.Encoding.NONE;
+    private Compression outEncoding = Compression.NONE;
     
     /**
      * 
@@ -56,19 +58,19 @@ public class ImageTask implements AutoCloseable {
         if(outPath == null) {
             throw new IOException("Kein Ausgabepfad gegeben!");            
         }  
-        DataResource.createFileAndDirectory(outPath);
+        DataUtil.createFileAndDirectory(outPath);
         
         // Ausgabekompression setzen und Konvertierung starten
-        outEncoding = cmd.getColorEncoding();
-        outImage = inImage.transferTo(outPath, outExt, outEncoding);
+        outEncoding = cmd.getCompression();
+        outImage = inImage.convertTo(outPath, outExt, outEncoding);
         
         // Prüfsumme prüfen
         if(inImage.getChecksum() != null) {
-            if(inImage.getChecksum().getValue() != inImage.getHeader().checksum()) {
+            if(inImage.getChecksum().getValue() != inImage.getAttributes().getChecksum()) {
                 throw new IOException(  "Prüfsumme " 
                                         + String.format("0x%08X", (int)inImage.getChecksum().getValue()) 
                                         + " ungleich " 
-                                        + String.format("0x%08X", (int)inImage.getHeader().checksum()));
+                                        + String.format("0x%08X", (int)inImage.getAttributes().getChecksum()));
             }
         }
     }
@@ -81,11 +83,11 @@ public class ImageTask implements AutoCloseable {
         String stateString = "";
 
         if(inImage != null) {
-            ImageHeader header = inImage.getHeader();
-            stateString = "\nBildinfo: " + header.width();
-            stateString = stateString.concat("x" + header.height());
-            stateString = stateString.concat("x" + header.pixelSize());
-            stateString = stateString.concat("\nKompression: " + header.colorFormat().encoding().toString());
+            ImageAttributes header = inImage.getAttributes();
+            stateString = "\nBildinfo: " + header.getWidth();
+            stateString = stateString.concat("x" + header.getHeight());
+            stateString = stateString.concat("x" + Color.PIXEL_SIZE);
+            stateString = stateString.concat("\nKompression: " + header.getCompression().toString());
             stateString = stateString.concat(" --> " + outEncoding.toString());            
             
             if(inImage.getChecksum() != null) {

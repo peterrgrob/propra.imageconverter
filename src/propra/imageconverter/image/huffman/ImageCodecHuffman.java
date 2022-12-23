@@ -98,7 +98,7 @@ public class ImageCodecHuffman extends ImageCodec {
                 for(long i:histogram) {
                     sum += i;
                 }  
-                if(sum != image.getHeader().imageSize()) {
+                if(sum != image.getAttributes().getImageSize()) {
                     throw new IOException("Fehlerhafte Bilddaten (Histogram)");
                 }
 
@@ -114,7 +114,7 @@ public class ImageCodecHuffman extends ImageCodec {
                  *  Stream flushen und kodierte Datengröße aktualisieren
                  */
                 outStream.flush();
-                image.getHeader().encodedSize(outStream.getByteCounter()); 
+                image.getAttributes().setDataLength(outStream.getByteCounter()); 
             }
         }
 
@@ -152,7 +152,7 @@ public class ImageCodecHuffman extends ImageCodec {
         huffmanTree.buildTreeFromResource(stream);
         
         // Lädt, dekodiert und sendet Pixelblöcke an Listener  
-        while(symbolCtr++ < image.getHeader().imageSize()) {
+        while(symbolCtr++ < image.getAttributes().getImageSize()) {
             
             // Symbol dekodieren
             int symbol = huffmanTree.decodeSymbol(stream);
@@ -165,13 +165,13 @@ public class ImageCodecHuffman extends ImageCodec {
 
             // Wenn Blockgröße erreicht an Listener senden
             if(data.capacity() == data.position()) {                
-                dispatchData(IDataTarget.Event.DATA_DECODED, output, 
+                sendData(IDataTarget.Event.DATA_DECODED, output, 
                             data,false);    
             }
         }
         
         // Restliche Daten im Puffer übertragen
-        dispatchData(IDataTarget.Event.DATA_DECODED,output, 
+        sendData(IDataTarget.Event.DATA_DECODED,output, 
                         data,true);     
     }
 

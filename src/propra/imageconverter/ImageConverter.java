@@ -16,11 +16,14 @@ import java.util.logging.Level;
  *      unterstützt und war teilweise aus Zeitgründen nicht ganz optimal umgesetzt. 
  *      Deshalb habe ich jetzt nochmal grundlegende Änderungen bei der Klassenstruktur 
  *      vorgenommen und das ganze etwas streamorientierter implementiert. 
- *  
+ *
  *  -   Farbkonvertierung ist aus Performancegründen jetzt weniger allgemein 
  *      implementiert mit Methoden-Referenzen je nach Kombination.
  *      
- *      Klassenhierarchie Übersicht:
+ *  -   Ich habe versucht die Komplexität und nicht genutzte Teile der Klassenstruktur, 
+ *      die im Laufe des Projekts entstanden sind zu reduzieren. 
+ *      
+ *      Damit es besser verständlich ist hier eine kleine Übersicht über die Klassenhierarchie:
  * 
  */
 public class ImageConverter {

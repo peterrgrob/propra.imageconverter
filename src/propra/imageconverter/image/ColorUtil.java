@@ -1,10 +1,9 @@
 package propra.imageconverter.image;
 
 import java.nio.ByteBuffer;
-import propra.imageconverter.data.DataFormat;
 
 /**
- * FunctionalInterfaces für Farbkonvertierungsfunktionen
+ * FunctionalInterface für Farbkonvertierungsfunktionen
  * @author pg
  */
 @FunctionalInterface
@@ -14,61 +13,10 @@ interface ColorFilter {
 }
 
 /**
- *  Farbformat der Resource
+ * Diverse Utility Methoden zur Bildverarbeitung
+ * @author pg
  */
-public class ColorFormat extends DataFormat 
-                         implements Comparable<ColorFormat> {
-    
-    // Farbreihenfolge
-    public enum ColorOrder {
-        ORDER_BGR,
-        ORDER_RBG,
-    }
-       
-    // Pixelgröße in Bytes
-    public static int PIXEL_SIZE = 3;
-    
-    // Reihenfolge
-    private ColorOrder order;
-    
-    /**
-     * 
-     */
-    public ColorFormat() {
-        order = ColorOrder.ORDER_BGR;
-    }
-    
-    /**
-     * 
-     * @param order 
-     */
-    public ColorFormat(ColorOrder order) {
-        this.order = order;
-    }
-    
-    /**
-     * 
-     * @param src
-     * @param src
-     */
-    public ColorFormat(ColorFormat src) {
-        super(src);
-        this.order = src.order;
-    }
-
-    /**
-     *
-     * @param o
-     * @return 
-     */
-    @Override
-    public int compareTo(ColorFormat o) {
-        if(this.order == o.order) {
-            return 0;
-        }
-        return -1;
-    }
-    
+public class ColorUtil {
     /**
      * 
      * @param in
@@ -130,20 +78,43 @@ public class ColorFormat extends DataFormat
             &&  array[offset0 + 1] == array[offset1 + 1]
             &&  array[offset0 + 2] == array[offset1 + 2]);
     }
-
+    
     /**
+     * Füllt Buffer len-mal mit Farbwert und gibt neuen Offset zurück
      * 
+     * @param buffer
+     * @param color
+     * @param len
      * @return 
      */
-    public ColorOrder getOrder() {
-        return order;
+    public static int fill(ByteBuffer buffer, Color color, int len) {
+        byte[] b = buffer.array();
+        byte[] bs = color.values;
+        int offs = buffer.position();
+        int co = color.getIndex();
+        
+        for(int i=0; i<len; i++){
+            b[offs++] = bs[co];
+            b[offs++] = bs[co + 1];
+            b[offs++] = bs[co + 2];            
+        }
+        buffer.position(buffer.position() + len * Color.PIXEL_SIZE);
+        return buffer.position();
     }
-
+    
     /**
+     * Vergleicht zwei Farbwerte in Array
      * 
-     * @param order 
+     * @param c1
+     * @param index1
+     * @param c2
+     * @param index2
+     * @return 
      */
-    public void setOrder(ColorOrder order) {
-        this.order = order;
+    public static boolean compareColor( byte[] c1, int index1,
+                                        byte[] c2, int index2) {
+        return (c1[index1 + 0] == c2[index2 + 0]
+            &&  c1[index1 + 1] == c2[index2 + 1]
+            &&  c1[index1 + 2] == c2[index2 + 2]);
     }
 }

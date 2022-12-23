@@ -46,8 +46,7 @@ public class ImageCodecRLE extends ImageCodec {
      */
     @Override
     public void decode(IDataTarget target) throws IOException {     
-        if(!isValid()
-        ||  target == null) {
+        if(target == null) {
             throw new IllegalArgumentException();
         }
         
@@ -66,14 +65,14 @@ public class ImageCodecRLE extends ImageCodec {
             // Paketkopf und Wiederholungen dekodieren
             packetHeader = packetHeader & 0xFF;
             int pixelCount = (packetHeader & 127) + 1;
-            int packetLen = pixelCount * ColorFormat.PIXEL_SIZE;
+            int packetLen = pixelCount * Color.PIXEL_SIZE;
 
             /*
              * Wenn im Ausgabepuffer nicht mehr genug Platz ist, Datenblock zum 
              * Empfänger senden
              */
             if( buff.position() + packetLen > buff.capacity()) {
-                dispatchData(Event.DATA_DECODED,target, 
+                sendData(Event.DATA_DECODED,target, 
                             buff,false);
             }
 
@@ -82,7 +81,7 @@ public class ImageCodecRLE extends ImageCodec {
             if(packetHeader > 127) {
                 // Farbwert auslesen und Ausgabepuffer auffüllen
                 stream.read(rle.get());
-                Color.fill(buff, rle, pixelCount);
+                ColorUtil.fill(buff, rle, pixelCount);
             } else {
                 // RAW Farben übertragen
                 stream.read(buff.array(),buff.position(),packetLen);
@@ -94,7 +93,7 @@ public class ImageCodecRLE extends ImageCodec {
          *  Letzten Block der Operation kennzeichnen und Restdaten
          *  übertragen
          */
-        dispatchData(Event.DATA_DECODED, target, 
+        sendData(Event.DATA_DECODED, target, 
                     buff,stream.eof());
     }
     
@@ -106,8 +105,7 @@ public class ImageCodecRLE extends ImageCodec {
      */
     @Override
     public void encode(ByteBuffer block, boolean last) throws IOException{ 
-        if(!isValid()
-        ||  block == null) {
+        if(block == null) {
             throw new IllegalArgumentException();
         }
         
@@ -115,7 +113,7 @@ public class ImageCodecRLE extends ImageCodec {
         CheckedOutputStream stream = resource.getOutputStream();
         
         // Puffer erstellen
-        ByteBuffer rleBlock = ByteBuffer.allocate(192 * ColorFormat.PIXEL_SIZE);
+        ByteBuffer rleBlock = ByteBuffer.allocate(192 * Color.PIXEL_SIZE);
         
         /*
          *  Eingabedaten mit gepufferten Daten zusammenführen
@@ -129,7 +127,7 @@ public class ImageCodecRLE extends ImageCodec {
              *  Wenn Blockgrenze erreichbar Restdaten puffern für nächsten Block, 
              *  nur wenn es sich nicht um den letzten Block handelt.
              */
-            boolean boundary = inBuffer.position() + (127 * ColorFormat.PIXEL_SIZE) >= dataLimit;
+            boolean boundary = inBuffer.position() + (127 * Color.PIXEL_SIZE) >= dataLimit;
             if(boundary && !last) {    
                 bufferInputData(inBuffer);
                 isBufferedData = true;
@@ -151,7 +149,7 @@ public class ImageCodecRLE extends ImageCodec {
                 rleBlock.flip();
 
                 // Gleiche Farben im Eingabepuffer überspringen
-                inBuffer.position(inBuffer.position() + (colorCtr - 1) * ColorFormat.PIXEL_SIZE);
+                inBuffer.position(inBuffer.position() + (colorCtr - 1) * Color.PIXEL_SIZE);
                 
             } else {      
                /*
@@ -179,23 +177,11 @@ public class ImageCodecRLE extends ImageCodec {
                  *  Stream flushen und kodierte Datengröße aktualisieren
                  */
                 image.getOutputStream().flush();
-                image.getHeader().encodedSize(encodedSize);
+                image.getAttributes().setDataLength(encodedSize);
             }
         }
 
         super.end();
-    }
-    
-    
-    
-    /**
-     *  
-     * @return 
-     * @return  
-     */
-    @Override
-    public boolean isValid() {
-        return true;
     }
     
     /**
@@ -203,14 +189,14 @@ public class ImageCodecRLE extends ImageCodec {
      */
     private int countRleColor(ByteBuffer data) {
         int baseOffset = data.position();
-        int runOffset = baseOffset + ColorFormat.PIXEL_SIZE;
+        int runOffset = baseOffset + Color.PIXEL_SIZE;
         byte array[] = data.array();
         int counter = 1;
         int len = data.limit();
 
-        while(Color.compareColor(array, baseOffset, 
+        while(ColorUtil.compareColor(array, baseOffset, 
                                  array, runOffset)) {
-            runOffset += ColorFormat.PIXEL_SIZE;  
+            runOffset += Color.PIXEL_SIZE;  
             counter++;
             
             // Zähler max, oder Ende erreicht?
@@ -237,7 +223,7 @@ public class ImageCodecRLE extends ImageCodec {
         int limit = inBuffer.limit();
         
         // Vergleicht aktuelle Farbe mit der folgenden Farbe
-        while( !ColorFormat.compareColor(inArray, inOffset, inOffset + 3)) {
+        while( !ColorUtil.compareColor(inArray, inOffset, inOffset + 3)) {
 
             outArray[outOffset++] = inArray[inOffset++];
             outArray[outOffset++] = inArray[inOffset++];

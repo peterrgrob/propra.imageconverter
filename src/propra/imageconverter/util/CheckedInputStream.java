@@ -13,7 +13,7 @@ import java.nio.ByteBuffer;
 public class CheckedInputStream extends FilterInputStream {
     
     // Prüfsumme
-    private Checksum checksum;
+    private IChecksum checksum;
     
     // Prüfsumme aktiviert?
     boolean checked;
@@ -35,8 +35,7 @@ public class CheckedInputStream extends FilterInputStream {
      * @param in
      * @param checksum 
      */
-    public CheckedInputStream(  InputStream in,
-                                Checksum checksum) {
+    public CheckedInputStream(InputStream in, IChecksum checksum) {
         super(in);
         this.checksum = checksum;
         checked = true;
@@ -46,7 +45,7 @@ public class CheckedInputStream extends FilterInputStream {
      * 
      * @param checksum 
      */
-    public void setChecksum(Checksum checksum) {
+    public void setChecksum(IChecksum checksum) {
         this.checksum = checksum;
         checked = true;
     }

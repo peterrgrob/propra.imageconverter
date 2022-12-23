@@ -30,15 +30,6 @@ public class BaseN extends DataCodec {
     }
 
     /**
-     * 
-     * @return 
-     */
-    @Override
-    public boolean isValid() {
-        return format != null;
-    }
-    
-    /**
      * Dekodiert BaseNCodec kodierte Daten
      * 
      * @param target
@@ -46,10 +37,6 @@ public class BaseN extends DataCodec {
      */
     @Override
     public void decode(IDataTarget target) throws IOException {
-        if(!isValid()) {
-            throw new IllegalArgumentException();
-        }   
-        
         // Größe der binären Base-N Byteblöcke
         int blockLength = format.getBlockLength();
         int charCtr = 0;
@@ -93,8 +80,7 @@ public class BaseN extends DataCodec {
      */
     @Override
     public void encode(ByteBuffer inBuffer, boolean last) throws IOException {
-        if(!isValid()
-        ||  inBuffer == null) {
+        if(inBuffer == null) {
             throw new IllegalArgumentException();
         }   
         
@@ -233,8 +219,7 @@ public class BaseN extends DataCodec {
      * @return 
      */
     public int encodedBufferLength(ByteBuffer buffer) {
-        if( buffer == null 
-        ||  !isValid()) {
+        if( buffer == null) {
             throw new IllegalArgumentException();
         }
         

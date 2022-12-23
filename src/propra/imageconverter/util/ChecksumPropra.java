@@ -4,11 +4,12 @@ import java.nio.ByteBuffer;
 
 /**
  * ProPra Implementierung einer Prüfsumme
- * 
- * @author pg
  */
-public class ChecksumPropra extends Checksum {
+public class ChecksumPropra implements IChecksum {
 
+    // Aktuelle Prüfsumme
+    protected long value;  
+    
     // Modulo
     private static final int X = 65521;
     
@@ -18,7 +19,7 @@ public class ChecksumPropra extends Checksum {
     private int currIndex;
 
     /**
-     * 
+     * Setzt Prüfsumme zurück
      */
     @Override
     public void reset() {
@@ -28,8 +29,7 @@ public class ChecksumPropra extends Checksum {
     }
     
     /**
-     *
-     * @return   
+     * Gibt Prüfsumme zurück
      */
     @Override
     public long getValue() {
@@ -38,10 +38,7 @@ public class ChecksumPropra extends Checksum {
     }
     
     /**
-     * Aktualisiert Prüfsumme mit der ProPra-Prüfsummenvorschrift
-     * 
-     * @param buffer
-     * @return 
+     * Aktualisiert Prüfsumme mit ByteBuffer
      */
     @Override
     public ByteBuffer update(ByteBuffer buffer) {
@@ -53,11 +50,7 @@ public class ChecksumPropra extends Checksum {
     }
 
     /**
-     * Aktualisiert Prüfsumme mit der ProPra-Prüfsummenvorschrift
-     * 
-     * @param b
-     * @param offset
-     * @param len 
+     * Aktualisiert Prüfsumme mit Bytes
      */
     @Override
     public void update(byte[] b, int offset, int len) {
@@ -71,9 +64,7 @@ public class ChecksumPropra extends Checksum {
     }
 
     /**
-     * Aktualisiert Prüfsumme mit der ProPra-Prüfsummenvorschrift
-     * 
-     * @param b 
+     * Aktualisiert Prüfsumme mit einem Byte
      */
     @Override
     public void update(byte b) {

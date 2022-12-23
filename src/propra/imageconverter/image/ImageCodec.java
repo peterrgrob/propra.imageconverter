@@ -31,7 +31,7 @@ public class ImageCodec extends DataCodec {
      */
     @Override
     public void decode(IDataTarget target) throws IOException {
-        if(!isValid()) {
+        if(target == null) {
             throw new IllegalArgumentException();
         }
         
@@ -76,8 +76,7 @@ public class ImageCodec extends DataCodec {
      */
     @Override
     public void encode(ByteBuffer block, boolean last) throws IOException {
-        if(!isValid()
-        ||  block == null) {
+        if(block == null) {
             throw new IllegalArgumentException();
         }
         
@@ -87,18 +86,18 @@ public class ImageCodec extends DataCodec {
     }
     
     /**
-     * Sendet Datenblock an Listener
+     * Sendet Datenblock an target
      * 
      * @param event
-     * @param listener
+     * @param target
      * @param block
      * @param last
      * @throws IOException 
      */
-    protected void dispatchData(Event event, IDataTarget listener,
-                                ByteBuffer block, boolean last) throws IOException {
+    protected void sendData(Event event, IDataTarget target,
+                            ByteBuffer block, boolean last) throws IOException {
         block.flip();
-        listener.onData(event, this, block, last);
+        target.onData(event, this, block, last);
         block.clear();
     }
 }

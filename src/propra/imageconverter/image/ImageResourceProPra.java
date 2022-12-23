@@ -5,7 +5,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import propra.imageconverter.util.ChecksumPropra;
-import propra.imageconverter.data.DataFormat;
 import propra.imageconverter.data.DataUtil;
 
 /**
@@ -41,7 +40,7 @@ public class ImageResourceProPra extends ImageResource {
         super(file, write);
         
         fileHeaderSize = PROPRA_HEADER_SIZE;
-        colorFormat = new ColorFormat(ColorFormat.ColorOrder.ORDER_RBG);
+        header.setFormat(Color.Format.COLOR_BGR);
         checksum = new ChecksumPropra();
         inStream.setChecksum(checksum);
         outStream.setChecksum(checksum);
@@ -54,10 +53,7 @@ public class ImageResourceProPra extends ImageResource {
      * @throws java.io.IOException
      */
     @Override
-    public ImageHeader readHeader() throws IOException {
-        if(binaryFile == null) {
-            throw new IllegalArgumentException();
-        }
+    public ImageAttributes readHeader() throws IOException {
         
         // DataBuffer für Header erstellen       
         ByteBuffer bytes = ByteBuffer.allocate(fileHeaderSize);
@@ -77,48 +73,40 @@ public class ImageResourceProPra extends ImageResource {
            throw new UnsupportedOperationException("Ungültige ProPra-Kennung!");
         }
         
-        // Headerfelder in allgemeinen Header konvertieren
-        ImageHeader newHeader = new ImageHeader();
-        newHeader.width(bytes.getShort(PROPRA_HEADER_OFFSET_WIDTH));
-        newHeader.height(bytes.getShort(PROPRA_HEADER_OFFSET_HEIGHT));
-        newHeader.pixelSize((int)bytes.get(PROPRA_HEADER_OFFSET_BPP) >> 3); 
-        newHeader.checksum(bytes.getInt(PROPRA_HEADER_OFFSET_CHECKSUM)); 
-        
-        long dataLen = bytes.getLong(PROPRA_HEADER_OFFSET_DATALEN); 
-        newHeader.encodedSize(dataLen);
-        
-        // RBG Farbmapping setzen
-        newHeader.colorFormat(colorFormat);
+        // Daten einlesen
+        header.setWidth(bytes.getShort(PROPRA_HEADER_OFFSET_WIDTH));
+        header.setHeight(bytes.getShort(PROPRA_HEADER_OFFSET_HEIGHT));
+        header.setChecksum(bytes.getInt(PROPRA_HEADER_OFFSET_CHECKSUM)); 
+        header.setDataLength(bytes.getLong(PROPRA_HEADER_OFFSET_DATALEN));
+        int bpp = (int)bytes.get(PROPRA_HEADER_OFFSET_BPP); 
         
         // Kompression initialisieren
         switch (bytes.get(PROPRA_HEADER_OFFSET_ENCODING)) {
             case PROPRA_HEADER_ENCODING_HUFFMAN -> {     
-                newHeader.colorFormat().encoding(DataFormat.Encoding.HUFFMAN);
+                header.setCompression(Compression.HUFFMAN);
             }
             case PROPRA_HEADER_ENCODING_RLE -> {
-                newHeader.colorFormat().encoding(DataFormat.Encoding.RLE);
+                header.setCompression(Compression.RLE);
             }
             case PROPRA_HEADER_ENCODING_NONE -> {
-                newHeader.colorFormat().encoding(DataFormat.Encoding.NONE);
+                header.setCompression(Compression.NONE);
             }
             default -> throw new UnsupportedOperationException("Nicht unterstützte Kompression!");
         }
-        inCodec = createCodec(newHeader);
+        inCodec = createCodec(header);
         
         // Prüfe ProPra Spezifikationen
-        if( newHeader.isValid() == false 
-        ||  (dataLen != (binaryFile.length() - PROPRA_HEADER_SIZE))) {
+        if( header.getHeight() <= 0 || header.getWidth() <= 0 || bpp != 24
+        ||  (header.getDataLength() != (binaryFile.length() - PROPRA_HEADER_SIZE))) {
             throw new UnsupportedOperationException("Ungültiges ProPra Dateiformat!");
-        } else if(newHeader.colorFormat().encoding() == DataFormat.Encoding.NONE) {
-            
+        } else if(header.getCompression() == Compression.NONE) {
             // Prüfungen für unkomprimierte Dateien 
-            if(newHeader.imageSize() != dataLen
-            || newHeader.imageSize() != (binaryFile.length() - PROPRA_HEADER_SIZE)) {
+            if(header.getPixelCount() * Color.PIXEL_SIZE != header.getDataLength()
+            || header.getPixelCount() * Color.PIXEL_SIZE != (binaryFile.length() - PROPRA_HEADER_SIZE)) {
                 throw new UnsupportedOperationException("Ungültiges ProPra Dateiformat!");
             }
         }
         
-        header = newHeader;
         return header;
     }  
     
@@ -128,10 +116,7 @@ public class ImageResourceProPra extends ImageResource {
      * @throws IOException 
      */
     @Override
-    public void writeHeader(ImageHeader srcHeader) throws IOException {
-        if(srcHeader.isValid() == false) {
-            throw new IllegalArgumentException();
-        }
+    public void writeHeader(ImageAttributes srcHeader) throws IOException {
         
         super.writeHeader(srcHeader);
         
@@ -139,33 +124,33 @@ public class ImageResourceProPra extends ImageResource {
         ByteBuffer buff = ByteBuffer.allocate(fileHeaderSize);
         buff.order(ByteOrder.LITTLE_ENDIAN);
         
-        // Headerfelder in ByteBuffer schreiben
+        // Attribute in ByteBuffer schreiben
         DataUtil.putStringToByteBuffer(buff, 0, PROPRA_VERSION);
         buff.put(PROPRA_HEADER_OFFSET_ENCODING, (byte)0);
-        buff.putShort(PROPRA_HEADER_OFFSET_WIDTH, (short)header.width());
-        buff.putShort(PROPRA_HEADER_OFFSET_HEIGHT, (short)header.height());
-        buff.put(PROPRA_HEADER_OFFSET_BPP, (byte)(header.pixelSize() << 3));
-        buff.putInt(PROPRA_HEADER_OFFSET_CHECKSUM, (int)header.checksum());
+        buff.putShort(PROPRA_HEADER_OFFSET_WIDTH, (short)header.getWidth());
+        buff.putShort(PROPRA_HEADER_OFFSET_HEIGHT, (short)header.getHeight());
+        buff.put(PROPRA_HEADER_OFFSET_BPP, (byte)(24));
+        buff.putInt(PROPRA_HEADER_OFFSET_CHECKSUM, (int)header.getChecksum());
         
         // Kompression 
-        switch(header.colorFormat().encoding()) {
+        switch(header.getCompression()) {
             case HUFFMAN -> {
                 buff.put(PROPRA_HEADER_OFFSET_ENCODING, 
                         (byte)PROPRA_HEADER_ENCODING_HUFFMAN);
                 buff.putLong(PROPRA_HEADER_OFFSET_DATALEN,
-                            header.encodedSize());
+                            header.getDataLength());
             }
             case RLE -> {
                 buff.put(PROPRA_HEADER_OFFSET_ENCODING, 
                         (byte)PROPRA_HEADER_ENCODING_RLE);
                 buff.putLong(PROPRA_HEADER_OFFSET_DATALEN,
-                            header.encodedSize());
+                            header.getDataLength());
             }
             case NONE -> {
                 buff.put(PROPRA_HEADER_OFFSET_ENCODING, 
                             (byte)PROPRA_HEADER_ENCODING_NONE);
                 buff.putLong(PROPRA_HEADER_OFFSET_DATALEN,
-                            (long)header.imageSize());
+                            (long)header.getPixelCount() * Color.PIXEL_SIZE);
             }
             default -> {
                 throw new IllegalArgumentException("Ungültige Kompression.");

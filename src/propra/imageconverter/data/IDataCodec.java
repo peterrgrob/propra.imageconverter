@@ -46,9 +46,6 @@ public interface IDataCodec {
     public void analyze(ByteBuffer data, boolean last);
 
     /**
-     * Dekodiert Daten in Blöcken und sendet diese an Daten Ziel. 
-     * Die Blockgröße kann je nach Codec unterschiedlich 
-     * sein.
      * 
      * @param target
      * @throws IOException

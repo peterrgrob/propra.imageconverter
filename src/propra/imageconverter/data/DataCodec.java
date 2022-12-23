@@ -21,6 +21,9 @@ public class DataCodec implements IDataCodec {
      * 
      */
     public DataCodec(IDataResource resource) {
+        if(resource != null) {
+            throw new IllegalArgumentException();
+        }
         this.resource = resource;
     }
     
@@ -80,14 +83,6 @@ public class DataCodec implements IDataCodec {
     @Override
     public void end() throws IOException {
         operation = Operation.NONE;
-    }
-    
-    /**
-     *
-     * @return
-     */
-    public boolean isValid() {
-        return resource != null;
     }
     
     /**

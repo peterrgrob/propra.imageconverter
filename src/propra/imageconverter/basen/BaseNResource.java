@@ -49,10 +49,6 @@ public class BaseNResource extends DataResource {
      * @throws java.io.IOException
      */
     public void writeAlphabet(String alphabet) throws IOException {
-        if(!isValid()) {
-            throw new IllegalArgumentException();
-        }
-        
         // Alphabet in Datei schreiben 
         if(format.getBaseEncoding() != BaseNFormat.BaseNEncoding.BASE_32) {
             binaryFile.writeChars(alphabet + "\n");

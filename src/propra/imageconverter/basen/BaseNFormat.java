@@ -1,13 +1,11 @@
 package propra.imageconverter.basen;
 
-import propra.imageconverter.data.DataFormat;
-
 /**
  * BaseN Datenformat
  * 
  * @author pg
  */
-public class BaseNFormat extends DataFormat {
+public class BaseNFormat {
     
     // Alphabettabellen, aus Performancegründen keine Hashmap
     private String alphabet = new String();
@@ -59,7 +57,6 @@ public class BaseNFormat extends DataFormat {
      */
     public BaseNFormat() {
         this.baseEncoding = BaseNEncoding.NONE;
-        this.encoding = Encoding.BASEN;
     }
     
     /**
@@ -75,7 +72,6 @@ public class BaseNFormat extends DataFormat {
      * @param src
      */
     public BaseNFormat(BaseNFormat src) {
-        super(src);
         this.alphabet = src.alphabet;
         System.arraycopy(src.alphabetMap , 0, 
                         this.alphabetMap, 0, 256);
@@ -109,8 +105,6 @@ public class BaseNFormat extends DataFormat {
                 case 64 -> {this.baseEncoding = BaseNEncoding.BASE_64;}
                 default -> {throw new IllegalArgumentException("Ungültige Base-N Alphabetlänge");}
             }
-            
-            encoding = Encoding.BASEN;
         }
     }
 
@@ -126,7 +120,6 @@ public class BaseNFormat extends DataFormat {
      *
      * @return
      */
-    @Override
     public boolean isValid() {
         switch(this.baseEncoding) {
             case BASE_2, BASE_4, BASE_8, BASE_16, BASE_32, BASE_64 -> {
