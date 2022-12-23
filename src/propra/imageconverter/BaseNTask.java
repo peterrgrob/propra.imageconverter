@@ -100,7 +100,7 @@ public class BaseNTask implements AutoCloseable, IDataTarget {
                                             false);
             binaryFile = new DataResource(  outPath,true);
             
-            baseNFile.decode(this);
+            baseNFile.decodeTo(this);
             
         } else {
             baseNFile = new BaseNResource(  outPath, 
@@ -108,7 +108,7 @@ public class BaseNTask implements AutoCloseable, IDataTarget {
                                             true);
             binaryFile = new DataResource(  cmd.getOption(Options.INPUT_FILE),false);
             
-            baseNFile.encode(binaryFile);
+            baseNFile.encodeFrom(binaryFile);
         }  
         
         baseNFile.close();
