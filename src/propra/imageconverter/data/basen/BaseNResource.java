@@ -3,25 +3,24 @@ package propra.imageconverter.data.basen;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataResource;
-import propra.imageconverter.data.IDataCompression.Operation;
 import propra.imageconverter.data.IDataResource;
 import propra.imageconverter.data.IDataTarget;
+import propra.imageconverter.data.basen.BaseN.BaseNEncoding;
+import static propra.imageconverter.data.basen.BaseN.BaseNEncoding.BASE_32_ALPHABET;
+import static propra.imageconverter.data.basen.BaseN.BaseNEncoding.BASE_DEFAULT_32;
 
 /**
  *
  * @author pg
  */
 public class BaseNResource extends DataResource {
-
+    
     // Alphabettabellen, aus Performancegründen keine Hashmap
     private String alphabet = new String();
     private final byte[] alphabetMap = new byte[256];
     
     // Verwendete BaseN Kodierung
     private BaseNEncoding baseEncoding;
-    
-    // Standard Base32 Alphabet
-    public static String BASE_32_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUV";
     
     /**
      * 
@@ -36,25 +35,40 @@ public class BaseNResource extends DataResource {
     }
     
     /**
-     * Alphabet aus Datei einlesen und DatenFormat ableiten
-     * @return 
-     * @throws java.io.IOException
+     * 
+     * @param output 
+     * @throws java.io.IOException 
      */
-    public String readAlphabet() throws IOException {
-        setAlphabet(binaryFile.readLine());
-        return alphabet;
-    }
+    public void decodeTo(IDataTarget output) throws IOException {
+        
+        // Alphabet aus Datei laden?
+        if(!isValid()) {
+            setAlphabet(binaryFile.readLine());
+        }
+
+        // Decoder erstellen
+        BaseN decoder = new BaseN(this);
+        decoder.decode(output);
+    } 
     
     /**
-     * Alphabet in Datei schreiben
-     * @param alphabet
-     * @throws java.io.IOException
+     * 
+     * @param input 
+     * @throws java.io.IOException 
      */
-    public void writeAlphabet(String alphabet) throws IOException {
-        // Alphabet in Datei schreiben 
-        if(baseEncoding != BaseNEncoding.BASE_32) {
+    public void encodeFrom(IDataResource input) throws IOException {
+        
+        // Bei BaseN Alphabet in Datei schreiben
+        if(baseEncoding != BaseNEncoding.BASE_DEFAULT_32) {
             binaryFile.writeChars(alphabet + "\n");
         }
+        
+        // Daten von Datei lesen
+        ByteBuffer data = ByteBuffer.wrap(input.getInputStream().readAllBytes());
+
+        // Daten in Resource kodieren
+        BaseN encoder = new BaseN(this);
+        encoder.encode(data, true);
     }
     
     /**
@@ -63,26 +77,35 @@ public class BaseNResource extends DataResource {
      */
     public void setAlphabet(String alphabet) {
         if(alphabet == null) {
-            throw new IllegalArgumentException();
+            this.alphabet = BASE_32_ALPHABET;
+            baseEncoding = BASE_DEFAULT_32;
+        } else {
+            if(alphabet.length() > 0) {
+                // Alphabet setzen und Mappingarray erstellen
+                this.alphabet = alphabet;
+
+                // Kodierung ableiten
+                switch(alphabet.length()) {
+                    case 2 -> {this.baseEncoding = BaseNEncoding.BASE_2;}
+                    case 4 -> {this.baseEncoding = BaseNEncoding.BASE_4;}     
+                    case 8 -> {this.baseEncoding = BaseNEncoding.BASE_8;}
+                    case 16 -> {this.baseEncoding = BaseNEncoding.BASE_16;}
+                    case 32 -> {this.baseEncoding = BaseNEncoding.BASE_32;}
+                    case 64 -> {this.baseEncoding = BaseNEncoding.BASE_64;}
+                    default -> {throw new IllegalArgumentException("Ungültige Base-N Alphabetlänge");}
+                }
+                // Mapping aus dem Alphabet vorberechnen für die Dekodierung
+                for(int i=0; i<alphabet.length(); i++) {
+                    alphabetMap[alphabet.getBytes()[i]] = (byte)i;
+                }
+            } else {
+                throw new IllegalArgumentException("Leeres BaseN Alphabet!");
+            }
         }
         
-        if(alphabet.length() > 0) {
-            // Alphabet setzen und Mappingarray erstellen
-            this.alphabet = alphabet;
-            for(int i=0; i<alphabet.length(); i++) {
-                alphabetMap[alphabet.getBytes()[i]] = (byte)i;
-            }
-
-            // Kodierung ableiten
-            switch(alphabet.length()) {
-                case 2 -> {this.baseEncoding = BaseNEncoding.BASE_2;}
-                case 4 -> {this.baseEncoding = BaseNEncoding.BASE_4;}     
-                case 8 -> {this.baseEncoding = BaseNEncoding.BASE_8;}
-                case 16 -> {this.baseEncoding = BaseNEncoding.BASE_16;}
-                case 32 -> {this.baseEncoding = BaseNEncoding.BASE_32;}
-                case 64 -> {this.baseEncoding = BaseNEncoding.BASE_64;}
-                default -> {throw new IllegalArgumentException("Ungültige Base-N Alphabetlänge");}
-            }
+        // Mapping aus dem Alphabet vorberechnen für die Dekodierung
+        for(int i=0; i<this.alphabet.length(); i++) {
+            alphabetMap[this.alphabet.getBytes()[i]] = (byte)i;
         }
     }
     
@@ -111,44 +134,6 @@ public class BaseNResource extends DataResource {
     
     /**
      * 
-     * @param output 
-     * @throws java.io.IOException 
-     */
-    public void decodeTo(IDataTarget output) throws IOException {
-        // Alphabet aus Datei laden?
-        if(!isValid()) {
-            setAlphabet(readAlphabet());
-        }
-
-        // Decoder erstellen
-        BaseN decoder = new BaseN(this);
-
-        // Datei in Puffer dekodieren
-        decoder.begin(Operation.DECODE);
-        decoder.decode(output);
-        decoder.end();
-    } 
-    
-    /**
-     * 
-     * @param input 
-     * @throws java.io.IOException 
-     */
-    public void encodeFrom(IDataResource input) throws IOException {
-        // Encoder erstellen
-        BaseN encoder = new BaseN(this);
-
-        // Daten von Datei lesen
-        ByteBuffer data = ByteBuffer.wrap(input.getInputStream().readAllBytes());
- 
-        // Daten in Resource kodieren
-        encoder.begin(Operation.ENCODE);
-        encoder.encode(data, true);
-        encoder.end();
-    }
-    
-    /**
-     * 
      * @return 
      */
     public BaseNEncoding getBaseNEncoding() {
@@ -162,6 +147,4 @@ public class BaseNResource extends DataResource {
     public byte[] getAlphabetMap() {
         return alphabetMap;
     }
-    
-    
 }

@@ -76,7 +76,7 @@ public class BaseNTask implements AutoCloseable, IDataTarget {
             baseNFile.decodeTo(this);
             
         } else {
-            baseNFile = new BaseNResource(  outPath,alphabet,true);
+            baseNFile = new BaseNResource(  outPath, alphabet,true);
             binaryFile = new DataResource(  cmd.getOption(Options.INPUT_FILE),false);
             
             baseNFile.encodeFrom(binaryFile);

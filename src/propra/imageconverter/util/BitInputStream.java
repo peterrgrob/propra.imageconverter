@@ -56,6 +56,23 @@ public class BitInputStream {
     }
     
     /**
+     * 
+     * @param bitLen
+     * @return
+     * @throws IOException 
+     */
+    public int readBits(int bitLen) throws IOException {
+        byte b = 0;
+        
+        // Iteriert die Bits von vorne nach hinten und konstruiert ein Byte
+        for(int i=bitLen-1; i>=0; i--) {
+            b |= readBit() << i;
+        }
+        
+        return b;
+    }
+    
+    /**
      * Liest ein Byte ausgehend von der aktuellen Bit Position ein 
      * 
      * @return

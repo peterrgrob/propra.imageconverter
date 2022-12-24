@@ -19,10 +19,13 @@ import java.util.logging.Level;
  *
  *  -   Farbkonvertierung ist aus Performancegründen jetzt weniger allgemein 
  *      implementiert mit Methoden-Referenzen je nach Kombination.
+ *
+ *  -   Mit Hilfe der BitStreams der Huffman Kompression konnte ich die BaseN 
+ *      Kodierung deutlich vereinfachen.
  *      
  *  -   Ich habe versucht, wie einige Reviewer angemerkt haben, die Komplexität und 
- *      nicht genutzte Teile der Klassenstruktur die im Laufe des Projekts entstanden 
- *      sind zu reduzieren. 
+ *      nicht genutzte Teile der Klassenstruktur, die im Laufe des Projekts entstanden 
+ *      sind, zu reduzieren. 
  *      
  *      Damit es besser verständlich ist hier eine kleine Übersicht über die Klassenhierarchie:
  * 

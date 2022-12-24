@@ -1,7 +1,6 @@
 package propra.imageconverter.util;
 
 import java.util.HashMap;
-import propra.imageconverter.data.basen.BaseNResource;
 import propra.imageconverter.data.DataResource.Compression;
 
 /**
@@ -97,7 +96,7 @@ import propra.imageconverter.data.DataResource.Compression;
         // Alphabet wählen
         if( options.containsKey(Options.ENCODE_BASE_32)
         ||  options.containsKey(Options.DECODE_BASE_32)) {
-            return BaseNResource.BASE_32_ALPHABET;
+            return null;
         } else if(options.containsKey(Options.DECODE_BASE_N)) {  
             // Leeres Alphabet, wird später aus Datei geladen
             return null;

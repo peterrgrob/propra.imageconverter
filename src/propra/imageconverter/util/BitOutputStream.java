@@ -92,6 +92,17 @@ public class BitOutputStream {
     }
     
     /**
+     * 
+     * @param bitLen
+     * @return 
+     */
+    public void writeBits(int b, int bitLen) throws IOException {
+        for(int i=bitLen-1; i>=0; i--) {
+            write((b >>> i) & 1);
+        }
+    }
+    
+    /**
      * Schreibt ein Byte 
      * 
      * @param b

@@ -31,6 +31,15 @@ public class BitCode implements Comparable<BitCode> {
        this.code = src.code;
        this.length = src.length;
    }
+   
+   /**
+    * 
+    * @param code
+    * @param length 
+    */
+   public void setCode(int code) {
+       this.code = code;
+   }
 
    /**
     * Bit hinzufügen
