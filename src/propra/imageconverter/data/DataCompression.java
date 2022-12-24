@@ -4,33 +4,21 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
- *  Basis-Codec für die unkomprimierte Datenübertragung
+ * Basisfunktionalität für die Kompressionsklassen. 
  */
-public class DataCompression implements IDataCompression {
+public abstract class DataCompression implements IDataCompression {
 
     // Standardblockgröße
     public static final int DEFAULT_BLOCK_SIZE = 4096 * 8 * 3;
     
-    // Zugeordnete Resource
-    protected IDataResource resource;
-    
     // Aktuelle Operation
     protected Operation operation;
-    
-    /*
-     * 
-     */
-    public DataCompression(IDataResource resource) {
-        if(resource == null) {
-            throw new IllegalArgumentException();
-        }
-        this.resource = resource;
-    }
+
+    public DataCompression() {
+    }    
     
     /**
      *
-     * @param op
-     * @throws IOException
      */
     @Override
     public void begin(Operation op) throws IOException {  
@@ -39,7 +27,6 @@ public class DataCompression implements IDataCompression {
     
     /**
      * 
-     * @return 
      */
     @Override
     public Operation getOperation() {
@@ -48,43 +35,17 @@ public class DataCompression implements IDataCompression {
     
     /**
      * 
-     * @param data
-     * @param last
      */
     @Override
-    public void analyze(ByteBuffer data, boolean last) {
-        
-    }
+    public void analyze(ByteBuffer data, boolean last) {}
     
     /**
      * 
-     * @param op
-     * @return 
      */
     @Override
     public boolean analyzeNecessary(Operation op) {
         return false;
     }
-
-    /**
-     *
-     * @param data
-     * @param last
-     * @throws IOException
-     */
-    @Override
-    public void encode(ByteBuffer data, boolean last) throws IOException {
-    }
-
-    /**
-     *
-     * @param target
-     * @throws IOException
-     */
-    @Override
-    public void decode(IDataTarget target) throws IOException {
-        
-    }        
 
     /**
      *

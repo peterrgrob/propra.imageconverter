@@ -1,42 +1,37 @@
-package propra.imageconverter.image;
+package propra.imageconverter.image.compression;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataCompression;
-import propra.imageconverter.data.IDataCompression;
 import propra.imageconverter.data.IDataTarget.Event;
 import propra.imageconverter.util.CheckedInputStream;
 import propra.imageconverter.data.IDataTarget;
-import propra.imageconverter.image.compression.ImageCompressionHuffman;
+import propra.imageconverter.image.ImageResource;
 
 
 /**
- *  Basiscodec für die Konvertierung von unkomprimierten Pixelblöcken
+ * Basiscodec für die Konvertierung von unkomprimierten Pixelblöcken.
+ * Die Ein- und Ausgabedaten für decode und encode werden von der per Konstruktor 
+ * übergebenen Resource gelesen/geschrieben. Allgemein erfolgt die 
+ * individuelle Konfiguration der Kompressionsklassen über die Konstruktoren.
  */
 public class ImageCompressionRaw extends DataCompression {
     
     // Zugeordnete Resource zur Ein-, oder Ausgabe der Daten 
-    protected ImageResource image;
+    protected ImageResource resource;
     
     /**
      * 
      */
     public ImageCompressionRaw(ImageResource resource) {
-        super(resource);
-        image = resource;
+        this.resource = resource;
     }
     
     /**
-     * 
-     * @param target
-     * @throws IOException 
+     * Dekodiert die Daten der Resource blockweise an das Datenziel
      */
     @Override
     public void decode(IDataTarget target) throws IOException {
-        if(target == null) {
-            throw new IllegalArgumentException();
-        }
-        
         CheckedInputStream stream = resource.getInputStream();
         
         // Lese Puffer  
@@ -60,41 +55,24 @@ public class ImageCompressionRaw extends DataCompression {
                 throw new IOException("Lesefehler!");
             }
             
-            // Daten an Listener senden
-            target.onData(Event.DATA_DECODED, 
-                            this, 
-                            data,
-                            bLast);  
+            // Daten an das Ziel senden
+            target.onData(  Event.DATA_DECODED, this, 
+                            data,bLast);  
             data.clear();
         }
     }
 
     /**
-     * 
-     * @param block
-     * @param last
-     * @param listener
-     * @throws IOException 
+     * Schreibt Datenblock 1:1 in die Resource
      */
     @Override
     public void encode(ByteBuffer block, boolean last) throws IOException {
-        if(block == null) {
-            throw new IllegalArgumentException();
-        }
-        
-        // Block direkt in Resource schreiben
         resource.getOutputStream()
                 .write(block);
     }
     
     /**
-     * Sendet Datenblock an target
-     * 
-     * @param event
-     * @param target
-     * @param block
-     * @param last
-     * @throws IOException 
+     * Schließt laufenden ByteBuffer ab und sendet ihn an das Datenziel
      */
     protected void sendData(Event event, IDataTarget target,
                             ByteBuffer block, boolean last) throws IOException {

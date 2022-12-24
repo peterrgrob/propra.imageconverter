@@ -5,8 +5,6 @@ import propra.imageconverter.util.BitInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import static propra.imageconverter.data.DataCompression.DEFAULT_BLOCK_SIZE;
-import propra.imageconverter.image.ImageCompressionRaw;
 import propra.imageconverter.image.ImageResource;
 import propra.imageconverter.data.IDataTarget;
 
@@ -27,17 +25,13 @@ public class ImageCompressionHuffman extends ImageCompressionRaw {
     
     /**
      *
-     * @param resource
      */
     public ImageCompressionHuffman(ImageResource resource) {
         super(resource);
     }
 
     /**
-     * Bereitet Datenverarbeitung vor
-     * 
-     * @param op
-     * @throws IOException 
+     * Bereitet die Huffmankodierung vor
      */
     @Override
     public void begin(Operation op) throws IOException {
@@ -59,19 +53,12 @@ public class ImageCompressionHuffman extends ImageCompressionRaw {
     }
  
     /**
-     * Ermittelt die Häufigkeit der Symbole im Datenblock
-     *
-     * @param block
-     * @param last 
+     * Analyse für die Huffman Kompression. Ermittelt die Häufigkeit der Symbole 
+     * im Datenblock
      */
     @Override
     public void analyze(ByteBuffer block, boolean last) {
-        if(block == null) {
-            throw new IllegalArgumentException();
-        }
-        
         if(operation == Operation.ENCODE_ANALYZE) {           
-            // Histogram aktualisieren mit den Daten
             byte[] buffer = block.array();
             int offset = 0;
 
@@ -83,9 +70,7 @@ public class ImageCompressionHuffman extends ImageCompressionRaw {
     }
     
     /**
-     * Schließt Blockweise Datenverarbeitung ab
-     * 
-     * @throws IOException 
+     * Schließt die Huffman-Kodierung/Analyse ab
      */
     @Override
     public void end() throws IOException {
@@ -98,7 +83,7 @@ public class ImageCompressionHuffman extends ImageCompressionRaw {
                 for(long i:histogram) {
                     sum += i;
                 }  
-                if(sum != image.getAttributes().getImageSize()) {
+                if(sum != resource.getAttributes().getImageSize()) {
                     throw new IOException("Fehlerhafte Bilddaten (Histogram)");
                 }
 
@@ -114,7 +99,7 @@ public class ImageCompressionHuffman extends ImageCompressionRaw {
                  *  Stream flushen und kodierte Datengröße aktualisieren
                  */
                 outStream.flush();
-                image.getAttributes().setDataLength(outStream.getByteCounter()); 
+                resource.getAttributes().setDataLength(outStream.getByteCounter()); 
             }
         }
 
@@ -122,9 +107,7 @@ public class ImageCompressionHuffman extends ImageCompressionRaw {
     }
     
     /**
-     * 
-     * @param op
-     * @return 
+     * Die Kompression benötigt einen Analyse-Durchlauf des Eingabebildes
      */
     @Override
     public boolean analyzeNecessary(Operation op) {
@@ -132,10 +115,7 @@ public class ImageCompressionHuffman extends ImageCompressionRaw {
     }
 
     /**
-     * Dekodiert Huffman kodierten Datenblock
-     * 
-     * @param output
-     * @throws IOException 
+     * Dekodiert die Huffman komprimierten Daten der Resource
      */
     @Override
     public void decode(IDataTarget output) throws IOException {
@@ -152,7 +132,7 @@ public class ImageCompressionHuffman extends ImageCompressionRaw {
         huffmanTree.buildTreeFromResource(stream);
         
         // Lädt, dekodiert und sendet Pixelblöcke an Listener  
-        while(symbolCtr++ < image.getAttributes().getImageSize()) {
+        while(symbolCtr++ < resource.getAttributes().getImageSize()) {
             
             // Symbol dekodieren
             int symbol = huffmanTree.decodeSymbol(stream);
@@ -177,10 +157,7 @@ public class ImageCompressionHuffman extends ImageCompressionRaw {
 
 
     /**
-     * 
-     * @param block
-     * @param last
-     * @throws IOException 
+     * Komprimiert Datenblock und speichert ihn in der Resource
      */
     @Override
     public void encode(ByteBuffer block, boolean last) throws IOException {

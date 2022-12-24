@@ -7,6 +7,7 @@ import java.nio.ByteBuffer;
  *
  * @author pg
  */
+@FunctionalInterface
 public interface IDataTarget {
     
     // Daten Events

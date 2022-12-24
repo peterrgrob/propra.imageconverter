@@ -90,7 +90,7 @@ import propra.imageconverter.data.DataResource.Compression;
     }
     
     /**
-     * Gibt passendes BaseNFormat Objekt zurück, oder wirft eine Exception
+     * Gibt Alpabet von der Konsole zurück
      */
     public String getAlphabet() {
         // Alphabet wählen

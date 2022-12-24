@@ -20,7 +20,7 @@ import propra.imageconverter.util.CheckedOutputStream;
 public class BaseN extends DataCompression {
 
     // Aktuelle BaseN Resource  
-    private final BaseNResource baseResource;
+    private final BaseNResource resource;
     
     // Aktuelle BaseN Kodierung
     private final BaseNEncoding baseEncoding;
@@ -64,8 +64,7 @@ public class BaseN extends DataCompression {
      * @param format
      */
     public BaseN(BaseNResource resource) {
-        super(resource);
-        this.baseResource = resource;
+        this.resource = resource;
         this.baseEncoding = resource.getBaseNEncoding();
     }
 
@@ -84,7 +83,7 @@ public class BaseN extends DataCompression {
         
         CheckedInputStream inStream = resource.getInputStream();
         int bitLen = baseEncoding.getBitCount();
-        byte[] map = baseResource.getAlphabetMap();
+        byte[] map = resource.getAlphabetMap();
         int c;
         
         // Zeichen iterieren und BitCodes in Puffer schreiben
@@ -113,7 +112,7 @@ public class BaseN extends DataCompression {
         CheckedOutputStream outStream = resource.getOutputStream();
         
         int bitLen = baseEncoding.getBitCount();
-        String alphabet = baseResource.getAlphabet();
+        String alphabet = resource.getAlphabet();
 
         long blockCount = inBuffer.limit() / bitLen;
         long blockCtr = 0;

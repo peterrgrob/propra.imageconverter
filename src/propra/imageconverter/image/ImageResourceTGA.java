@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import propra.imageconverter.data.DataUtil;
+import propra.imageconverter.image.compression.ImageCompressionRLE;
+import propra.imageconverter.image.compression.ImageCompressionRaw;
 
 /**
  *  Schreibt und liest TGA Header

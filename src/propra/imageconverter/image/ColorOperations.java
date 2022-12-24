@@ -3,20 +3,19 @@ package propra.imageconverter.image;
 import java.nio.ByteBuffer;
 
 /**
- * FunctionalInterface für Farbkonvertierungsfunktionen
- * @author pg
+ * FunctionalInterface für Farboperationen
  */
 @FunctionalInterface
-interface ColorFilter {
-    void apply(byte[] in, int offset1,
-                 byte[] out, int offset2);
+interface ColorOp {
+    void apply( byte[] in, int offset1, 
+                byte[] out, int offset2);
 }
 
 /**
- * Diverse Utility Methoden zur Bildverarbeitung
+ * Diverse statische Utility Methoden zur Bildverarbeitung
  * @author pg
  */
-public class ColorUtil {
+public class ColorOperations {
     /**
      * 
      * @param in
@@ -51,7 +50,7 @@ public class ColorUtil {
      * @param in
      * @param out 
      */
-    static void filterColorBuffer(ByteBuffer in, ByteBuffer out, ColorFilter filter) {
+    static void filterColorBuffer(ByteBuffer in, ByteBuffer out, ColorOp filter) {
         byte[] inBytes = in.array();
         byte[] outBytes = out.array();
                 
@@ -100,21 +99,5 @@ public class ColorUtil {
         }
         buffer.position(buffer.position() + len * Color.PIXEL_SIZE);
         return buffer.position();
-    }
-    
-    /**
-     * Vergleicht zwei Farbwerte in Array
-     * 
-     * @param c1
-     * @param index1
-     * @param c2
-     * @param index2
-     * @return 
-     */
-    public static boolean compareColor( byte[] c1, int index1,
-                                        byte[] c2, int index2) {
-        return (c1[index1 + 0] == c2[index2 + 0]
-            &&  c1[index1 + 1] == c2[index2 + 1]
-            &&  c1[index1 + 2] == c2[index2 + 2]);
     }
 }

@@ -9,7 +9,7 @@ import java.nio.ByteBuffer;
  */
 public interface IDataCompression {
     
-    // Datenoperation
+    // Datenoperation des Codecs
     public enum Operation {
         ENCODE,
         DECODE,
@@ -20,49 +20,36 @@ public interface IDataCompression {
     
     /**
      * 
-     * @param op
-     * @throws java.io.IOException
      */
     public void begin(Operation op) throws IOException;
     
     /**
      * 
-     * @return 
      */
     public Operation getOperation();
     
     /**
      * Analyse der ganzen Daten vor Kodierung nötig?
-     * @param op
-     * @return 
      */
     public boolean analyzeNecessary(Operation op);
     
     /**
      * Ermöglicht die Analyse der Daten vor der Kodierung
-     * @param data
-     * @param last
      */
     public void analyze(ByteBuffer data, boolean last);
 
     /**
      * 
-     * @param target
-     * @throws IOException
      */
     public void decode(IDataTarget target) throws IOException;
     
     /**
      * Kodiert Daten des Blocks und speichert diese.
-     * @param data
-     * @param last
-     * @throws IOException
      */
     public void encode(ByteBuffer data, boolean last) throws IOException;
     
     /**
      * 
-     * @throws java.io.IOException
      */
     public void end() throws IOException;
 }

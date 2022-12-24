@@ -29,8 +29,6 @@ public class HuffmanNode implements Comparable<HuffmanNode>{
 
     /**
      *
-     * @param s
-     * @param frequency
      */
     public HuffmanNode(int s, long frequency) {
        this.symbol = s;
@@ -39,10 +37,6 @@ public class HuffmanNode implements Comparable<HuffmanNode>{
 
     /**
      *
-     * @param s
-     * @param frequency
-     * @param leftNode
-     * @param rightNode
      */
     public HuffmanNode(int s, long frequency,
                        HuffmanNode leftNode, 
@@ -56,9 +50,6 @@ public class HuffmanNode implements Comparable<HuffmanNode>{
    /**
     * Baum aus der ProPra Kodierung rekursiv wiederherstellen
     * 
-    * @param resource
-    * @param nodeMap
-    * @throws java.io.IOException
     */
    public void buildTreeFromResource(BitInputStream resource, HuffmanNode[] nodeMap) throws IOException {
        /*
@@ -87,8 +78,6 @@ public class HuffmanNode implements Comparable<HuffmanNode>{
 
    /**
     *  
-    * @param stream
-    * @throws IOException
     */
    public void storeTreeInStream(BitOutputStream stream) throws IOException {
        if( leftNode == null 
@@ -104,7 +93,6 @@ public class HuffmanNode implements Comparable<HuffmanNode>{
    
    /**
     * Berechnet rekursiv die Codes je Symbol nach Erstellung des Baumes
-    * @param c
     */
    public void buildBitCodes(BitCode c) {
        // Code speichern
@@ -124,10 +112,7 @@ public class HuffmanNode implements Comparable<HuffmanNode>{
    /**
     * Sucht Symbol zu den Bits im Stream, gibt -1 bei EOF zurück, 
     * ansonsten Symbol
-    * 
-    * @param stream
-    * @return 
-    * @throws java.io.IOException 
+    *  
     */
    public int decodeSymbol(BitInputStream stream) throws IOException {
        // Symbol erreicht?
@@ -163,16 +148,11 @@ public class HuffmanNode implements Comparable<HuffmanNode>{
 
    /**
     * Getter/Setter
-    * @return 
     */
     public long getFrequency() {
         return frequency;
     }
 
-    /**
-     *
-     * @return
-     */
     public BitCode getCode() {
        return code;
     }

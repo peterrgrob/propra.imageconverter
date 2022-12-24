@@ -28,17 +28,11 @@ public class HuffmanTree {
     }
     
     /**
-     * Rekonstruiert rekursiv einen Huffmantree aus der Resource nach 
-     * Propra-Konstruktionsvorschrift aus einem Code mit Preorder-Durchlauf
-     *
-     * @param resource
-     * @throws IOException 
+     * Rekonstruiert rekursiv einen Huffmantree aus dem Bitcode in der Ressource nach 
+     * Propra-Konstruktionsvorschrift mit einem Preorder-Durchlauf
+     * 
      */
     public void buildTreeFromResource(BitInputStream resource) throws IOException {
-        if(resource == null) {
-            throw new IllegalArgumentException();
-        }
-
         rootNode = new HuffmanNode((byte)0, 0);
         rootNode.buildTreeFromResource(resource, nodeArray);
         rootNode.buildBitCodes(new BitCode(0,0));
@@ -48,7 +42,6 @@ public class HuffmanTree {
      * Erstellt einen Huffmantree aus den Eingabesymbolen und Häufigkeiten
      * durch Verwendung einer PriorityQueue
      *
-     * @param symbols 
      */
     public void buildTreeFromHistogram(long[] symbols) {
         
@@ -95,19 +88,14 @@ public class HuffmanTree {
     /**
      * Baum als kodierte Bitfolge in Stream speichern
      *
-     * @param stream
-     * @throws IOException 
      */
     public void storeTreeInStream(BitOutputStream stream) throws IOException {
         rootNode.storeTreeInStream(stream);
     }
     
     /**
-     * Dekodiert Byte von Stream, gibt Symbol oder -1 bei EOF zurück
+     * Dekodiert ein Byte von Stream, gibt Symbol oder -1 bei EOF zurück
      * 
-     * @param stream
-     * @return
-     * @throws IOException 
      */
     public int decodeSymbol(BitInputStream stream) throws IOException {
         return rootNode.decodeSymbol(stream);
@@ -116,8 +104,6 @@ public class HuffmanTree {
     /**
      * Gibt den Bitcode für ein Symbol zurück
      * 
-     * @param symbol
-     * @return 
      */
     public BitCode encodeSymbol(int symbol) {
         HuffmanNode n = nodeArray[symbol];
@@ -126,7 +112,6 @@ public class HuffmanTree {
     
     /**
      *  
-     * @return 
      */
     @Override
     public String toString() {

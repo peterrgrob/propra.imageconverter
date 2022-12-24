@@ -1,4 +1,4 @@
-package propra.imageconverter.image;
+package propra.imageconverter.image.compression;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -6,22 +6,24 @@ import propra.imageconverter.data.IDataTarget.Event;
 import propra.imageconverter.util.CheckedInputStream;
 import propra.imageconverter.util.CheckedOutputStream;
 import propra.imageconverter.data.IDataTarget;
+import propra.imageconverter.image.Color;
+import propra.imageconverter.image.ColorOperations;
+import propra.imageconverter.image.ImageResource;
 
 /**
  *
- * 
- * @author pg
  */
 public class ImageCompressionRLE extends ImageCompressionRaw {
 
     // Gepufferte Daten
     private ByteBuffer bufferedData; 
     private boolean isBufferedData;
+    
+    // Anzahl der aktuell kodierten Bytes
     private int encodedSize;
 
     /**
      *
-     * @param resource
      */
     public ImageCompressionRLE(ImageResource resource) {
         super(resource);
@@ -29,8 +31,6 @@ public class ImageCompressionRLE extends ImageCompressionRaw {
 
     /**
      * 
-     * @param op
-     * @throws IOException 
      */
     @Override
     public void begin(Operation op) throws IOException {
@@ -41,14 +41,9 @@ public class ImageCompressionRLE extends ImageCompressionRaw {
     
     /**
      *
-     * @param target
-     * @throws IOException
      */
     @Override
     public void decode(IDataTarget target) throws IOException {     
-        if(target == null) {
-            throw new IllegalArgumentException();
-        }
         
         // Temporäre Variablen zur Performanceoptimierung
         CheckedInputStream stream = resource.getInputStream();
@@ -81,7 +76,7 @@ public class ImageCompressionRLE extends ImageCompressionRaw {
             if(packetHeader > 127) {
                 // Farbwert auslesen und Ausgabepuffer auffüllen
                 stream.read(rle.get());
-                ColorUtil.fill(buff, rle, pixelCount);
+                ColorOperations.fill(buff, rle, pixelCount);
             } else {
                 // RAW Farben übertragen
                 stream.read(buff.array(),buff.position(),packetLen);
@@ -99,16 +94,10 @@ public class ImageCompressionRLE extends ImageCompressionRaw {
     
     /**
      *
-     * @param block
-     * @param last
-     * @throws IOException
      */
     @Override
     public void encode(ByteBuffer block, boolean last) throws IOException{ 
-        if(block == null) {
-            throw new IllegalArgumentException();
-        }
-        
+
         // Input Stream
         CheckedOutputStream stream = resource.getOutputStream();
         
@@ -135,7 +124,7 @@ public class ImageCompressionRLE extends ImageCompressionRaw {
             }
             
             /*
-             *  Kodierung
+             *  RLE Kodierung
              */
             int colorCtr = countRleColor(inBuffer);
             if(colorCtr > 1 ) {     
@@ -167,7 +156,6 @@ public class ImageCompressionRLE extends ImageCompressionRaw {
 
     /**
      * 
-     * @throws IOException 
      */
     @Override
     public void end() throws IOException {
@@ -176,8 +164,8 @@ public class ImageCompressionRLE extends ImageCompressionRaw {
                 /*
                  *  Stream flushen und kodierte Datengröße aktualisieren
                  */
-                image.getOutputStream().flush();
-                image.getAttributes().setDataLength(encodedSize);
+                resource.getOutputStream().flush();
+                resource.getAttributes().setDataLength(encodedSize);
             }
         }
 
@@ -194,8 +182,7 @@ public class ImageCompressionRLE extends ImageCompressionRaw {
         int counter = 1;
         int len = data.limit();
 
-        while(ColorUtil.compareColor(array, baseOffset, 
-                                 array, runOffset)) {
+        while(ColorOperations.compareColor(array, baseOffset, runOffset)) {
             runOffset += Color.PIXEL_SIZE;  
             counter++;
             
@@ -223,7 +210,7 @@ public class ImageCompressionRLE extends ImageCompressionRaw {
         int limit = inBuffer.limit();
         
         // Vergleicht aktuelle Farbe mit der folgenden Farbe
-        while( !ColorUtil.compareColor(inArray, inOffset, inOffset + 3)) {
+        while( !ColorOperations.compareColor(inArray, inOffset, inOffset + 3)) {
 
             outArray[outOffset++] = inArray[inOffset++];
             outArray[outOffset++] = inArray[inOffset++];

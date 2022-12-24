@@ -10,6 +10,8 @@ import propra.imageconverter.data.IDataCompression.Operation;
 import propra.imageconverter.data.IDataTarget;
 import propra.imageconverter.util.CheckedInputStream;
 import propra.imageconverter.data.IDataCompression;
+import propra.imageconverter.image.compression.ImageCompressionRLE;
+import propra.imageconverter.image.compression.ImageCompressionRaw;
 
 /**
  *
@@ -29,9 +31,6 @@ public abstract class ImageResource extends DataResource
     
     // Prüfsumme 
     protected IChecksum checksum;
-    
-    // Farbkonvertierung Methode 
-    protected ColorFilter colorConverter;
 
     /**
      * 
@@ -114,14 +113,15 @@ public abstract class ImageResource extends DataResource
         outHeader.setFormat(transcodedImage.getAttributes().getFormat());  
         transcodedImage.writeHeader(outHeader);
         
-        // Farbconverter setzen
+        // Farbkonvertierung ermitteln
+        ColorOp colorConverter = null;
         if(transcodedImage.getAttributes().getFormat() != header.getFormat()) { 
             switch(header.getFormat()) {
                 case COLOR_BGR -> {
-                    colorConverter = ColorUtil::convertBGRtoRBG;
+                    colorConverter = ColorOperations::convertBGRtoRBG;
                 }
                 case COLOR_RBG -> {
-                    colorConverter = ColorUtil::convertRBGtoBGR;
+                    colorConverter = ColorOperations::convertRBGtoBGR;
                 }
             }
         }
@@ -136,7 +136,7 @@ public abstract class ImageResource extends DataResource
         outCodec.begin(Operation.ENCODE);
 
         // Dekodierung starten
-        inCodec.decode(this);
+        inCodec.decode(new ColorFilter(colorConverter, this));
 
         // Bildkonvertierung abschließen
         inCodec.end();
@@ -232,12 +232,7 @@ public abstract class ImageResource extends DataResource
             case DATA_DECODED -> {
                 if(caller.getOperation() == Operation.DECODE_ANALYZE) {
                     transcodedImage.getCodec().analyze( block, last);
-                } else {
-                    // Farben ggfs. konvertieren
-                    if(colorConverter != null) {
-                        ColorUtil.filterColorBuffer(block, block, colorConverter);
-                    }
-                    
+                } else {                
                     // An Encoder weiterreichen
                     transcodedImage.getCodec().encode(block, last);
                 }

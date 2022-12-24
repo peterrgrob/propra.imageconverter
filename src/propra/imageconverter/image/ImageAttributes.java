@@ -4,7 +4,7 @@ import propra.imageconverter.data.DataResource.Compression;
 import propra.imageconverter.image.Color.Format;
 
 /**
- * Klasse für einen allgemeine Bildinformationen
+ * Klasse für einen allgemeine Bildattribute
  */
 public class ImageAttributes {
     
@@ -41,114 +41,59 @@ public class ImageAttributes {
         this.format = src.format;
     }
     
-    /**
-     *
-     * @return
-     */
+
     public int getPixelCount() {
         return width * height;
     }
     
-    /**
-     * 
-     * @return 
-     */
     public int getImageSize() {
         return width * height * Color.PIXEL_SIZE;
     }
 
-    /**
-     * 
-     * @return 
-     */
     public Compression getCompression() {
         return encoding;
     }
 
-    /**
-     * 
-     * @param encoding 
-     */
     public void setCompression(Compression encoding) {
         this.encoding = encoding;
     }
     
-    /**
-     *
-     * @return
-     */
     public long getChecksum() {
         return checksum;
     }
 
-    /**
-     *
-     * @param checksum
-     */
     public void setChecksum(long checksum) {
         this.checksum = checksum;
     }
     
-    /**
-     *
-     * @return
-     */
     public int getHeight() {
         return height;
     }
 
-    /**
-     *
-     * @param height
-     */
     public void setHeight(int height) {
         this.height = height;
     }
 
-    /**
-     *
-     * @return
-     */
     public int getWidth() {
         return width;
     }
 
-    /**
-     *
-     * @param width
-     */
     public void setWidth(int width) {
         this.width = width;
     }
 
-    /**
-     *
-     * @return
-     */
     public long getDataLength() {
         return dataLength;
     }
 
-    /**
-     *
-     * @param encodedSize
-     */
     public void setDataLength(long encodedSize) {
         this.dataLength = encodedSize;
     }
 
-    /**
-     * 
-     * @return 
-     */
     public Format getFormat() {
         return format;
     }
 
-    /**
-     * 
-     * @param format 
-     */
     public void setFormat(Format format) {
         this.format = format;
     }
