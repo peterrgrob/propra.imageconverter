@@ -7,12 +7,13 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import propra.imageconverter.image.ImageResource;
 import propra.imageconverter.data.IDataTarget;
+import propra.imageconverter.data.IDataTranscoder;
 
 /**
  * 
  * @author pg
  */
-public class ImageCompressionHuffman extends ImageCompressionRaw {
+public class ImageTranscoderHuffman extends ImageTranscoderRaw {
     
     //  Histogramm der Daten
     private final long[] histogram = new long[256]; 
@@ -26,7 +27,7 @@ public class ImageCompressionHuffman extends ImageCompressionRaw {
     /**
      *
      */
-    public ImageCompressionHuffman(ImageResource resource) {
+    public ImageTranscoderHuffman(ImageResource resource) {
         super(resource);
     }
 
@@ -34,7 +35,7 @@ public class ImageCompressionHuffman extends ImageCompressionRaw {
      * Bereitet die Huffmankodierung vor
      */
     @Override
-    public void begin(Operation op) throws IOException {
+    public IDataTranscoder begin(Operation op) throws IOException {
         super.begin(op);
         
         switch(op) {
@@ -50,6 +51,7 @@ public class ImageCompressionHuffman extends ImageCompressionRaw {
                 huffmanTree.storeTreeInStream(outStream);
             }
         }
+        return this;
     }
  
     /**

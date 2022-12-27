@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import propra.imageconverter.data.DataUtil;
-import propra.imageconverter.image.compression.ImageCompressionRLE;
-import propra.imageconverter.image.compression.ImageCompressionRaw;
+import propra.imageconverter.image.compression.ImageTranscoderRLE;
+import propra.imageconverter.image.compression.ImageTranscoderRaw;
 
 /**
  *  Schreibt und liest TGA Header
@@ -68,11 +68,11 @@ public class ImageResourceTGA extends ImageResource {
         byte compression = bytes.get(TGA_HEADER_OFFSET_ENCODING);
         switch (compression) {
             case TGA_HEADER_ENCODING_RLE -> {
-                inCodec = new ImageCompressionRLE(this);
+                inCodec = new ImageTranscoderRLE(this);
                 header.setCompression(Compression.RLE);
             }
             case TGA_HEADER_ENCODING_NONE -> {
-                inCodec = new ImageCompressionRaw(this);
+                inCodec = new ImageTranscoderRaw(this);
                 header.setCompression(Compression.NONE);
             }
             default -> throw new UnsupportedOperationException("Nicht unterstützte TGA Kompression!");

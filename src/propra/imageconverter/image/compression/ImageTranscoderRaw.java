@@ -2,10 +2,11 @@ package propra.imageconverter.image.compression;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import propra.imageconverter.data.DataCompression;
+import propra.imageconverter.data.DataTranscoder;
 import propra.imageconverter.data.IDataTarget.Event;
 import propra.imageconverter.util.CheckedInputStream;
 import propra.imageconverter.data.IDataTarget;
+import propra.imageconverter.data.IDataTranscoder;
 import propra.imageconverter.image.ImageResource;
 
 
@@ -15,7 +16,7 @@ import propra.imageconverter.image.ImageResource;
  * übergebenen Resource gelesen/geschrieben. Allgemein erfolgt die 
  * individuelle Konfiguration der Kompressionsklassen über die Konstruktoren.
  */
-public class ImageCompressionRaw extends DataCompression {
+public class ImageTranscoderRaw extends DataTranscoder implements IDataTarget {
     
     // Zugeordnete Resource zur Ein-, oder Ausgabe der Daten 
     protected ImageResource resource;
@@ -23,7 +24,7 @@ public class ImageCompressionRaw extends DataCompression {
     /**
      * 
      */
-    public ImageCompressionRaw(ImageResource resource) {
+    public ImageTranscoderRaw(ImageResource resource) {
         this.resource = resource;
     }
     
@@ -79,5 +80,17 @@ public class ImageCompressionRaw extends DataCompression {
         block.flip();
         target.onData(event, this, block, last);
         block.clear();
+    }
+
+    /**
+     * 
+     */
+    @Override
+    public void onData(Event event, IDataTranscoder caller, ByteBuffer data, boolean lastBlock) throws IOException {
+        switch(operation) {
+            case ENCODE -> {
+                encode(data, lastBlock);
+            }
+        }
     }
 }

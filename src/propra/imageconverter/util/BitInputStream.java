@@ -29,10 +29,7 @@ public class BitInputStream {
     
     /**
      * Liest ein Bit von der Resource, gibt -1 zurück bei Dateiende
-     * Speichert gelesene Bytes in bytes
      * 
-     * @return
-     * @throws IOException 
      */
     public int readBit() throws IOException {
         /*
@@ -57,9 +54,6 @@ public class BitInputStream {
     
     /**
      * 
-     * @param bitLen
-     * @return
-     * @throws IOException 
      */
     public int readBits(int bitLen) throws IOException {
         byte b = 0;
@@ -74,9 +68,6 @@ public class BitInputStream {
     
     /**
      * Liest ein Byte ausgehend von der aktuellen Bit Position ein 
-     * 
-     * @return
-     * @throws IOException 
      */
     public byte readByte() throws IOException {
         byte b = 0;

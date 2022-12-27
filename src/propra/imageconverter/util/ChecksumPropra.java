@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
 public class ChecksumPropra implements IChecksum {
 
     // Aktuelle Prüfsumme
-    protected long value;  
+    private long value;  
     
     // Modulo
     private static final int X = 65521;

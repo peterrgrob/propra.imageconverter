@@ -2,12 +2,12 @@ package propra.imageconverter.image;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import propra.imageconverter.data.IDataCompression;
+import propra.imageconverter.data.IDataTranscoder;
 import propra.imageconverter.data.IDataTarget;
 
 /**
- * Filtert übergebene Farben mit ColorOp Objekt und leitet diese weiter an 
- * ein weiteres Datenziel.
+ * Filtert übergebene Farben mit der ColorOperation und leitet Daten weiter an 
+ * das nächstes Datenziel
  */
 public class ColorFilter implements IDataTarget {
     
@@ -15,9 +15,9 @@ public class ColorFilter implements IDataTarget {
     private final IDataTarget target;
     
     // Operation die auf den Farben ausgeführt wird
-    private final ColorOp op;
+    private final ColorOperation op;
 
-    public ColorFilter(ColorOp op, IDataTarget target) {
+    public ColorFilter(ColorOperation op, IDataTarget target) {
         this.target = target;
         this.op = op;
     }
@@ -26,7 +26,7 @@ public class ColorFilter implements IDataTarget {
      * 
      */
     @Override
-    public void onData( Event event, IDataCompression caller, 
+    public void onData( Event event, IDataTranscoder caller, 
                         ByteBuffer data, boolean lastBlock) throws IOException {
         if(op != null) {
             ColorOperations.filterColorBuffer(data, data, op);

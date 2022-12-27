@@ -4,7 +4,7 @@ import propra.imageconverter.data.DataResource.Compression;
 import propra.imageconverter.image.Color.Format;
 
 /**
- * Klasse für einen allgemeine Bildattribute
+ * Klasse für eine allgemeine Bildattribute
  */
 public class ImageAttributes {
     

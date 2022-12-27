@@ -6,14 +6,14 @@ import java.nio.ByteBuffer;
  * FunctionalInterface für Farboperationen
  */
 @FunctionalInterface
-interface ColorOp {
+interface ColorOperation {
     void apply( byte[] in, int offset1, 
                 byte[] out, int offset2);
 }
 
 /**
- * Diverse statische Utility Methoden zur Bildverarbeitung
- * @author pg
+ * Diverse statische Utility Methoden zur Bildverarbeitung, zT verwendbar als 
+ * statische Lambda Referenz für ColorOperation
  */
 public class ColorOperations {
     /**
@@ -47,10 +47,8 @@ public class ColorOperations {
    
     /**
      * 
-     * @param in
-     * @param out 
      */
-    static void filterColorBuffer(ByteBuffer in, ByteBuffer out, ColorOp filter) {
+    static void filterColorBuffer(ByteBuffer in, ByteBuffer out, ColorOperation filter) {
         byte[] inBytes = in.array();
         byte[] outBytes = out.array();
                 

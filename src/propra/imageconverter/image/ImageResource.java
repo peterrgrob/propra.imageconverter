@@ -1,17 +1,17 @@
 package propra.imageconverter.image;
 
-import propra.imageconverter.image.compression.ImageCompressionHuffman;
+import propra.imageconverter.image.compression.ImageTranscoderHuffman;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import propra.imageconverter.util.IChecksum;
-import propra.imageconverter.data.DataCompression;
+import propra.imageconverter.data.DataTranscoder;
 import propra.imageconverter.data.DataResource;
-import propra.imageconverter.data.IDataCompression.Operation;
 import propra.imageconverter.data.IDataTarget;
 import propra.imageconverter.util.CheckedInputStream;
-import propra.imageconverter.data.IDataCompression;
-import propra.imageconverter.image.compression.ImageCompressionRLE;
-import propra.imageconverter.image.compression.ImageCompressionRaw;
+import propra.imageconverter.data.IDataTranscoder;
+import propra.imageconverter.data.IDataTranscoder.Operation;
+import propra.imageconverter.image.compression.ImageTranscoderRLE;
+import propra.imageconverter.image.compression.ImageTranscoderRaw;
 
 /**
  *
@@ -26,7 +26,7 @@ public abstract class ImageResource extends DataResource
     // Bildattribute
     protected ImageAttributes header;
     
-    // Konvertiertes Bild
+    // Aktuelles konvertiertes Bild
     protected ImageResource transcodedImage;
     
     // Prüfsumme 
@@ -114,7 +114,7 @@ public abstract class ImageResource extends DataResource
         transcodedImage.writeHeader(outHeader);
         
         // Farbkonvertierung ermitteln
-        ColorOp colorConverter = null;
+        ColorOperation colorConverter = null;
         if(transcodedImage.getAttributes().getFormat() != header.getFormat()) { 
             switch(header.getFormat()) {
                 case COLOR_BGR -> {
@@ -130,13 +130,11 @@ public abstract class ImageResource extends DataResource
         analyzeCompression();
         
         // Bildkonvertierung initialisieren
-        IDataCompression outCodec = transcodedImage.getCodec();
+        IDataTranscoder outCodec = transcodedImage.getCodec();
         
-        inCodec.begin(Operation.DECODE);
-        outCodec.begin(Operation.ENCODE);
-
         // Dekodierung starten
-        inCodec.decode(new ColorFilter(colorConverter, this));
+        inCodec.begin(Operation.DECODE)
+               .decode(new ColorFilter(colorConverter, outCodec.begin(Operation.ENCODE)));
 
         // Bildkonvertierung abschließen
         inCodec.end();
@@ -155,12 +153,12 @@ public abstract class ImageResource extends DataResource
     /**
      * Analyse für die Kompression durchführen.         
      * Analyse durch Ein- und Ausgabecodec erfordert je nach Kombination
-     * eine spezielle Behandlung
+     * eine spezielle Behandlung um unnötige Operationen zu vermeiden
      * 
      * @throws IOException 
      */
     private void analyzeCompression() throws IOException {
-        IDataCompression outCodec = transcodedImage.getCodec();
+        IDataTranscoder outCodec = transcodedImage.getCodec();
         
         // Keine Analyse notwendig?
         if( !inCodec.analyzeNecessary(Operation.DECODE)
@@ -171,7 +169,7 @@ public abstract class ImageResource extends DataResource
         // Position merken
         long p = position();
 
-        ByteBuffer dataBlock = ByteBuffer.allocate(DataCompression.DEFAULT_BLOCK_SIZE);
+        ByteBuffer dataBlock = ByteBuffer.allocate(DataTranscoder.DEFAULT_BLOCK_SIZE);
         CheckedInputStream in = getInputStream();
         in.enableChecksum(false);
         
@@ -226,15 +224,12 @@ public abstract class ImageResource extends DataResource
      * @throws IOException 
      */
     @Override
-    public void onData( Event event, IDataCompression caller, 
+    public void onData( Event event, IDataTranscoder caller, 
                         ByteBuffer block, boolean last) throws IOException {
         switch(event) {
             case DATA_DECODED -> {
                 if(caller.getOperation() == Operation.DECODE_ANALYZE) {
                     transcodedImage.getCodec().analyze( block, last);
-                } else {                
-                    // An Encoder weiterreichen
-                    transcodedImage.getCodec().encode(block, last);
                 }
             }
         }
@@ -245,18 +240,19 @@ public abstract class ImageResource extends DataResource
      * @param header
      * @return 
      */
-    protected IDataCompression createCodec(ImageAttributes header) {
+    protected IDataTranscoder createCodec(ImageAttributes header) {
         if(header != null) {
             switch(header.getCompression()) {
                 case NONE -> {
-                    return new ImageCompressionRaw(this);
+                    return new ImageTranscoderRaw(this);
                 }
                 case RLE -> {
-                    return new ImageCompressionRLE(this);
+                    return new ImageTranscoderRLE(this);
                 }
                 case HUFFMAN -> {
-                    return new ImageCompressionHuffman(this);
+                    return new ImageTranscoderHuffman(this);
                 }
+
 
             }
         }
@@ -275,7 +271,7 @@ public abstract class ImageResource extends DataResource
      *
      * @return
      */
-    public IDataCompression getCodec() {
+    public IDataTranscoder getCodec() {
         return inCodec;
     }
     

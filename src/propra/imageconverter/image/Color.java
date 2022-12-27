@@ -4,7 +4,7 @@ package propra.imageconverter.image;
  * Enthält einen Farbwert, oder indiziert einen Farbwert in einem 
  * byte-Array (Referenz)
  */
-public class Color {
+public class Color implements Comparable<Color> {
 
     // Farbformat
     public enum Format {
@@ -30,7 +30,6 @@ public class Color {
    
     /**
      * 
-     * @param values 
      */
     public Color(byte[] values) {
         set(values);
@@ -38,18 +37,14 @@ public class Color {
 
     /**
      * 
-     * @param values
-     * @param index 
      */
-    public Color(byte[] values,
-                 int index) {
+    public Color(byte[] values, int index) {
         this.values = values;
         this.index = index;
     }
    
    /**
     * 
-    * @return 
     */
     public byte[] get() {
         return values;
@@ -57,8 +52,6 @@ public class Color {
    
     /**
      * 
-     * @return 
-     * @return  
      */
     public int getIndex() {
         return index;
@@ -77,14 +70,11 @@ public class Color {
     
     /**
      * Vergleicht zwei Farbwerte
-     * 
-     * @param c1
-     * @param c2
-     * @return 
      */
-    public static boolean compareColor(Color c1, Color c2) {
-        return (c1.values[c1.index + 0] == c2.values[c2.index + 0]
-            &&  c1.values[c1.index + 1] == c2.values[c2.index + 1]
-            &&  c1.values[c1.index + 2] == c2.values[c2.index + 2]);
+    @Override
+    public int compareTo(Color color) {
+        return (values[index + 0] == color.values[color.index + 0]
+            &&  values[index + 1] == color.values[color.index + 1]
+            &&  values[index + 2] == color.values[color.index + 2]) == true ? 0 : 1;
     }
 }

@@ -4,9 +4,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import propra.imageconverter.data.DataCompression;
+import propra.imageconverter.data.DataTranscoder;
 import propra.imageconverter.data.IDataTarget;
 import propra.imageconverter.data.IDataTarget.Event;
+import propra.imageconverter.data.IDataTranscoder;
 import propra.imageconverter.util.BitInputStream;
 import propra.imageconverter.util.BitOutputStream;
 import propra.imageconverter.util.CheckedInputStream;
@@ -17,7 +18,7 @@ import propra.imageconverter.util.CheckedOutputStream;
  * über das per Konstruktor übergebene Ressourcen Objekt. 
  *  
  */
-public class BaseN extends DataCompression {
+public class BaseN extends DataTranscoder {
 
     // Aktuelle BaseN Resource  
     private final BaseNResource resource;
@@ -138,6 +139,11 @@ public class BaseN extends DataCompression {
         }
 
         return len;
+    }
+    
+    @Override
+    public void onData(Event event, IDataTranscoder caller, ByteBuffer data, boolean lastBlock) throws IOException {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }
 

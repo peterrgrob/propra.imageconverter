@@ -6,6 +6,7 @@ import propra.imageconverter.data.IDataTarget.Event;
 import propra.imageconverter.util.CheckedInputStream;
 import propra.imageconverter.util.CheckedOutputStream;
 import propra.imageconverter.data.IDataTarget;
+import propra.imageconverter.data.IDataTranscoder;
 import propra.imageconverter.image.Color;
 import propra.imageconverter.image.ColorOperations;
 import propra.imageconverter.image.ImageResource;
@@ -13,7 +14,7 @@ import propra.imageconverter.image.ImageResource;
 /**
  *
  */
-public class ImageCompressionRLE extends ImageCompressionRaw {
+public class ImageTranscoderRLE extends ImageTranscoderRaw {
 
     // Gepufferte Daten
     private ByteBuffer bufferedData; 
@@ -25,7 +26,7 @@ public class ImageCompressionRLE extends ImageCompressionRaw {
     /**
      *
      */
-    public ImageCompressionRLE(ImageResource resource) {
+    public ImageTranscoderRLE(ImageResource resource) {
         super(resource);
     }
 
@@ -33,9 +34,10 @@ public class ImageCompressionRLE extends ImageCompressionRaw {
      * 
      */
     @Override
-    public void begin(Operation op) throws IOException {
+    public IDataTranscoder begin(Operation op) throws IOException {
         super.begin(op);
         bufferedData = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE * 2);
+        return this;
     }
 
     

@@ -7,21 +7,21 @@ import java.nio.ByteBuffer;
  *
  * @author pg
  */
-public interface IDataCompression {
+public interface IDataTranscoder extends IDataTarget {
     
-    // Datenoperation des Codecs
+    // Datenoperationstypen
     public enum Operation {
+        NONE,
         ENCODE,
         DECODE,
         ENCODE_ANALYZE,
-        DECODE_ANALYZE,
-        NONE;
+        DECODE_ANALYZE;
     }
     
     /**
      * 
      */
-    public void begin(Operation op) throws IOException;
+    public IDataTranscoder begin(Operation op) throws IOException;
     
     /**
      * 

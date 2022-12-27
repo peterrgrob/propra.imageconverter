@@ -35,7 +35,7 @@ public class DataResource implements IDataResource {
     protected CheckedInputStream inStream; 
     
     // Zugeordneter Codec zum lesen/schreiben der Daten
-    protected IDataCompression inCodec;
+    protected IDataTranscoder inCodec;
     
     /**
      * 
