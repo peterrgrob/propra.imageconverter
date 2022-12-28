@@ -6,8 +6,7 @@ import propra.imageconverter.data.DataResource;
 import propra.imageconverter.data.IDataResource;
 import propra.imageconverter.data.IDataTarget;
 import propra.imageconverter.data.basen.BaseN.BaseNEncoding;
-import static propra.imageconverter.data.basen.BaseN.BaseNEncoding.BASE_32_ALPHABET;
-import static propra.imageconverter.data.basen.BaseN.BaseNEncoding.BASE_DEFAULT_32;
+
 
 /**
  *
@@ -48,7 +47,7 @@ public class BaseNResource extends DataResource {
 
         // Daten dekodieren
         BaseN decoder = new BaseN(this);
-        decoder.decode(output);
+        decoder.decode(getInputStream(), output);
     } 
     
     /**
@@ -76,8 +75,8 @@ public class BaseNResource extends DataResource {
      */
     public void setAlphabet(String alphabet) {
         if(alphabet == null) {
-            this.alphabet = BASE_32_ALPHABET;
-            baseEncoding = BASE_DEFAULT_32;
+            this.alphabet = BaseNEncoding.BASE_32_ALPHABET;
+            baseEncoding = BaseNEncoding.BASE_DEFAULT_32;
         } else {
             if(alphabet.length() > 0) {
                 // Alphabet setzen und Mappingarray erstellen

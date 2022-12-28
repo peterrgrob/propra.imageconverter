@@ -31,8 +31,7 @@ public class ImageTranscoderRaw extends DataTranscoder implements IDataTarget {
      * Dekodiert die Daten der Resource blockweise an das Datenziel
      */
     @Override
-    public void decode(IDataTarget target) throws IOException {
-        CheckedInputStream stream = resource.getInputStream();
+    public void decode(CheckedInputStream in, IDataTarget target) throws IOException {
         
         // Lese Puffer  
         ByteBuffer data = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
@@ -50,7 +49,7 @@ public class ImageTranscoderRaw extends DataTranscoder implements IDataTarget {
             }
             
             // Datenblock von Resource lesen 
-            int r = stream.read(data.array(), data.position(), data.limit());
+            int r = in.read(data.array(), data.position(), data.limit());
             if(r == -1) {
                 throw new IOException("Lesefehler!");
             }
@@ -68,6 +67,7 @@ public class ImageTranscoderRaw extends DataTranscoder implements IDataTarget {
     public void encode(ByteBuffer block, boolean last) throws IOException {
         resource.getOutputStream()
                 .write(block);
+        encodedBytes += block.limit() - block.position();
     }
     
     /**

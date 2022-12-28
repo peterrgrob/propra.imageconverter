@@ -18,9 +18,6 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
     // Gepufferte Daten
     private ByteBuffer bufferedData; 
     private boolean isBufferedData;
-    
-    // Anzahl der aktuell kodierten Bytes
-    private int encodedSize;
 
     /**
      *
@@ -33,8 +30,8 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
      * 
      */
     @Override
-    public IDataTranscoder beginOperation(Operation op) throws IOException {
-        super.beginOperation(op);
+    public IDataTranscoder beginOperation(Operation op, CheckedOutputStream out) throws IOException {
+        super.beginOperation(op, out);
         bufferedData = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE * 2);
         return this;
     }
@@ -44,10 +41,7 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
      *
      */
     @Override
-    public void decode(IDataTarget target) throws IOException {     
-        
-        // Temporäre Variablen zur Performanceoptimierung
-        CheckedInputStream stream = resource.getInputStream();
+    public void decode(CheckedInputStream in, IDataTarget target) throws IOException {     
     
         // Puffer vorbereiten
         ByteBuffer buff = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
@@ -56,7 +50,7 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
          * Rle Block dekodieren
          */
         int packetHeader;
-        while((packetHeader = stream.read()) != -1) {
+        while((packetHeader = in.read()) != -1) {
             
             // Paketkopf und Wiederholungen dekodieren
             packetHeader = packetHeader & 0xFF;
@@ -75,11 +69,11 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
             Color rle = new Color();
             if(packetHeader > 127) {
                 // Farbwert auslesen und Ausgabepuffer auffüllen
-                stream.read(rle.get());
+                in.read(rle.get());
                 ColorOperations.fill(buff, rle, pixelCount);
             } else {
                 // RAW Farben übertragen
-                stream.read(buff.array(),buff.position(),packetLen);
+                in.read(buff.array(),buff.position(),packetLen);
                 buff.position(buff.position() + packetLen);
             }
         }
@@ -96,9 +90,6 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
      */
     @Override
     public void encode(ByteBuffer block, boolean last) throws IOException{ 
-
-        // Input Stream
-        CheckedOutputStream stream = resource.getOutputStream();
         
         // Puffer erstellen
         ByteBuffer rleBlock = ByteBuffer.allocate(192 * Color.PIXEL_SIZE);
@@ -147,8 +138,8 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
             }
             
             // In Resource schreiben
-            stream.write(rleBlock);
-            encodedSize += rleBlock.limit();
+            outStream.write(rleBlock);
+            encodedBytes += rleBlock.limit();
             rleBlock.clear();
         }
     }
@@ -157,18 +148,17 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
      * 
      */
     @Override
-    public void endOperation() throws IOException {
+    public long endOperation() throws IOException {
         switch(operation) {
             case ENCODE -> {
                 /*
                  *  Stream flushen und kodierte Datengröße aktualisieren
                  */
                 resource.getOutputStream().flush();
-                resource.getAttributes().setDataLength(encodedSize);
             }
         }
 
-        super.endOperation();
+        return super.endOperation();
     }
     
     /**

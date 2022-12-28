@@ -92,19 +92,17 @@ public class ImageResourceTGA extends ImageResource {
      * Schreibt allgemeinen Header als TGA Header
      */
     @Override
-    public void writeHeader(ImageAttributes srcHeader) throws IOException {
-
-        super.writeHeader(srcHeader);
-                
+    public void writeHeader() throws IOException {
+        
         // DataBuffer für Header erstellen
         ByteBuffer bytes = ByteBuffer.allocate(fileHeaderSize);
         bytes.order(ByteOrder.LITTLE_ENDIAN);
                 
         // Headerfelder in Buffer schreiben
         bytes.put(TGA_HEADER_OFFSET_ENCODING, (byte)2);
-        bytes.putShort(TGA_HEADER_OFFSET_WIDTH, (short)srcHeader.getWidth());
-        bytes.putShort(TGA_HEADER_OFFSET_HEIGHT, (short)srcHeader.getHeight());
-        bytes.putShort(TGA_HEADER_OFFSET_Y0, (short)srcHeader.getHeight());
+        bytes.putShort(TGA_HEADER_OFFSET_WIDTH, (short)header.getWidth());
+        bytes.putShort(TGA_HEADER_OFFSET_HEIGHT, (short)header.getHeight());
+        bytes.putShort(TGA_HEADER_OFFSET_Y0, (short)header.getHeight());
         bytes.put(TGA_HEADER_OFFSET_BPP, (byte)(24));        
         bytes.put(TGA_HEADER_OFFSET_ORIGIN, (byte)(1 << 5)); 
         

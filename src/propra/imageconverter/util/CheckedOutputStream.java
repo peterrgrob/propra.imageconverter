@@ -56,10 +56,6 @@ public class CheckedOutputStream extends FilterOutputStream {
     
     /**
      * 
-     * @param b
-     * @param off
-     * @param len
-     * @throws IOException 
      */
     @Override
     public synchronized void write(byte[] b, int off, int len) throws IOException {

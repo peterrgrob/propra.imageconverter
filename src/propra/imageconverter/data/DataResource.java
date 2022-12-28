@@ -22,7 +22,8 @@ public class DataResource implements IDataResource {
         NONE,
         RLE,
         BASEN,
-        HUFFMAN;
+        HUFFMAN,
+        AUTO;
     }
     
     // Aktuelle Kodierung

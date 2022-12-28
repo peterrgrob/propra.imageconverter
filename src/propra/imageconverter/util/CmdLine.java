@@ -84,6 +84,9 @@ import propra.imageconverter.data.DataResource.Compression;
                 case "huffman" -> {
                     return Compression.HUFFMAN;
                 }
+                case "auto" -> {
+                    return Compression.AUTO;
+                }
             }
         }
         return Compression.NONE;

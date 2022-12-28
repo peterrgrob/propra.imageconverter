@@ -2,10 +2,12 @@ package propra.imageconverter.image;
 
 import propra.imageconverter.image.compression.ImageTranscoderHuffman;
 import java.io.IOException;
+import java.util.ArrayList;
 import propra.imageconverter.util.IChecksum;
 import propra.imageconverter.data.DataResource;
 import propra.imageconverter.data.IDataTranscoder;
 import propra.imageconverter.data.IDataTranscoder.Operation;
+import propra.imageconverter.image.compression.ImageTranscoderAuto;
 import propra.imageconverter.image.compression.ImageTranscoderRLE;
 import propra.imageconverter.image.compression.ImageTranscoderRaw;
 
@@ -26,9 +28,6 @@ public abstract class ImageResource extends DataResource {
 
     /**
      * 
-     * @param file
-     * @param write
-     * @throws java.io.IOException
      */
     protected ImageResource(String file, boolean write) throws IOException {
         super(file, write);
@@ -59,17 +58,18 @@ public abstract class ImageResource extends DataResource {
     
     /**
      *
-     * @return 
-     * @throws IOException
      */
     abstract public ImageAttributes readHeader() throws IOException;
     
     /**
      * 
-     * @param srcHeader
-     * @throws IOException 
      */
-    public void writeHeader(ImageAttributes srcHeader) throws IOException {
+    abstract public void writeHeader() throws IOException;
+    
+    /**
+     * 
+     */
+    public void setHeader(ImageAttributes srcHeader) {
         this.header = new ImageAttributes(srcHeader);
         inCodec = createCodec(header);
         
@@ -99,11 +99,14 @@ public abstract class ImageResource extends DataResource {
         // Bildattribute einlesen
         readHeader();
         
-        // Neuen Header schreiben
+        // Neuen Header erstellen
         ImageAttributes outHeader = new ImageAttributes(header);
         outHeader.setCompression(outEncoding); 
         outHeader.setFormat(transcodedImage.getAttributes().getFormat());  
-        transcodedImage.writeHeader(outHeader);
+        transcodedImage.setHeader(outHeader);
+        
+        // Header erstmal überspringen, wird später geschrieben
+        transcodedImage.position(transcodedImage.fileHeaderSize);
         
         // Farbkonvertierung ermitteln
         ColorOperation colorConverter = null;
@@ -122,7 +125,7 @@ public abstract class ImageResource extends DataResource {
         IDataTranscoder outCodec = transcodedImage.getCodec();
         
         // Analyselauf für den Encoder notwendig?
-        if(outCodec.analyzeNecessary(Operation.ENCODE)) {
+        if(outCodec.analyzeNecessary()) {
             
             // Position merken
             long p = position();
@@ -130,8 +133,9 @@ public abstract class ImageResource extends DataResource {
             getInputStream().enableChecksum(false);
 
             // Dekodierung für Analyse starten
-            inCodec.decode(new ColorFilter(colorConverter, outCodec.beginOperation(Operation.ANALYZE)));
-
+            outCodec.beginOperation(Operation.ANALYZE, transcodedImage.getOutputStream());
+            inCodec.decode(getInputStream(), new ColorFilter( colorConverter, outCodec));
+                                            
             getInputStream().enableChecksum(true);
             outCodec.endOperation();
 
@@ -140,17 +144,16 @@ public abstract class ImageResource extends DataResource {
         }
         
         // Dekodierung und Enkodierung starten
-        inCodec.decode(new ColorFilter(colorConverter, outCodec.beginOperation(Operation.ENCODE)));
+        outCodec.beginOperation(Operation.ENCODE, transcodedImage.getOutputStream());
+        inCodec.decode(getInputStream(), new ColorFilter( colorConverter, outCodec));
 
         // Bildkonvertierung abschließen
-        outCodec.endOperation();
-        
+        transcodedImage.getAttributes()
+                       .setDataLength(outCodec.endOperation());
+
         //  Falls nötig Header mit Prüfsumme, oder Länge des komprimierten Datensegements 
         //  aktualisieren
-        if( transcodedImage.getChecksum() != null
-        ||  transcodedImage.getAttributes().getCompression() != Compression.NONE) {
-            transcodedImage.writeHeader(transcodedImage.getAttributes());
-        }
+        transcodedImage.writeHeader();
         
         return transcodedImage;
     }
@@ -170,8 +173,12 @@ public abstract class ImageResource extends DataResource {
                 case HUFFMAN -> {
                     return new ImageTranscoderHuffman(this);
                 }
-
-
+                case AUTO -> {
+                    ArrayList<ImageTranscoderRaw> encoderList = new ArrayList<>();
+                    encoderList.add(new ImageTranscoderHuffman(this));
+                    encoderList.add(new ImageTranscoderRLE(this));                
+                    return new ImageTranscoderAuto(encoderList);
+                }
             }
         }
         throw new UnsupportedOperationException("Nicht unterstützte Kompression!");

@@ -10,7 +10,6 @@ import propra.imageconverter.data.IDataTranscoder;
 import propra.imageconverter.util.BitInputStream;
 import propra.imageconverter.util.BitOutputStream;
 import propra.imageconverter.util.CheckedInputStream;
-import propra.imageconverter.util.CheckedOutputStream;
 
 /**
  * Klasse für allgemeine Base-N Kodierung, die Parametrisierung erfolgt
@@ -75,7 +74,7 @@ public class BaseN extends DataTranscoder {
      * @throws java.io.IOException
      */
     @Override
-    public void decode(IDataTarget target) throws IOException {
+    public void decode(CheckedInputStream in, IDataTarget target) throws IOException {
         
         // Ausgabepuffer als BitStream erstellen
         ByteArrayOutputStream outStream = new ByteArrayOutputStream(getEncodedLength((int)resource.length()));
@@ -109,7 +108,6 @@ public class BaseN extends DataTranscoder {
         
         ByteArrayInputStream inStream = new ByteArrayInputStream(inBuffer.array());
         BitInputStream bitStream = new BitInputStream(inStream);
-        CheckedOutputStream outStream = resource.getOutputStream();
         
         int bitLen = baseEncoding.getBitCount();
         String alphabet = resource.getAlphabet();

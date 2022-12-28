@@ -1,7 +1,8 @@
 package propra.imageconverter.data;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
+import propra.imageconverter.util.CheckedOutputStream;
+import propra.imageconverter.util.PropraException;
 
 /**
  * Basisfunktionalität für die Kompressionsklassen. 
@@ -13,7 +14,16 @@ public abstract class DataTranscoder implements IDataTranscoder {
     
     // Aktuelle Operation
     protected Operation operation;
+    
+    // Kodierte Bytes
+    protected long encodedBytes;
+    
+    // Ausgabestream
+    protected CheckedOutputStream outStream;
 
+    /**
+     * 
+     */
     public DataTranscoder() {
         operation = Operation.NONE;
     }    
@@ -30,7 +40,7 @@ public abstract class DataTranscoder implements IDataTranscoder {
      * 
      */
     @Override
-    public boolean analyzeNecessary(Operation op) {
+    public boolean analyzeNecessary() {
         return false;
     }
 
@@ -38,8 +48,11 @@ public abstract class DataTranscoder implements IDataTranscoder {
      *
      */
     @Override
-    public IDataTranscoder beginOperation(Operation op) throws IOException {  
+    public IDataTranscoder beginOperation(Operation op, CheckedOutputStream out) throws IOException {  
+        PropraException.assertArgument(out);
         operation = op;
+        encodedBytes = 0;
+        this.outStream = out;
         return this;
     }
     
@@ -48,7 +61,8 @@ public abstract class DataTranscoder implements IDataTranscoder {
      * @throws IOException
      */
     @Override
-    public void endOperation() throws IOException {
+    public long endOperation() throws IOException {
         operation = Operation.NONE;
+        return encodedBytes;
     }
 }

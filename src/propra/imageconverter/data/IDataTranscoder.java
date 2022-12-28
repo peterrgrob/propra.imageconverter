@@ -2,6 +2,8 @@ package propra.imageconverter.data;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import propra.imageconverter.util.CheckedInputStream;
+import propra.imageconverter.util.CheckedOutputStream;
 
 /**
  *
@@ -14,18 +16,19 @@ public interface IDataTranscoder extends IDataTarget {
         NONE,
         ENCODE,
         DECODE,
-        ANALYZE;
+        ANALYZE,
+        AUTO;
     }
 
     /**
      * 
      */
-    public void decode(IDataTarget target) throws IOException;
+    public void decode(CheckedInputStream in, IDataTarget target) throws IOException;
     
     /**
      * 
      */
-    public IDataTranscoder beginOperation(Operation op) throws IOException;
+    public IDataTranscoder beginOperation(Operation op, CheckedOutputStream out) throws IOException;
     
     /**
      * 
@@ -35,7 +38,7 @@ public interface IDataTranscoder extends IDataTarget {
     /**
      * Analyse der ganzen Daten vor Kodierung nötig?
      */
-    public boolean analyzeNecessary(Operation op);
+    public boolean analyzeNecessary();
     
     
     /**
@@ -44,7 +47,7 @@ public interface IDataTranscoder extends IDataTarget {
     public void encode(ByteBuffer data, boolean last) throws IOException;
     
     /**
-     * 
+     * Gibt Anzahl der kodierten Bytes zurück
      */
-    public void endOperation() throws IOException;
+    public long endOperation() throws IOException;
 }

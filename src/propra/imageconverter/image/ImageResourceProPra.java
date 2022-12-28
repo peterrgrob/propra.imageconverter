@@ -116,9 +116,7 @@ public class ImageResourceProPra extends ImageResource {
      * @throws IOException 
      */
     @Override
-    public void writeHeader(ImageAttributes srcHeader) throws IOException {
-        
-        super.writeHeader(srcHeader);
+    public void writeHeader() throws IOException {
         
         // DataBuffer für Header erstellen
         ByteBuffer buff = ByteBuffer.allocate(fileHeaderSize);

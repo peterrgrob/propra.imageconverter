@@ -8,10 +8,11 @@ import java.util.Arrays;
 import propra.imageconverter.image.ImageResource;
 import propra.imageconverter.data.IDataTarget;
 import propra.imageconverter.data.IDataTranscoder;
+import propra.imageconverter.util.CheckedInputStream;
+import propra.imageconverter.util.CheckedOutputStream;
 
 /**
  * 
- * @author pg
  */
 public class ImageTranscoderHuffman extends ImageTranscoderRaw {
     
@@ -35,8 +36,8 @@ public class ImageTranscoderHuffman extends ImageTranscoderRaw {
      * Bereitet die Huffmankodierung vor
      */
     @Override
-    public IDataTranscoder beginOperation(Operation op) throws IOException {
-        super.beginOperation(op);
+    public IDataTranscoder beginOperation(Operation op, CheckedOutputStream out) throws IOException {
+        super.beginOperation(op, out);
         
         switch(op) {
             case ANALYZE -> {
@@ -58,7 +59,7 @@ public class ImageTranscoderHuffman extends ImageTranscoderRaw {
      * Schließt die Huffman-Kodierung/Analyse ab
      */
     @Override
-    public void endOperation() throws IOException {
+    public long endOperation() throws IOException {
         switch(operation) {
             case ANALYZE -> {
                /*
@@ -84,32 +85,32 @@ public class ImageTranscoderHuffman extends ImageTranscoderRaw {
                  *  Stream flushen und kodierte Datengröße aktualisieren
                  */
                 outStream.flush();
-                resource.getAttributes().setDataLength(outStream.getByteCounter()); 
+                encodedBytes = outStream.getByteCounter(); 
             }
         }
 
-        super.endOperation();
+        return super.endOperation();
     }
     
     /**
      * Die Kompression benötigt einen Analyse-Durchlauf des Eingabebildes
      */
     @Override
-    public boolean analyzeNecessary(Operation op) {
-        return op == Operation.ENCODE;
+    public boolean analyzeNecessary() {
+        return true;
     }
 
     /**
      * Dekodiert die Huffman komprimierten Daten der Resource
      */
     @Override
-    public void decode(IDataTarget output) throws IOException {
+    public void decode(CheckedInputStream in, IDataTarget output) throws IOException {
         
         // Ausgabepuffer vorbereiten
         int symbolCtr = 0;
         
         // BitStream erstellen
-        BitInputStream stream = new BitInputStream(resource.getInputStream());
+        BitInputStream stream = new BitInputStream(in);
         ByteBuffer data = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
         
         // Kodierten Baum einlesen und erstellen
@@ -144,7 +145,6 @@ public class ImageTranscoderHuffman extends ImageTranscoderRaw {
      */
     @Override
     public void encode(ByteBuffer block, boolean last) throws IOException {
-        
         // Analyse- oder Kodiermodus?
         if(operation == Operation.ANALYZE) {           
             byte[] buffer = block.array();
@@ -155,7 +155,6 @@ public class ImageTranscoderHuffman extends ImageTranscoderRaw {
                 offset++;
             }
         } else {    
-            
             if(huffmanTree == null) {
                 throw new IllegalStateException("Huffmann-Tree nicht initialisiert.");
             }
