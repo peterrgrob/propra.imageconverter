@@ -7,8 +7,7 @@ import java.nio.ByteBuffer;
 
 
 /**
- * 
- * @author pg
+ * Kapselt einen InputStream und berechnet optional eine Prüfsumme
  */
 public class CheckedInputStream extends FilterInputStream {
     
@@ -23,44 +22,35 @@ public class CheckedInputStream extends FilterInputStream {
     
     /**
      * 
-     * @param in 
      */
     public CheckedInputStream(InputStream in) {
         super(in);
         checked = false;
+        checksum = new ChecksumNull();
     }
     
     /**
      * 
-     * @param in
-     * @param checksum 
      */
     public CheckedInputStream(InputStream in, IChecksum checksum) {
         super(in);
+        PropraException.assertArgument(checksum);
         this.checksum = checksum;
         checked = true;
     }
     
     /**
      * 
-     * @param checksum 
      */
     public void setChecksum(IChecksum checksum) {
-        this.checksum = checksum;
+        PropraException.assertArgument(checksum);
+        this.checksum = checksum; 
         checked = true;
     }
+   
     
     /**
      * 
-     * @return 
-     */
-    public boolean eof() {
-        return r == -1;
-    }
-    
-    /**
-     * 
-     * @param checked 
      */
     public void enableChecksum(boolean checked) {
         this.checked = checked;
@@ -68,13 +58,11 @@ public class CheckedInputStream extends FilterInputStream {
     
     /**
      * 
-     * @return
-     * @throws IOException 
      */
     @Override
     public synchronized int read() throws IOException {
         r = in.read();
-        if( checksum != null && checked &&  r != -1) {
+        if( checked &&  r != -1) {
             checksum.update((byte)r);
         }
         return r;
@@ -82,16 +70,11 @@ public class CheckedInputStream extends FilterInputStream {
 
     /**
      * 
-     * @param b
-     * @param off
-     * @param len
-     * @return
-     * @throws IOException 
      */
     @Override
     public synchronized int read(byte[] b, int off, int len) throws IOException {
         r = in.read(b, off, len);
-        if( checksum != null && checked &&  r != -1) {
+        if( checked &&  r != -1) {
             checksum.update(b, off, len);
         }
         return r;
@@ -126,7 +109,7 @@ public class CheckedInputStream extends FilterInputStream {
     @Override
     public byte[] readAllBytes() throws IOException {
         byte[] b = super.readAllBytes();
-        if(b != null && checksum != null && checked) {
+        if(b != null && checked) {
             checksum.update(b, 0, b.length);
         }
         return b;

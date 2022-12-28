@@ -28,9 +28,6 @@ public abstract class ImageResource extends DataResource
     
     // Aktuelles konvertiertes Bild
     protected ImageResource transcodedImage;
-    
-    // Prüfsumme 
-    protected IChecksum checksum;
 
     /**
      * 
@@ -133,12 +130,10 @@ public abstract class ImageResource extends DataResource
         IDataTranscoder outCodec = transcodedImage.getCodec();
         
         // Dekodierung starten
-        inCodec.begin(Operation.DECODE)
-               .decode(new ColorFilter(colorConverter, outCodec.begin(Operation.ENCODE)));
+        inCodec.decode(new ColorFilter(colorConverter, outCodec.beginOperation(Operation.ENCODE)));
 
         // Bildkonvertierung abschließen
-        inCodec.end();
-        outCodec.end();
+        outCodec.endOperation();
         
         //  Falls nötig Header mit Prüfsumme, oder Länge des komprimierten Datensegements 
         //  aktualisieren
@@ -173,8 +168,8 @@ public abstract class ImageResource extends DataResource
         CheckedInputStream in = getInputStream();
         in.enableChecksum(false);
         
-        inCodec.begin(Operation.DECODE_ANALYZE);
-        outCodec.begin(Operation.ENCODE_ANALYZE);
+        inCodec.beginOperation(Operation.ANALYZE);
+        outCodec.beginOperation(Operation.ANALYZE);
 
         // Analyse für Ein- und Ausgabe
         if( inCodec.analyzeNecessary(Operation.DECODE)
@@ -208,8 +203,8 @@ public abstract class ImageResource extends DataResource
         }
 
         in.enableChecksum(true);
-        inCodec.end();
-        outCodec.end();
+        inCodec.endOperation();
+        outCodec.endOperation();
 
         // Ursprüngliche Position wiederherstellen
         position(p);
@@ -224,14 +219,9 @@ public abstract class ImageResource extends DataResource
      * @throws IOException 
      */
     @Override
-    public void onData( Event event, IDataTranscoder caller, 
-                        ByteBuffer block, boolean last) throws IOException {
-        switch(event) {
-            case DATA_DECODED -> {
-                if(caller.getOperation() == Operation.DECODE_ANALYZE) {
-                    transcodedImage.getCodec().analyze( block, last);
-                }
-            }
+    public void onData(ByteBuffer block, boolean last, IDataTranscoder caller) throws IOException {
+        if(caller.getOperation() == Operation.ANALYZE) {
+            transcodedImage.getCodec().analyze( block, last);
         }
     }
     

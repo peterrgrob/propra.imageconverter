@@ -35,11 +35,11 @@ public class ImageTranscoderHuffman extends ImageTranscoderRaw {
      * Bereitet die Huffmankodierung vor
      */
     @Override
-    public IDataTranscoder begin(Operation op) throws IOException {
-        super.begin(op);
+    public IDataTranscoder beginOperation(Operation op) throws IOException {
+        super.beginOperation(op);
         
         switch(op) {
-            case ENCODE_ANALYZE -> {
+            case ANALYZE -> {
                 Arrays.fill(histogram, 0);
             }
             case ENCODE -> {
@@ -60,7 +60,7 @@ public class ImageTranscoderHuffman extends ImageTranscoderRaw {
      */
     @Override
     public void analyze(ByteBuffer block, boolean last) {
-        if(operation == Operation.ENCODE_ANALYZE) {           
+        if(operation == Operation.ANALYZE) {           
             byte[] buffer = block.array();
             int offset = 0;
 
@@ -75,9 +75,9 @@ public class ImageTranscoderHuffman extends ImageTranscoderRaw {
      * Schließt die Huffman-Kodierung/Analyse ab
      */
     @Override
-    public void end() throws IOException {
+    public void endOperation() throws IOException {
         switch(operation) {
-            case ENCODE_ANALYZE -> {
+            case ANALYZE -> {
                /*
                 *  Histogram prüfen
                 */
@@ -105,7 +105,7 @@ public class ImageTranscoderHuffman extends ImageTranscoderRaw {
             }
         }
 
-        super.end();
+        super.endOperation();
     }
     
     /**
@@ -147,14 +147,12 @@ public class ImageTranscoderHuffman extends ImageTranscoderRaw {
 
             // Wenn Blockgröße erreicht an Listener senden
             if(data.capacity() == data.position()) {                
-                sendData(IDataTarget.Event.DATA_DECODED, output, 
-                            data,false);    
+                pushData(data, false, output);    
             }
         }
         
         // Restliche Daten im Puffer übertragen
-        sendData(IDataTarget.Event.DATA_DECODED,output, 
-                        data,true);     
+        pushData(data,true, output);     
     }
 
 

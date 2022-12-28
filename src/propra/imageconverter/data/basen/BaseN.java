@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataTranscoder;
 import propra.imageconverter.data.IDataTarget;
-import propra.imageconverter.data.IDataTarget.Event;
 import propra.imageconverter.data.IDataTranscoder;
 import propra.imageconverter.util.BitInputStream;
 import propra.imageconverter.util.BitOutputStream;
@@ -95,7 +94,7 @@ public class BaseN extends DataTranscoder {
         //  Daten an Listener senden
         bitStream.flushByte();
         ByteBuffer out = ByteBuffer.wrap(outStream.toByteArray());
-        target.onData(Event.DATA_DECODED, this, out, true);
+        target.onData(out, true, this);
     }
     
     /**
@@ -142,7 +141,7 @@ public class BaseN extends DataTranscoder {
     }
     
     @Override
-    public void onData(Event event, IDataTranscoder caller, ByteBuffer data, boolean lastBlock) throws IOException {
+    public void onData(ByteBuffer data, boolean lastBlock, IDataTranscoder caller) throws IOException {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

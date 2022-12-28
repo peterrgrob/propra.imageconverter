@@ -6,8 +6,11 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.channels.Channels;
+import propra.imageconverter.util.IChecksum;
 
 
 /**
@@ -36,6 +39,9 @@ public class DataResource implements IDataResource {
     
     // Zugeordneter Codec zum lesen/schreiben der Daten
     protected IDataTranscoder inCodec;
+    
+    // Prüfsumme 
+    protected IChecksum checksum;
     
     /**
      * 
@@ -109,7 +115,7 @@ public class DataResource implements IDataResource {
      */
     @Override
     public CheckedOutputStream getOutputStream() {
-        return outStream;       
+        return outStream;     
     }
     
     /**

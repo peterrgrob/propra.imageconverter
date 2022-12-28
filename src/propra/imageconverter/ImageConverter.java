@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.logging.*;
 import java.util.logging.Level;
+import propra.imageconverter.util.PropraException;
 
 
 /*
@@ -27,20 +28,17 @@ import java.util.logging.Level;
  *      nicht genutzte Teile der Klassenstruktur, die im Laufe des Projekts entstanden 
  *      sind, zu reduzieren. 
  *      
- *      Damit es besser verständlich ist hier eine kleine Übersicht über die Klassenhierarchie:
+ *      Damit es besser verständlich ist hier eine kleine Übersicht:
  * 
+ *      IDataResource <-> IDataCodec(Decoder) -> Filter -> IDataCodec(Encoder) <-> IDataResourec 
  */
 public class ImageConverter {
     
     // Kommandozeilenoptionen
     private final CmdLine cmdLine;
     
-    // Fehlercode
-    private static final int ERROR_EXIT_CODE = 123;
-    
     /**
      * 
-     * @param cmdLine 
      */
     ImageConverter(CmdLine cmdLine) {
         this.cmdLine = cmdLine;
@@ -48,8 +46,6 @@ public class ImageConverter {
     
     /** 
      * Programmeinstieg
-     * 
-     * @param args the command line arguments
      */
     public static void main(String[] args) {
         try {
@@ -57,7 +53,7 @@ public class ImageConverter {
             long start = System.currentTimeMillis();   
         
             if(args.length == 0) {
-                printErrorAndQuit("Keine Parameter übergeben!", null);
+                PropraException.printErrorAndQuit("Keine Parameter übergeben!", null);
             }
             
             // Klasseninstanz erstellen und gewünschten Task starten
@@ -68,17 +64,17 @@ public class ImageConverter {
             long timeElapsed = System.currentTimeMillis() - start;
 
             // Infos Programmablauf ausgeben
-            printMessage("Operation abgeschlossen in (ms): " + String.valueOf(timeElapsed));
+            PropraException.printMessage("Operation abgeschlossen in (ms): " + String.valueOf(timeElapsed));
             
         } catch(FileNotFoundException e) {
-            printErrorAndQuit("Datei nicht gefunden!", e);
+            PropraException.printErrorAndQuit("Datei nicht gefunden!", e);
         }
         catch(IOException e) {
-            printErrorAndQuit("I/O Fehler:\n", e);
+            PropraException.printErrorAndQuit("I/O Fehler:\n", e);
         } 
         catch(Exception e) {
             Logger.getLogger(ImageConverter.class.getName()).log(Level.SEVERE, null, e);
-            printErrorAndQuit("Unbehandelter Fehler:", e);
+            PropraException.printErrorAndQuit("Unbehandelter Fehler:", e);
         }
     }
     
@@ -106,13 +102,13 @@ public class ImageConverter {
                                         IOException,      
                                         Exception {      
         // Ein- und Ausgabedateipfad auf der Konsole ausgeben
-        printMessage("Dateien:");
-        printMessage(cmdLine.getOption(Options.INPUT_FILE));
-        printMessage(cmdLine.getOption(Options.OUTPUT_FILE));
+        PropraException.printMessage("Dateien:");
+        PropraException.printMessage(cmdLine.getOption(Options.INPUT_FILE));
+        PropraException.printMessage(cmdLine.getOption(Options.OUTPUT_FILE));
         
         try(ImageTask op = new ImageTask(cmdLine)) {
             op.run();
-            printMessage(op.toString());
+            PropraException.printMessage(op.toString());
         }
     }   
     
@@ -125,37 +121,13 @@ public class ImageConverter {
                                         IOException,    
                                         Exception {    
         // Eingabedateipfad auf der Konsole ausgeben
-        printMessage("Eingabedatei:");
-        printMessage(cmdLine.getOption(CmdLine.Options.INPUT_FILE));
+        PropraException.printMessage("Eingabedatei:");
+        PropraException.printMessage(cmdLine.getOption(CmdLine.Options.INPUT_FILE));
         
         // BaseN Kodierung ausführen
         try(BaseNTask op = new BaseNTask(cmdLine)) {   
             op.run();  
-            printMessage(op.toString());
+            PropraException.printMessage(op.toString());
         }
     } 
-    
-    /**
-     * 
-     * @param msg 
-     * @param e 
-     */
-    public static void printMessage(String msg) {
-        System.out.println(msg); 
-    }
-    
-    /**
-     * 
-     * @param msg 
-     */
-    public static void printErrorAndQuit(String msg, Exception e) {
-        String s = msg;
-        if(e != null) {
-            if(e.getMessage() != null) {
-                s = s.concat(e.getMessage());
-            }
-        }
-        System.err.println(s);
-        System.exit(ERROR_EXIT_CODE);
-    }
 }

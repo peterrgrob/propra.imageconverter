@@ -1,8 +1,8 @@
 package propra.imageconverter.data;
 
+import java.io.IOException;
 import propra.imageconverter.util.CheckedInputStream;
 import propra.imageconverter.util.CheckedOutputStream;
-import java.io.IOException;
 
 /**
  *

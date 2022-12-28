@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import propra.imageconverter.data.*;
 import propra.imageconverter.util.CmdLine.Options;
+import propra.imageconverter.util.PropraException;
 
 /**
  * Klasse implementiert BaseN Programmfunktionalität
@@ -62,7 +63,7 @@ public class BaseNTask implements AutoCloseable, IDataTarget {
         } else {    
             outPath = outPath.concat(outExt);
         }          
-        ImageConverter.printMessage(outPath);
+        PropraException.printMessage(outPath);
         
         /*
          *  Kodieren / Dekodieren 
@@ -111,10 +112,7 @@ public class BaseNTask implements AutoCloseable, IDataTarget {
      * @throws IOException 
      */
     @Override
-    public void onData( Event event, IDataTranscoder caller, 
-                        ByteBuffer data, boolean lastBlock) throws IOException {
-        if(event == Event.DATA_DECODED) {
-            binaryFile.getOutputStream().write(data);
-        }
+    public void onData(ByteBuffer data, boolean lastBlock, IDataTranscoder caller) throws IOException {
+        binaryFile.getOutputStream().write(data);
     }
 }

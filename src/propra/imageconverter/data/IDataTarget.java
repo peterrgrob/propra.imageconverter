@@ -10,20 +10,8 @@ import java.nio.ByteBuffer;
 @FunctionalInterface
 public interface IDataTarget {
     
-    // Daten Events
-    public enum Event {
-        DATA_DECODED,
-        DATA_ENCODED,
-    }
-    
     /**
      * 
-     * @param event
-     * @param data
-     * @param caller
-     * @param lastBlock
-     * @throws java.io.IOException
      */
-    public void onData( Event event, IDataTranscoder caller, 
-                        ByteBuffer data, boolean lastBlock) throws IOException;  
+    public void onData(ByteBuffer data, boolean lastBlock, IDataTranscoder caller) throws IOException;  
 }

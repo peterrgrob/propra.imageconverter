@@ -2,7 +2,6 @@ package propra.imageconverter.image.compression;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import propra.imageconverter.data.IDataTarget.Event;
 import propra.imageconverter.util.CheckedInputStream;
 import propra.imageconverter.util.CheckedOutputStream;
 import propra.imageconverter.data.IDataTarget;
@@ -34,8 +33,8 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
      * 
      */
     @Override
-    public IDataTranscoder begin(Operation op) throws IOException {
-        super.begin(op);
+    public IDataTranscoder beginOperation(Operation op) throws IOException {
+        super.beginOperation(op);
         bufferedData = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE * 2);
         return this;
     }
@@ -69,8 +68,7 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
              * Empfänger senden
              */
             if( buff.position() + packetLen > buff.capacity()) {
-                sendData(Event.DATA_DECODED,target, 
-                            buff,false);
+                pushData(buff,false, target);
             }
 
             // RLE oder RAW Paket?
@@ -90,8 +88,7 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
          *  Letzten Block der Operation kennzeichnen und Restdaten
          *  übertragen
          */
-        sendData(Event.DATA_DECODED, target, 
-                    buff,stream.eof());
+        pushData(buff,true, target);
     }
     
     /**
@@ -160,7 +157,7 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
      * 
      */
     @Override
-    public void end() throws IOException {
+    public void endOperation() throws IOException {
         switch(operation) {
             case ENCODE -> {
                 /*
@@ -171,7 +168,7 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
             }
         }
 
-        super.end();
+        super.endOperation();
     }
     
     /**

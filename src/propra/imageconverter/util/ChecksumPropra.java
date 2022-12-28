@@ -5,10 +5,7 @@ import java.nio.ByteBuffer;
 /**
  * ProPra Implementierung einer Prüfsumme
  */
-public class ChecksumPropra implements IChecksum {
-
-    // Aktuelle Prüfsumme
-    private long value;  
+public class ChecksumPropra extends ChecksumNull {
     
     // Modulo
     private static final int X = 65521;

@@ -3,7 +3,6 @@ package propra.imageconverter.image.compression;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataTranscoder;
-import propra.imageconverter.data.IDataTarget.Event;
 import propra.imageconverter.util.CheckedInputStream;
 import propra.imageconverter.data.IDataTarget;
 import propra.imageconverter.data.IDataTranscoder;
@@ -57,8 +56,7 @@ public class ImageTranscoderRaw extends DataTranscoder implements IDataTarget {
             }
             
             // Daten an das Ziel senden
-            target.onData(  Event.DATA_DECODED, this, 
-                            data,bLast);  
+            target.onData(data,bLast, this);  
             data.clear();
         }
     }
@@ -75,10 +73,9 @@ public class ImageTranscoderRaw extends DataTranscoder implements IDataTarget {
     /**
      * Schließt laufenden ByteBuffer ab und sendet ihn an das Datenziel
      */
-    protected void sendData(Event event, IDataTarget target,
-                            ByteBuffer block, boolean last) throws IOException {
+    protected void pushData(ByteBuffer block, boolean last, IDataTarget target) throws IOException {
         block.flip();
-        target.onData(event, this, block, last);
+        target.onData(block, last, this);
         block.clear();
     }
 
@@ -86,7 +83,7 @@ public class ImageTranscoderRaw extends DataTranscoder implements IDataTarget {
      * 
      */
     @Override
-    public void onData(Event event, IDataTranscoder caller, ByteBuffer data, boolean lastBlock) throws IOException {
+    public void onData(ByteBuffer data, boolean lastBlock, IDataTranscoder caller) throws IOException {
         switch(operation) {
             case ENCODE -> {
                 encode(data, lastBlock);

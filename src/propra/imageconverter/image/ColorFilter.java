@@ -26,11 +26,10 @@ public class ColorFilter implements IDataTarget {
      * 
      */
     @Override
-    public void onData( Event event, IDataTranscoder caller, 
-                        ByteBuffer data, boolean lastBlock) throws IOException {
+    public void onData(ByteBuffer data, boolean lastBlock, IDataTranscoder caller) throws IOException {
         if(op != null) {
             ColorOperations.filterColorBuffer(data, data, op);
         }
-        target.onData(event, caller, data, lastBlock);
+        target.onData(data, lastBlock, caller);
     }
 }

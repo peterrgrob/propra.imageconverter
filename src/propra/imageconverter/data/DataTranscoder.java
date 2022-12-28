@@ -15,16 +15,8 @@ public abstract class DataTranscoder implements IDataTranscoder {
     protected Operation operation;
 
     public DataTranscoder() {
+        operation = Operation.NONE;
     }    
-    
-    /**
-     *
-     */
-    @Override
-    public IDataTranscoder begin(Operation op) throws IOException {  
-        operation = op;
-        return this;
-    }
     
     /**
      * 
@@ -50,10 +42,19 @@ public abstract class DataTranscoder implements IDataTranscoder {
 
     /**
      *
+     */
+    @Override
+    public IDataTranscoder beginOperation(Operation op) throws IOException {  
+        operation = op;
+        return this;
+    }
+    
+    /**
+     *
      * @throws IOException
      */
     @Override
-    public void end() throws IOException {
+    public void endOperation() throws IOException {
         operation = Operation.NONE;
     }
 }

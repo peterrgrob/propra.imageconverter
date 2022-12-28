@@ -14,14 +14,18 @@ public interface IDataTranscoder extends IDataTarget {
         NONE,
         ENCODE,
         DECODE,
-        ENCODE_ANALYZE,
-        DECODE_ANALYZE;
+        ANALYZE;
     }
+
+    /**
+     * 
+     */
+    public void decode(IDataTarget target) throws IOException;
     
     /**
      * 
      */
-    public IDataTranscoder begin(Operation op) throws IOException;
+    public IDataTranscoder beginOperation(Operation op) throws IOException;
     
     /**
      * 
@@ -37,11 +41,6 @@ public interface IDataTranscoder extends IDataTarget {
      * Ermöglicht die Analyse der Daten vor der Kodierung
      */
     public void analyze(ByteBuffer data, boolean last);
-
-    /**
-     * 
-     */
-    public void decode(IDataTarget target) throws IOException;
     
     /**
      * Kodiert Daten des Blocks und speichert diese.
@@ -51,5 +50,5 @@ public interface IDataTranscoder extends IDataTarget {
     /**
      * 
      */
-    public void end() throws IOException;
+    public void endOperation() throws IOException;
 }
