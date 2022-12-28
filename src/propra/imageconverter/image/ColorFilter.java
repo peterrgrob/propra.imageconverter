@@ -6,17 +6,20 @@ import propra.imageconverter.data.IDataTranscoder;
 import propra.imageconverter.data.IDataTarget;
 
 /**
- * Filtert übergebene Farben mit der ColorOperation und leitet Daten weiter an 
+ * Wendet eine Operation auf die übergebene Farben an und leitet den Puffer weiter an 
  * das nächstes Datenziel
  */
 public class ColorFilter implements IDataTarget {
     
-    // Ziel an das die Farben weitergeleitet werden
+    // Ziel an das der Puffer weitergeleitet wird
     private final IDataTarget target;
     
     // Operation die auf den Farben ausgeführt wird
     private final ColorOperation op;
 
+    /**
+     * 
+     */
     public ColorFilter(ColorOperation op, IDataTarget target) {
         this.target = target;
         this.op = op;

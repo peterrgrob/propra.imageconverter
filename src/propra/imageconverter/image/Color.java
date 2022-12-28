@@ -2,7 +2,7 @@ package propra.imageconverter.image;
 
 /**
  * Enthält einen Farbwert, oder indiziert einen Farbwert in einem 
- * byte-Array (Referenz)
+ * byte-Array als Referenz
  */
 public class Color implements Comparable<Color> {
 

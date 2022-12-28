@@ -46,7 +46,7 @@ public class BaseNResource extends DataResource {
             setAlphabet(binaryFile.readLine());
         }
 
-        // Decoder erstellen
+        // Daten dekodieren
         BaseN decoder = new BaseN(this);
         decoder.decode(output);
     } 
@@ -73,7 +73,6 @@ public class BaseNResource extends DataResource {
     
     /**
      *
-     * @param alphabet
      */
     public void setAlphabet(String alphabet) {
         if(alphabet == null) {

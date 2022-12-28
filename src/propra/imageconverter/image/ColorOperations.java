@@ -17,9 +17,7 @@ interface ColorOperation {
  */
 public class ColorOperations {
     /**
-     * 
-     * @param in
-     * @param out 
+     *
      */
     static public void convertBGRtoRBG( byte[] in, int offset1,
                                         byte[] out, int offset2) {
@@ -32,9 +30,7 @@ public class ColorOperations {
     }
     
     /**
-     * 
-     * @param in
-     * @param out 
+     *
      */
     static public void convertRBGtoBGR( byte[] in, int offset1,
                                         byte[] out, int offset2) {
@@ -46,7 +42,7 @@ public class ColorOperations {
     }
    
     /**
-     * 
+     * Wendet eine ColorOperation auf den ByteBuffer an
      */
     static void filterColorBuffer(ByteBuffer in, ByteBuffer out, ColorOperation filter) {
         byte[] inBytes = in.array();
@@ -63,12 +59,8 @@ public class ColorOperations {
         }
     }
     
-     /**
+    /**
      * Vergleicht zwei Pixel in einem Byte-Array
-     * @param array
-     * @param offset0
-     * @param offset1
-     * @return 
      */
     static public boolean compareColor(byte[] array, int offset0, int offset1) {
         return (array[offset0 + 0] == array[offset1 + 0]
@@ -78,11 +70,6 @@ public class ColorOperations {
     
     /**
      * Füllt Buffer len-mal mit Farbwert und gibt neuen Offset zurück
-     * 
-     * @param buffer
-     * @param color
-     * @param len
-     * @return 
      */
     public static int fill(ByteBuffer buffer, Color color, int len) {
         byte[] b = buffer.array();
