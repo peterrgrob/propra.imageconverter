@@ -37,10 +37,6 @@ public interface IDataTranscoder extends IDataTarget {
      */
     public boolean analyzeNecessary(Operation op);
     
-    /**
-     * Ermöglicht die Analyse der Daten vor der Kodierung
-     */
-    public void analyze(ByteBuffer data, boolean last);
     
     /**
      * Kodiert Daten des Blocks und speichert diese.

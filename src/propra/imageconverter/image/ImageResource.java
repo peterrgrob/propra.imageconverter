@@ -2,12 +2,8 @@ package propra.imageconverter.image;
 
 import propra.imageconverter.image.compression.ImageTranscoderHuffman;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import propra.imageconverter.util.IChecksum;
-import propra.imageconverter.data.DataTranscoder;
 import propra.imageconverter.data.DataResource;
-import propra.imageconverter.data.IDataTarget;
-import propra.imageconverter.util.CheckedInputStream;
 import propra.imageconverter.data.IDataTranscoder;
 import propra.imageconverter.data.IDataTranscoder.Operation;
 import propra.imageconverter.image.compression.ImageTranscoderRLE;
@@ -17,8 +13,7 @@ import propra.imageconverter.image.compression.ImageTranscoderRaw;
  *
  * @author pg
  */
-public abstract class ImageResource extends DataResource 
-                                    implements IDataTarget {
+public abstract class ImageResource extends DataResource {
     
     // Größe des Bildheaders in der Datei
     protected int fileHeaderSize;
@@ -123,13 +118,28 @@ public abstract class ImageResource extends DataResource
             }
         }
         
-        // Bild ggfs. analysieren für Kodierungen
-        analyzeCompression();
-        
         // Bildkonvertierung initialisieren
         IDataTranscoder outCodec = transcodedImage.getCodec();
         
-        // Dekodierung starten
+        // Analyselauf für den Encoder notwendig?
+        if(outCodec.analyzeNecessary(Operation.ENCODE)) {
+            
+            // Position merken
+            long p = position();
+
+            getInputStream().enableChecksum(false);
+
+            // Dekodierung für Analyse starten
+            inCodec.decode(new ColorFilter(colorConverter, outCodec.beginOperation(Operation.ANALYZE)));
+
+            getInputStream().enableChecksum(true);
+            outCodec.endOperation();
+
+            // Ursprüngliche Position wiederherstellen
+            position(p);
+        }
+        
+        // Dekodierung und Enkodierung starten
         inCodec.decode(new ColorFilter(colorConverter, outCodec.beginOperation(Operation.ENCODE)));
 
         // Bildkonvertierung abschließen
@@ -144,91 +154,9 @@ public abstract class ImageResource extends DataResource
         
         return transcodedImage;
     }
-
-    /**
-     * Analyse für die Kompression durchführen.         
-     * Analyse durch Ein- und Ausgabecodec erfordert je nach Kombination
-     * eine spezielle Behandlung um unnötige Operationen zu vermeiden
-     * 
-     * @throws IOException 
-     */
-    private void analyzeCompression() throws IOException {
-        IDataTranscoder outCodec = transcodedImage.getCodec();
-        
-        // Keine Analyse notwendig?
-        if( !inCodec.analyzeNecessary(Operation.DECODE)
-        &&  !transcodedImage.getCodec().analyzeNecessary(Operation.ENCODE)) {
-            return;
-        }
-
-        // Position merken
-        long p = position();
-
-        ByteBuffer dataBlock = ByteBuffer.allocate(DataTranscoder.DEFAULT_BLOCK_SIZE);
-        CheckedInputStream in = getInputStream();
-        in.enableChecksum(false);
-        
-        inCodec.beginOperation(Operation.ANALYZE);
-        outCodec.beginOperation(Operation.ANALYZE);
-
-        // Analyse für Ein- und Ausgabe
-        if( inCodec.analyzeNecessary(Operation.DECODE)
-        &&  outCodec.analyzeNecessary(Operation.ENCODE)) {
-            // Durchlauf für Decoder-Analyse 
-            while(position() < length()) {
-                in.read(dataBlock);
-                inCodec.analyze(dataBlock, false);
-            }
-
-            // Ursprüngliche Position wiederherstellen
-            position(p);
-
-            // Durchlauf mit Dekodierung und Encoder-Analyse 
-            while(position() < length()) {
-                inCodec.decode(this);
-            } 
-
-        } else if(inCodec.analyzeNecessary(Operation.DECODE)) {
-            // Durchlauf nur für Decoder-Analyse 
-            while(position() < length()) {
-                in.read(dataBlock);
-                inCodec.analyze(dataBlock, false);
-            }
-            
-        } else if(outCodec.analyzeNecessary(Operation.ENCODE)) {
-            // Durchlauf mit Dekodierung und Encoder-Analyse 
-            while(position() < length()) {
-                inCodec.decode(this);
-            } 
-        }
-
-        in.enableChecksum(true);
-        inCodec.endOperation();
-        outCodec.endOperation();
-
-        // Ursprüngliche Position wiederherstellen
-        position(p);
-    }
-        
-    /**
-     * 
-     * @param event
-     * @param caller
-     * @param block
-     * @param last
-     * @throws IOException 
-     */
-    @Override
-    public void onData(ByteBuffer block, boolean last, IDataTranscoder caller) throws IOException {
-        if(caller.getOperation() == Operation.ANALYZE) {
-            transcodedImage.getCodec().analyze( block, last);
-        }
-    }
     
     /**
      * 
-     * @param header
-     * @return 
      */
     protected IDataTranscoder createCodec(ImageAttributes header) {
         if(header != null) {

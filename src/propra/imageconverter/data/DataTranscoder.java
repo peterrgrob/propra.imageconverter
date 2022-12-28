@@ -30,12 +30,6 @@ public abstract class DataTranscoder implements IDataTranscoder {
      * 
      */
     @Override
-    public void analyze(ByteBuffer data, boolean last) {}
-    
-    /**
-     * 
-     */
-    @Override
     public boolean analyzeNecessary(Operation op) {
         return false;
     }

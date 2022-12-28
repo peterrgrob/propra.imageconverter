@@ -53,23 +53,6 @@ public class ImageTranscoderHuffman extends ImageTranscoderRaw {
         }
         return this;
     }
- 
-    /**
-     * Analyse für die Huffman Kompression. Ermittelt die Häufigkeit der Symbole 
-     * im Datenblock
-     */
-    @Override
-    public void analyze(ByteBuffer block, boolean last) {
-        if(operation == Operation.ANALYZE) {           
-            byte[] buffer = block.array();
-            int offset = 0;
-
-            while(offset < block.limit()) {
-                histogram[buffer[offset] & 0xFF]++;
-                offset++;
-            }
-        } 
-    }
     
     /**
      * Schließt die Huffman-Kodierung/Analyse ab
@@ -157,27 +140,40 @@ public class ImageTranscoderHuffman extends ImageTranscoderRaw {
 
 
     /**
-     * Komprimiert Datenblock und speichert ihn in der Resource
+     * Analysiert, oder komprimiert den Datenblock und speichert ihn in der Resource
      */
     @Override
     public void encode(ByteBuffer block, boolean last) throws IOException {
-        if(huffmanTree == null) {
-            throw new IllegalStateException("Huffmann-Tree nicht initialisiert.");
-        }
         
-        /**
-         *  Symbole im Puffer iterieren, per Huffmantree zu Bitcode umsetzen und 
-         *  diesen in der Resource speichern
-         */
-        byte[] c = new byte[3];
-        while(block.position() < block.limit()) {
+        // Analyse- oder Kodiermodus?
+        if(operation == Operation.ANALYZE) {           
+            byte[] buffer = block.array();
+            int offset = 0;
+
+            while(offset < block.limit()) {
+                histogram[buffer[offset] & 0xFF]++;
+                offset++;
+            }
+        } else {    
             
-            // Pixel lesen und Farbe konvertieren
-            block.get(c);
-                    
-            outStream.write(huffmanTree.encodeSymbol(c[0] & 0xFF));
-            outStream.write(huffmanTree.encodeSymbol(c[1] & 0xFF));
-            outStream.write(huffmanTree.encodeSymbol(c[2] & 0xFF));
+            if(huffmanTree == null) {
+                throw new IllegalStateException("Huffmann-Tree nicht initialisiert.");
+            }
+            
+            /**
+             *  Symbole im Puffer iterieren, per Huffmantree zu Bitcode umsetzen und 
+             *  diesen in der Resource speichern
+             */
+            byte[] c = new byte[3];
+            while(block.position() < block.limit()) {
+
+                // Pixel lesen und Farbe konvertieren
+                block.get(c);
+
+                outStream.write(huffmanTree.encodeSymbol(c[0] & 0xFF));
+                outStream.write(huffmanTree.encodeSymbol(c[1] & 0xFF));
+                outStream.write(huffmanTree.encodeSymbol(c[2] & 0xFF));
+            }
         }
     }   
 }

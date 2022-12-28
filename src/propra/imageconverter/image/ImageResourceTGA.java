@@ -65,8 +65,7 @@ public class ImageResourceTGA extends ImageResource {
         int bpp = bytes.get(TGA_HEADER_OFFSET_BPP); 
         
         // Kompression
-        byte compression = bytes.get(TGA_HEADER_OFFSET_ENCODING);
-        switch (compression) {
+        switch (bytes.get(TGA_HEADER_OFFSET_ENCODING)) {
             case TGA_HEADER_ENCODING_RLE -> {
                 inCodec = new ImageTranscoderRLE(this);
                 header.setCompression(Compression.RLE);
