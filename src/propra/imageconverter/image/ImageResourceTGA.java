@@ -5,8 +5,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import propra.imageconverter.data.DataUtil;
 import propra.imageconverter.data.IDataTranscoder.Compression;
-import propra.imageconverter.image.compression.ImageTranscoderRLE;
-import propra.imageconverter.image.compression.ImageTranscoderRaw;
 
 /**
  *  Schreibt und liest TGA Header
@@ -57,35 +55,35 @@ public class ImageResourceTGA extends ImageResource {
         bytes.order(ByteOrder.LITTLE_ENDIAN);
        
         // Headerbytes von Stream einlesen
+        ImageAttributes attributes = new ImageAttributes();
         binaryFile.read(bytes.array());
         
-        // Headerfelder konvertieren
-        header.setWidth(bytes.getShort(TGA_HEADER_OFFSET_WIDTH));
-        header.setHeight(bytes.getShort(TGA_HEADER_OFFSET_HEIGHT));
-        header.setFormat(Color.Format.COLOR_BGR);
+        attributes.setWidth(bytes.getShort(TGA_HEADER_OFFSET_WIDTH));
+        attributes.setHeight(bytes.getShort(TGA_HEADER_OFFSET_HEIGHT));
+        attributes.setFormat(Color.Format.COLOR_BGR);
         int bpp = bytes.get(TGA_HEADER_OFFSET_BPP); 
         
         // Kompression
         switch (bytes.get(TGA_HEADER_OFFSET_ENCODING)) {
             case TGA_HEADER_ENCODING_RLE -> {
-                inCodec = new ImageTranscoderRLE(header);
-                header.setCompression(Compression.RLE);
+                attributes.setCompression(Compression.RLE);
             }
             case TGA_HEADER_ENCODING_NONE -> {
-                inCodec = new ImageTranscoderRaw(header);
-                header.setCompression(Compression.NONE);
+                attributes.setCompression(Compression.NONE);
             }
             default -> throw new UnsupportedOperationException("Nicht unterstützte TGA Kompression!");
         }
         
         // Prüfe tga Spezifikationen
-        if(header.getWidth() <= 0 || header.getHeight() <= 0 || bpp != 24
+        if(attributes.getWidth() <= 0 || attributes.getHeight() <= 0 || bpp != 24
         || !DataUtil.checkBit(bytes.get(TGA_HEADER_OFFSET_ORIGIN), (byte)6)
         || DataUtil.checkBit(bytes.get(TGA_HEADER_OFFSET_ORIGIN), (byte)5)
         || bytes.get(0) != 0) {
             throw new UnsupportedOperationException("Ungültiges TGA Dateiformat!");
         }
         
+        // Header setzen
+        setHeader(attributes);
         return header;
     }  
     

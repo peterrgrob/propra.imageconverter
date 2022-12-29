@@ -42,6 +42,7 @@ public class ImageResourceProPra extends ImageResource {
         fileHeaderSize = PROPRA_HEADER_SIZE;
         header.setFormat(Color.Format.COLOR_BGR);
         checksum = new ChecksumPropra();
+        
         inStream.setChecksum(checksum);
         outStream.setChecksum(checksum);
     }
@@ -73,40 +74,43 @@ public class ImageResourceProPra extends ImageResource {
            throw new UnsupportedOperationException("Ungültige ProPra-Kennung!");
         }
         
-        // Daten einlesen
-        header.setWidth(bytes.getShort(PROPRA_HEADER_OFFSET_WIDTH));
-        header.setHeight(bytes.getShort(PROPRA_HEADER_OFFSET_HEIGHT));
-        header.setChecksum(bytes.getInt(PROPRA_HEADER_OFFSET_CHECKSUM)); 
-        header.setDataLength(bytes.getLong(PROPRA_HEADER_OFFSET_DATALEN));
-        header.setFormat(Color.Format.COLOR_RBG);
+        // Header einlesen
+        ImageAttributes attributes = new ImageAttributes();
+        attributes.setWidth(bytes.getShort(PROPRA_HEADER_OFFSET_WIDTH));
+        attributes.setHeight(bytes.getShort(PROPRA_HEADER_OFFSET_HEIGHT));
+        attributes.setChecksum(bytes.getInt(PROPRA_HEADER_OFFSET_CHECKSUM)); 
+        attributes.setDataLength(bytes.getLong(PROPRA_HEADER_OFFSET_DATALEN));
+        attributes.setFormat(Color.Format.COLOR_RBG);
         int bpp = (int)bytes.get(PROPRA_HEADER_OFFSET_BPP); 
         
         // Kompression initialisieren
         switch (bytes.get(PROPRA_HEADER_OFFSET_ENCODING)) {
             case PROPRA_HEADER_ENCODING_HUFFMAN -> {     
-                header.setCompression(Compression.HUFFMAN);
+                attributes.setCompression(Compression.HUFFMAN);
             }
             case PROPRA_HEADER_ENCODING_RLE -> {
-                header.setCompression(Compression.RLE);
+                attributes.setCompression(Compression.RLE);
             }
             case PROPRA_HEADER_ENCODING_NONE -> {
-                header.setCompression(Compression.NONE);
+                attributes.setCompression(Compression.NONE);
             }
             default -> throw new UnsupportedOperationException("Nicht unterstützte Kompression!");
         }
-        inCodec = createTranscoder(header);
         
         // Prüfe ProPra Spezifikationen
-        if( header.getHeight() <= 0 || header.getWidth() <= 0 || bpp != 24
-        ||  (header.getDataLength() != (binaryFile.length() - PROPRA_HEADER_SIZE))) {
+        if( attributes.getHeight() <= 0 || attributes.getWidth() <= 0 || bpp != 24
+        ||  (attributes.getDataLength() != (binaryFile.length() - PROPRA_HEADER_SIZE))) {
             throw new UnsupportedOperationException("Ungültiges ProPra Dateiformat!");
-        } else if(header.getCompression() == Compression.NONE) {
+        } else if(attributes.getCompression() == Compression.NONE) {
             // Prüfungen für unkomprimierte Dateien 
-            if(header.getPixelCount() * Color.PIXEL_SIZE != header.getDataLength()
-            || header.getPixelCount() * Color.PIXEL_SIZE != (binaryFile.length() - PROPRA_HEADER_SIZE)) {
+            if(attributes.getPixelCount() * Color.PIXEL_SIZE != attributes.getDataLength()
+            || attributes.getPixelCount() * Color.PIXEL_SIZE != (binaryFile.length() - PROPRA_HEADER_SIZE)) {
                 throw new UnsupportedOperationException("Ungültiges ProPra Dateiformat!");
             }
         }
+        
+        // Header setzen
+        setHeader(attributes);
         
         return header;
     }  

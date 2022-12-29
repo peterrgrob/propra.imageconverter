@@ -1,16 +1,13 @@
 package propra.imageconverter.image;
 
-import propra.imageconverter.image.compression.ImageTranscoderHuffman;
 import java.io.IOException;
-import java.util.ArrayList;
 import propra.imageconverter.util.IChecksum;
 import propra.imageconverter.data.DataResource;
 import propra.imageconverter.data.DataUtil;
 import propra.imageconverter.data.IDataTranscoder;
 import propra.imageconverter.data.IDataTranscoder.Compression;
-import propra.imageconverter.data.IDataTranscoder.Operation;
+import propra.imageconverter.data.IDataTranscoder.EncodeMode;
 import propra.imageconverter.image.compression.ImageTranscoderAuto;
-import propra.imageconverter.image.compression.ImageTranscoderRLE;
 import propra.imageconverter.image.compression.ImageTranscoderRaw;
 
 /**
@@ -24,12 +21,16 @@ public abstract class ImageResource extends DataResource {
     // Bildattribute
     protected ImageAttributes header;
 
+    // Zugeordneter Codec zum kodieren/dekodieren der Bilddaten
+    protected IDataTranscoder transcoder;
+    
     /**
      * 
      */
     protected ImageResource(String file, boolean write) throws IOException {
         super(file, write);
-        this.header = new ImageAttributes();
+        header = new ImageAttributes();
+        transcoder = ImageTranscoderRaw.createTranscoder(header);
     }
     
     /**
@@ -45,9 +46,9 @@ public abstract class ImageResource extends DataResource {
     /**
      * 
      */
-    public void setHeader(ImageAttributes srcHeader) {
-        this.header = new ImageAttributes(srcHeader);
-        inCodec = createTranscoder(header);
+    public void setHeader(ImageAttributes newHeader) {
+        this.header = new ImageAttributes(newHeader);
+        transcoder = ImageTranscoderRaw.createTranscoder(header);
         
         if(checksum != null) {
             header.setChecksum(checksum.getValue());
@@ -94,21 +95,18 @@ public abstract class ImageResource extends DataResource {
         
         // Position des Datenblocks merken
         long p = position();
-         
+        getInputStream().enableChecksum(false); 
+        
         /*
          * ggfs. Analyselauf für den Encoder durchführen
          */
         IDataTranscoder encoder = transcodedImage.getTranscoder();
         if(encoder.analyzeNecessary()) {
 
-            getInputStream().enableChecksum(false);
-
             // Dekodierung für Analyse starten
-            encoder.beginOperation(Operation.ANALYZE, transcodedImage.getOutputStream());
-            inCodec.decode(getInputStream(), new ColorFilter( colorConverter, encoder));
-                                            
-            getInputStream().enableChecksum(true);
-            encoder.endOperation();
+            encoder.beginEncoding(EncodeMode.ANALYZE, transcodedImage.getOutputStream());
+            transcoder.decode(getInputStream(), new ColorConverter( colorConverter, encoder));
+            encoder.endEncoding();
 
             // Ursprüngliche Position wiederherstellen
             position(p);
@@ -118,10 +116,11 @@ public abstract class ImageResource extends DataResource {
          * Bei Automodus einen Vorlauf durchführen und bestes Verfahren wählen
          */
         if(outEncoding == Compression.AUTO) {
+                        
+            encoder.beginEncoding(EncodeMode.ENCODE, transcodedImage.getOutputStream());
+            transcoder.decode(getInputStream(), new ColorConverter( colorConverter, encoder));
+            encoder.endEncoding();
             
-            encoder.beginOperation(Operation.ENCODE, transcodedImage.getOutputStream());
-            inCodec.decode(getInputStream(), new ColorFilter( colorConverter, encoder));
-            encoder.endOperation();
             encoder = ((ImageTranscoderAuto)encoder).getWinner();
             transcodedImage.getAttributes().setCompression(encoder.getCompression());
             
@@ -132,16 +131,18 @@ public abstract class ImageResource extends DataResource {
         /* 
          * Finale Dekodierung und Kodierung starten
          */
-        
+                                                    
+        getInputStream().enableChecksum(true);
+            
         // Header überspringen, wird später geschrieben
         transcodedImage.position(transcodedImage.fileHeaderSize);
         
         // Dekodieren und Kodieren
-        encoder.beginOperation(Operation.ENCODE, transcodedImage.getOutputStream());
-        inCodec.decode(getInputStream(), new ColorFilter( colorConverter, encoder));
+        encoder.beginEncoding(EncodeMode.ENCODE, transcodedImage.getOutputStream());
+        transcoder.decode(getInputStream(), new ColorConverter( colorConverter, encoder));
 
         // Konvertierung abschließen und Header schreiben 
-        transcodedImage.getAttributes().setDataLength(encoder.endOperation());
+        transcodedImage.getAttributes().setDataLength(encoder.endEncoding());
         transcodedImage.writeHeader();
         
         return transcodedImage;
@@ -161,33 +162,7 @@ public abstract class ImageResource extends DataResource {
         }
         throw new UnsupportedOperationException("Nicht unterstütztes Dateiformat!");
     }
-    
-    /**
-     * 
-     */
-    protected static IDataTranscoder createTranscoder(ImageAttributes header) {
-        if(header != null) {
-            switch(header.getCompression()) {
-                case NONE -> {
-                    return new ImageTranscoderRaw(header);
-                }
-                case RLE -> {
-                    return new ImageTranscoderRLE(header);
-                }
-                case HUFFMAN -> {
-                    return new ImageTranscoderHuffman(header);
-                }
-                case AUTO -> {
-                    ArrayList<ImageTranscoderRaw> encoderList = new ArrayList<>();
-                    encoderList.add(new ImageTranscoderHuffman(header));
-                    encoderList.add(new ImageTranscoderRLE(header));                
-                    return new ImageTranscoderAuto(encoderList);
-                }
-            }
-        }
-        throw new UnsupportedOperationException("Nicht unterstützte Kompression!");
-    }
-
+   
     /**
      *
      * @return
@@ -201,7 +176,7 @@ public abstract class ImageResource extends DataResource {
      * @return
      */
     public IDataTranscoder getTranscoder() {
-        return inCodec;
+        return transcoder;
     }
     
     /**

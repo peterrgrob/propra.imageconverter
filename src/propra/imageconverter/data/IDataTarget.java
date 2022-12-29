@@ -9,7 +9,6 @@ import java.nio.ByteBuffer;
  */
 @FunctionalInterface
 public interface IDataTarget {
-    
     /**
      * 
      */

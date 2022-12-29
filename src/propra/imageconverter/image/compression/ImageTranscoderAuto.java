@@ -55,12 +55,12 @@ public class ImageTranscoderAuto extends ImageTranscoderRaw {
      * 
      */
     @Override
-    public IDataTranscoder beginOperation(Operation op, CheckedOutputStream out) throws IOException {
-        super.beginOperation(op, out);
+    public IDataTranscoder beginEncoding(EncodeMode op, CheckedOutputStream out) throws IOException {
+        super.beginEncoding(op, out);
 
         // Encoding mit NullStream beginnen
         for(ImageTranscoderRaw e : encoderList) {
-            e.beginOperation(op, new CheckedOutputStream(OutputStream.nullOutputStream()));
+            e.beginEncoding(op, new CheckedOutputStream(OutputStream.nullOutputStream()));
         }
         
         return this;
@@ -82,12 +82,12 @@ public class ImageTranscoderAuto extends ImageTranscoderRaw {
      * 
      */
     @Override
-    public long endOperation() throws IOException {
+    public long endEncoding() throws IOException {
         if(null != operation) switch (operation) {
             case ANALYZE -> {
                 // Analyse abschließen
                 for(ImageTranscoderRaw e : encoderList) {
-                    e.endOperation();
+                    e.endEncoding();
                 }
             }
             case ENCODE -> {
@@ -95,15 +95,16 @@ public class ImageTranscoderAuto extends ImageTranscoderRaw {
                 long min = Long.MAX_VALUE;
                 long t = 0;
                 for(ImageTranscoderRaw e : encoderList) {
-                    if((t = e.endOperation()) < min) {
+                    if((t = e.endEncoding()) < min) {
                        winner = e;
                        min = t; 
                     }
                 }
                 encodedBytes = min;
             }
+
         }
-        return super.endOperation();
+        return super.endEncoding();
     }
     
     @Override

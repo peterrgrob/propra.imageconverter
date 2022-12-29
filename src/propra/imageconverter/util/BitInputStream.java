@@ -29,7 +29,6 @@ public class BitInputStream {
     
     /**
      * Liest ein Bit von der Resource, gibt -1 zurück bei Dateiende
-     * 
      */
     public int readBit() throws IOException {
         /*

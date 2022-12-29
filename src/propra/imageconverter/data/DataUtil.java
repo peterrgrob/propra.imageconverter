@@ -10,7 +10,6 @@ import java.nio.file.Paths;
 
 /**
  * Diverse Utility Methoden zur Datenverarbeitung
- * @author pg
  */
 public class DataUtil {
     

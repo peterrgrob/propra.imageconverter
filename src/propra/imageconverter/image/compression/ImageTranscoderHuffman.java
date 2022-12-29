@@ -43,8 +43,8 @@ public class ImageTranscoderHuffman extends ImageTranscoderRaw {
      * Bereitet die Huffmankodierung vor
      */
     @Override
-    public IDataTranscoder beginOperation(Operation op, CheckedOutputStream out) throws IOException {
-        super.beginOperation(op, out);
+    public IDataTranscoder beginEncoding(EncodeMode op, CheckedOutputStream out) throws IOException {
+        super.beginEncoding(op, out);
         
         switch(op) {
             case ENCODE -> {
@@ -63,7 +63,7 @@ public class ImageTranscoderHuffman extends ImageTranscoderRaw {
      * Schließt die Huffman-Kodierung/Analyse ab
      */
     @Override
-    public long endOperation() throws IOException {
+    public long endEncoding() throws IOException {
         switch(operation) {
             case ANALYZE -> {
                /*
@@ -93,7 +93,7 @@ public class ImageTranscoderHuffman extends ImageTranscoderRaw {
             }
         }
 
-        return super.endOperation();
+        return super.endEncoding();
     }
     
     /**
@@ -150,7 +150,7 @@ public class ImageTranscoderHuffman extends ImageTranscoderRaw {
     @Override
     public void encode(ByteBuffer block, boolean last) throws IOException {
         // Analyse- oder Kodiermodus?
-        if(operation == Operation.ANALYZE) {           
+        if(operation == EncodeMode.ANALYZE) {           
             byte[] buffer = block.array();
             int offset = 0;
 

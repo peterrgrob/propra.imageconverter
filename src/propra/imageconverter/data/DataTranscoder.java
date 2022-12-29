@@ -13,7 +13,7 @@ public abstract class DataTranscoder implements IDataTranscoder {
     public static final int DEFAULT_BLOCK_SIZE = 4096 * 8 * 3;
     
     // Aktuelle Operation
-    protected Operation operation;
+    protected EncodeMode operation;
     
     // Kodierte Bytes
     protected long encodedBytes;
@@ -25,14 +25,14 @@ public abstract class DataTranscoder implements IDataTranscoder {
      * 
      */
     public DataTranscoder() {
-        operation = Operation.NONE;
+        operation = EncodeMode.NONE;
     }    
     
     /**
      * 
      */
     @Override
-    public Operation getOperation() {
+    public EncodeMode getOperation() {
         return operation;
     }
     
@@ -48,7 +48,7 @@ public abstract class DataTranscoder implements IDataTranscoder {
      *
      */
     @Override
-    public IDataTranscoder beginOperation(Operation op, CheckedOutputStream out) throws IOException {  
+    public IDataTranscoder beginEncoding(EncodeMode op, CheckedOutputStream out) throws IOException {  
         PropraException.assertArgument(out);
         operation = op;
         encodedBytes = 0;
@@ -61,8 +61,8 @@ public abstract class DataTranscoder implements IDataTranscoder {
      * @throws IOException
      */
     @Override
-    public long endOperation() throws IOException {
-        operation = Operation.NONE;
+    public long endEncoding() throws IOException {
+        operation = EncodeMode.NONE;
         return encodedBytes;
     }
 }

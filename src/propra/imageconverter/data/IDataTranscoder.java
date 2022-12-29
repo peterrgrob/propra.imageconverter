@@ -11,16 +11,15 @@ import propra.imageconverter.util.CheckedOutputStream;
  */
 public interface IDataTranscoder extends IDataTarget {
     
-    // Datenoperationstypen
-    public enum Operation {
+    // Encodingmodus
+    public enum EncodeMode {
         NONE,
         ENCODE,
-        DECODE,
         ANALYZE,
         AUTO;
     }
     
-    // Kodierungstypen der Daten
+    // Komprimierungen
     public enum Compression {
         NONE,
         RLE,
@@ -33,16 +32,11 @@ public interface IDataTranscoder extends IDataTarget {
      * 
      */
     public void decode(CheckedInputStream in, IDataTarget target) throws IOException;
-    
+     
     /**
      * 
      */
-    public IDataTranscoder beginOperation(Operation op, CheckedOutputStream out) throws IOException;
-    
-    /**
-     * 
-     */
-    public Operation getOperation();
+    public EncodeMode getOperation();
     
     /**
      * 
@@ -54,7 +48,11 @@ public interface IDataTranscoder extends IDataTarget {
      */
     public boolean analyzeNecessary();
     
-    
+    /**
+     * 
+     */
+    public IDataTranscoder beginEncoding(EncodeMode op, CheckedOutputStream out) throws IOException;
+   
     /**
      * Kodiert Daten des Blocks und speichert diese.
      */
@@ -63,5 +61,5 @@ public interface IDataTranscoder extends IDataTarget {
     /**
      * Gibt Anzahl der kodierten Bytes zurück
      */
-    public long endOperation() throws IOException;
+    public long endEncoding() throws IOException;
 }

@@ -28,9 +28,6 @@ public class DataResource implements IDataResource {
     protected CheckedOutputStream outStream;
     protected CheckedInputStream inStream; 
     
-    // Zugeordneter Codec zum lesen/schreiben der Daten
-    protected IDataTranscoder inCodec;
-    
     // Prüfsumme 
     protected IChecksum checksum;
     

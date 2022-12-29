@@ -2,15 +2,14 @@ package propra.imageconverter.image;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import propra.imageconverter.data.IDataTranscoder;
 import propra.imageconverter.data.IDataTarget;
 
 /**
- * Wendet eine Operation auf die übergebene Farben an und leitet den Puffer weiter an 
- * das nächstes Datenziel
+ * Wendet eine Operation auf die empfangenen Farben an und leitet den Puffer 
+ * weiter an das Datenziel
  */
-public class ColorFilter implements IDataTarget {
+public class ColorConverter implements IDataTarget {
     
     // Ziel an das der Puffer weitergeleitet wird
     private final IDataTarget target;
@@ -21,7 +20,7 @@ public class ColorFilter implements IDataTarget {
     /**
      * 
      */
-    public ColorFilter(ColorOperation op, IDataTarget target) {
+    public ColorConverter(ColorOperation op, IDataTarget target) {
         this.target = target;
         this.op = op;
     }

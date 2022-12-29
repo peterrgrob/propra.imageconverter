@@ -38,8 +38,8 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
      * 
      */
     @Override
-    public IDataTranscoder beginOperation(Operation op, CheckedOutputStream out) throws IOException {
-        super.beginOperation(op, out);
+    public IDataTranscoder beginEncoding(EncodeMode op, CheckedOutputStream out) throws IOException {
+        super.beginEncoding(op, out);
         bufferedData = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE * 2);
         return this;
     }
@@ -156,7 +156,7 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
      * 
      */
     @Override
-    public long endOperation() throws IOException {
+    public long endEncoding() throws IOException {
         switch(operation) {
             case ENCODE -> {
                 /*
@@ -166,7 +166,7 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
             }
         }
 
-        return super.endOperation();
+        return super.endEncoding();
     }
     
     /**
