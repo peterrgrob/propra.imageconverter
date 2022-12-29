@@ -6,25 +6,30 @@ import propra.imageconverter.data.DataTranscoder;
 import propra.imageconverter.util.CheckedInputStream;
 import propra.imageconverter.data.IDataTarget;
 import propra.imageconverter.data.IDataTranscoder;
-import propra.imageconverter.image.ImageResource;
+import propra.imageconverter.image.ImageAttributes;
 
 
 /**
  * Basiscodec für die Konvertierung von unkomprimierten Pixelblöcken.
- * Die Ein- und Ausgabedaten für decode und encode werden von der per Konstruktor 
- * übergebenen Resource gelesen/geschrieben. Allgemein erfolgt die 
- * individuelle Konfiguration der Kompressionsklassen über die Konstruktoren.
  */
 public class ImageTranscoderRaw extends DataTranscoder implements IDataTarget {
     
-    // Zugeordnete Resource zur Ein-, oder Ausgabe der Daten 
-    protected ImageResource resource;
+    // Zugeordnete Bildattribute
+    protected ImageAttributes attributes;
     
     /**
      * 
      */
-    public ImageTranscoderRaw(ImageResource resource) {
-        this.resource = resource;
+    public ImageTranscoderRaw(ImageAttributes attributes) {
+        this.attributes = attributes;
+    }
+    
+    /**
+     * 
+     */
+    @Override
+    public Compression getCompression() {
+        return Compression.NONE;
     }
     
     /**
@@ -36,26 +41,29 @@ public class ImageTranscoderRaw extends DataTranscoder implements IDataTarget {
         // Lese Puffer  
         ByteBuffer data = ByteBuffer.allocate(DEFAULT_BLOCK_SIZE);
         boolean bLast = false;
+        long offset = 0;
+        long len = attributes.getImageSize();
         
         /*
          * Lädt und sendet Pixelblöcke direkt an Listener  
          */
-        while(resource.position() < resource.length()) {
+        while(offset < len) {
             
             // Blockgröße anpassen
-            if(resource.length() - resource.position() < data.capacity()) {
-                data.limit((int)(resource.length() - resource.position()));
+            if(len - offset < data.capacity()) {
+                data.limit((int)(len - offset));
                 bLast = true;
             }
             
             // Datenblock von Resource lesen 
-            int r = in.read(data.array(), data.position(), data.limit());
+            int r = in.read(data);
             if(r == -1) {
                 throw new IOException("Lesefehler!");
             }
             
             // Daten an das Ziel senden
             target.onData(data,bLast, this);  
+            offset += r;
             data.clear();
         }
     }
@@ -65,8 +73,7 @@ public class ImageTranscoderRaw extends DataTranscoder implements IDataTarget {
      */
     @Override
     public void encode(ByteBuffer block, boolean last) throws IOException {
-        resource.getOutputStream()
-                .write(block);
+        outStream.write(block);
         encodedBytes += block.limit() - block.position();
     }
     

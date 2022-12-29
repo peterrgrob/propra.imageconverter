@@ -8,7 +8,7 @@ import propra.imageconverter.data.IDataTarget;
 import propra.imageconverter.data.IDataTranscoder;
 import propra.imageconverter.image.Color;
 import propra.imageconverter.image.ColorOperations;
-import propra.imageconverter.image.ImageResource;
+import propra.imageconverter.image.ImageAttributes;
 
 /**
  *
@@ -22,10 +22,18 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
     /**
      *
      */
-    public ImageTranscoderRLE(ImageResource resource) {
-        super(resource);
+    public ImageTranscoderRLE(ImageAttributes attributes) {
+        super(attributes);
     }
 
+    /**
+     * 
+     */
+    @Override
+    public Compression getCompression() {
+        return Compression.RLE;
+    }
+    
     /**
      * 
      */
@@ -154,7 +162,7 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
                 /*
                  *  Stream flushen und kodierte Datengröße aktualisieren
                  */
-                resource.getOutputStream().flush();
+                outStream.flush();
             }
         }
 

@@ -19,6 +19,15 @@ public interface IDataTranscoder extends IDataTarget {
         ANALYZE,
         AUTO;
     }
+    
+    // Kodierungstypen der Daten
+    public enum Compression {
+        NONE,
+        RLE,
+        BASEN,
+        HUFFMAN,
+        AUTO;
+    }
 
     /**
      * 
@@ -34,6 +43,11 @@ public interface IDataTranscoder extends IDataTarget {
      * 
      */
     public Operation getOperation();
+    
+    /**
+     * 
+     */
+    public Compression getCompression();
     
     /**
      * Analyse der ganzen Daten vor Kodierung nötig?

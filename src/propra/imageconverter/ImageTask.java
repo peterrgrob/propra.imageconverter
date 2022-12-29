@@ -3,12 +3,12 @@ package propra.imageconverter;
 import propra.imageconverter.util.CmdLine;
 import java.io.IOException;
 import propra.imageconverter.util.CmdLine.Options;
-import propra.imageconverter.data.DataResource.Compression;
+import propra.imageconverter.data.IDataTranscoder.Compression;
 import propra.imageconverter.data.DataUtil;
 import propra.imageconverter.image.*;
 
 /**
- * Klasse implementiert Bildkonvertierung
+ * Klasse implementiert Bildkonvertierungen
  * 
  * @author pg
  */
@@ -41,16 +41,13 @@ public class ImageTask implements AutoCloseable {
      */
     public void run() throws IOException {
         
-        // Dateiendungen ableiten
-        String inExt = DataUtil.getExtension(cmd.getOption(Options.INPUT_FILE));
-        String outExt = DataUtil.getExtension(cmd.getOption(Options.OUTPUT_FILE));
+        String inPath = cmd.getOption(Options.INPUT_FILE);
+        String outPath = cmd.getOption(Options.OUTPUT_FILE);
         
         // Readerobjekt erstellen
-        inImage = ImageResource.createResource( cmd.getOption(Options.INPUT_FILE), 
-                                                inExt,false);
+        inImage = ImageResource.createResource(inPath,false);
        
         // Verzeichnisse und Datei für die Ausgabe erstellen, falls nötig
-        String outPath = cmd.getOption(Options.OUTPUT_FILE);  
         if(outPath == null) {
             throw new IOException("Kein Ausgabepfad gegeben!");            
         }  
@@ -58,7 +55,7 @@ public class ImageTask implements AutoCloseable {
         
         // Ausgabekompression setzen und Konvertierung starten
         outEncoding = cmd.getCompression();
-        outImage = inImage.convertTo(outPath, outExt, outEncoding);
+        outImage = inImage.convertTo(outPath, outEncoding);
         
         // Prüfsumme prüfen
         if(inImage.getChecksum() != null) {

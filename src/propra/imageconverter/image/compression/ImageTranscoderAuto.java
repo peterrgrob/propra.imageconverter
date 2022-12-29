@@ -8,15 +8,13 @@ import propra.imageconverter.data.IDataTarget;
 import propra.imageconverter.data.IDataTranscoder;
 import propra.imageconverter.util.CheckedInputStream;
 import propra.imageconverter.util.CheckedOutputStream;
-import propra.imageconverter.util.PropraException;
 
 /**
- * Bündelt mehrere Encoder und ermittelt über den Analyse-Lauf das beste
- * Verfahren und verwendet dieses anschließend für die Kodierung
+ * Bündelt mehrere Encoder und ermittelt das beste Verfahren
  */
 public class ImageTranscoderAuto extends ImageTranscoderRaw {
     
-    // Encoder
+    // Liste der Encoder
     private final ArrayList<ImageTranscoderRaw> encoderList;
     
     // Bester Codec
@@ -25,11 +23,64 @@ public class ImageTranscoderAuto extends ImageTranscoderRaw {
     /**
      * 
      */
-    public ImageTranscoderAuto(ArrayList<ImageTranscoderRaw> encoder) {
+    public ImageTranscoderAuto( ArrayList<ImageTranscoderRaw> encoder) {
         super(null);
         this.encoderList = encoder;
     }
+    
+    /**
+     * 
+     */
+    @Override
+    public Compression getCompression() {
+        return Compression.AUTO;
+    }
 
+    /**
+     * 
+     */
+    public ImageTranscoderRaw getWinner() {
+        return winner;
+    }
+    
+    /**
+     * 
+     */
+    @Override
+    public boolean analyzeNecessary() {
+        return true;
+    }
+
+    /**
+     * 
+     */
+    @Override
+    public IDataTranscoder beginOperation(Operation op, CheckedOutputStream out) throws IOException {
+        super.beginOperation(op, out);
+
+        // Encoding mit NullStream beginnen
+        for(ImageTranscoderRaw e : encoderList) {
+            e.beginOperation(op, new CheckedOutputStream(OutputStream.nullOutputStream()));
+        }
+        
+        return this;
+    }
+    
+    /**
+     * 
+     */
+    @Override
+    public void encode(ByteBuffer block, boolean last) throws IOException {
+        // Block an Codecs weiterreichen
+        for(ImageTranscoderRaw e : encoderList) {
+            e.encode(block, last);
+            block.rewind();
+        }            
+    }
+
+    /**
+     * 
+     */
     @Override
     public long endOperation() throws IOException {
         if(null != operation) switch (operation) {
@@ -39,56 +90,22 @@ public class ImageTranscoderAuto extends ImageTranscoderRaw {
                     e.endOperation();
                 }
             }
-            case AUTO -> {
+            case ENCODE -> {
                 // Besten Codec ermitteln
-                long ctr = 0;
+                long min = Long.MAX_VALUE;
+                long t = 0;
                 for(ImageTranscoderRaw e : encoderList) {
-                    if(e.endOperation() > ctr) {
-                        winner = e;
+                    if((t = e.endOperation()) < min) {
+                       winner = e;
+                       min = t; 
                     }
                 }
+                encodedBytes = min;
             }
-            case ENCODE -> encodedBytes = winner.endOperation();
         }
         return super.endOperation();
     }
-
-    @Override
-    public IDataTranscoder beginOperation(Operation op, CheckedOutputStream out) throws IOException {
-        if(operation == Operation.ANALYZE) {
-            super.beginOperation(op, out);
-
-            // Encoding mit NullStream beginnen
-            for(ImageTranscoderRaw e : encoderList) {
-                e.beginOperation(op, new CheckedOutputStream(OutputStream.nullOutputStream()));
-            }
-        } else if(operation == Operation.ENCODE){
-            // Testlauf starten um den besten Codec zu ermitteln
-        }
-        
-        return this;
-    }
     
-    @Override
-    public boolean analyzeNecessary() {
-        return true;
-    }
-
-    @Override
-    public void encode(ByteBuffer block, boolean last) throws IOException {
-        if( operation == Operation.ANALYZE
-        ||  operation == Operation.AUTO) {
-            // Block an Codecs weiterreichen
-            for(ImageTranscoderRaw e : encoderList) {
-                e.encode(block, last);
-            }            
-        } else {
-            PropraException.assertArgument(winner);        
-            // Block mit dem besten Codec komprimieren
-            winner.encode(block, last);
-        }
-    }
-
     @Override
     public void decode(CheckedInputStream in, IDataTarget target) throws IOException {
         throw new UnsupportedOperationException();

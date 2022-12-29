@@ -1,7 +1,7 @@
 package propra.imageconverter.util;
 
 import java.util.HashMap;
-import propra.imageconverter.data.DataResource.Compression;
+import propra.imageconverter.data.IDataTranscoder.Compression;
 
 /**
  * Hilfsklasse die Kommandozeilenparameter parsed und speichert, diese

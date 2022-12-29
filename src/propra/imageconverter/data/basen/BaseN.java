@@ -66,6 +66,14 @@ public class BaseN extends DataTranscoder {
         this.resource = resource;
         this.baseEncoding = resource.getBaseNEncoding();
     }
+    
+    /**
+     * 
+     */
+    @Override
+    public Compression getCompression() {
+        return Compression.BASEN;
+    }
 
     /**
      * Dekodiert BaseNCodec kodierte Daten

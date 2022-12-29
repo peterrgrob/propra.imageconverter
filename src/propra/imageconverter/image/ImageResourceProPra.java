@@ -6,6 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import propra.imageconverter.util.ChecksumPropra;
 import propra.imageconverter.data.DataUtil;
+import propra.imageconverter.data.IDataTranscoder.Compression;
 
 /**
  * Schreibt und liest ProPra Header
@@ -93,7 +94,7 @@ public class ImageResourceProPra extends ImageResource {
             }
             default -> throw new UnsupportedOperationException("Nicht unterstützte Kompression!");
         }
-        inCodec = createCodec(header);
+        inCodec = createTranscoder(header);
         
         // Prüfe ProPra Spezifikationen
         if( header.getHeight() <= 0 || header.getWidth() <= 0 || bpp != 24

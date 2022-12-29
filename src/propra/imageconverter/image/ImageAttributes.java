@@ -1,6 +1,6 @@
 package propra.imageconverter.image;
 
-import propra.imageconverter.data.DataResource.Compression;
+import propra.imageconverter.data.IDataTranscoder.Compression;
 import propra.imageconverter.image.Color.Format;
 
 /**

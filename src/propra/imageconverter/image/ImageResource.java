@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import propra.imageconverter.util.IChecksum;
 import propra.imageconverter.data.DataResource;
+import propra.imageconverter.data.DataUtil;
 import propra.imageconverter.data.IDataTranscoder;
+import propra.imageconverter.data.IDataTranscoder.Compression;
 import propra.imageconverter.data.IDataTranscoder.Operation;
 import propra.imageconverter.image.compression.ImageTranscoderAuto;
 import propra.imageconverter.image.compression.ImageTranscoderRLE;
@@ -13,7 +15,6 @@ import propra.imageconverter.image.compression.ImageTranscoderRaw;
 
 /**
  *
- * @author pg
  */
 public abstract class ImageResource extends DataResource {
     
@@ -22,9 +23,6 @@ public abstract class ImageResource extends DataResource {
     
     // Bildattribute
     protected ImageAttributes header;
-    
-    // Aktuelles konvertiertes Bild
-    protected ImageResource transcodedImage;
 
     /**
      * 
@@ -32,28 +30,6 @@ public abstract class ImageResource extends DataResource {
     protected ImageResource(String file, boolean write) throws IOException {
         super(file, write);
         this.header = new ImageAttributes();
-    }
-    
-    /**
-     * Erstellt ein ImageResource Objekt
-     * 
-     * @param path
-     * @param ext
-     * @param write
-     * @return
-     * @throws IOException 
-     */
-    public static ImageResource createResource(String path, String ext, boolean write) throws IOException {
-        switch(ext) {
-            case "tga" -> {
-                return new ImageResourceTGA(path, write);
-            }
-            case "propra" -> {
-                return new ImageResourceProPra(path, write);
-            }
-
-        }
-        throw new UnsupportedOperationException("Nicht unterstütztes Dateiformat!");
     }
     
     /**
@@ -71,7 +47,7 @@ public abstract class ImageResource extends DataResource {
      */
     public void setHeader(ImageAttributes srcHeader) {
         this.header = new ImageAttributes(srcHeader);
-        inCodec = createCodec(header);
+        inCodec = createTranscoder(header);
         
         if(checksum != null) {
             header.setChecksum(checksum.getValue());
@@ -80,35 +56,30 @@ public abstract class ImageResource extends DataResource {
     
     /**
      * Konvertiert ein Quellbild in ein neues Bild mit gegebenem Format und 
-     * Kodierung
-     * 
-     * @param outFile
-     * @param ext
-     * @param outEncoding
-     * @return
-     * @throws IOException 
+     * Kompression
      */
-    public ImageResource convertTo(String outFile, String ext, Compression outEncoding) throws IOException {
+    public ImageResource convertTo(String outFile, Compression outEncoding) throws IOException {
         if(outFile == null) {
             throw new IllegalArgumentException();
-        }
-        
-        // Neues Bild erstellen
-        transcodedImage = createResource(outFile, ext, true);    
+        }   
         
         // Bildattribute einlesen
         readHeader();
         
-        // Neuen Header erstellen
+        /* 
+         * Neues Bild anlegen
+         */
+        ImageResource transcodedImage = createResource(outFile, true); 
+        
+        // Neuen Header erstellen  
         ImageAttributes outHeader = new ImageAttributes(header);
         outHeader.setCompression(outEncoding); 
-        outHeader.setFormat(transcodedImage.getAttributes().getFormat());  
+        outHeader.setFormat(transcodedImage.getAttributes().getFormat());
         transcodedImage.setHeader(outHeader);
         
-        // Header erstmal überspringen, wird später geschrieben
-        transcodedImage.position(transcodedImage.fileHeaderSize);
-        
-        // Farbkonvertierung ermitteln
+        /*
+         * ggfs. notwendige Farbkonvertierung ermitteln
+         */
         ColorOperation colorConverter = null;
         if(transcodedImage.getAttributes().getFormat() != header.getFormat()) { 
             switch(header.getFormat()) {
@@ -121,62 +92,95 @@ public abstract class ImageResource extends DataResource {
             }
         }
         
-        // Bildkonvertierung initialisieren
-        IDataTranscoder outCodec = transcodedImage.getCodec();
-        
-        // Analyselauf für den Encoder notwendig?
-        if(outCodec.analyzeNecessary()) {
-            
-            // Position merken
-            long p = position();
+        // Position des Datenblocks merken
+        long p = position();
+         
+        /*
+         * ggfs. Analyselauf für den Encoder durchführen
+         */
+        IDataTranscoder encoder = transcodedImage.getTranscoder();
+        if(encoder.analyzeNecessary()) {
 
             getInputStream().enableChecksum(false);
 
             // Dekodierung für Analyse starten
-            outCodec.beginOperation(Operation.ANALYZE, transcodedImage.getOutputStream());
-            inCodec.decode(getInputStream(), new ColorFilter( colorConverter, outCodec));
+            encoder.beginOperation(Operation.ANALYZE, transcodedImage.getOutputStream());
+            inCodec.decode(getInputStream(), new ColorFilter( colorConverter, encoder));
                                             
             getInputStream().enableChecksum(true);
-            outCodec.endOperation();
+            encoder.endOperation();
 
             // Ursprüngliche Position wiederherstellen
             position(p);
         }
         
-        // Dekodierung und Enkodierung starten
-        outCodec.beginOperation(Operation.ENCODE, transcodedImage.getOutputStream());
-        inCodec.decode(getInputStream(), new ColorFilter( colorConverter, outCodec));
+        /*
+         * Bei Automodus einen Vorlauf durchführen und bestes Verfahren wählen
+         */
+        if(outEncoding == Compression.AUTO) {
+            
+            encoder.beginOperation(Operation.ENCODE, transcodedImage.getOutputStream());
+            inCodec.decode(getInputStream(), new ColorFilter( colorConverter, encoder));
+            encoder.endOperation();
+            encoder = ((ImageTranscoderAuto)encoder).getWinner();
+            transcodedImage.getAttributes().setCompression(encoder.getCompression());
+            
+            // Ursprüngliche Position wiederherstellen
+            position(p);
+        }
+        
+        /* 
+         * Finale Dekodierung und Kodierung starten
+         */
+        
+        // Header überspringen, wird später geschrieben
+        transcodedImage.position(transcodedImage.fileHeaderSize);
+        
+        // Dekodieren und Kodieren
+        encoder.beginOperation(Operation.ENCODE, transcodedImage.getOutputStream());
+        inCodec.decode(getInputStream(), new ColorFilter( colorConverter, encoder));
 
-        // Bildkonvertierung abschließen
-        transcodedImage.getAttributes()
-                       .setDataLength(outCodec.endOperation());
-
-        //  Falls nötig Header mit Prüfsumme, oder Länge des komprimierten Datensegements 
-        //  aktualisieren
+        // Konvertierung abschließen und Header schreiben 
+        transcodedImage.getAttributes().setDataLength(encoder.endOperation());
         transcodedImage.writeHeader();
         
         return transcodedImage;
+    }
+   
+    /**
+     * Erstellt ein ImageResource Objekt passend zur Dateiendung
+     */
+    public static ImageResource createResource(String path, boolean write) throws IOException {
+        switch(DataUtil.getExtension(path)) {
+            case "tga" -> {
+                return new ImageResourceTGA(path, write);
+            }
+            case "propra" -> {
+                return new ImageResourceProPra(path, write);
+            }
+        }
+        throw new UnsupportedOperationException("Nicht unterstütztes Dateiformat!");
     }
     
     /**
      * 
      */
-    protected IDataTranscoder createCodec(ImageAttributes header) {
+    protected static IDataTranscoder createTranscoder(ImageAttributes header) {
         if(header != null) {
             switch(header.getCompression()) {
                 case NONE -> {
-                    return new ImageTranscoderRaw(this);
+                    return new ImageTranscoderRaw(header);
                 }
                 case RLE -> {
-                    return new ImageTranscoderRLE(this);
+                    return new ImageTranscoderRLE(header);
                 }
                 case HUFFMAN -> {
-                    return new ImageTranscoderHuffman(this);
+                    return new ImageTranscoderHuffman(header);
                 }
                 case AUTO -> {
                     ArrayList<ImageTranscoderRaw> encoderList = new ArrayList<>();
-                    encoderList.add(new ImageTranscoderHuffman(this));
-                    encoderList.add(new ImageTranscoderRLE(this));                
+                    encoderList.add(new ImageTranscoderHuffman(header));
+                    encoderList.add(new ImageTranscoderRLE(header));                
                     return new ImageTranscoderAuto(encoderList);
                 }
             }
@@ -196,7 +200,7 @@ public abstract class ImageResource extends DataResource {
      *
      * @return
      */
-    public IDataTranscoder getCodec() {
+    public IDataTranscoder getTranscoder() {
         return inCodec;
     }
     

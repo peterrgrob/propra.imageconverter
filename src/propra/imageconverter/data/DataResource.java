@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.Channels;
+import propra.imageconverter.data.IDataTranscoder.Compression;
 import propra.imageconverter.util.IChecksum;
 
 
@@ -16,15 +17,6 @@ import propra.imageconverter.util.IChecksum;
  * @author pg
  */
 public class DataResource implements IDataResource {
-    
-    // Kodierungstypen der Daten
-    public enum Compression {
-        NONE,
-        RLE,
-        BASEN,
-        HUFFMAN,
-        AUTO;
-    }
     
     // Aktuelle Kodierung
     protected Compression compression = Compression.NONE;

@@ -4,10 +4,9 @@ import propra.imageconverter.util.BitOutputStream;
 import propra.imageconverter.util.BitInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
-import propra.imageconverter.image.ImageResource;
 import propra.imageconverter.data.IDataTarget;
 import propra.imageconverter.data.IDataTranscoder;
+import propra.imageconverter.image.ImageAttributes;
 import propra.imageconverter.util.CheckedInputStream;
 import propra.imageconverter.util.CheckedOutputStream;
 
@@ -23,15 +22,23 @@ public class ImageTranscoderHuffman extends ImageTranscoderRaw {
     private HuffmanTree huffmanTree;
     
     // Ausgabe Bitstream
-    private BitOutputStream outStream;  
+    private BitOutputStream bitOutStream;  
     
     /**
      *
      */
-    public ImageTranscoderHuffman(ImageResource resource) {
-        super(resource);
+    public ImageTranscoderHuffman(ImageAttributes attributes) {
+        super(attributes);
     }
 
+    /**
+     * 
+     */
+    @Override
+    public Compression getCompression() {
+        return Compression.HUFFMAN;
+    }
+    
     /**
      * Bereitet die Huffmankodierung vor
      */
@@ -40,16 +47,13 @@ public class ImageTranscoderHuffman extends ImageTranscoderRaw {
         super.beginOperation(op, out);
         
         switch(op) {
-            case ANALYZE -> {
-                Arrays.fill(histogram, 0);
-            }
             case ENCODE -> {
                 /*
                  *  BitStream erstellen und den durch Analyse erstellten 
                  *  Baum als Bitfolge in Stream kodieren
                  */
-                outStream = new BitOutputStream(resource.getOutputStream());
-                huffmanTree.storeTreeInStream(outStream);
+                bitOutStream = new BitOutputStream(outStream);
+                huffmanTree.storeTreeInStream(bitOutStream);
             }
         }
         return this;
@@ -69,7 +73,7 @@ public class ImageTranscoderHuffman extends ImageTranscoderRaw {
                 for(long i:histogram) {
                     sum += i;
                 }  
-                if(sum != resource.getAttributes().getImageSize()) {
+                if(sum != attributes.getImageSize()) {
                     throw new IOException("Fehlerhafte Bilddaten (Histogram)");
                 }
 
@@ -85,7 +89,7 @@ public class ImageTranscoderHuffman extends ImageTranscoderRaw {
                  *  Stream flushen und kodierte Datengröße aktualisieren
                  */
                 outStream.flush();
-                encodedBytes = outStream.getByteCounter(); 
+                encodedBytes = bitOutStream.getByteCounter(); 
             }
         }
 
@@ -118,7 +122,7 @@ public class ImageTranscoderHuffman extends ImageTranscoderRaw {
         huffmanTree.buildTreeFromResource(stream);
         
         // Lädt, dekodiert und sendet Pixelblöcke an Listener  
-        while(symbolCtr++ < resource.getAttributes().getImageSize()) {
+        while(symbolCtr++ < attributes.getImageSize()) {
             
             // Symbol dekodieren
             int symbol = huffmanTree.decodeSymbol(stream);
@@ -169,9 +173,9 @@ public class ImageTranscoderHuffman extends ImageTranscoderRaw {
                 // Pixel lesen und Farbe konvertieren
                 block.get(c);
 
-                outStream.write(huffmanTree.encodeSymbol(c[0] & 0xFF));
-                outStream.write(huffmanTree.encodeSymbol(c[1] & 0xFF));
-                outStream.write(huffmanTree.encodeSymbol(c[2] & 0xFF));
+                bitOutStream.write(huffmanTree.encodeSymbol(c[0] & 0xFF));
+                bitOutStream.write(huffmanTree.encodeSymbol(c[1] & 0xFF));
+                bitOutStream.write(huffmanTree.encodeSymbol(c[2] & 0xFF));
             }
         }
     }   
