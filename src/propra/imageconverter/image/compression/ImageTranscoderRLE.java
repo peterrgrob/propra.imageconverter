@@ -7,7 +7,7 @@ import propra.imageconverter.util.CheckedOutputStream;
 import propra.imageconverter.data.IDataTarget;
 import propra.imageconverter.data.IDataTranscoder;
 import propra.imageconverter.image.Color;
-import propra.imageconverter.image.ColorOperations;
+import propra.imageconverter.image.ColorUtil;
 import propra.imageconverter.image.ImageAttributes;
 
 /**
@@ -78,7 +78,7 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
             if(packetHeader > 127) {
                 // Farbwert auslesen und Ausgabepuffer auffüllen
                 in.read(rle.get());
-                ColorOperations.fill(buff, rle, pixelCount);
+                ColorUtil.fill(buff, rle, pixelCount);
             } else {
                 // RAW Farben übertragen
                 in.read(buff.array(),buff.position(),packetLen);
@@ -179,7 +179,7 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
         int counter = 1;
         int len = data.limit();
 
-        while(ColorOperations.compareColor(array, baseOffset, runOffset)) {
+        while(ColorUtil.compareColor(array, baseOffset, runOffset)) {
             runOffset += Color.PIXEL_SIZE;  
             counter++;
             
@@ -207,7 +207,7 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
         int limit = inBuffer.limit();
         
         // Vergleicht aktuelle Farbe mit der folgenden Farbe
-        while( !ColorOperations.compareColor(inArray, inOffset, inOffset + 3)) {
+        while( !ColorUtil.compareColor(inArray, inOffset, inOffset + 3)) {
 
             outArray[outOffset++] = inArray[inOffset++];
             outArray[outOffset++] = inArray[inOffset++];

@@ -37,6 +37,7 @@ public class ImageResourceTGA extends ImageResource {
     public ImageResourceTGA(String file, boolean write) throws IOException {
         super(file, write);
         fileHeaderSize = TGA_HEADER_SIZE;
+        header.setFormat(Color.Format.COLOR_BGR);
     }
     
     /**

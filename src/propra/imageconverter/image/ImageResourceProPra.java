@@ -40,7 +40,7 @@ public class ImageResourceProPra extends ImageResource {
         super(file, write);
         
         fileHeaderSize = PROPRA_HEADER_SIZE;
-        header.setFormat(Color.Format.COLOR_BGR);
+        header.setFormat(Color.Format.COLOR_RBG);
         checksum = new ChecksumPropra();
         
         inStream.setChecksum(checksum);
@@ -126,6 +126,8 @@ public class ImageResourceProPra extends ImageResource {
         // DataBuffer für Header erstellen
         ByteBuffer buff = ByteBuffer.allocate(fileHeaderSize);
         buff.order(ByteOrder.LITTLE_ENDIAN);
+        
+        header.setChecksum(checksum.getValue());
         
         // Attribute in ByteBuffer schreiben
         DataUtil.putStringToByteBuffer(buff, 0, PROPRA_VERSION);

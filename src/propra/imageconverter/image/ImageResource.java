@@ -7,6 +7,7 @@ import propra.imageconverter.data.DataUtil;
 import propra.imageconverter.data.IDataTranscoder;
 import propra.imageconverter.data.IDataTranscoder.Compression;
 import propra.imageconverter.data.IDataTranscoder.EncodeMode;
+import propra.imageconverter.image.ColorUtil.ColorOp;
 import propra.imageconverter.image.compression.ImageTranscoderAuto;
 import propra.imageconverter.image.compression.ImageTranscoderRaw;
 
@@ -81,14 +82,14 @@ public abstract class ImageResource extends DataResource {
         /*
          * ggfs. notwendige Farbkonvertierung ermitteln
          */
-        ColorOperation colorConverter = null;
+        ColorOp colorConverter = null;
         if(transcodedImage.getAttributes().getFormat() != header.getFormat()) { 
             switch(header.getFormat()) {
                 case COLOR_BGR -> {
-                    colorConverter = ColorOperations::convertBGRtoRBG;
+                    colorConverter = ColorUtil::convertBGRtoRBG;
                 }
                 case COLOR_RBG -> {
-                    colorConverter = ColorOperations::convertRBGtoBGR;
+                    colorConverter = ColorUtil::convertRBGtoBGR;
                 }
             }
         }

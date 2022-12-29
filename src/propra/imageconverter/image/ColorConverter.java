@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import propra.imageconverter.data.IDataTranscoder;
 import propra.imageconverter.data.IDataTarget;
+import propra.imageconverter.image.ColorUtil.ColorOp;
 
 /**
  * Wendet eine Operation auf die empfangenen Farben an und leitet den Puffer 
@@ -15,12 +16,12 @@ public class ColorConverter implements IDataTarget {
     private final IDataTarget target;
     
     // Operation die auf den Farben ausgeführt wird
-    private final ColorOperation op;
+    private final ColorOp op;
 
     /**
      * 
      */
-    public ColorConverter(ColorOperation op, IDataTarget target) {
+    public ColorConverter(ColorOp op, IDataTarget target) {
         this.target = target;
         this.op = op;
     }
@@ -31,7 +32,7 @@ public class ColorConverter implements IDataTarget {
     @Override
     public void onData(ByteBuffer data, boolean lastBlock, IDataTranscoder caller) throws IOException {
         if(op != null) {
-            ColorOperations.filterColorBuffer(data, data, op);
+            ColorUtil.filterColorBuffer(data, data, op);
         }
         target.onData(data, lastBlock, caller);
     }

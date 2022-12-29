@@ -2,20 +2,21 @@ package propra.imageconverter.image;
 
 import java.nio.ByteBuffer;
 
-/**
- * FunctionalInterface für Farboperationen
- */
-@FunctionalInterface
-interface ColorOperation {
-    void apply( byte[] in, int offset1, 
-                byte[] out, int offset2);
-}
 
 /**
  * Diverse statische Utility Methoden zur Bildverarbeitung, zT verwendbar als 
  * statische Lambda Referenz für ColorOperation
  */
-public class ColorOperations {
+public class ColorUtil {
+    /**
+    * FunctionalInterface für Farboperationen
+    */
+   @FunctionalInterface
+   interface ColorOp {
+       void apply( byte[] in, int offset1, 
+                   byte[] out, int offset2);
+   }
+    
     /**
      *
      */
@@ -44,7 +45,7 @@ public class ColorOperations {
     /**
      * Wendet eine ColorOperation auf den ByteBuffer an
      */
-    static void filterColorBuffer(ByteBuffer in, ByteBuffer out, ColorOperation filter) {
+    static void filterColorBuffer(ByteBuffer in, ByteBuffer out, ColorOp filter) {
         byte[] inBytes = in.array();
         byte[] outBytes = out.array();
                 
@@ -86,3 +87,4 @@ public class ColorOperations {
         return buffer.position();
     }
 }
+
