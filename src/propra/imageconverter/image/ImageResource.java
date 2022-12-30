@@ -176,16 +176,16 @@ public abstract class ImageResource extends DataResource {
     }
     
     /**
-     * 
+     * Format unterstützt Prüfsumme?
      */
     public boolean isChecked() {
         return false;
     }
     
     /**
-     * 
+     * Gibt die aktuelle Prüfsumme zurück
      */
-    public long getChecksum() {
+    public long getCurrentChecksum() {
         return header.getChecksum();
     }
 }

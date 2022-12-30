@@ -59,9 +59,9 @@ public class ImageTask implements AutoCloseable {
         
         // Prüfsumme prüfen
         if(inImage.isChecked()) {
-            if(inImage.getChecksum() != inImage.getAttributes().getChecksum()) {
+            if(inImage.getCurrentChecksum() != inImage.getAttributes().getChecksum()) {
                 throw new IOException(  "Prüfsumme " 
-                                        + String.format("0x%08X", (int)inImage.getChecksum()) 
+                                        + String.format("0x%08X", (int)inImage.getCurrentChecksum()) 
                                         + " ungleich " 
                                         + String.format("0x%08X", (int)inImage.getAttributes().getChecksum()));
             }
@@ -85,12 +85,12 @@ public class ImageTask implements AutoCloseable {
             
             if(inImage.isChecked()) {
                 stateString = stateString.concat(   "\nEingabe Prüfsumme (Ok): "+String.format("0x%08X", 
-                                                    (int)inImage.getChecksum()));
+                                                    (int)inImage.getCurrentChecksum()));
             }
             
             if(outImage.isChecked()) {
                 stateString = stateString.concat(   "\nAusgabe Prüfsumme: "+String.format("0x%08X", 
-                                                    (int)outImage.getChecksum()));
+                                                    (int)outImage.getCurrentChecksum()));
             }
         }
         

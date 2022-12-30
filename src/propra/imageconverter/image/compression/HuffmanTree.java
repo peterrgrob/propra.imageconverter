@@ -67,7 +67,7 @@ public class HuffmanTree {
                     
             /*
              *  Zwei niedrigste Knoten zu einem Knoten verbinden
-             *  und in der Queue einfügen
+             *  und in die Queue einfügen
              */
             HuffmanNode right = q.poll();
             HuffmanNode left = q.poll();

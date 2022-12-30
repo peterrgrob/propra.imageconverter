@@ -63,19 +63,8 @@ public class ImageResourceProPra extends ImageResource {
      * 
      */
     @Override
-    public long getChecksum() {
+    public long getCurrentChecksum() {
         return checksum.getValue();
-    }
-    
-    /**
-     * 
-     */
-    @Override
-    public void setHeader(ImageAttributes newHeader) {
-        super.setHeader(newHeader);
-        if(checksum != null) {
-            header.setChecksum(checksum.getValue());
-        }
     }
     
     /**
@@ -166,7 +155,7 @@ public class ImageResourceProPra extends ImageResource {
         buff.putShort(PROPRA_HEADER_OFFSET_WIDTH, (short)header.getWidth());
         buff.putShort(PROPRA_HEADER_OFFSET_HEIGHT, (short)header.getHeight());
         buff.put(PROPRA_HEADER_OFFSET_BPP, (byte)(24));
-        buff.putInt(PROPRA_HEADER_OFFSET_CHECKSUM, (int)header.getChecksum());
+        buff.putInt(PROPRA_HEADER_OFFSET_CHECKSUM, (int)getCurrentChecksum());
         
         // Kompression 
         switch(header.getCompression()) {
