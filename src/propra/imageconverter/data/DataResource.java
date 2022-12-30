@@ -28,9 +28,6 @@ public class DataResource implements IDataResource {
     protected CheckedOutputStream outStream;
     protected CheckedInputStream inStream; 
     
-    // Prüfsumme 
-    protected IChecksum checksum;
-    
     /**
      * 
      * @param file

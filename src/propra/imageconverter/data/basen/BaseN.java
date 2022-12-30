@@ -99,7 +99,6 @@ public class BaseN extends DataTranscoder {
         }
                 
         //  Daten an Listener senden
-        bitStream.flushByte();
         ByteBuffer out = ByteBuffer.wrap(outStream.toByteArray());
         target.onData(out, true, this);
     }

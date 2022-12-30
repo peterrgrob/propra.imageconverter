@@ -1,7 +1,6 @@
 package propra.imageconverter.image;
 
 import java.io.IOException;
-import propra.imageconverter.util.IChecksum;
 import propra.imageconverter.data.DataResource;
 import propra.imageconverter.data.DataUtil;
 import propra.imageconverter.data.IDataTranscoder;
@@ -50,10 +49,6 @@ public abstract class ImageResource extends DataResource {
     public void setHeader(ImageAttributes newHeader) {
         this.header = new ImageAttributes(newHeader);
         transcoder = ImageTranscoderRaw.createTranscoder(header);
-        
-        if(checksum != null) {
-            header.setChecksum(checksum.getValue());
-        }
     }
     
     /**
@@ -181,10 +176,16 @@ public abstract class ImageResource extends DataResource {
     }
     
     /**
-     *
-     * @return
+     * 
      */
-    public IChecksum getChecksum() {
-        return checksum;
+    public boolean isChecked() {
+        return false;
+    }
+    
+    /**
+     * 
+     */
+    public long getChecksum() {
+        return header.getChecksum();
     }
 }

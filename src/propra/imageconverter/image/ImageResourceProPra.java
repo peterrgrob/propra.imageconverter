@@ -7,6 +7,7 @@ import java.nio.ByteOrder;
 import propra.imageconverter.util.ChecksumPropra;
 import propra.imageconverter.data.DataUtil;
 import propra.imageconverter.data.IDataTranscoder.Compression;
+import propra.imageconverter.util.IChecksum;
 
 /**
  * Schreibt und liest ProPra Header
@@ -30,6 +31,9 @@ public class ImageResourceProPra extends ImageResource {
     static final int PROPRA_HEADER_ENCODING_RLE = 1;   
     static final int PROPRA_HEADER_ENCODING_HUFFMAN = 2;  
     
+    // Prüfsumme 
+    protected IChecksum checksum;
+    
     /**
      * 
      * @param file
@@ -45,6 +49,33 @@ public class ImageResourceProPra extends ImageResource {
         
         inStream.setChecksum(checksum);
         outStream.setChecksum(checksum);
+    }
+    
+    /**
+     * 
+     */
+    @Override
+    public boolean isChecked() {
+        return true;
+    }
+    
+    /**
+     * 
+     */
+    @Override
+    public long getChecksum() {
+        return checksum.getValue();
+    }
+    
+    /**
+     * 
+     */
+    @Override
+    public void setHeader(ImageAttributes newHeader) {
+        super.setHeader(newHeader);
+        if(checksum != null) {
+            header.setChecksum(checksum.getValue());
+        }
     }
     
     /**

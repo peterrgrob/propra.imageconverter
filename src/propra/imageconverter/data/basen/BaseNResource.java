@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataResource;
 import propra.imageconverter.data.IDataResource;
 import propra.imageconverter.data.IDataTarget;
+import propra.imageconverter.data.IDataTranscoder.EncodeMode;
 import propra.imageconverter.data.basen.BaseN.BaseNEncoding;
 
 
@@ -67,7 +68,9 @@ public class BaseNResource extends DataResource {
 
         // Daten in Resource kodieren
         BaseN encoder = new BaseN(this);
+        encoder.beginEncoding(EncodeMode.ENCODE, getOutputStream());
         encoder.encode(data, true);
+        encoder.endEncoding();
     }
     
     /**

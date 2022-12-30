@@ -58,10 +58,10 @@ public class ImageTask implements AutoCloseable {
         outImage = inImage.convertTo(outPath, outEncoding);
         
         // Prüfsumme prüfen
-        if(inImage.getChecksum() != null) {
-            if(inImage.getChecksum().getValue() != inImage.getAttributes().getChecksum()) {
+        if(inImage.isChecked()) {
+            if(inImage.getChecksum() != inImage.getAttributes().getChecksum()) {
                 throw new IOException(  "Prüfsumme " 
-                                        + String.format("0x%08X", (int)inImage.getChecksum().getValue()) 
+                                        + String.format("0x%08X", (int)inImage.getChecksum()) 
                                         + " ungleich " 
                                         + String.format("0x%08X", (int)inImage.getAttributes().getChecksum()));
             }
@@ -83,14 +83,14 @@ public class ImageTask implements AutoCloseable {
             stateString = stateString.concat("\nKompression: " + header.getCompression().toString());
             stateString = stateString.concat(" --> " + outEncoding.toString());            
             
-            if(inImage.getChecksum() != null) {
+            if(inImage.isChecked()) {
                 stateString = stateString.concat(   "\nEingabe Prüfsumme (Ok): "+String.format("0x%08X", 
-                                                    (int)inImage.getChecksum().getValue()));
+                                                    (int)inImage.getChecksum()));
             }
             
-            if(outImage.getChecksum() != null) {
+            if(outImage.isChecked()) {
                 stateString = stateString.concat(   "\nAusgabe Prüfsumme: "+String.format("0x%08X", 
-                                                    (int)outImage.getChecksum().getValue()));
+                                                    (int)outImage.getChecksum()));
             }
         }
         
