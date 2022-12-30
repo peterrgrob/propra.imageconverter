@@ -16,17 +16,13 @@ public class ImageAttributes {
     private Compression encoding;
     private Format format;
 
-    /**
-     * 
-     */
     public ImageAttributes() {
         format = Color.Format.COLOR_BGR;
         encoding = Compression.UNCOMPRESSED;
     }
     
     /**
-     *
-     * @param src
+     * Copyconstructor
      */
     public ImageAttributes(ImageAttributes src) {
         if (src == null) {
@@ -41,6 +37,9 @@ public class ImageAttributes {
         this.format = src.format;
     }
 
+    /**
+     * Gibt Attribute als String zurück
+     */
     @Override
     public String toString() {
         String stateString;
@@ -52,8 +51,9 @@ public class ImageAttributes {
           return stateString;
     }
     
-    
-
+    /*
+     *  Getter/Setter
+     */
     public int getPixelCount() {
         return width * height;
     }

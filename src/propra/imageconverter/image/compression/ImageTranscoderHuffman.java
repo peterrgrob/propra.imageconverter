@@ -11,7 +11,7 @@ import propra.imageconverter.util.CheckedInputStream;
 import propra.imageconverter.util.CheckedOutputStream;
 
 /**
- * 
+ * Transcoder Implementierung für Huffman Kodierung
  */
 public class ImageTranscoderHuffman extends ImageTranscoderRaw {
     
@@ -25,22 +25,19 @@ public class ImageTranscoderHuffman extends ImageTranscoderRaw {
     private BitOutputStream bitOutStream;  
     
     /**
-     *
+     *  Konstruktor
      */
     public ImageTranscoderHuffman(ImageAttributes attributes) {
         super(attributes);
     }
 
-    /**
-     * 
-     */
     @Override
     public Compression getCompression() {
         return Compression.HUFFMAN;
     }
     
     /**
-     * Bereitet die Huffmankodierung vor
+     * Bereitet die Huffmankodierung der Blöcke vor
      */
     @Override
     public IDataTranscoder beginEncoding(EncodeMode op, CheckedOutputStream out) throws IOException {

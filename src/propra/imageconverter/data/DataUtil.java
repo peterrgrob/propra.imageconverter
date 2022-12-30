@@ -15,50 +15,13 @@ public class DataUtil {
     
     /**
      * Prüft ob ein Bit gesetzt ist
-     * @param value
-     * @param bit
-     * @return 
      */
     public static boolean checkBit(byte value, byte bit) {
         return ((value >> bit) & 1) == 0;
     }
     
     /**
-     * Konvertiert Byte Array in einen Long Wert 
-     * @param bytes
-     * @param offset
-     * @param len
-     * @return 
-     */
-    public static long bytesToLong(byte[] bytes, int offset, int len) {
-        long value = 0;
-        for(int i=0; i<len; i++) {
-            value <<= 8;
-            value += (int)(bytes[i + offset] & 0xFF);
-        }
-        return value;
-    }
-    
-    /**
-     * Konvertiert Bytes eines long Wertes zu einem Byte Array
-     * @param value
-     * @param byteCount
-     * @return 
-     */
-    static public byte[] longToBytes(long value, int byteCount) {
-        byte[] nb = new byte[byteCount];
-        for(int i=0; i<byteCount;i++) {
-            nb[byteCount - i - 1] = (byte)(value & 0xFF);
-            value >>= 8;
-        }
-        return nb;
-    }
-    
-    /**
-     *
-     * @param buffer
-     * @param offset
-     * @param string
+     * Schreibt String in ByteBuffer
      */
     public static void putStringToByteBuffer(ByteBuffer buffer, 
                                              int offset, 
@@ -73,11 +36,7 @@ public class DataUtil {
     }
     
     /**
-     *
-     * @param buffer
-     * @param len 
-     * @return
-     * @throws java.io.UnsupportedEncodingException 
+     * Liest String von ByteBuffer
      */
     public static String getStringFromByteBuffer(ByteBuffer buffer, int len) throws UnsupportedEncodingException {
         if (len <= 0 
@@ -91,12 +50,8 @@ public class DataUtil {
     
     /**
      * Verzeichnisse und Datei erstellen, falls nötig
-     * @param filePath
-     * @return 
-     * @throws java.io.IOException
      */
     public static File createFileAndDirectory(String filePath) throws IOException {
-     
         Path outDirs = Paths.get(filePath);
         Files.createDirectories(outDirs.getParent());
         
@@ -109,7 +64,7 @@ public class DataUtil {
     }
     
     /**
-     * 
+     * Extrahiert Dateiendung des Dateinamens
      */
     static public String getExtension(String path) {
         String[] components = path.split("\\.");

@@ -1,9 +1,7 @@
 package propra.imageconverter.util;
 
 /**
- * Klasse hält den Code für ein Symbol
- *
- * @author pg
+ * Utility Klasse für BitCode, hält z.B den Code für ein Huffman-Symbol
  */
 public class BitCode implements Comparable<BitCode> {
 
@@ -13,39 +11,22 @@ public class BitCode implements Comparable<BitCode> {
    // Länge des Codes in Bit
    private int length;
 
-   /**
-    * 
-    * @param code
-    * @param length 
-    */
    public BitCode(int code, int length) {
        this.code = code;
        this.length = length;
    }
 
-   /**
-    * 
-    * @param src 
-    */
    public BitCode(BitCode src) {
        this.code = src.code;
        this.length = src.length;
    }
    
-   /**
-    * 
-    * @param code
-    * @param length 
-    */
    public void setCode(int code) {
        this.code = code;
    }
 
    /**
-    * Bit hinzufügen
-    * 
-    * @param bit
-    * @return 
+    * Fügt ein Bit an aktuelle Position hinzu
     */
    public BitCode addBit(boolean bit) {
        code <<= 1;
@@ -55,25 +36,21 @@ public class BitCode implements Comparable<BitCode> {
    }
 
    /**
-    * 
-    * @return 
+    * Gibt den aktuellen Code zurück
     */
    public int getCode() {
        return code;
    }
 
    /**
-    * 
-    * @return 
+    * Code-Länge
     */
    public int getLength() {
        return length;
    }
 
    /**
-    * 
-    * @param o
-    * @return 
+    * Vergleicht zwei Codes
     */
    @Override
    public int compareTo(BitCode o) {

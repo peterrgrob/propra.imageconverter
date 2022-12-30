@@ -1,11 +1,11 @@
-package propra.imageconverter.util;
+package propra.imageconverter;
 
 import java.util.HashMap;
 import propra.imageconverter.data.IDataTranscoder.Compression;
 
 /**
  * Hilfsklasse die Kommandozeilenparameter parsed und speichert, diese
- * können über Option abgefragt werden.
+ * können über Options abgefragt werden.
  */
  public class CmdLine {
     
@@ -35,7 +35,7 @@ import propra.imageconverter.data.IDataTranscoder.Compression;
     }
    
     /**
-     * 
+     * Parsed alle Optionen der Kommandozeile in Hashtable
      */
     public CmdLine(String[] args) {
         this.options = new HashMap<>();
@@ -65,14 +65,14 @@ import propra.imageconverter.data.IDataTranscoder.Compression;
     } 
     
     /**
-     *
+     * Gibt den Wert der Option zurück
      */
     public String getOption(Options opt) {
         return options.get(opt);
     }
     
     /**
-     * 
+     * Gibt gewünschte Kompression zurück
      */
     public Compression getCompression() {
         String enc = getOption(Options.COMPRESSION);
@@ -93,15 +93,13 @@ import propra.imageconverter.data.IDataTranscoder.Compression;
     }
     
     /**
-     * Gibt Alpabet von der Konsole zurück
+     * Gibt Alphabet von der Konsole zurück, oder null
      */
     public String getAlphabet() {
         // Alphabet wählen
         if( options.containsKey(Options.ENCODE_BASE_32)
-        ||  options.containsKey(Options.DECODE_BASE_32)) {
-            return null;
-        } else if(options.containsKey(Options.DECODE_BASE_N)) {  
-            // Leeres Alphabet, wird später aus Datei geladen
+        ||  options.containsKey(Options.DECODE_BASE_32)
+        ||  options.containsKey(Options.DECODE_BASE_N)) {
             return null;
         }else if(options.containsKey(Options.ENCODE_BASE_N)) { 
             // Von der Kommandozeile übernehmen
@@ -117,7 +115,7 @@ import propra.imageconverter.data.IDataTranscoder.Compression;
     }
     
     /**
-     *  true wenn Base en- oder dekodierung 
+     * true wenn allgemeiner BaseN-Modus 
      */
     public boolean isBaseTask() {
         return (options.containsKey(Options.ENCODE_BASE_32)
@@ -127,7 +125,7 @@ import propra.imageconverter.data.IDataTranscoder.Compression;
     }
     
     /**
-     * true, wenn BaseNCodec&Base32 Dekodierung
+     * true, wenn allgemeine BaseN Dekodierung
      */
     public boolean isBaseNDecode() {
         return (options.containsKey(Options.DECODE_BASE_32)
@@ -135,7 +133,7 @@ import propra.imageconverter.data.IDataTranscoder.Compression;
     }
     
     /**
-     * true, wenn BaseNCodec Verarbeitung
+     * true, wenn BaseN Modus
      */
     public boolean isBaseN() {
         return (options.containsKey(Options.ENCODE_BASE_N)
@@ -143,7 +141,7 @@ import propra.imageconverter.data.IDataTranscoder.Compression;
     }
     
     /**
-     * true, wenn Base32 Verarbeitung
+     * true, wenn Base32 Modus
      */
     public boolean isBase32() {
         return (options.containsKey(Options.ENCODE_BASE_32)

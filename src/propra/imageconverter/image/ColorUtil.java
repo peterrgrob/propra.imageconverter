@@ -5,23 +5,21 @@ import java.nio.ByteBuffer;
 
 /**
  * Diverse statische Utility Methoden zur Bildverarbeitung, zT verwendbar als 
- * statische Lambda Referenz für ColorOperation
+ * statische Methoden Referenz für ColorConverter
  */
 public class ColorUtil {
-    /**
+   /**
     * FunctionalInterface für Farboperationen
     */
    @FunctionalInterface
    interface ColorOp {
-       void apply( byte[] in, int offset1, 
-                   byte[] out, int offset2);
+       void apply( byte[] in, int offset1, byte[] out, int offset2);
    }
     
     /**
-     *
+     * BGR -> RBG
      */
-    static public void convertBGRtoRBG( byte[] in, int offset1,
-                                        byte[] out, int offset2) {
+    static public void convertBGRtoRBG(byte[] in, int offset1, byte[] out, int offset2) {
         byte b = in[offset1];
         byte g = in[offset1 + 1];
         
@@ -29,12 +27,11 @@ public class ColorUtil {
         out[offset2 + 1] = b;
         out[offset2 + 2] = g;
     }
-    
+ 
     /**
-     *
+     * RBG -> BGR
      */
-    static public void convertRBGtoBGR( byte[] in, int offset1,
-                                        byte[] out, int offset2) {
+    static public void convertRBGtoBGR(byte[] in, int offset1, byte[] out, int offset2) {
         byte r = in[offset1];
 
         out[offset2] = in[offset1 + 1];

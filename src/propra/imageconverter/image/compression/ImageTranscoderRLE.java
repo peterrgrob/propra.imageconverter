@@ -11,7 +11,7 @@ import propra.imageconverter.image.ColorUtil;
 import propra.imageconverter.image.ImageAttributes;
 
 /**
- *
+ * Transcoder Implementierung für RLE Kompression
  */
 public class ImageTranscoderRLE extends ImageTranscoderRaw {
 
@@ -19,23 +19,17 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
     private ByteBuffer bufferedData; 
     private boolean isBufferedData;
 
-    /**
-     *
-     */
     public ImageTranscoderRLE(ImageAttributes attributes) {
         super(attributes);
     }
 
-    /**
-     * 
-     */
     @Override
     public Compression getCompression() {
         return Compression.RLE;
     }
     
     /**
-     * 
+     * Initialisiert Kodierung der Blöcke
      */
     @Override
     public IDataTranscoder beginEncoding(EncodeMode op, CheckedOutputStream out) throws IOException {
@@ -46,7 +40,7 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
 
     
     /**
-     *
+     * Dekodiert RLE Daten des Streams
      */
     @Override
     public void decode(CheckedInputStream in, IDataTarget target) throws IOException {     
@@ -94,7 +88,7 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
     }
     
     /**
-     *
+     * Kodiert Block
      */
     @Override
     public void encode(ByteBuffer block, boolean last) throws IOException{ 
@@ -153,7 +147,7 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
     }
 
     /**
-     * 
+     * Schließt Kodierung ab
      */
     @Override
     public long endEncoding() throws IOException {

@@ -5,7 +5,7 @@ import propra.imageconverter.util.CheckedOutputStream;
 import propra.imageconverter.util.PropraException;
 
 /**
- * Basisfunktionalität für die Kompressionsklassen. 
+ * Basisfunktionalität für Transcoderklassen
  */
 public abstract class DataTranscoder implements IDataTranscoder {
     
@@ -21,23 +21,18 @@ public abstract class DataTranscoder implements IDataTranscoder {
     // Ausgabestream
     protected CheckedOutputStream outStream;
 
-    /**
-     * 
-     */
     public DataTranscoder() {
         operation = EncodeMode.NONE;
     }    
     
-    /**
-     * 
-     */
     @Override
     public EncodeMode getOperation() {
         return operation;
     }
     
     /**
-     * 
+     * Gibt true zurück, wenn der Transcoder für die Kodierung einen 
+     * Analyselauf benötigt
      */
     @Override
     public boolean analyzeNecessary() {
@@ -45,7 +40,7 @@ public abstract class DataTranscoder implements IDataTranscoder {
     }
 
     /**
-     *
+     * Initialisiert die Kodierung von Datenblöcken
      */
     @Override
     public IDataTranscoder beginEncoding(EncodeMode op, CheckedOutputStream out) throws IOException {  
@@ -57,8 +52,7 @@ public abstract class DataTranscoder implements IDataTranscoder {
     }
     
     /**
-     *
-     * @throws IOException
+     * Beendet die Kodierung
      */
     @Override
     public long endEncoding() throws IOException {

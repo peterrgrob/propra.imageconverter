@@ -1,17 +1,17 @@
-package propra.imageconverter.data.basen;
+package propra.imageconverter.basen;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataResource;
 import propra.imageconverter.data.IDataResource;
-import propra.imageconverter.data.IDataTarget;
+import propra.imageconverter.data.IDataTranscoder;
 import propra.imageconverter.data.IDataTranscoder.EncodeMode;
-import propra.imageconverter.data.basen.BaseN.BaseNEncoding;
+import propra.imageconverter.basen.BaseN.BaseNEncoding;
+import propra.imageconverter.util.PropraException;
 
 
 /**
- *
- * @author pg
+ *  BaseN Implementierung einer Ressource
  */
 public class BaseNResource extends DataResource {
     
@@ -22,46 +22,49 @@ public class BaseNResource extends DataResource {
     // Verwendete BaseN Kodierung
     private BaseNEncoding baseEncoding;
     
-    /**
-     * 
-     * @param file
-     * @param format
-     * @param write
-     * @throws IOException
-     */
+    // Konvertierungsresource
+    private IDataResource currentResource; 
+    
     public BaseNResource(String file, String alphabet, boolean write) throws IOException {
         super(file, write);
         setAlphabet(alphabet);
     }
     
     /**
-     * 
-     * @param output 
-     * @throws java.io.IOException 
+     * Dekodiert BaseN Ressource und speichert in output
      */
-    public void decodeTo(IDataTarget output) throws IOException {
-        
+    public void decode(IDataResource output) throws IOException {
+        currentResource = output;
+                
         // Alphabet aus Datei laden?
         if(!isValid()) {
             setAlphabet(binaryFile.readLine());
         }
-
+        
+        PropraException.printMessage("Format: " + baseEncoding.toString() 
+                                    + "\nAlphabet: " + alphabet + "\nDekodierung starten...");
+        
         // Daten dekodieren
         BaseN decoder = new BaseN(this);
-        decoder.decode(getInputStream(), output);
+        decoder.decode(getInputStream(), (ByteBuffer data, boolean lastBlock, IDataTranscoder caller) -> {
+                        currentResource.getOutputStream().write(data);
+        });
+        
+        PropraException.printMessage("Abgeschlossen");
     } 
     
     /**
-     * 
-     * @param input 
-     * @throws java.io.IOException 
+     * Kodiert Binärdaten zu BaseN
      */
-    public void encodeFrom(IDataResource input) throws IOException {
+    public void encode(IDataResource input) throws IOException {
         
         // Bei BaseN Alphabet in Datei schreiben
         if(baseEncoding != BaseNEncoding.BASE_DEFAULT_32) {
             binaryFile.writeChars(alphabet + "\n");
         }
+            
+        PropraException.printMessage("Format: " + baseEncoding.toString() 
+                                    + "\nAlphabet: " + alphabet + "\nKodierung starten...");
         
         // Daten von Datei lesen
         ByteBuffer data = ByteBuffer.wrap(input.getInputStream().readAllBytes());
@@ -71,10 +74,12 @@ public class BaseNResource extends DataResource {
         encoder.beginEncoding(EncodeMode.ENCODE, getOutputStream());
         encoder.encode(data, true);
         encoder.endEncoding();
+        
+        PropraException.printMessage("Abgeschlossen");
     }
     
     /**
-     *
+     * Alphabet setzen und prüfen
      */
     public void setAlphabet(String alphabet) {
         if(alphabet == null) {
@@ -133,10 +138,6 @@ public class BaseNResource extends DataResource {
         return true;
     }
     
-    /**
-     * 
-     * @return 
-     */
     public BaseNEncoding getBaseNEncoding() {
         return baseEncoding;
     }

@@ -9,7 +9,7 @@ public class PropraException extends Exception {
     private static final int ERROR_EXIT_CODE = 123;
     
     /**
-     * 
+     * Schreibt msg in System.err und beendet das Programm mit EXIT_CODE
      */
     public static void printErrorAndQuit(String msg, Exception e) {
         String s = msg;
@@ -32,7 +32,7 @@ public class PropraException extends Exception {
     }
     
     /**
-     * 
+     * Gibt msg in System.out aus
      */
     public static void printMessage(String msg) {
         System.out.println(msg); 

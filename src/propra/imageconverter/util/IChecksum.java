@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
  */
 public interface IChecksum {
     /**
-     * 
+     * Prüfsumme
      */
     public long getValue();
     

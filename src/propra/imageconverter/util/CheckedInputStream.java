@@ -20,18 +20,12 @@ public class CheckedInputStream extends FilterInputStream {
     // Letzte Ergebnis
     private int r;
     
-    /**
-     * 
-     */
     public CheckedInputStream(InputStream in) {
         super(in);
         checked = false;
         checksum = new ChecksumNull();
     }
     
-    /**
-     * 
-     */
     public CheckedInputStream(InputStream in, IChecksum checksum) {
         super(in);
         PropraException.assertArgument(checksum);
@@ -39,25 +33,18 @@ public class CheckedInputStream extends FilterInputStream {
         checked = true;
     }
     
-    /**
-     * 
-     */
     public void setChecksum(IChecksum checksum) {
         PropraException.assertArgument(checksum);
         this.checksum = checksum; 
         checked = true;
     }
    
-    
-    /**
-     * 
-     */
     public void enableChecksum(boolean checked) {
         this.checked = checked;
     }
     
-    /**
-     * 
+    /*
+     *  Stream-Methoden
      */
     @Override
     public synchronized int read() throws IOException {
@@ -68,9 +55,6 @@ public class CheckedInputStream extends FilterInputStream {
         return r;
     }   
 
-    /**
-     * 
-     */
     @Override
     public synchronized int read(byte[] b, int off, int len) throws IOException {
         r = in.read(b, off, len);
@@ -80,32 +64,15 @@ public class CheckedInputStream extends FilterInputStream {
         return r;
     }   
     
-    /**
-     * 
-     * @param b
-     * @return
-     * @throws IOException 
-     */
     @Override
     public int read(byte[] b) throws IOException {
         return read(b, 0, b.length);
     }
     
-    /**
-     * 
-     * @param buff
-     * @return
-     * @throws IOException 
-     */
     public int read(ByteBuffer buff) throws IOException {
         return read(buff.array(), buff.position(), buff.limit());
     }
-
-    /**
-     * 
-     * @return
-     * @throws IOException 
-     */
+    
     @Override
     public byte[] readAllBytes() throws IOException {
         byte[] b = super.readAllBytes();

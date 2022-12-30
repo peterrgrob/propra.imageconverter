@@ -7,7 +7,7 @@ import propra.imageconverter.data.IDataTarget;
 import propra.imageconverter.image.ColorUtil.ColorOp;
 
 /**
- * Wendet eine Operation auf die empfangenen Farben an und leitet den Puffer 
+ * Wendet eine ConverterOperation auf die empfangenen Farben an und leitet den Puffer 
  * weiter an das Datenziel
  */
 public class ColorConverter implements IDataTarget {
@@ -19,7 +19,7 @@ public class ColorConverter implements IDataTarget {
     private final ColorOp op;
 
     /**
-     * 
+     * Initialisiert mit Konverterierungsoperation und Datenziel
      */
     public ColorConverter(ColorOp op, IDataTarget target) {
         this.target = target;
@@ -27,7 +27,7 @@ public class ColorConverter implements IDataTarget {
     }
     
     /**
-     * 
+     * Empfängt Pixel zum Konvertieren und weiterleiten
      */
     @Override
     public void onData(ByteBuffer data, boolean lastBlock, IDataTranscoder caller) throws IOException {

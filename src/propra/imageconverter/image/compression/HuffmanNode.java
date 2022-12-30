@@ -48,8 +48,7 @@ public class HuffmanNode implements Comparable<HuffmanNode>{
    }
 
    /**
-    * Baum aus der ProPra Kodierung rekursiv wiederherstellen
-    * 
+    * Erstellt rekursiv einen Baum gemäß der Propra-Kodierung
     */
    public void buildTreeFromResource(BitInputStream resource, HuffmanNode[] nodeMap) throws IOException {
        /*
@@ -77,7 +76,7 @@ public class HuffmanNode implements Comparable<HuffmanNode>{
    }
 
    /**
-    *  
+    * Speichert Baum gemäß der Propra-Kodierung im Stream
     */
    public void storeTreeInStream(BitOutputStream stream) throws IOException {
        if( leftNode == null 
@@ -101,7 +100,6 @@ public class HuffmanNode implements Comparable<HuffmanNode>{
        // Innerer Knoten?
        if(leftNode != null 
        && rightNode != null) {
-
            //  Linken und rechten Teilbaum besuchen
            leftNode.buildBitCodes(new BitCode(c).addBit(false));
            rightNode.buildBitCodes(new BitCode(c).addBit(true));
@@ -110,9 +108,8 @@ public class HuffmanNode implements Comparable<HuffmanNode>{
    }
 
    /**
-    * Sucht Symbol zu den Bits im Stream, gibt -1 bei EOF zurück, 
-    * ansonsten Symbol
-    *  
+    * Durchläuft den Baum bestimmt durch die Bits im Stream, gibt -1 bei EOF zurück, 
+    * ansonsten gefundenes Symbol
     */
    public int decodeSymbol(BitInputStream stream) throws IOException {
        // Symbol erreicht?

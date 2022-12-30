@@ -22,7 +22,7 @@ public class HuffmanTree {
     private HuffmanNode[] nodeArray = new HuffmanNode[256];
 
     /**
-     * 
+     * Konstruktor
      */
     public HuffmanTree() {
     }
@@ -30,7 +30,6 @@ public class HuffmanTree {
     /**
      * Rekonstruiert rekursiv einen Huffmantree aus dem Bitcode in der Ressource nach 
      * Propra-Konstruktionsvorschrift mit einem Preorder-Durchlauf
-     * 
      */
     public void buildTreeFromResource(BitInputStream resource) throws IOException {
         rootNode = new HuffmanNode((byte)0, 0);
@@ -40,14 +39,12 @@ public class HuffmanTree {
     
     /**
      * Erstellt einen Huffmantree aus den Eingabesymbolen und Häufigkeiten
-     * durch Verwendung einer PriorityQueue
-     *
+     * durch Verwendung einer PriorityQueue 
      */
     public void buildTreeFromHistogram(long[] symbols) {
-        
         PriorityQueue<HuffmanNode> q = new PriorityQueue<>();
         
-        /**
+        /*
          *  Symbole nach Häufigkeit sortiert als Knoten 
          *  in PriorityQueue einfügen
          */ 
@@ -87,7 +84,6 @@ public class HuffmanTree {
     
     /**
      * Baum als kodierte Bitfolge in Stream speichern
-     *
      */
     public void storeTreeInStream(BitOutputStream stream) throws IOException {
         rootNode.storeTreeInStream(stream);
@@ -95,7 +91,6 @@ public class HuffmanTree {
     
     /**
      * Dekodiert ein Byte von Stream, gibt Symbol oder -1 bei EOF zurück
-     * 
      */
     public int decodeSymbol(BitInputStream stream) throws IOException {
         return rootNode.decodeSymbol(stream);
@@ -103,21 +98,9 @@ public class HuffmanTree {
     
     /**
      * Gibt den Bitcode für ein Symbol zurück
-     * 
      */
     public BitCode encodeSymbol(int symbol) {
         HuffmanNode n = nodeArray[symbol];
         return n != null ? n.getCode() : null;
-    }
-    
-    /**
-     *  
-     */
-    @Override
-    public String toString() {
-        if(rootNode != null) {
-            return rootNode.toString();
-        }
-        return "";
     }
 }

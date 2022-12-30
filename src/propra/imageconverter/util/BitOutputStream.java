@@ -4,8 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * 
- * @author pg
+ * Klasse kapselt einen Stream und erlaubt das Schreiben einzelner Bits
  */
 public class BitOutputStream {
     
@@ -21,10 +20,6 @@ public class BitOutputStream {
     // Byte Zähler
     private int byteCounter;
     
-    /**
-     * 
-     * @param stream 
-     */
     public BitOutputStream(OutputStream stream) {
         this.stream = stream;
         value = 0;
@@ -32,16 +27,14 @@ public class BitOutputStream {
     }
 
     /**
-     * 
-     * @return 
+     * Anzahl geschriebener Bytes
      */
     public int getByteCounter() {
         return byteCounter;
     }
     
     /**
-     * 
-     * @throws IOException 
+     * Schließt aktuelles Byte ab und flushed den Stream
      */
     public void flush() throws IOException {
         flushByte();
@@ -49,8 +42,7 @@ public class BitOutputStream {
     }
     
     /**
-     * 
-     * @throws IOException 
+     * Schließt aktuelles Byte ab
      */
     public void flushByte() throws IOException {
         if(bitIndex > 0) {
@@ -63,9 +55,6 @@ public class BitOutputStream {
     
     /**
      * Schreibt ein Bit in den Stream
-     * 
-     * @param bit
-     * @throws IOException 
      */
     public void write(int bit) throws IOException {
         value |= (bit & 1) << (7 - bitIndex);
@@ -79,9 +68,6 @@ public class BitOutputStream {
     
     /**
      * Schreibt einen BitCode in den Stream
-     * 
-     * @param code
-     * @throws IOException 
      */
     public void write(BitCode code) throws IOException {  
         int c = code.getCode();
@@ -92,9 +78,7 @@ public class BitOutputStream {
     }
     
     /**
-     * 
-     * @param bitLen
-     * @return 
+     * Schreibt Anzahl an Bits in den Stream
      */
     public void writeBits(int b, int bitLen) throws IOException {
         for(int i=bitLen-1; i>=0; i--) {
@@ -103,10 +87,7 @@ public class BitOutputStream {
     }
     
     /**
-     * Schreibt ein Byte 
-     * 
-     * @param b
-     * @throws IOException 
+     * Schreibt ein Byte an aktuelle Bit-Position
      */
     public void writeByte(int b) throws IOException {
         for(int i=7; i>=0; i--) {

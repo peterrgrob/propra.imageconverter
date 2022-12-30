@@ -4,8 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * 
- * @author pg
+ * Klasse kapselt einen Stream und erlaubt das Lesen einzelner Bits
  */
 public class BitInputStream {
     
@@ -18,10 +17,6 @@ public class BitInputStream {
     // Aktueller Bit-Index
     private byte bitIndex;
     
-    /**
-     * 
-     * @param inStream 
-     */
     public BitInputStream(InputStream inStream) {
         this.inStream = inStream;
         bitIndex = 8;
@@ -52,7 +47,7 @@ public class BitInputStream {
     }
     
     /**
-     * 
+     * Liest Anzahl an Bits
      */
     public int readBits(int bitLen) throws IOException {
         byte b = 0;

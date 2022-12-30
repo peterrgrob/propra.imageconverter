@@ -21,56 +21,33 @@ public class Color implements Comparable<Color> {
     // Index des Pixels im Puffer
     private int index;
 
-    /**
-     * 
-     */
     public Color() {
          values = new byte[PIXEL_SIZE];
     }
    
-    /**
-     * 
-     */
     public Color(byte[] values) {
         set(values);
     }
 
-    /**
-     * 
-     */
     public Color(byte[] values, int index) {
         this.values = values;
         this.index = index;
     }
    
-   /**
-    * 
-    */
     public byte[] get() {
         return values;
     }
    
-    /**
-     * 
-     */
     public int getIndex() {
         return index;
     }
    
-
-    /**
-     * 
-     * @param values 
-     */
     public void set(byte[] values) {
         System.arraycopy(this.values, 0, 
                         values, index, 
                         PIXEL_SIZE);
     }
     
-    /**
-     * Vergleicht zwei Farbwerte
-     */
     @Override
     public int compareTo(Color color) {
         return (values[index + 0] == color.values[color.index + 0]

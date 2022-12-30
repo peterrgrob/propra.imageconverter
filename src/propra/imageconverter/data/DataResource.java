@@ -9,12 +9,10 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.Channels;
 import propra.imageconverter.data.IDataTranscoder.Compression;
-import propra.imageconverter.util.IChecksum;
 
 
 /**
  * Klasse bietet Basisfunktionen für Dateiressourcen 
- * @author pg
  */
 public class DataResource implements IDataResource {
     
@@ -29,36 +27,25 @@ public class DataResource implements IDataResource {
     protected CheckedInputStream inStream; 
     
     /**
-     * 
-     * @param file
-     * @param write
-     * @throws java.io.IOException
+     * Konstruktor, öffnet Streams und erstellt Dateien/Verzeichnis
      */
     public DataResource(String file, boolean write) throws IOException {
-        File fileObj;
-        if(write) {
-            fileObj = DataUtil.createFileAndDirectory(file); 
-        } else {
-            fileObj = new File(file);
-        }
         
+        File fileObj = write ? DataUtil.createFileAndDirectory(file) : new File(file); 
+ 
         binaryFile = new RandomAccessFile(fileObj, "r" + (write ? "w":""));
         inStream = new CheckedInputStream(
                    new BufferedInputStream(Channels.newInputStream(binaryFile.getChannel())));
         outStream = new CheckedOutputStream(
                     new BufferedOutputStream(Channels.newOutputStream(binaryFile.getChannel())));
         
-        if(binaryFile == null 
-        || inStream == null
-        || outStream == null) {
+        if(binaryFile == null || inStream == null || outStream == null) {
             throw new IOException("Fehler beim öffnen der Datei!");
         }
     }
 
     /**
-     * 
-     * @return
-     * @throws IOException
+     * Gibt Länge der Ressource zurück
      */
     @Override
     public long length() throws IOException {
@@ -66,9 +53,7 @@ public class DataResource implements IDataResource {
     }
     
     /**
-     * 
-     * @return
-     * @throws IOException
+     * Gibt aktuelle Position in der Ressource zurück
      */
     @Override
     public long position() throws IOException {
@@ -76,9 +61,7 @@ public class DataResource implements IDataResource {
     }
     
     /**
-     * 
-     * @param p
-     * @throws IOException
+     * Setzt aktuelle Position
      */
     @Override
     public void position(long p) throws IOException {
@@ -86,26 +69,20 @@ public class DataResource implements IDataResource {
     } 
         
     /**
-     *  
-     * @return 
+     *  Gibt Streams der Ressource zurück
      */
     @Override
     public CheckedInputStream getInputStream() {
         return inStream;
     }
     
-    /**
-     *  
-     * @return 
-     */
     @Override
     public CheckedOutputStream getOutputStream() {
         return outStream;     
     }
-    
+     
     /**
-     *
-     * @throws java.io.IOException
+     * Schließt Streams und Filehandle
      */
     @Override
     public void close() throws IOException {

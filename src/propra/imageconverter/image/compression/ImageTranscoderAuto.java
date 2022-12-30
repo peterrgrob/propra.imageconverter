@@ -21,30 +21,27 @@ public class ImageTranscoderAuto extends ImageTranscoderRaw {
     private ImageTranscoderRaw winner;
     
     /**
-     * 
+     * Initialisiert mit Encoder Liste
      */
     public ImageTranscoderAuto( ArrayList<ImageTranscoderRaw> encoder) {
         super(null);
         this.encoderList = encoder;
     }
     
-    /**
-     * 
-     */
     @Override
     public Compression getCompression() {
         return Compression.AUTO;
     }
 
     /**
-     * 
+     * Gibt den besten Transcoder zurück
      */
     public ImageTranscoderRaw getWinner() {
         return winner;
     }
     
     /**
-     * 
+     * Analyse nötig für Huffman
      */
     @Override
     public boolean analyzeNecessary() {
@@ -52,7 +49,7 @@ public class ImageTranscoderAuto extends ImageTranscoderRaw {
     }
 
     /**
-     * 
+     * Initialisiert Encoding
      */
     @Override
     public IDataTranscoder beginEncoding(EncodeMode op, CheckedOutputStream out) throws IOException {
@@ -67,11 +64,10 @@ public class ImageTranscoderAuto extends ImageTranscoderRaw {
     }
     
     /**
-     * 
+     * Blöcke an Codecs weiterreichen
      */
     @Override
     public void encode(ByteBuffer block, boolean last) throws IOException {
-        // Block an Codecs weiterreichen
         for(ImageTranscoderRaw e : encoderList) {
             e.encode(block, last);
             block.rewind();
@@ -79,7 +75,7 @@ public class ImageTranscoderAuto extends ImageTranscoderRaw {
     }
 
     /**
-     * 
+     * Beendet Encoding/Analyse und bestimmt den besten Transcoder
      */
     @Override
     public long endEncoding() throws IOException {

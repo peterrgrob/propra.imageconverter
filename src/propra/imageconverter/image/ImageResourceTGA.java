@@ -7,7 +7,7 @@ import propra.imageconverter.data.DataUtil;
 import propra.imageconverter.data.IDataTranscoder.Compression;
 
 /**
- *  Schreibt und liest TGA Header
+ * Tga spezifische Implementierung einer ImageRessource
  */
 public class ImageResourceTGA extends ImageResource {  
 
@@ -26,13 +26,7 @@ public class ImageResourceTGA extends ImageResource {
     static final int TGA_HEADER_ENCODING_RLE = 10;    
     
     /**
-     *
-     * 
-     * @param file
-     * @param file
-     * @param write
-     * @throws java.io.IOException
-     * @throws IOException
+     * Konstruktor
      */
     public ImageResourceTGA(String file, boolean write) throws IOException {
         super(file, write);
@@ -40,13 +34,9 @@ public class ImageResourceTGA extends ImageResource {
         header.setFormat(Color.Format.COLOR_BGR);
     }
     
-    /**
-     * 
-     * 
-     * @return
-     * @return 
-     * @throws java.io.IOException 
-     * @throws IOException
+    /** 
+     * Liest Tga Header aus dem Stream ein, wandelt in allgemeine Bildattribute um
+     * und prüft auf korrekte Werte
      */
     @Override
     public ImageAttributes readHeader() throws IOException {
@@ -89,7 +79,7 @@ public class ImageResourceTGA extends ImageResource {
     }  
     
     /**
-     * Schreibt allgemeinen Header als TGA Header
+     * Schreibt allgemeine Bildattribute als TGA Header
      */
     @Override
     public void writeHeader() throws IOException {

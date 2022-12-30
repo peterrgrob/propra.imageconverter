@@ -6,13 +6,14 @@ import propra.imageconverter.data.DataUtil;
 import propra.imageconverter.data.IDataTranscoder;
 import propra.imageconverter.data.IDataTranscoder.Compression;
 import propra.imageconverter.data.IDataTranscoder.EncodeMode;
+import propra.imageconverter.image.Color.Format;
 import propra.imageconverter.image.ColorUtil.ColorOp;
 import propra.imageconverter.image.compression.ImageTranscoderAuto;
 import propra.imageconverter.image.compression.ImageTranscoderRaw;
 import propra.imageconverter.util.PropraException;
 
 /**
- *
+ *  Basisklasse für ImageRessources
  */
 public abstract class ImageResource extends DataResource {
     
@@ -22,11 +23,11 @@ public abstract class ImageResource extends DataResource {
     // Bildattribute
     protected ImageAttributes header;
 
-    // Zugeordneter Codec zum kodieren/dekodieren der Bilddaten
+    // Passender Codec zum kodieren/dekodieren der Bilddaten
     protected IDataTranscoder transcoder;
     
     /**
-     * 
+     * Initialisiert die Bild-Ressource zum Lesen/Schreiben
      */
     protected ImageResource(String file, boolean write) throws IOException {
         super(file, write);
@@ -35,17 +36,17 @@ public abstract class ImageResource extends DataResource {
     }
     
     /**
-     *
+     *  Liest Header ein, zu implementieren
      */
     abstract public ImageAttributes readHeader() throws IOException;
     
     /**
-     * 
+     * Schreibt Header, zu implementieren
      */
     abstract public void writeHeader() throws IOException;
     
     /**
-     * 
+     * Bildattribute setzen
      */
     public void setHeader(ImageAttributes newHeader) {
         this.header = new ImageAttributes(newHeader);
@@ -57,9 +58,7 @@ public abstract class ImageResource extends DataResource {
      * Kompression
      */
     public ImageResource convertTo(String outFile, Compression outEncoding) throws IOException {
-        if(outFile == null) {
-            throw new IllegalArgumentException();
-        }   
+        PropraException.assertArgument(outFile);
         
         // Bildattribute einlesen
         readHeader();
@@ -75,21 +74,15 @@ public abstract class ImageResource extends DataResource {
         outHeader.setCompression(outEncoding); 
         outHeader.setFormat(transcodedImage.getAttributes().getFormat());
         transcodedImage.setHeader(outHeader);
-        PropraException.printMessage("Zielbild: " + outHeader.toString() + "\n\nKonvertierung starten...");
+        PropraException.printMessage("Zielbild: " + outHeader.toString() + "\nKonvertierung starten...");
         
         /*
          * ggfs. notwendige Farbkonvertierung ermitteln
          */
         ColorOp colorConverter = null;
         if(transcodedImage.getAttributes().getFormat() != header.getFormat()) { 
-            switch(header.getFormat()) {
-                case COLOR_BGR -> {
-                    colorConverter = ColorUtil::convertBGRtoRBG;
-                }
-                case COLOR_RBG -> {
-                    colorConverter = ColorUtil::convertRBGtoBGR;
-                }
-            }
+            colorConverter = header.getFormat() == Format.COLOR_BGR 
+                           ? ColorUtil::convertBGRtoRBG : ColorUtil::convertRBGtoBGR; 
         }
         
         // Position des Datenblocks merken
@@ -112,7 +105,7 @@ public abstract class ImageResource extends DataResource {
         }
         
         /*
-         * Bei Automodus einen Vorlauf durchführen und bestes Verfahren wählen
+         * Bei Automodus einen Vorlauf ohne Speichern durchführen und bestes Verfahren wählen
          */
         if(outEncoding == Compression.AUTO) {
                         
@@ -129,8 +122,7 @@ public abstract class ImageResource extends DataResource {
         
         /* 
          * Finale Dekodierung und Kodierung starten
-         */
-                                                    
+         */                                        
         getInputStream().enableChecksum(true);
             
         // Header überspringen, wird später geschrieben
@@ -154,9 +146,10 @@ public abstract class ImageResource extends DataResource {
             }
         }
         
+        // Infos ausgeben
         PropraException.printMessage("abgeschlossen ("  + transcodedImage.getAttributes().getDataLength() 
                                                         + " Bytes, Leseprüfsumme (Ok): " + String.format("0x%08X", (int)getAttributes().getChecksum()) 
-                                                        + (transcodedImage.isChecked() ? "Schreibprüfsumme:" + String.format("0x%08X", (int)getAttributes().getChecksum()) : ""
+                                                        + (transcodedImage.isChecked() ? ", Schreibprüfsumme:" + String.format("0x%08X", (int)getAttributes().getChecksum()) : ""
                                                         + ")"));
         return transcodedImage;
     }
@@ -177,30 +170,28 @@ public abstract class ImageResource extends DataResource {
     }
    
     /**
-     *
-     * @return
+     * Gibt Attribute zurück
      */
     public ImageAttributes getAttributes() {
         return header;
     }
 
     /**
-     *
-     * @return
+     * Gibt aktuellen Transcoder zurück
      */
     public IDataTranscoder getTranscoder() {
         return transcoder;
     }
     
     /**
-     * Format unterstützt Prüfsumme?
+     * Ressource unterstützt Prüfsumme?
      */
     public boolean isChecked() {
         return false;
     }
     
     /**
-     * Gibt die aktuelle Prüfsumme zurück
+     * Gibt die gespeicherte Prüfsumme zurück
      */
     public long getCurrentChecksum() {
         return header.getChecksum();

@@ -17,17 +17,11 @@ public class ImageTranscoderRaw extends DataTranscoder implements IDataTarget {
     
     // Zugeordnete Bildattribute
     protected ImageAttributes attributes;
-    
-    /**
-     * 
-     */
+
     public ImageTranscoderRaw(ImageAttributes attributes) {
         this.attributes = attributes;
     }
     
-    /**
-     * 
-     */
     @Override
     public Compression getCompression() {
         return Compression.UNCOMPRESSED;
@@ -88,7 +82,7 @@ public class ImageTranscoderRaw extends DataTranscoder implements IDataTarget {
     }
 
     /**
-     * 
+     * Empfängt Daten zum Kodieren
      */
     @Override
     public void onData(ByteBuffer data, boolean lastBlock, IDataTranscoder caller) throws IOException {
@@ -100,7 +94,7 @@ public class ImageTranscoderRaw extends DataTranscoder implements IDataTarget {
     }
     
     /**
-     * Erstellt einen Transcoder je nach Kompression
+     * Erstellt einen passenden Transcoder, je nach Kompression
      */
     public static IDataTranscoder createTranscoder(ImageAttributes header) {
         if(header != null) {

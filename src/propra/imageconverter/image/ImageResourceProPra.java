@@ -10,7 +10,7 @@ import propra.imageconverter.data.IDataTranscoder.Compression;
 import propra.imageconverter.util.IChecksum;
 
 /**
- * Schreibt und liest ProPra Header
+ * Propra spezifische Implementierung einer ImageRessource
  */
 public class ImageResourceProPra extends ImageResource {
     
@@ -35,10 +35,7 @@ public class ImageResourceProPra extends ImageResource {
     protected IChecksum checksum;
     
     /**
-     * 
-     * @param file
-     * @param write
-     * @throws IOException 
+     * Konstruktor
      */
     public ImageResourceProPra(String file, boolean write) throws IOException {
         super(file, write);
@@ -52,7 +49,7 @@ public class ImageResourceProPra extends ImageResource {
     }
     
     /**
-     * 
+     * Propra unterstützt Prüfsumme
      */
     @Override
     public boolean isChecked() {
@@ -60,7 +57,7 @@ public class ImageResourceProPra extends ImageResource {
     }
     
     /**
-     * 
+     * Gibt aktuell laufende Prüfsumme zurück
      */
     @Override
     public long getCurrentChecksum() {
@@ -68,10 +65,8 @@ public class ImageResourceProPra extends ImageResource {
     }
     
     /**
-     * 
-     * 
-     * @return
-     * @throws java.io.IOException
+     * Liest Propra Header aus Stream ein, wandelt in allgemeine Bildattribute um
+     * und prüft auf korrekte Werte
      */
     @Override
     public ImageAttributes readHeader() throws IOException {
@@ -136,9 +131,7 @@ public class ImageResourceProPra extends ImageResource {
     }  
     
     /**
-     * Schreibt allgemeinen Header als ProPra Header
-     * @param srcHeader
-     * @throws IOException 
+     * Schreibt Bildattribute im Propra-Format in den Stream
      */
     @Override
     public void writeHeader() throws IOException {
@@ -146,7 +139,7 @@ public class ImageResourceProPra extends ImageResource {
         // DataBuffer für Header erstellen
         ByteBuffer buff = ByteBuffer.allocate(fileHeaderSize);
         buff.order(ByteOrder.LITTLE_ENDIAN);
-        
+         
         header.setChecksum(checksum.getValue());
         
         // Attribute in ByteBuffer schreiben

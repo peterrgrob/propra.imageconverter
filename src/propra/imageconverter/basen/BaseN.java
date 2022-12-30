@@ -1,4 +1,4 @@
-package propra.imageconverter.data.basen;
+package propra.imageconverter.basen;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -12,9 +12,8 @@ import propra.imageconverter.util.BitOutputStream;
 import propra.imageconverter.util.CheckedInputStream;
 
 /**
- * Klasse für allgemeine Base-N Kodierung, die Parametrisierung erfolgt
- * über das per Konstruktor übergebene Ressourcen Objekt. 
- *  
+ * Transcoder Klasse für allgemeine Base-N Kodierung, die Parametrisierung erfolgt
+ * über das per Konstruktor übergebene Ressourcen Objekt und Alphabet 
  */
 public class BaseN extends DataTranscoder {
 
@@ -44,10 +43,6 @@ public class BaseN extends DataTranscoder {
         // Standard Base32 Alphabet
         public static String BASE_32_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUV";
 
-        /**
-         * 
-         * @param bitCount
-         */
         private BaseNEncoding(int bitCount) {
             this.bitCount = bitCount;
         }
@@ -57,29 +52,18 @@ public class BaseN extends DataTranscoder {
         }  
     }
     
-    /**
-     *
-     * @param resource
-     * @param format
-     */
     public BaseN(BaseNResource resource) {
         this.resource = resource;
         this.baseEncoding = resource.getBaseNEncoding();
     }
     
-    /**
-     * 
-     */
     @Override
     public Compression getCompression() {
         return Compression.BASEN;
     }
 
     /**
-     * Dekodiert BaseNCodec kodierte Daten
-     * 
-     * @param target
-     * @throws java.io.IOException
+     * Dekodiert BaseN kodierte Daten im Stream und sendet diese an target
      */
     @Override
     public void decode(CheckedInputStream in, IDataTarget target) throws IOException {
@@ -104,11 +88,7 @@ public class BaseN extends DataTranscoder {
     }
     
     /**
-     * Kodiert Binärdaten in BaseNCodec
-     * 
-     * @param inBuffer
-     * @param last
-     * @throws IOException 
+     * Kodiert Binärdaten in inBuffer in den OutStream
      */
     @Override
     public void encode(ByteBuffer inBuffer, boolean last) throws IOException { 
@@ -130,8 +110,7 @@ public class BaseN extends DataTranscoder {
     }        
 
     /**
-     * @param buffer
-     * @return 
+     *  Gibt die Größe einer BaseN Kodierung zurück 
      */
     private int getEncodedLength(int size) {
         int totalBits = size << 3;

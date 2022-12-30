@@ -6,8 +6,8 @@ import propra.imageconverter.util.CheckedInputStream;
 import propra.imageconverter.util.CheckedOutputStream;
 
 /**
- *
- * @author pg
+ * Interface für Transcoder, diese implementieren die Kodierung und Dekodierung
+ * der Nutzdaten einer Ressource (Pixel, BaseN, Binärdaten)
  */
 public interface IDataTranscoder extends IDataTarget {
     
@@ -29,17 +29,13 @@ public interface IDataTranscoder extends IDataTarget {
     }
 
     /**
-     * 
+     * Dekodiert alle Daten des Streams und sendet diese ggfs in mehreren
+     * Blöcken an das Target
      */
     public void decode(CheckedInputStream in, IDataTarget target) throws IOException;
-     
-    /**
-     * 
-     */
-    public EncodeMode getOperation();
     
     /**
-     * 
+     * Gibt den Kompressionstyp zurück
      */
     public Compression getCompression();
     
@@ -49,17 +45,22 @@ public interface IDataTranscoder extends IDataTarget {
     public boolean analyzeNecessary();
     
     /**
-     * 
+     * Kodierung initialisieren mit Modus und Ausgabestream
      */
     public IDataTranscoder beginEncoding(EncodeMode op, CheckedOutputStream out) throws IOException;
    
     /**
-     * Kodiert Daten des Blocks und speichert diese.
+     * Gibt aktuellen EncodingModus zurück
+     */
+    public EncodeMode getOperation();
+    
+    /**
+     * Kodiert Daten des aktuellen Blocks in den Stream
      */
     public void encode(ByteBuffer data, boolean last) throws IOException;
     
     /**
-     * Gibt Anzahl der kodierten Bytes zurück
+     * Beendet Encoding und gibt die Anzahl der kodierten Bytes zurück
      */
     public long endEncoding() throws IOException;
 }
