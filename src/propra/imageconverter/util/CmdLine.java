@@ -89,7 +89,7 @@ import propra.imageconverter.data.IDataTranscoder.Compression;
                 }
             }
         }
-        return Compression.NONE;
+        return Compression.UNCOMPRESSED;
     }
     
     /**

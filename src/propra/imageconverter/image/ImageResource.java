@@ -9,6 +9,7 @@ import propra.imageconverter.data.IDataTranscoder.EncodeMode;
 import propra.imageconverter.image.ColorUtil.ColorOp;
 import propra.imageconverter.image.compression.ImageTranscoderAuto;
 import propra.imageconverter.image.compression.ImageTranscoderRaw;
+import propra.imageconverter.util.PropraException;
 
 /**
  *
@@ -62,6 +63,7 @@ public abstract class ImageResource extends DataResource {
         
         // Bildattribute einlesen
         readHeader();
+        PropraException.printMessage("Quellbild: " + header.toString());
         
         /* 
          * Neues Bild anlegen
@@ -73,6 +75,7 @@ public abstract class ImageResource extends DataResource {
         outHeader.setCompression(outEncoding); 
         outHeader.setFormat(transcodedImage.getAttributes().getFormat());
         transcodedImage.setHeader(outHeader);
+        PropraException.printMessage("Zielbild: " + outHeader.toString() + "\n\nKonvertierung starten...");
         
         /*
          * ggfs. notwendige Farbkonvertierung ermitteln
@@ -141,6 +144,20 @@ public abstract class ImageResource extends DataResource {
         transcodedImage.getAttributes().setDataLength(encoder.endEncoding());
         transcodedImage.writeHeader();
         
+        // Prüfsumme prüfen
+        if(isChecked()) {
+            if(getCurrentChecksum() != getAttributes().getChecksum()) {
+                throw new IOException(  "Prüfsumme " 
+                                        + String.format("0x%08X", (int)getCurrentChecksum()) 
+                                        + " ungleich " 
+                                        + String.format("0x%08X", (int)getAttributes().getChecksum()));
+            }
+        }
+        
+        PropraException.printMessage("abgeschlossen ("  + transcodedImage.getAttributes().getDataLength() 
+                                                        + " Bytes, Leseprüfsumme (Ok): " + String.format("0x%08X", (int)getAttributes().getChecksum()) 
+                                                        + (transcodedImage.isChecked() ? "Schreibprüfsumme:" + String.format("0x%08X", (int)getAttributes().getChecksum()) : ""
+                                                        + ")"));
         return transcodedImage;
     }
    

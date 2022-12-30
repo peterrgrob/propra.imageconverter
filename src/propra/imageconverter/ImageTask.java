@@ -6,6 +6,7 @@ import propra.imageconverter.util.CmdLine.Options;
 import propra.imageconverter.data.IDataTranscoder.Compression;
 import propra.imageconverter.data.DataUtil;
 import propra.imageconverter.image.*;
+import propra.imageconverter.util.PropraException;
 
 /**
  * Klasse implementiert Bildkonvertierungen
@@ -19,7 +20,7 @@ public class ImageTask implements AutoCloseable {
     private ImageResource outImage;
     
     // Kodierung des Ausgabebildes
-    private Compression outEncoding = Compression.NONE;
+    private Compression outEncoding = Compression.UNCOMPRESSED;
     
     /**
      * 
@@ -27,9 +28,7 @@ public class ImageTask implements AutoCloseable {
      * @throws IOException 
      */
     public ImageTask(CmdLine cmd) throws IOException {
-        if(cmd == null) {
-            throw new IllegalArgumentException();
-        }
+        PropraException.assertArgument(cmd);
         this.cmd = cmd;
     }
     
@@ -44,9 +43,14 @@ public class ImageTask implements AutoCloseable {
         String inPath = cmd.getOption(Options.INPUT_FILE);
         String outPath = cmd.getOption(Options.OUTPUT_FILE);
         
+        // Ein- und Ausgabedateipfad auf der Konsole ausgeben
+        PropraException.printMessage("\n\nBildkonvertierung");
+        PropraException.printMessage("Eingabe: " + inPath);
+        PropraException.printMessage("Ausgabe: " + outPath);
+        
         // Readerobjekt erstellen
         inImage = ImageResource.createResource(inPath,false);
-       
+        
         // Verzeichnisse und Datei für die Ausgabe erstellen, falls nötig
         if(outPath == null) {
             throw new IOException("Kein Ausgabepfad gegeben!");            
@@ -56,45 +60,6 @@ public class ImageTask implements AutoCloseable {
         // Ausgabekompression setzen und Konvertierung starten
         outEncoding = cmd.getCompression();
         outImage = inImage.convertTo(outPath, outEncoding);
-        
-        // Prüfsumme prüfen
-        if(inImage.isChecked()) {
-            if(inImage.getCurrentChecksum() != inImage.getAttributes().getChecksum()) {
-                throw new IOException(  "Prüfsumme " 
-                                        + String.format("0x%08X", (int)inImage.getCurrentChecksum()) 
-                                        + " ungleich " 
-                                        + String.format("0x%08X", (int)inImage.getAttributes().getChecksum()));
-            }
-        }
-    }
-    
-    /**
-     * @return
-     */
-    @Override
-    public String toString() {
-        String stateString = "";
-
-        if(inImage != null) {
-            ImageAttributes header = inImage.getAttributes();
-            stateString = "\nBildinfo: " + header.getWidth();
-            stateString = stateString.concat("x" + header.getHeight());
-            stateString = stateString.concat("x" + Color.PIXEL_SIZE);
-            stateString = stateString.concat("\nKompression: " + header.getCompression().toString());
-            stateString = stateString.concat(" --> " + outEncoding.toString());            
-            
-            if(inImage.isChecked()) {
-                stateString = stateString.concat(   "\nEingabe Prüfsumme (Ok): "+String.format("0x%08X", 
-                                                    (int)inImage.getCurrentChecksum()));
-            }
-            
-            if(outImage.isChecked()) {
-                stateString = stateString.concat(   "\nAusgabe Prüfsumme: "+String.format("0x%08X", 
-                                                    (int)outImage.getCurrentChecksum()));
-            }
-        }
-        
-        return stateString;
     }
 
     /**

@@ -19,7 +19,7 @@ import propra.imageconverter.util.IChecksum;
 public class DataResource implements IDataResource {
     
     // Aktuelle Kodierung
-    protected Compression compression = Compression.NONE;
+    protected Compression compression = Compression.UNCOMPRESSED;
     
     // Dateiresource
     protected RandomAccessFile binaryFile;

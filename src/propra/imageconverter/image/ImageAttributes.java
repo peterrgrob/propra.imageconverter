@@ -21,7 +21,7 @@ public class ImageAttributes {
      */
     public ImageAttributes() {
         format = Color.Format.COLOR_BGR;
-        encoding = Compression.NONE;
+        encoding = Compression.UNCOMPRESSED;
     }
     
     /**
@@ -40,6 +40,18 @@ public class ImageAttributes {
         this.encoding = src.encoding;
         this.format = src.format;
     }
+
+    @Override
+    public String toString() {
+        String stateString;
+        stateString = "" + width;
+        stateString = stateString.concat("x" + height);
+        stateString = stateString.concat("x" + (Color.PIXEL_SIZE*8));
+        stateString = stateString.concat(" (" + format.toString());  
+        stateString = stateString.concat(", " + encoding.toString()+")");
+          return stateString;
+    }
+    
     
 
     public int getPixelCount() {

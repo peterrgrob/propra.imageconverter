@@ -112,7 +112,7 @@ public class ImageResourceProPra extends ImageResource {
                 attributes.setCompression(Compression.RLE);
             }
             case PROPRA_HEADER_ENCODING_NONE -> {
-                attributes.setCompression(Compression.NONE);
+                attributes.setCompression(Compression.UNCOMPRESSED);
             }
             default -> throw new UnsupportedOperationException("Nicht unterstützte Kompression!");
         }
@@ -121,7 +121,7 @@ public class ImageResourceProPra extends ImageResource {
         if( attributes.getHeight() <= 0 || attributes.getWidth() <= 0 || bpp != 24
         ||  (attributes.getDataLength() != (binaryFile.length() - PROPRA_HEADER_SIZE))) {
             throw new UnsupportedOperationException("Ungültiges ProPra Dateiformat!");
-        } else if(attributes.getCompression() == Compression.NONE) {
+        } else if(attributes.getCompression() == Compression.UNCOMPRESSED) {
             // Prüfungen für unkomprimierte Dateien 
             if(attributes.getPixelCount() * Color.PIXEL_SIZE != attributes.getDataLength()
             || attributes.getPixelCount() * Color.PIXEL_SIZE != (binaryFile.length() - PROPRA_HEADER_SIZE)) {
@@ -171,7 +171,7 @@ public class ImageResourceProPra extends ImageResource {
                 buff.putLong(PROPRA_HEADER_OFFSET_DATALEN,
                             header.getDataLength());
             }
-            case NONE -> {
+            case UNCOMPRESSED -> {
                 buff.put(PROPRA_HEADER_OFFSET_ENCODING, 
                             (byte)PROPRA_HEADER_ENCODING_NONE);
                 buff.putLong(PROPRA_HEADER_OFFSET_DATALEN,

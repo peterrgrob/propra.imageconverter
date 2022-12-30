@@ -30,7 +30,7 @@ public class ImageTranscoderRaw extends DataTranscoder implements IDataTarget {
      */
     @Override
     public Compression getCompression() {
-        return Compression.NONE;
+        return Compression.UNCOMPRESSED;
     }
     
     /**
@@ -105,7 +105,7 @@ public class ImageTranscoderRaw extends DataTranscoder implements IDataTarget {
     public static IDataTranscoder createTranscoder(ImageAttributes header) {
         if(header != null) {
             switch(header.getCompression()) {
-                case NONE -> {
+                case UNCOMPRESSED -> {
                     return new ImageTranscoderRaw(header);
                 }
                 case RLE -> {

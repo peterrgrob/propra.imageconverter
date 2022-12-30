@@ -70,7 +70,7 @@ public class ImageResourceTGA extends ImageResource {
                 attributes.setCompression(Compression.RLE);
             }
             case TGA_HEADER_ENCODING_NONE -> {
-                attributes.setCompression(Compression.NONE);
+                attributes.setCompression(Compression.UNCOMPRESSED);
             }
             default -> throw new UnsupportedOperationException("Nicht unterstützte TGA Kompression!");
         }
@@ -112,7 +112,7 @@ public class ImageResourceTGA extends ImageResource {
                 bytes.put(TGA_HEADER_OFFSET_ENCODING, 
                             (byte)TGA_HEADER_ENCODING_RLE);
             }
-            case NONE -> {
+            case UNCOMPRESSED -> {
                 bytes.put(TGA_HEADER_OFFSET_ENCODING, 
                             (byte)TGA_HEADER_ENCODING_NONE);
             }

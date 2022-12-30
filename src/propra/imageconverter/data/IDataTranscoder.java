@@ -21,7 +21,7 @@ public interface IDataTranscoder extends IDataTarget {
     
     // Komprimierungen
     public enum Compression {
-        NONE,
+        UNCOMPRESSED,
         RLE,
         BASEN,
         HUFFMAN,

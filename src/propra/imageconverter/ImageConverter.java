@@ -57,14 +57,21 @@ public class ImageConverter {
             }
             
             // Klasseninstanz erstellen und gewünschten Task starten
+            CmdLine cmd = new CmdLine(args);
             ImageConverter converter = new ImageConverter(new CmdLine(args)); 
-            converter.run();
+            if(cmd.isBaseTask()) {
+                converter.doBaseNTask();
+            } else {
+                try(ImageTask op = new ImageTask(cmd)) {
+                    op.run();
+                }
+            }
         
             // Zeitmessung beenden
             long timeElapsed = System.currentTimeMillis() - start;
 
             // Infos Programmablauf ausgeben
-            PropraException.printMessage("Operation abgeschlossen in (ms): " + String.valueOf(timeElapsed));
+            PropraException.printMessage("Zeit: " + String.valueOf(timeElapsed) + "ms");
             
         } catch(FileNotFoundException e) {
             PropraException.printErrorAndQuit("Datei nicht gefunden!", e);
@@ -76,41 +83,7 @@ public class ImageConverter {
             Logger.getLogger(ImageConverter.class.getName()).log(Level.SEVERE, null, e);
             PropraException.printErrorAndQuit("Unbehandelter Fehler:", e);
         }
-    }
-    
-    /**
-     * 
-     * @throws FileNotFoundException
-     * @throws IOException
-     */
-    public void run() throws    FileNotFoundException,
-                                IOException,
-                                Exception{
-        if(cmdLine.isBaseTask()) {
-            doBaseNTask();
-        } else {
-            doImageTask();
-        }
-    }
-    
-    /**
-     * 
-     * Konvertiert Ein- in Ausgabebild entsprechend der Kommandozeilenparameter
-     * @throws java.io.FileNotFoundException 
-     */
-    public void doImageTask() throws    FileNotFoundException, 
-                                        IOException,      
-                                        Exception {      
-        // Ein- und Ausgabedateipfad auf der Konsole ausgeben
-        PropraException.printMessage("Dateien:");
-        PropraException.printMessage(cmdLine.getOption(Options.INPUT_FILE));
-        PropraException.printMessage(cmdLine.getOption(Options.OUTPUT_FILE));
-        
-        try(ImageTask op = new ImageTask(cmdLine)) {
-            op.run();
-            PropraException.printMessage(op.toString());
-        }
-    }   
+    }  
     
     /**
      * BaseN Kodierung entsprechend der Kommandozeilenparameter
