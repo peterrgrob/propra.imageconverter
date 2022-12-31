@@ -71,8 +71,9 @@ public class BitOutputStream {
      */
     public void write(BitCode code) throws IOException {  
         int c = code.getCode();
+        int len = code.getLength() - 1;
         
-        for(int i=code.getLength()-1; i>=0; i--) {
+        for(int i=len; i>=0; i--) {
             write((c >>> i) & 1);
         }
     }
