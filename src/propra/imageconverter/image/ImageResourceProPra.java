@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import propra.imageconverter.util.ChecksumPropra;
+import propra.imageconverter.checksum.ChecksumPropra;
 import propra.imageconverter.data.DataUtil;
 import propra.imageconverter.data.IDataTranscoder.Compression;
-import propra.imageconverter.util.IChecksum;
+import propra.imageconverter.checksum.IChecksum;
 
 /**
  * Propra spezifische Implementierung einer ImageRessource
@@ -171,7 +171,7 @@ public class ImageResourceProPra extends ImageResource {
                             (long)header.getPixelCount() * Color.PIXEL_SIZE);
             }
             default -> {
-                throw new IllegalArgumentException("Ungültige Kompression.");
+                throw new UnsupportedOperationException("Ungültige Kompression.");
             }                   
         }
         

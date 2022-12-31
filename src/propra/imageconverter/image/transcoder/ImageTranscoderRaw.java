@@ -1,17 +1,17 @@
-package propra.imageconverter.image.compression;
+package propra.imageconverter.image.transcoder;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import propra.imageconverter.data.DataTranscoder;
-import propra.imageconverter.util.CheckedInputStream;
+import propra.imageconverter.data.CheckedInputStream;
 import propra.imageconverter.data.IDataTarget;
 import propra.imageconverter.data.IDataTranscoder;
 import propra.imageconverter.image.ImageAttributes;
 
 
 /**
- * Basiscodec für die Konvertierung von unkomprimierten Pixelblöcken.
+ * Basistranscoder für die Konvertierung von unkomprimierten Pixelblöcken
  */
 public class ImageTranscoderRaw extends DataTranscoder implements IDataTarget {
     

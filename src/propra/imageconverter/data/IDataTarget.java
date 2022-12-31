@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 /**
- * Interface für Datenziele die Daten vom Decoder empfangen
+ * Interface für Datenziele die Daten vom Decoder empfangen.
  */
 @FunctionalInterface
 public interface IDataTarget {

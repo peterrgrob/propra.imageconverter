@@ -7,7 +7,7 @@ import propra.imageconverter.data.IDataResource;
 import propra.imageconverter.data.IDataTranscoder;
 import propra.imageconverter.data.IDataTranscoder.EncodeMode;
 import propra.imageconverter.basen.BaseN.BaseNEncoding;
-import propra.imageconverter.util.PropraException;
+import propra.imageconverter.PropraException;
 
 
 /**
@@ -44,7 +44,7 @@ public class BaseNResource extends DataResource {
         PropraException.printMessage("Format: " + baseEncoding.toString() 
                                     + "\nAlphabet: " + alphabet + "\nDekodierung starten...");
         
-        // Daten dekodieren
+        // Daten dekodieren, Target als Lambda-Ausdruck
         BaseN decoder = new BaseN(this);
         decoder.decode(getInputStream(), (ByteBuffer data, boolean lastBlock, IDataTranscoder caller) -> {
                         currentResource.getOutputStream().write(data);

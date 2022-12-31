@@ -1,4 +1,4 @@
-package propra.imageconverter.util;
+package propra.imageconverter.checksum;
 
 import java.nio.ByteBuffer;
 

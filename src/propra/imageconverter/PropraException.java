@@ -1,4 +1,4 @@
-package propra.imageconverter.util;
+package propra.imageconverter;
 
 /**
  *  Propra spezifische Exception und allgemeine Fehlerbehandlung

@@ -1,13 +1,17 @@
-package propra.imageconverter.util;
+package propra.imageconverter.data;
 
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import propra.imageconverter.checksum.ChecksumNull;
+import propra.imageconverter.checksum.IChecksum;
+import propra.imageconverter.PropraException;
 
 
 /**
- * Kapselt einen InputStream und berechnet optional eine Prüfsumme
+ * Kapselt einen InputStream und berechnet optional eine Prüfsumme über die
+ * gelesenen Daten
  */
 public class CheckedInputStream extends FilterInputStream {
     
@@ -39,6 +43,9 @@ public class CheckedInputStream extends FilterInputStream {
         checked = true;
     }
    
+    /**
+     * Prüfsumme aktivieren
+     */
     public void enableChecksum(boolean checked) {
         this.checked = checked;
     }

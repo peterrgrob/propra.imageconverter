@@ -1,4 +1,4 @@
-package propra.imageconverter.image.compression;
+package propra.imageconverter.image.transcoder;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -6,11 +6,17 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import propra.imageconverter.data.IDataTarget;
 import propra.imageconverter.data.IDataTranscoder;
-import propra.imageconverter.util.CheckedInputStream;
-import propra.imageconverter.util.CheckedOutputStream;
+import propra.imageconverter.data.CheckedInputStream;
+import propra.imageconverter.data.CheckedOutputStream;
 
 /**
- * Bündelt mehrere Encoder und ermittelt das beste Verfahren
+ * Transcoder für die automatische Wahl der besten Kompressionmethode.
+ * 
+ * Bündelt dazu mehrere Encoder und ermittelt nach Abschluss der Kodierung 
+ * das beste Verfahren. Die Kompression wird zum Vergleich in einen NullStream 
+ * durchgeführt, ein Vergleich über Entropie, oder ähnliches scheint für die 
+ * Anforderungen des Praktikums nicht unbedingt nötig zu sein, wenn überhaupt 
+ * möglich.
  */
 public class ImageTranscoderAuto extends ImageTranscoderRaw {
     

@@ -1,17 +1,18 @@
-package propra.imageconverter.image.compression;
+package propra.imageconverter.image.transcoder;
 
-import propra.imageconverter.util.BitOutputStream;
-import propra.imageconverter.util.BitInputStream;
+import propra.imageconverter.data.BitOutputStream;
+import propra.imageconverter.data.BitInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import propra.imageconverter.data.IDataTarget;
 import propra.imageconverter.data.IDataTranscoder;
 import propra.imageconverter.image.ImageAttributes;
-import propra.imageconverter.util.CheckedInputStream;
-import propra.imageconverter.util.CheckedOutputStream;
+import propra.imageconverter.data.CheckedInputStream;
+import propra.imageconverter.data.CheckedOutputStream;
 
 /**
- * Transcoder Implementierung für Huffman Kodierung
+ * Transcoder Implementierung für die Huffman Kodierung gemäß der 
+ * Propra-Spezifikation
  */
 public class ImageTranscoderHuffman extends ImageTranscoderRaw {
     
@@ -85,7 +86,7 @@ public class ImageTranscoderHuffman extends ImageTranscoderRaw {
                 /*
                  *  Stream flushen und kodierte Datengröße aktualisieren
                  */
-                outStream.flush();
+                bitOutStream.flush();
                 encodedBytes = bitOutStream.getByteCounter(); 
             }
         }

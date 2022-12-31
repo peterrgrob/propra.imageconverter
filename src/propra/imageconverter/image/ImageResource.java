@@ -8,12 +8,17 @@ import propra.imageconverter.data.IDataTranscoder.Compression;
 import propra.imageconverter.data.IDataTranscoder.EncodeMode;
 import propra.imageconverter.image.Color.Format;
 import propra.imageconverter.image.ColorUtil.ColorOp;
-import propra.imageconverter.image.compression.ImageTranscoderAuto;
-import propra.imageconverter.image.compression.ImageTranscoderRaw;
-import propra.imageconverter.util.PropraException;
+import propra.imageconverter.image.transcoder.ImageTranscoderAuto;
+import propra.imageconverter.image.transcoder.ImageTranscoderRaw;
+import propra.imageconverter.PropraException;
 
 /**
- *  Basisklasse für ImageRessources
+ * Basisklasse für ImageRessources.
+ * 
+ * Implementiert die Konvertierung zwischen den Bildformaten mit ConvertTo().
+ * 
+ * Abgeleitete Klassen für TGA und ProPra implementieren insbesondere die Methoden
+ * read- und writeHeader().
  */
 public abstract class ImageResource extends DataResource {
     
@@ -147,10 +152,13 @@ public abstract class ImageResource extends DataResource {
         }
         
         // Infos ausgeben
-        PropraException.printMessage("abgeschlossen ("  + transcodedImage.getAttributes().getDataLength() 
-                                                        + " Bytes, Leseprüfsumme (Ok): " + String.format("0x%08X", (int)getAttributes().getChecksum()) 
-                                                        + (transcodedImage.isChecked() ? ", Schreibprüfsumme:" + String.format("0x%08X", (int)getAttributes().getChecksum()) : ""
-                                                        + ")"));
+        PropraException.printMessage("abgeschlossen -> "  
+                + transcodedImage.getAttributes().getDataLength() 
+                + " Bytes" 
+                + (isChecked() ? ", Leseprüfsumme (Ok): " 
+                + String.format("0x%08X", (int)getAttributes().getChecksum()) : "") 
+                + (transcodedImage.isChecked() ? ", Schreibprüfsumme: " 
+                + String.format("0x%08X", (int)transcodedImage.getCurrentChecksum()) : ""));
         return transcodedImage;
     }
    

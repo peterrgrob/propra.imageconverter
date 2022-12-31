@@ -9,7 +9,6 @@ import propra.imageconverter.data.DataResource;
 import propra.imageconverter.data.DataUtil;
 import propra.imageconverter.basen.BaseNResource;
 import propra.imageconverter.image.ImageResource;
-import propra.imageconverter.util.PropraException;
 
 
 /*
@@ -19,21 +18,23 @@ import propra.imageconverter.util.PropraException;
  *  -   Meine Abgabe für KE2 hat die Verarbeitung großer Dateien nicht 
  *      unterstützt und war teilweise aus Zeitgründen nicht ganz optimal umgesetzt. 
  *      Deshalb habe ich jetzt nochmal Änderungen bei der Klassenstruktur 
- *      vorgenommen um die Verarbeitung großer Dateien zu ermöglichen.
+ *      vorgenommen um die Verarbeitung großer Dateien zu ermöglichen. Die Reader/Writer
+ *      sind nun jeweils in einer ImageResource zusammengefasst die CheckedReader/Writer 
+ *      anbietet und das Transcoderinterface ist nun etwas besser strukturiert.
  *
  *  -   Farbkonvertierung ist aus Performancegründen jetzt weniger allgemein 
  *      implementiert mit Methoden-Referenzen je nach Kombination.
  *
- *  -   Mit Hilfe der BitStreams, die ich für die Huffman Kompression implemenitiert habe,
+ *  -   Mit Hilfe der BitStreams, die ich für die Huffman Kompression implementiert habe,
  *      konnte ich die BaseN Kodierung deutlich vereinfachen.
  *      
- *  -   Ich habe allgemein versucht, wie einige Reviewer angemerkt haben, die Komplexität und 
- *      nicht genutzte Teile der Klassenstruktur, die im Laufe des Projekts entstanden 
- *      sind, zu reduzieren. 
+ *  -   Ich habe allgemein versucht, wie einige Reviewer angemerkt haben, die Komplexität 
+ *      mit teilweise unklaren Abhängigkeiten und nicht genutzte Teile der 
+ *      Klassenstruktur, die im Laufe des Projekts entstanden sind, zu reduzieren. 
  *      
- *      Damit es besser verständlich ist hier eine kleine Übersicht:
+ *      Kleine Übersicht über die Struktur:
  * 
- *      Stream -> Resource -> Transcoder(Decoder) -> Filter -> Transcoder(Encoder) <-> Resource -> Stream 
+ *      Stream -> Resource <-> Transcoder(Decoder) -> Filter -> Transcoder(Encoder) <-> Resource -> Stream 
  */
 public class ImageConverter {
     

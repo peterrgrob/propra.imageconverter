@@ -1,9 +1,9 @@
-package propra.imageconverter.image.compression;
+package propra.imageconverter.image.transcoder;
 
-import propra.imageconverter.util.BitCode;
+import propra.imageconverter.data.BitCode;
 import java.io.IOException;
-import propra.imageconverter.util.BitInputStream;
-import propra.imageconverter.util.BitOutputStream;
+import propra.imageconverter.data.BitInputStream;
+import propra.imageconverter.data.BitOutputStream;
 
 /**
  *  Klasse implementiert einen Knoten des Huffman Baumes

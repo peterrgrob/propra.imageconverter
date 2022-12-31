@@ -45,7 +45,7 @@ public class ImageAttributes {
         String stateString;
         stateString = "" + width;
         stateString = stateString.concat("x" + height);
-        stateString = stateString.concat("x" + (Color.PIXEL_SIZE*8));
+        stateString = stateString.concat("x" + (Color.PIXEL_SIZE * 8));
         stateString = stateString.concat(" (" + format.toString());  
         stateString = stateString.concat(", " + encoding.toString()+")");
           return stateString;

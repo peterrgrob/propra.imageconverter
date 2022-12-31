@@ -7,13 +7,13 @@ import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataTranscoder;
 import propra.imageconverter.data.IDataTarget;
 import propra.imageconverter.data.IDataTranscoder;
-import propra.imageconverter.util.BitInputStream;
-import propra.imageconverter.util.BitOutputStream;
-import propra.imageconverter.util.CheckedInputStream;
+import propra.imageconverter.data.BitInputStream;
+import propra.imageconverter.data.BitOutputStream;
+import propra.imageconverter.data.CheckedInputStream;
 
 /**
  * Transcoder Klasse für allgemeine Base-N Kodierung, die Parametrisierung erfolgt
- * über das per Konstruktor übergebene Ressourcen Objekt und Alphabet 
+ * über das per Konstruktor übergebene Ressourcen Objekt und dem Alphabet 
  */
 public class BaseN extends DataTranscoder {
 

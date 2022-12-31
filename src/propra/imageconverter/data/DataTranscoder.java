@@ -1,8 +1,7 @@
 package propra.imageconverter.data;
 
 import java.io.IOException;
-import propra.imageconverter.util.CheckedOutputStream;
-import propra.imageconverter.util.PropraException;
+import propra.imageconverter.PropraException;
 
 /**
  * Basisfunktionalität für Transcoderklassen

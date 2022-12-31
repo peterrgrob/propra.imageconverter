@@ -1,7 +1,5 @@
 package propra.imageconverter.data;
 
-import propra.imageconverter.util.CheckedInputStream;
-import propra.imageconverter.util.CheckedOutputStream;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;

@@ -1,4 +1,4 @@
-package propra.imageconverter.util;
+package propra.imageconverter.data;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -42,7 +42,7 @@ public class BitOutputStream {
     }
     
     /**
-     * Schließt aktuelles Byte ab
+     * Schreibt aktuelles Byte in Stream und beginnt nächstes Byte
      */
     public void flushByte() throws IOException {
         if(bitIndex > 0) {

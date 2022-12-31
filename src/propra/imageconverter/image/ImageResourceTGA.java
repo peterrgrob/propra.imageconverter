@@ -107,7 +107,7 @@ public class ImageResourceTGA extends ImageResource {
                             (byte)TGA_HEADER_ENCODING_NONE);
             }
             default -> {
-                throw new IllegalArgumentException("Ungültige Kompression.");
+                throw new UnsupportedOperationException("Ungültige Kompression.");
             }                   
         }
         

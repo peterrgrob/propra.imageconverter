@@ -1,4 +1,4 @@
-package propra.imageconverter.util;
+package propra.imageconverter.data;
 
 import java.io.IOException;
 import java.io.InputStream;
