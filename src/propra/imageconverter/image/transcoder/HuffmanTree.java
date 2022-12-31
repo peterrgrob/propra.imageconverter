@@ -56,27 +56,36 @@ public class HuffmanTree {
             }
         }
         
-        /*
-         *  Baum iterativ konstruieren bis nur noch ein Knoten (Wurzel) in der 
-         *  Queue enthalten ist.
-         */
-        while(q.size() > 1) {
-                    
+        if(q.size() > 1) {
             /*
-             *  Zwei niedrigste Knoten zu einem Knoten verbinden
-             *  und in die Queue einfügen
+             *  Baum iterativ konstruieren bis nur noch ein Knoten (Wurzel) in der 
+             *  Queue enthalten ist.
              */
-            HuffmanNode right = q.poll();
+            while(q.size() > 1) {
+
+                /*
+                 *  Zwei niedrigste Knoten zu einem Knoten verbinden
+                 *  und in die Queue einfügen
+                 */
+                HuffmanNode right = q.poll();
+                HuffmanNode left = q.poll();
+                HuffmanNode parentNode = new HuffmanNode( (byte)0, 
+                                                        left.getFrequency() + right.getFrequency(),
+                                                        left,right);
+
+                q.offer(parentNode);
+            }
+            
+            // Wurzel speichern
+            rootNode = q.remove();
+            
+        } else {
+            // Spezialfall für ein Bild mit nur einem Symbol
+            HuffmanNode right = new HuffmanNode(0, 0);
             HuffmanNode left = q.poll();
-            HuffmanNode parentNode = new HuffmanNode( (byte)0, 
-                                                    left.getFrequency() + right.getFrequency(),
-                                                    left,right);
-                    
-            q.offer(parentNode);
+            rootNode = new HuffmanNode((byte)0, left.getFrequency(),left,right);
         }
-        
-        // Wurzel speichern
-        rootNode = q.remove();
+       
         
         // Codes berechnen
         rootNode.buildBitCodes(new BitCode(0, 0));

@@ -11,12 +11,12 @@ import propra.imageconverter.basen.BaseNResource;
 import propra.imageconverter.image.ImageResource;
 
 
-/*
- *  Einstiegsklasse für ImageConverter 
+/**
+ *  Einstiegsklasse für ImageConverter.
  * 
  *  Änderungen zu KE2
  *  -   Meine Abgabe für KE2 hat die Verarbeitung großer Dateien nicht 
- *      unterstützt und war teilweise aus Zeitgründen nicht ganz optimal umgesetzt. 
+ *      unterstützt und war teilweise aus Zeitgründen nicht ganz optimal umgesetzt.
  *      Deshalb habe ich jetzt nochmal Änderungen bei der Klassenstruktur 
  *      vorgenommen um die Verarbeitung großer Dateien zu ermöglichen. Die Reader/Writer
  *      sind nun jeweils in einer ImageResource zusammengefasst die CheckedReader/Writer 
@@ -32,9 +32,37 @@ import propra.imageconverter.image.ImageResource;
  *      mit teilweise unklaren Abhängigkeiten und nicht genutzte Teile der 
  *      Klassenstruktur, die im Laufe des Projekts entstanden sind, zu reduzieren. 
  *      
- *      Kleine Übersicht über die Struktur:
+ *      Kleine Übersicht über die Klassenstruktur, Resource Klassen bieten Schreiben/Lesen 
+ *      der Daten per Stream und individuelles Lesen/Schreiben der Formatspezifischen Daten, z.B. 
+ *      Bildheader oder BaseN Alphabet. Die Transcoder Klassen implementieren die 
+ *      Kompressionsalgorithmen unabhängig vom Ressourcentyp.
  * 
- *      Stream -> Resource <-> Transcoder(Decoder) -> Filter -> Transcoder(Encoder) <-> Resource -> Stream 
+ *      Ablauf der Konvertierung/Kodierung
+ *          Stream -> Resource <-> Transcoder(Decoder) -> Filter -> Transcoder(Encoder) <-> Resource -> Stream 
+ *       
+ *      Klassenstruktur
+ *          IDataResource
+ *            DataResource     
+ *              BaseNResource
+ *              ImageResource
+ *                  ImageResourcePropra
+ *                  ImageResourceTGA
+ *          IDataTranscoder
+ *              DataTranscoder
+ *                  BaseN
+ *                  ImageTranscoder
+ *                      ImageTranscoderRaw
+ *                      ImageTranscoderRLE
+ *                      ImageTranscoderHuffman
+ *                      ImageTranscoderAuto
+ *          IChecksum
+ *              NullChecksum
+ *                  ChecksumPropra
+ *          CheckedInputStream
+ *              BitInputStream
+ *          CheckedOutputStream
+ *              BitOutputStream
+ *
  */
 public class ImageConverter {
     
