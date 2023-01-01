@@ -48,7 +48,7 @@ public class HuffmanNode implements Comparable<HuffmanNode>{
    }
 
    /**
-    * Erstellt rekursiv einen Baum gemäß der Propra-Kodierung
+    * Liest rekursiv einen Baum aus dem Stream ein gemäß der Propra-Kodierung
     */
    public void buildTreeFromResource(BitInputStream resource, HuffmanNode[] nodeMap) throws IOException {
        /*

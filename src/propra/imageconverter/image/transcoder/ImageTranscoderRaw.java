@@ -86,11 +86,7 @@ public class ImageTranscoderRaw extends DataTranscoder implements IDataTarget {
      */
     @Override
     public void onData(ByteBuffer data, boolean lastBlock, IDataTranscoder caller) throws IOException {
-        switch(operation) {
-            case ENCODE, ANALYZE -> {
-                encode(data, lastBlock);
-            }
-        }
+        encode(data, lastBlock);
     }
     
     /**

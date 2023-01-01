@@ -12,10 +12,10 @@ public class BitOutputStream {
     private final OutputStream stream;
     
     // Aktuelles Schreib-Byte
-    private byte value;
+    private int value;
     
     // Aktueller Bit-Index
-    private byte bitIndex;
+    private int bitIndex;
     
     // Byte Zähler
     private int byteCounter;
@@ -58,7 +58,7 @@ public class BitOutputStream {
      */
     public void write(int bit) throws IOException {
         value |= (bit & 1) << (7 - bitIndex);
-        
+                
         if(bitIndex >= 7) {
             flushByte();
         } else { 

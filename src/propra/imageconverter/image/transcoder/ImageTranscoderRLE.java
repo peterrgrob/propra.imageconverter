@@ -115,12 +115,10 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
                 return; 
             }
             
-            /*
-             *  RLE Kodierung
-             */
+            // Farben zählen
             int colorCtr = countRleColor(inBuffer);
             if(colorCtr > 1 ) {     
-                /**
+                /*
                  * Rle Pixel kodieren
                  */
                 Color color = new Color();
@@ -153,9 +151,6 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
     public long endEncoding() throws IOException {
         switch(operation) {
             case ENCODE -> {
-                /*
-                 *  Stream flushen und kodierte Datengröße aktualisieren
-                 */
                 outStream.flush();
             }
         }
@@ -164,7 +159,7 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
     }
     
     /**
-     *  Zählt identische Pixel bis zu 128
+     *  Zählt bis zu 128 identische Pixel 
      */
     private int countRleColor(ByteBuffer data) {
         int baseOffset = data.position();
@@ -192,7 +187,6 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
      *  Performancegründen direkt mit den Arrays der ByteBuffer
      */
     private int encodeRawData(ByteBuffer inBuffer, ByteBuffer outBuffer) {
-        
         int inOffset = inBuffer.position();
         byte[] outArray = outBuffer.array();
         byte[] inArray = inBuffer.array();
@@ -202,13 +196,11 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
         
         // Vergleicht aktuelle Farbe mit der folgenden Farbe
         while( !ColorUtil.compareColor(inArray, inOffset, inOffset + 3)) {
-
             outArray[outOffset++] = inArray[inOffset++];
             outArray[outOffset++] = inArray[inOffset++];
             outArray[outOffset++] = inArray[inOffset++];
 
             rawCounter++;
-            
             if(rawCounter >= 128
             || inOffset >= limit) {
                 break;

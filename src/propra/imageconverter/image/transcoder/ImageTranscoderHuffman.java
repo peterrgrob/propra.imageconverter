@@ -165,15 +165,17 @@ public class ImageTranscoderHuffman extends ImageTranscoderRaw {
              *  Symbole im Puffer iterieren, per Huffmantree zu Bitcode umsetzen und 
              *  diesen in der Resource speichern
              */
-            byte[] c = new byte[3];
-            while(block.position() < block.limit()) {
-
-                // Pixel lesen und Farbe konvertieren
-                block.get(c);
-
-                bitOutStream.write(huffmanTree.encodeSymbol(c[0] & 0xFF));
-                bitOutStream.write(huffmanTree.encodeSymbol(c[1] & 0xFF));
-                bitOutStream.write(huffmanTree.encodeSymbol(c[2] & 0xFF));
+            byte[] color = block.array(); 
+            int offs = block.position();
+            int lim = block.limit();
+            
+            while(offs < lim) {
+           
+                bitOutStream.write(huffmanTree.encodeSymbol(color[offs + 0] & 0xFF));
+                bitOutStream.write(huffmanTree.encodeSymbol(color[offs + 1] & 0xFF));
+                bitOutStream.write(huffmanTree.encodeSymbol(color[offs + 2] & 0xFF));
+                
+                offs += 3;
             }
         }
     }   
