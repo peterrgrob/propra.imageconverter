@@ -2,6 +2,7 @@ package propra.imageconverter.image.transcoder;
 
 import propra.imageconverter.data.BitCode;
 import java.io.IOException;
+import propra.imageconverter.PropraException;
 import propra.imageconverter.data.BitInputStream;
 import propra.imageconverter.data.BitOutputStream;
 
@@ -50,7 +51,7 @@ public class HuffmanNode implements Comparable<HuffmanNode>{
    /**
     * Liest rekursiv einen Baum aus dem Stream ein gemäß der Propra-Kodierung
     */
-   public void buildTreeFromResource(BitInputStream resource, HuffmanNode[] nodeMap) throws IOException {
+   public void buildTreeFromResource(BitInputStream resource, HuffmanNode[] nodeMap) throws IOException, PropraException {
        /*
         * Nächstes Bit gibt an um welchen Knotentyp es sich handelt
         */
@@ -62,6 +63,11 @@ public class HuffmanNode implements Comparable<HuffmanNode>{
           rightNode.buildTreeFromResource(resource, nodeMap); 
 
        } else {
+          // Fehlerhafte Wurzel prüfen
+          if(nodeMap.length == 0) {
+              throw new PropraException("Ungültige Baumkodierung!");
+          }
+           
           // Blatt erreicht, daher Symbol für das Blatt einlesen
           symbol = resource.readByte() & 0xFF;
 

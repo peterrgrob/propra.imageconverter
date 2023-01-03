@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import propra.imageconverter.data.DataResource;
 import propra.imageconverter.data.DataUtil;
 import propra.imageconverter.basen.BaseNResource;
+import propra.imageconverter.data.IDataTranscoder.Compression;
 import propra.imageconverter.image.ImageResource;
 
 
@@ -120,6 +121,12 @@ public class ImageConverter {
         PropraException.printMessage("\n\nBildkonvertierung");
         PropraException.printMessage("Eingabe: " + inPath);
         PropraException.printMessage("Ausgabe: " + outPath);
+        
+        if(cmd.getCompression() == Compression.AUTO) {
+            if(DataUtil.getExtension(outPath).compareTo("tga") == 0) {
+                throw new PropraException("AUTO Kompression nicht von tga unterstützt.");
+            }
+        }
         
         // Readerobjekt erstellen
         try(ImageResource inImage = ImageResource.createResource(inPath,false)) {

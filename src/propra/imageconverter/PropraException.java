@@ -3,10 +3,14 @@ package propra.imageconverter;
 /**
  *  Propra spezifische Exception und allgemeine Fehlerbehandlung
  */
-public class PropraException extends Exception {
+public class PropraException extends RuntimeException {
         
     // Fehlercode
     private static final int ERROR_EXIT_CODE = 123;
+    
+    public PropraException(String msg) {
+        super(msg);
+    }
     
     /**
      * Schreibt msg in System.err und beendet das Programm mit EXIT_CODE

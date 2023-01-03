@@ -3,6 +3,7 @@ package propra.imageconverter.image.transcoder;
 import propra.imageconverter.data.BitCode;
 import java.io.IOException;
 import java.util.PriorityQueue;
+import propra.imageconverter.PropraException;
 import propra.imageconverter.data.BitInputStream;
 import propra.imageconverter.data.BitOutputStream;
 
@@ -31,7 +32,7 @@ public class HuffmanTree {
      * Rekonstruiert rekursiv einen Huffmantree aus dem Bitcode in der Ressource nach 
      * Propra-Konstruktionsvorschrift mit einem Preorder-Durchlauf
      */
-    public void buildTreeFromResource(BitInputStream resource) throws IOException {
+    public void buildTreeFromResource(BitInputStream resource) throws IOException, PropraException {
         rootNode = new HuffmanNode((byte)0, 0);
         rootNode.buildTreeFromResource(resource, nodeArray);
         rootNode.buildBitCodes(new BitCode(0,0));
