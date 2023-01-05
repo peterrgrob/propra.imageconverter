@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * Klasse kapselt einen Stream und erlaubt das Schreiben einzelner Bits
+ * Klasse kapselt einen Stream und erlaubt das Schreiben einzelner Bits.
+ * Die logische Ordnung der Bits beginnt bei dem höchstwertigen Bit und steigt
+ * ab.
  */
 public class BitOutputStream {
     

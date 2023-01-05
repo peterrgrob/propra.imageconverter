@@ -51,34 +51,36 @@ public class HuffmanNode implements Comparable<HuffmanNode>{
    /**
     * Liest rekursiv einen Baum aus dem Stream ein gemäß der Propra-Kodierung
     */
-   public void buildTreeFromResource(BitInputStream resource, HuffmanNode[] nodeMap) throws IOException, PropraException {
-       /*
-        * Nächstes Bit gibt an um welchen Knotentyp es sich handelt
-        */
-       if(resource.readBit() == 0) {
-          // Innerer Knoten, daher mit Pre-Order Durchlauf fortfahren
-          leftNode = new HuffmanNode();
-          leftNode.buildTreeFromResource(resource, nodeMap);
-          rightNode = new HuffmanNode();
-          rightNode.buildTreeFromResource(resource, nodeMap); 
+   public void buildTreeFromResource(BitInputStream resource, HuffmanNode[] nodeMap, int leafCtr) throws IOException, PropraException {
+        /*
+         * Nächstes Bit gibt an um welchen Knotentyp es sich handelt
+         */
+        if(resource.readBit() == 0) {
+           // Innerer Knoten, daher mit Pre-Order Durchlauf fortfahren
+           leftNode = new HuffmanNode();
+           leftNode.buildTreeFromResource(resource, nodeMap, leafCtr);
+           rightNode = new HuffmanNode();
+           rightNode.buildTreeFromResource(resource, nodeMap, leafCtr); 
 
-       } else {
-          // Fehlerhafte Wurzel prüfen
-          if(nodeMap.length == 0) {
-              throw new PropraException("Ungültige Baumkodierung!");
-          }
-           
-          // Blatt erreicht, daher Symbol für das Blatt einlesen
-          symbol = resource.readByte() & 0xFF;
+        } else {
+            // Fehlerhafte Kodierung prüfen
+            if( nodeMap.length == 0
+            ||  leafCtr >= 256) {
+                throw new PropraException("Ungültige Baumkodierung!");
+            }
 
-          // Fehlerbehandlung bei möglicherweise korrupten Daten
-          if(nodeMap[symbol] != null) {
-              throw new IOException("Doppeltes Huffman-Blatt, Daten korrupt?");
-          }
-          
-          // Blatt vermerken
-          nodeMap[symbol] =  this;
-       }
+            // Blatt erreicht, daher Symbol für das Blatt einlesen
+            symbol = resource.readByte() & 0xFF;
+
+            // Fehlerbehandlung bei möglicherweise korrupten Daten
+            if(nodeMap[symbol] != null) {
+                throw new IOException("Doppeltes Huffman-Blatt, Daten korrupt?");
+            }
+
+            // Blatt vermerken
+            nodeMap[symbol] =  this;
+            leafCtr++;
+        }
    }
 
    /**

@@ -1,7 +1,7 @@
 package propra.imageconverter.data;
 
 /**
- * Utility Klasse für BitCode, hält z.B den Code für ein Huffman-Symbol
+ * Utility Klasse für BitCodes, hält z.B den Code für ein Huffman-Symbol
  */
 public class BitCode implements Comparable<BitCode> {
 

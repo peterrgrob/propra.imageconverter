@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Klasse kapselt einen Stream und erlaubt das Lesen einzelner Bits
+ * Klasse kapselt einen Stream und erlaubt das Lesen einzelner Bits. 
+ * Die logische Ordnung der Bits beginnt bei dem höchstwertigen Bit und steigt
+ * ab.
  */
 public class BitInputStream {
     

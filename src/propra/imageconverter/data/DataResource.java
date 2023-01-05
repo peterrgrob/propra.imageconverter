@@ -10,7 +10,7 @@ import propra.imageconverter.data.IDataTranscoder.Compression;
 
 
 /**
- * Klasse bietet Basisfunktionen für Dateiressourcen 
+ * Klasse implementiert Basisfunktionen für Dateiressourcen 
  */
 public class DataResource implements IDataResource {
     

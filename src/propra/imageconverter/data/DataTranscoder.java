@@ -1,6 +1,7 @@
 package propra.imageconverter.data;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import propra.imageconverter.PropraException;
 
 /**
@@ -57,5 +58,10 @@ public abstract class DataTranscoder implements IDataTranscoder {
     public long endEncoding() throws IOException {
         operation = EncodeMode.NONE;
         return encodedBytes;
+    }
+    
+    @Override
+    public void onData(ByteBuffer data, boolean lastBlock, IDataTranscoder caller) throws IOException {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

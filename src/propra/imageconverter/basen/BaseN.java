@@ -6,14 +6,14 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import propra.imageconverter.data.DataTranscoder;
 import propra.imageconverter.data.IDataTarget;
-import propra.imageconverter.data.IDataTranscoder;
 import propra.imageconverter.data.BitInputStream;
 import propra.imageconverter.data.BitOutputStream;
 import propra.imageconverter.data.CheckedInputStream;
 
 /**
- * Transcoder Klasse für allgemeine Base-N Kodierung, die Parametrisierung erfolgt
- * über das per Konstruktor übergebene Ressourcen Objekt und dem Alphabet 
+ * Transcoder Klasse für allgemeine Base-N Kodierung. 
+ * Die Parametrisierung erfolgt über das per Konstruktor übergebene Ressourcen 
+ * Objekt und dem Alphabet.
  */
 public class BaseN extends DataTranscoder {
 
@@ -122,11 +122,6 @@ public class BaseN extends DataTranscoder {
         }
 
         return len;
-    }
-    
-    @Override
-    public void onData(ByteBuffer data, boolean lastBlock, IDataTranscoder caller) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }
 

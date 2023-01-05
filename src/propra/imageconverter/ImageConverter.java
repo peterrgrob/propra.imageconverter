@@ -16,11 +16,11 @@ import propra.imageconverter.image.ImageResource;
  *  Einstiegsklasse für ImageConverter.
  * 
  *  Änderungen zu KE2
- *  -   Meine Abgabe für KE2 hat die Verarbeitung großer Dateien nicht 
+ *  -   Meine Abgabe für KE2 hat die Verarbeitung großer Dateien nicht korrekt
  *      unterstützt und war teilweise aus Zeitgründen nicht ganz optimal umgesetzt.
  *      Deshalb habe ich jetzt nochmal Änderungen bei der Klassenstruktur 
  *      vorgenommen um die Verarbeitung großer Dateien zu ermöglichen. Die Reader/Writer
- *      sind nun jeweils in einer ImageResource zusammengefasst die CheckedReader/Writer 
+ *      sind nun jeweils in einer ImageResource zusammengefasst, die CheckedReader/Writer 
  *      anbietet und das Transcoderinterface ist nun etwas besser strukturiert.
  *
  *  -   Farbkonvertierung ist aus Performancegründen jetzt weniger allgemein 
@@ -30,10 +30,10 @@ import propra.imageconverter.image.ImageResource;
  *      konnte ich die BaseN Kodierung deutlich vereinfachen.
  *      
  *  -   Ich habe allgemein versucht, wie einige Reviewer angemerkt haben, die Komplexität 
- *      mit teilweise unklaren Abhängigkeiten und nicht genutzte Teile der 
+ *      mit teilweise unklaren Abhängigkeiten sowie nicht genutzte Teile der 
  *      Klassenstruktur, die im Laufe des Projekts entstanden sind, zu reduzieren. 
  *      
- *      Kleine Übersicht über die Klassenstruktur, Resource Klassen bieten Schreiben/Lesen 
+ *      Kleine Übersicht über die Klassenstruktur. Die Resource Klassen bieten Schreiben/Lesen 
  *      der Daten per Stream und individuelles Lesen/Schreiben der Formatspezifischen Daten, z.B. 
  *      Bildheader oder BaseN Alphabet. Die Transcoder Klassen implementieren die 
  *      Kompressionsalgorithmen unabhängig vom Ressourcentyp.

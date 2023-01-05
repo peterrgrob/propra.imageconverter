@@ -34,7 +34,7 @@ public class HuffmanTree {
      */
     public void buildTreeFromResource(BitInputStream resource) throws IOException, PropraException {
         rootNode = new HuffmanNode((byte)0, 0);
-        rootNode.buildTreeFromResource(resource, nodeArray);
+        rootNode.buildTreeFromResource(resource, nodeArray, 0);
         rootNode.buildBitCodes(new BitCode(0,0));
     }
     
