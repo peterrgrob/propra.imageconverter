@@ -20,10 +20,10 @@ import propra.imageconverter.image.ImageResource;
  *      unterstützt und war teilweise aus Zeitgründen nicht ganz optimal umgesetzt.
  *      Deshalb habe ich jetzt nochmal Änderungen bei der Klassenstruktur 
  *      vorgenommen um die Verarbeitung großer Dateien zu ermöglichen. Die Reader/Writer
- *      sind nun jeweils in einer ImageResource zusammengefasst, die CheckedReader/Writer 
- *      anbietet und das Transcoderinterface ist nun etwas besser strukturiert.
+ *      sind nun jeweils in einer ImageResource zusammengefasst welche CheckedReader/Writer 
+ *      anbietet, zudem ist das Transcoderinterface nun etwas besser strukturiert.
  *
- *  -   Farbkonvertierung ist aus Performancegründen jetzt weniger allgemein 
+ *  -   Die Farbkonvertierung ist aus Performancegründen jetzt weniger allgemein 
  *      implementiert mit Methoden-Referenzen je nach Kombination.
  *
  *  -   Mit Hilfe der BitStreams, die ich für die Huffman Kompression implementiert habe,
@@ -33,15 +33,15 @@ import propra.imageconverter.image.ImageResource;
  *      mit teilweise unklaren Abhängigkeiten sowie nicht genutzte Teile der 
  *      Klassenstruktur, die im Laufe des Projekts entstanden sind, zu reduzieren. 
  *      
- *      Kleine Übersicht über die Klassenstruktur. Die Resource Klassen bieten Schreiben/Lesen 
- *      der Daten per Stream und individuelles Lesen/Schreiben der Formatspezifischen Daten, z.B. 
- *      Bildheader oder BaseN Alphabet. Die Transcoder Klassen implementieren die 
- *      Kompressionsalgorithmen unabhängig vom Ressourcentyp.
+ *  Kleine Übersicht über die Klassenstruktur. Die Resource Klassen bieten Schreiben und Lesen 
+ *  der Daten per Stream und jeweils individuelles Lesen und Schreiben der formatspezifischen 
+ *  Daten, wie z.B. Bildheader oder BaseN Alphabet. Die Transcoder Klassen implementieren die 
+ *  verschiedenen Kompressionsalgorithmen unabhängig vom Ressourcentyp, bzw. die BaseN Kodierung.
  * 
- *      Ablauf der Konvertierung/Kodierung
- *          Stream -> Resource <-> Transcoder(Decoder) -> Filter -> Transcoder(Encoder) <-> Resource -> Stream 
+ *  Ablauf der Konvertierung/Kodierung
+ *    Stream -> Resource <-> Transcoder(Decoder) -> Filter -> Transcoder(Encoder) <-> Resource -> Stream 
  *       
- *      Klassenstruktur
+ *  Klassenstruktur
  *          IDataResource
  *            DataResource     
  *              BaseNResource

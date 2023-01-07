@@ -105,8 +105,10 @@ public class ImageTranscoderRLE extends ImageTranscoderRaw {
         // Über Bytes iterieren und gemäß RLE verarbeiten
         while(inBuffer.position() < dataLimit) {
             /*
-             *  Wenn Blockgrenze erreichbar Restdaten puffern für nächsten Block, 
-             *  nur wenn es sich nicht um den letzten Block handelt.
+             *  Wenn möglicherweise das Blockende überschritten werden kann, Restdaten 
+             *  puffern für nächsten Block da mit dieser Implementierung keine Kenntnis 
+             *  zu den folgenden Pixel vorliegt. 
+             *  Ausnahme: es handelt sich um den letzten Block.
              */
             boolean boundary = inBuffer.position() + (127 * Color.PIXEL_SIZE) >= dataLimit;
             if(boundary && !last) {    

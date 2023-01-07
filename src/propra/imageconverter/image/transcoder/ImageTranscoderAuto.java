@@ -14,9 +14,8 @@ import propra.imageconverter.data.CheckedOutputStream;
  * 
  * Bündelt dazu mehrere Encoder und ermittelt nach Abschluss der Kodierung 
  * das beste Verfahren. Die Kompression wird zum Vergleich in einen NullStream 
- * durchgeführt, ein Vergleich über Entropie, oder ähnliches scheint für die 
- * Anforderungen des Praktikums nicht unbedingt nötig zu sein, wenn überhaupt 
- * möglich.
+ * durchgeführt, ein Vergleich über Entropie, oder ähnliches scheint hier zu viel
+ * Aufwand zu sein, wenn überhaupt zuverlässig möglich.
  */
 public class ImageTranscoderAuto extends ImageTranscoderRaw {
     
